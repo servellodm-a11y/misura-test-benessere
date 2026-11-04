@@ -8,7 +8,7 @@
 <section class="panel"><h2>Attività recente</h2><div id="recent"></div><p class="small">La data si riferisce all'inserimento del record nel browser, non alla data in cui la fonte è stata pubblicata.</p></section>
 <p style="margin-top:18px"><a class="btn" href="/nextway-ai.html">Apri archivio Lead</a>　<a class="btn" href="/nextway-analisi.html">Analizza un nuovo Lead</a></p></main>
 <script>
-const KEY='nextway_ai_records_v1';let records=[];try{records=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(records))records=[]}catch(e){records=[]}
+const KEY='nextway_ai_records_v1';let records=[];try{records=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(records))records=[];records=records.filter(x=>!x.is_test)}catch(e){records=[]}
 const $=id=>document.getElementById(id),count=(fn)=>records.filter(fn).length;
 function score(x){if(x.scoring_total!==undefined)return Number(x.scoring_total)||0;return ['fit','activity','presence','interest','approach'].reduce((n,k)=>n+(Number(x[k])||0),0)}
 function band(n){return n>=80?'A':n>=65?'B':n>=50?'C':'Sotto soglia'}
