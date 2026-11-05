@@ -6,7 +6,7 @@
 <title>NEXTWAY AI · Motore di ricerca</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f4f6fa}
-*{box-sizing:border-box}body{margin:0}header{background:#111c32;color:#fff;padding:20px max(18px,calc((100% - 1100px)/2)}
+*{box-sizing:border-box}body{margin:0}header{background:#111c32;color:#fff;padding:20px max(18px,calc((100% - 1100px)/2))}
 main{max-width:1100px;margin:28px auto;padding:0 18px}.panel{background:#fff;border:1px solid #dfe5ef;border-radius:14px;padding:20px;margin:14px 0}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
 input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;font:inherit}.muted{color:#647187}.btn{display:inline-block;background:#2457d6;color:#fff;border:0;border-radius:8px;padding:10px 14px;text-decoration:none;font-weight:700;cursor:pointer}.alt{background:#edf1f7;color:#23324d}
@@ -95,12 +95,13 @@ function build(){
  const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
  let base=templates[seg],terms=base.map(x=>x[1]);
  if(lang==='en')terms=enTerms[seg];
- if(lang==='both')terms=terms.concat(enTerms[seg].slice(0,2));
+ if(lang==='both')terms=terms.slice(0,3).concat(enTerms[seg].slice(0,2));
  generated=terms.slice(0,5).map((q,i)=>{
    let full=q+' "'+area+'"'+(platform?' site:'+platform:'')+(extra?' '+extra:'');
    if(seg==='networker')full+=' -offerte di lavoro -annunci generici -franchising';
    if(seg==='customers')full+=' -diagnosi -terapie -dati sanitari';
-   return {label:base[i]?.[0]||(lang==='en'?'English query':'Ricerca'),query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full)};
+   const label=lang==='en'?'English search '+(i+1):lang==='both'&&i>=3?'English search '+(i-2):base[i]?.[0]||'Ricerca';
+   return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full)};
  });
  $('summary').textContent=generated.length+' query create · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · '+(platform||'tutto il web')+' · Area: '+area;
  render();
