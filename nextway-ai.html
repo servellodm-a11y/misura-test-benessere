@@ -17,7 +17,7 @@
 <div class="field"><label>Note / prossima azione</label><textarea name="notes"></textarea></div><button class="btn" type="submit">Salva Lead</button> <button class="btn alt" type="reset">Pulisci</button><p class="small">Il punteggio indica pertinenza documentata, non probabilità di acquisto o adesione.</p></form></section>
 <section class="panel"><h2>Archivio</h2><div class="filters"><input id="query" placeholder="Cerca nome, professione, città"><select id="cat"><option value="">Tutte le categorie</option><option value="potential_partner">Potenziali Partner</option><option value="final_customer">Clienti finali</option><option value="wellness_professional">Professionisti wellness</option></select><select id="state"><option value="">Tutti gli stati</option><option>Da verificare</option><option>Verificato</option><option>Escluso</option><option>Contattato</option></select></div>
 <div class="actions"><button class="btn alt" id="csv">Esporta CSV</button><button class="btn alt" id="jsonBackup">Backup completo JSON</button><button class="btn alt" id="csvTemplate">Scarica modello CSV</button><button class="btn red" id="deleteTests">Elimina tutti i test tecnici</button><button class="btn red" id="wipe">Svuota archivio</button></div>
-<div class="panel" style="margin:14px 0;background:#f8faff"><h3>Importa Lead da Excel / CSV</h3><p class="small">Esporta il foglio Excel in formato CSV UTF-8 con intestazioni compatibili NEXTWAY, quindi seleziona il file. L'importazione controlla URL, campi obbligatori e duplicati senza sovrascrivere i record già presenti.</p><div class="actions"><input id="importFile" type="file" accept=".csv,text/csv" style="max-width:100%"><button class="btn" id="previewImport" type="button">Verifica file</button><button class="btn alt" id="confirmImport" type="button" disabled>Importa record validi</button></div><div id="importReport" class="small" aria-live="polite">Nessun file verificato.</div></div><p class="small">I record TEST TECNICO sono esclusi dai conteggi. Puoi rimuoverli senza toccare i Lead reali.</p><div id="records"></div></section></div></main>
+<div class="panel" style="margin:14px 0;background:#f8faff"><h3>Importa Lead da Excel / CSV</h3><p class="small">Esporta il foglio Excel in formato CSV UTF-8 con intestazioni compatibili NEXTWAY, quindi seleziona il file. L'importazione controlla URL, campi obbligatori e duplicati senza sovrascrivere i record già presenti.</p><div class="actions"><input id="importFile" type="file" accept=".csv,text/csv" style="max-width:100%"><button class="btn" id="previewImport" type="button">Verifica file</button><button class="btn alt" id="confirmImport" type="button" disabled>Importa record validi</button></div><div id="importReport" class="small" aria-live="polite">Nessun file verificato.</div><hr><h3>Ripristina backup JSON</h3><div class="actions"><input id="backupFile" type="file" accept=".json,application/json" style="max-width:100%"><button class="btn alt" id="previewBackup" type="button">Verifica backup</button><button class="btn alt" id="restoreBackup" type="button" disabled>Unisci backup</button></div><div id="backupReport" class="small" aria-live="polite">Il backup verrà unito ai record attuali senza sovrascriverli.</div></div><p class="small">I record TEST TECNICO sono esclusi dai conteggi. Puoi rimuoverli senza toccare i Lead reali.</p><div id="records"></div></section></div></main>
 <footer>Prototipo NEXTWAY AI. I dati sono conservati esclusivamente nel browser corrente. Per l'uso condiviso serviranno autenticazione e database. Nessuna raccolta o contatto automatico è attivo.</footer>
 <script>
 const KEY='nextway_ai_records_v1';let data=[];try{data=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){data=[]}
@@ -67,6 +67,22 @@ function validateImport(rows){
  });
  return {valid,duplicates,invalid,total:rows.length};
 }
+let backupRows=[];
+el('previewBackup').addEventListener('click',async()=>{
+ const file=el('backupFile').files[0];if(!file){el('backupReport').textContent='Seleziona un backup JSON.';return}
+ if(file.size>10*1024*1024){el('backupReport').textContent='File troppo grande: massimo 10 MB.';return}
+ try{const obj=JSON.parse(await file.text());if(obj.format!=='NEXTWAY_BACKUP_V1'||!Array.isArray(obj.records))throw new Error('Formato non riconosciuto');
+ const report=validateImport(obj.records);backupRows=report.valid;
+ el('backupReport').textContent='Backup riconosciuto · Record validi: '+report.valid.length+' · Già presenti: '+report.duplicates+' · Non validi: '+report.invalid+'. Nessun dato è stato ancora ripristinato.';
+ el('restoreBackup').disabled=!report.valid.length;
+ }catch(err){backupRows=[];el('restoreBackup').disabled=true;el('backupReport').textContent='Backup non valido o illeggibile. Nessun dato modificato.'}
+});
+el('restoreBackup').addEventListener('click',()=>{
+ if(!backupRows.length)return;
+ if(!confirm('Unire '+backupRows.length+' record del backup all’archivio attuale? I record esistenti non saranno sovrascritti.'))return;
+ const count=backupRows.length;data=[...backupRows,...data];backupRows=[];persist();
+ el('restoreBackup').disabled=true;el('backupReport').textContent='Ripristino completato: '+count+' record aggiunti.';
+});
 el('previewImport').addEventListener('click',async()=>{
  const file=el('importFile').files[0];if(!file){el('importReport').textContent='Seleziona prima un file CSV.';return}
  if(file.size>5*1024*1024){el('importReport').textContent='File troppo grande: massimo 5 MB.';return}
