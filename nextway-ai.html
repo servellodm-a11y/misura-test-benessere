@@ -99,4 +99,4 @@ el('confirmImport').addEventListener('click',()=>{
  el('confirmImport').disabled=true;el('importReport').textContent='Importazione completata: '+count+' Lead aggiunti all’archivio locale.';
 });
 el('deleteTests').addEventListener('click',()=>{let n=data.filter(x=>x.is_test).length;if(!n){alert('Non ci sono test tecnici da eliminare.');return}if(confirm('Eliminare '+n+' record TEST TECNICO? I Lead reali resteranno invariati.')){data=data.filter(x=>!x.is_test);persist()}});el('wipe').addEventListener('click',()=>{if(confirm('Confermi la cancellazione di tutto l’archivio locale?')){data=[];persist()}});draw();
-</script></body></html>
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script></body></html>
