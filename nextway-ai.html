@@ -16,7 +16,8 @@
 <div class="grid2"><div class="field"><label>Coerenza target (0–30)</label><input name="fit" type="number" min="0" max="30" value="0"></div><div class="field"><label>Attività verificabile (0–20)</label><input name="activity" type="number" min="0" max="20" value="0"></div><div class="field"><label>Presenza pubblica (0–15)</label><input name="presence" type="number" min="0" max="15" value="0"></div><div class="field"><label>Interesse pubblico (0–20)</label><input name="interest" type="number" min="0" max="20" value="0"></div><div class="field"><label>Pertinenza approccio (0–15)</label><input name="approach" type="number" min="0" max="15" value="0"></div></div>
 <div class="field"><label>Note / prossima azione</label><textarea name="notes"></textarea></div><button class="btn" type="submit">Salva Lead</button> <button class="btn alt" type="reset">Pulisci</button><p class="small">Il punteggio indica pertinenza documentata, non probabilità di acquisto o adesione.</p></form></section>
 <section class="panel"><h2>Archivio</h2><div class="filters"><input id="query" placeholder="Cerca nome, professione, città"><select id="cat"><option value="">Tutte le categorie</option><option value="potential_partner">Potenziali Partner</option><option value="final_customer">Clienti finali</option><option value="wellness_professional">Professionisti wellness</option></select><select id="state"><option value="">Tutti gli stati</option><option>Da verificare</option><option>Verificato</option><option>Escluso</option><option>Contattato</option></select></div>
-<div class="actions"><button class="btn alt" id="csv">Esporta CSV</button><button class="btn red" id="deleteTests">Elimina tutti i test tecnici</button><button class="btn red" id="wipe">Svuota archivio</button></div><p class="small">I record TEST TECNICO sono esclusi dai conteggi. Puoi rimuoverli senza toccare i Lead reali.</p><div id="records"></div></section></div></main>
+<div class="actions"><button class="btn alt" id="csv">Esporta CSV</button><button class="btn alt" id="jsonBackup">Backup completo JSON</button><button class="btn alt" id="csvTemplate">Scarica modello CSV</button><button class="btn red" id="deleteTests">Elimina tutti i test tecnici</button><button class="btn red" id="wipe">Svuota archivio</button></div>
+<div class="panel" style="margin:14px 0;background:#f8faff"><h3>Importa Lead da Excel / CSV</h3><p class="small">Esporta il foglio Excel in formato CSV UTF-8 con intestazioni compatibili NEXTWAY, quindi seleziona il file. L'importazione controlla URL, campi obbligatori e duplicati senza sovrascrivere i record già presenti.</p><div class="actions"><input id="importFile" type="file" accept=".csv,text/csv" style="max-width:100%"><button class="btn" id="previewImport" type="button">Verifica file</button><button class="btn alt" id="confirmImport" type="button" disabled>Importa record validi</button></div><div id="importReport" class="small" aria-live="polite">Nessun file verificato.</div></div><p class="small">I record TEST TECNICO sono esclusi dai conteggi. Puoi rimuoverli senza toccare i Lead reali.</p><div id="records"></div></section></div></main>
 <footer>Prototipo NEXTWAY AI. I dati sono conservati esclusivamente nel browser corrente. Per l'uso condiviso serviranno autenticazione e database. Nessuna raccolta o contatto automatico è attivo.</footer>
 <script>
 const KEY='nextway_ai_records_v1';let data=[];try{data=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){data=[]}
@@ -30,8 +31,56 @@ let q=el('query').value.toLowerCase(),c=el('cat').value,s=el('state').value;let 
 if(!rows.length){let d=document.createElement('div');d.className='empty';d.textContent='Nessun Lead corrispondente. Inserisci un nominativo verificato per iniziare.';root.append(d);return}
 rows.forEach(x=>{let a=document.createElement('article');a.className='lead';let n=points(x);a.innerHTML='<div class="leadhead"><strong>'+esc(x.name)+(x.is_test?' <span class="tag">TEST TECNICO</span>':'')+'</strong><span class="tag">'+labels[x.category]+'</span><b class="score">'+n+'/100 · '+rank(n)+'</b></div><p>'+esc(x.profession||'Professione non indicata')+' · '+esc(x.location||'Località non indicata')+' · '+esc(x.status)+' · '+esc(x.qualification||'Da approfondire')+'</p><p>Identità: '+esc(x.identity_check||'Non registrata')+(x.partner_type?' · Profilo: '+esc(x.partner_type):'')+(x.company_brand?' · Azienda/brand: '+esc(x.company_brand):'')+(x.signal_type?' · Segnale: '+esc(x.signal_type):'')+'</p><p>'+esc(x.evidence)+'</p><p>Fonte: '+esc(x.source)+' · <a target="_blank" rel="noopener noreferrer" href="'+esc(x.url)+'">Apri fonte ↗</a></p><p>'+esc(x.notes||'')+'</p>';
 let bar=document.createElement('div');bar.className='actions';let sel=document.createElement('select');['Da verificare','Verificato','Escluso','Contattato'].forEach(v=>{let o=document.createElement('option');o.textContent=v;o.selected=x.status===v;sel.append(o)});sel.addEventListener('change',()=>{x.status=sel.value;persist()});let del=document.createElement('button');del.className='btn red';del.textContent='Elimina';del.addEventListener('click',()=>{if(confirm('Eliminare questo nominativo?')){data=data.filter(y=>y.id!==x.id);persist()}});bar.append(sel,del);a.append(bar);root.append(a)})}
-el('form').addEventListener('submit',e=>{e.preventDefault();let f=new FormData(e.target),x=Object.fromEntries(f.entries());if(!/^https?:\/\//i.test(x.url)){alert('Inserisci un indirizzo web http o https valido.');return}if(data.some(y=>!y.is_test&&y.url&&x.url&&y.url.toLowerCase()===x.url.toLowerCase())){alert('URL già presente: possibile duplicato. Controlla il Lead esistente prima di inserirlo di nuovo.');return}if(x.identity_check!=='confirmed'&&x.qualification==='Qualificato'){alert('Per qualificare un Lead devi prima confermare l’identità individuale.');return}if(x.qualification==='Qualificato'&&points(x)<50){alert('Il punteggio è sotto 50: non può essere qualificato.');return}if(x.qualification==='Escluso')x.status='Escluso';x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);x.status='Da verificare';x.created=new Date().toISOString();data.unshift(x);persist();e.target.reset()});
+el('form').addEventListener('submit',e=>{e.preventDefault();let f=new FormData(e.target),x=Object.fromEntries(f.entries());if(!/^https?:\/\//i.test(x.url)){alert('Inserisci un indirizzo web http o https valido.');return}if(data.some(y=>!y.is_test&&y.url&&x.url&&y.url.toLowerCase()===x.url.toLowerCase())){alert('URL già presente: possibile duplicato. Controlla il Lead esistente prima di inserirlo di nuovo.');return}if(x.identity_check!=='confirmed'&&x.qualification==='Qualificato'){alert('Per qualificare un Lead devi prima confermare l’identità individuale.');return}if(x.qualification==='Qualificato'&&points(x)<50){alert('Il punteggio è sotto 50: non può essere qualificato.');return}x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);x.status=x.qualification==='Escluso'?'Escluso':'Da verificare';x.created=new Date().toISOString();data.unshift(x);persist();e.target.reset()});
 ['query','cat','state'].forEach(id=>el(id).addEventListener(id==='query'?'input':'change',draw));
 el('csv').addEventListener('click',()=>{let keys=['name','profession','company_brand','signal_type','location','category','partner_type','mode','source','url','evidence','verified_at','identity_check','qualification','fit','activity','presence','interest','approach','notes','status','created'];let out=[keys.join(';'),...data.map(x=>keys.map(k=>'"'+String(x[k]??'').replace(/"/g,'""')+'"').join(';'))].join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+out],{type:'text/csv;charset=utf-8'}));a.download='nextway-ai-lead.csv';a.click();URL.revokeObjectURL(a.href)});
+
+const csvKeys=['name','profession','company_brand','signal_type','location','category','partner_type','mode','source','url','evidence','verified_at','identity_check','qualification','fit','activity','presence','interest','approach','notes','status','created'];
+function downloadText(filename,content,type){const a=document.createElement('a');const u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+el('jsonBackup').addEventListener('click',()=>downloadText('nextway-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({format:'NEXTWAY_BACKUP_V1',exported_at:new Date().toISOString(),records:data},null,2),'application/json'));
+el('csvTemplate').addEventListener('click',()=>downloadText('nextway-modello-import.csv','\\ufeff'+csvKeys.join(';')+'\\r\\n','text/csv;charset=utf-8'));
+let importRows=[];
+function parseCSV(text){
+ const first=(text.split(/\r?\n/,1)[0]||'');const semi=(first.match(/;/g)||[]).length,comma=(first.match(/,/g)||[]).length,delim=semi>=comma?';':',';
+ const rows=[];let row=[],cell='',quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++}else if(ch==='"')quoted=false;else cell+=ch}
+ else if(ch==='"')quoted=true;else if(ch===delim){row.push(cell);cell=''}else if(ch==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))rows.push(row);row=[];cell=''}else cell+=ch}
+ row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))rows.push(row);
+ if(!rows.length)return [];
+ const headers=rows.shift().map(v=>v.replace(/^\uFEFF/,'').trim());
+ return rows.map(values=>Object.fromEntries(headers.map((h,i)=>[h,(values[i]??'').trim()])));
+}
+function validateImport(rows){
+ const cats=['potential_partner','final_customer','wellness_professional'],statuses=['Da verificare','Verificato','Escluso','Contattato'];
+ const seen=new Set(data.filter(x=>x.url).map(x=>String(x.url).trim().toLowerCase()));let valid=[],duplicates=0,invalid=0;
+ rows.forEach(raw=>{
+  const x={...raw};x.name=String(x.name||'').trim();x.url=String(x.url||'').trim();x.source=String(x.source||'').trim();x.evidence=String(x.evidence||'').trim();
+  if(!x.name||!x.source||!x.evidence||!/^https?:\/\//i.test(x.url)||!cats.includes(x.category)){invalid++;return}
+  const key=x.url.toLowerCase();if(seen.has(key)){duplicates++;return}seen.add(key);
+  const limits={fit:30,activity:20,presence:15,interest:20,approach:15};
+  Object.keys(limits).forEach(k=>x[k]=Math.max(0,Math.min(limits[k],Number(x[k]||0)||0)));
+  x.identity_check=['pending','confirmed','uncertain'].includes(x.identity_check)?x.identity_check:'pending';
+  x.qualification=['Da approfondire','Qualificato','Escluso'].includes(x.qualification)?x.qualification:'Da approfondire';
+  if(x.qualification==='Qualificato'&&(x.identity_check!=='confirmed'||Object.keys(limits).reduce((n,k)=>n+x[k],0)<50)){invalid++;return}
+  x.status=statuses.includes(x.status)?x.status:(x.qualification==='Escluso'?'Escluso':'Da verificare');
+  x.id='imp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);x.created=x.created||new Date().toISOString();valid.push(x);
+ });
+ return {valid,duplicates,invalid,total:rows.length};
+}
+el('previewImport').addEventListener('click',async()=>{
+ const file=el('importFile').files[0];if(!file){el('importReport').textContent='Seleziona prima un file CSV.';return}
+ if(file.size>5*1024*1024){el('importReport').textContent='File troppo grande: massimo 5 MB.';return}
+ try{const parsed=parseCSV((await file.text()).replace(/^\uFEFF/,''));
+ const report=validateImport(parsed);importRows=report.valid;
+ el('importReport').textContent='Righe lette: '+report.total+' · Pronte: '+report.valid.length+' · Duplicati URL: '+report.duplicates+' · Non valide: '+report.invalid+'. Nessun dato è stato ancora importato.';
+ el('confirmImport').disabled=!report.valid.length;
+ }catch(err){importRows=[];el('confirmImport').disabled=true;el('importReport').textContent='Impossibile leggere il CSV. Verifica che sia UTF-8 con intestazioni NEXTWAY.'}
+});
+el('confirmImport').addEventListener('click',()=>{
+ if(!importRows.length)return;
+ if(!confirm('Importare '+importRows.length+' Lead validi? I record esistenti non saranno sovrascritti.'))return;
+ data=[...importRows,...data];const count=importRows.length;importRows=[];persist();
+ el('confirmImport').disabled=true;el('importReport').textContent='Importazione completata: '+count+' Lead aggiunti all’archivio locale.';
+});
 el('deleteTests').addEventListener('click',()=>{let n=data.filter(x=>x.is_test).length;if(!n){alert('Non ci sono test tecnici da eliminare.');return}if(confirm('Eliminare '+n+' record TEST TECNICO? I Lead reali resteranno invariati.')){data=data.filter(x=>!x.is_test);persist()}});el('wipe').addEventListener('click',()=>{if(confirm('Confermi la cancellazione di tutto l’archivio locale?')){data=[];persist()}});draw();
 </script></body></html>
