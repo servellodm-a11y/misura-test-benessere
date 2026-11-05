@@ -42,8 +42,22 @@ Deno.serve(async (req: Request) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const publishableMap = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}");
-  const publishableKey = publishableMap.default ?? Deno.env.get("SUPABASE_ANON_KEY");
+  // Accept either a JSON map of publishable keys or a single publishable/legacy anon key.
+  const rawPublishable = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "";
+  let publishableKey: string | undefined;
+  if (rawPublishable.trim()) {
+    try {
+      const parsed = JSON.parse(rawPublishable);
+      publishableKey = typeof parsed === "string"
+        ? parsed
+        : (parsed.default ?? parsed[Object.keys(parsed)[0]]);
+    } catch {
+      publishableKey = rawPublishable.trim();
+    }
+  }
+  publishableKey = publishableKey ||
+    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+    Deno.env.get("SUPABASE_ANON_KEY");
   const tavilyKey = Deno.env.get("TAVILY_API_KEY");
   if (!supabaseUrl || !publishableKey || !tavilyKey) {
     return json({ error: "Configurazione server incompleta. Verificare i secrets Supabase." }, 503, responseOrigin);
