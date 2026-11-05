@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXTWAY AI · Motore di ricerca</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f4f6fa}
+*{box-sizing:border-box}body{margin:0}header{background:#111c32;color:#fff;padding:20px max(18px,calc((100% - 1100px)/2)}
+main{max-width:1100px;margin:28px auto;padding:0 18px}.panel{background:#fff;border:1px solid #dfe5ef;border-radius:14px;padding:20px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
+input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;font:inherit}.muted{color:#647187}.btn{display:inline-block;background:#2457d6;color:#fff;border:0;border-radius:8px;padding:10px 14px;text-decoration:none;font-weight:700;cursor:pointer}.alt{background:#edf1f7;color:#23324d}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.query{border:1px solid #dfe5ef;border-radius:10px;padding:14px;margin:12px 0;background:#f9fbfe}.query pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.5 ui-monospace,monospace;margin:8px 0;color:#263650}.queryhead{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.tag{font-size:12px;background:#edf1f7;border-radius:20px;padding:4px 9px}.notice{background:#fff6df;border:1px solid #eedca8;border-radius:9px;padding:12px;font-size:14px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><strong>NEXTWAY AI</strong><div style="font-size:13px;color:#cbd5e1">Motore di ricerca · generatore multi-query</div></header>
+<main>
+<h1>Ricerca mirata dei profili</h1>
+<p class="muted">Genera una batteria di ricerche diverse per individuare segnali pubblici pertinenti. Ogni risultato deve essere aperto, verificato e valutato da una persona prima di entrare nell'Archivio Lead.</p>
+<div class="notice"><b>Stato del modulo:</b> generazione assistita di query. Non esegue scraping, non estrae automaticamente profili e non invia messaggi. Le ricerche riguardano informazioni professionali pubbliche; non raccogliere dati sensibili o informazioni non pertinenti.</div>
+<section class="panel">
+<h2>Configura la ricerca</h2>
+<div class="grid">
+<div class="field"><label for="segment">Profilo da individuare</label><select id="segment">
+<option value="networker">Networker attivi di altre aziende</option>
+<option value="exnetworker">Ex-networker / esperienza precedente</option>
+<option value="wellness">Professionisti wellness</option>
+<option value="business">Imprenditori e professionisti</option>
+<option value="customers">Persone con interesse espresso per benessere</option>
+</select></div>
+<div class="field"><label for="area">Area geografica</label><input id="area" value="Italia" placeholder="Italia, regione, città o provincia"></div>
+<div class="field"><label for="platform">Fonte</label><select id="platform">
+<option value="">Tutto il web</option><option value="linkedin.com">LinkedIn</option><option value="facebook.com">Facebook</option><option value="instagram.com">Instagram</option><option value="youtube.com">YouTube</option>
+</select></div>
+<div class="field"><label for="engine">Motore di ricerca</label><select id="engine"><option value="google">Google</option><option value="bing">Bing</option></select></div>
+<div class="field"><label for="extra">Parole chiave aggiuntive</label><input id="extra" placeholder="es. MONAT, team leader, consulente"></div>
+<div class="field"><label for="language">Lingua dei risultati</label><select id="language"><option value="it">Italiano</option><option value="en">Inglese</option><option value="both">Italiano + inglese</option></select></div>
+</div>
+<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div>
+</section>
+<section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
+<section class="panel"><h2>Metodo di lavoro consigliato</h2>
+<ol>
+<li>Apri una ricerca alla volta e seleziona solo risultati con un segnale professionale chiaro.</li>
+<li>Apri la fonte originale: snippet e titoli dei motori di ricerca non bastano.</li>
+<li>Registra nome, ruolo, azienda/brand dichiarato, URL, data ed evidenza pubblica.</li>
+<li>Non dedurre che una persona cerchi una nuova opportunità solo perché lavora nel network marketing.</li>
+<li>Evita duplicati e interrompi la raccolta quando non emerge una pertinenza documentabile.</li>
+</ol>
+<p class="small muted">Collegamenti: <a href="/nextway-ricerca.html">Ricerca assistita</a> · <a href="/nextway-ai.html">Archivio Lead</a></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);let generated=[];
+const templates={
+networker:[
+['Ricerca attiva di collaboratori','("cerco collaboratori" OR "cerco collaboratrici" OR "nuove persone nel team" OR "amplio il team") ("network marketing" OR networker OR "vendita diretta")'],
+['Leadership e sviluppo team','("team leader" OR "leader di team" OR "formazione del team" OR "sviluppo organizzativo") ("network marketing" OR "vendita diretta")'],
+['Crescita organizzativa','("costruire un team" OR "sviluppare il gruppo" OR "espansione del team" OR "nuovi incaricati") network marketing'],
+['Attività e brand dichiarato','("distributore indipendente" OR "consulente indipendente" OR "brand partner") ("team" OR "collaboratori" OR "formazione")'],
+['Segnali pubblici recenti','("unisciti al mio team" OR "opportunità nel mio team" OR "sto selezionando") ("network marketing" OR wellness)']
+],
+exnetworker:[
+['Esperienza dichiarata','("ex networker" OR "ex incaricato" OR "ex distributore" OR "ho lavorato nel network marketing")'],
+['Nuovo percorso professionale','("dopo il network marketing" OR "nuova esperienza professionale" OR "nuovo progetto") collaborazione'],
+['Transizione lavorativa','("esperienza nella vendita diretta" OR "esperienza network marketing") ("nuova attività" OR "nuovo percorso")'],
+['Competenze trasferibili','("gestione team" OR "formazione venditori" OR "sviluppo commerciale") ("network marketing" OR "vendita diretta")'],
+['Professionisti con esperienza','("network marketing" OR "vendita diretta") ("consulente" OR imprenditore OR "team leader")']
+],
+wellness:[
+['Professioni wellness','(nutrizionista OR "personal trainer" OR naturopata OR osteopata OR "istruttore fitness")'],
+['Collaborazioni professionali','("cerco collaborazioni" OR collaborazioni OR partnership) (wellness OR benessere OR nutrizione OR fitness)'],
+['Attività indipendente','("libero professionista" OR "studio professionale" OR "attività indipendente") (wellness OR nutrizione OR fitness)'],
+['Contenuti e community','("educazione al benessere" OR "consulenza nutrizionale" OR "allenamento personalizzato") professionista'],
+['Sviluppo servizi','("ampliare i servizi" OR "nuovi servizi" OR "collaborazione professionale") wellness']
+],
+business:[
+['Imprenditori e consulenti','(imprenditore OR imprenditrice OR consulente OR professionista) ("sviluppo commerciale" OR networking OR partnership)'],
+['Professionisti autonomi','("libero professionista" OR freelance OR "consulente indipendente") (collaborazioni OR partnership OR networking)'],
+['Sviluppo commerciale','("business development" OR "sviluppo commerciale" OR "rete commerciale") professionista'],
+['Leadership','("gestione team" OR leadership OR "sviluppo persone") (imprenditore OR consulente OR professionista)'],
+['Progetti paralleli','("seconda attività" OR "progetto imprenditoriale" OR "nuova collaborazione") professionista']
+],
+customers:[
+['Interesse espresso','("cerco consigli" OR "cerco informazioni" OR "qualcuno ha esperienza") (benessere OR nutrizione OR integrazione)'],
+['Domande su benessere','("come migliorare" OR "consigli per" OR "esperienze con") (benessere OR alimentazione OR stile di vita)'],
+['Community e discussioni','(forum OR community OR discussione) (benessere OR nutrizione OR alimentazione)'],
+['Interesse a percorsi','("percorso benessere" OR "stile di vita sano" OR "educazione alimentare") informazioni'],
+['Ricerca di consulenza','("cerco un professionista" OR "consigli da un esperto") (benessere OR nutrizione OR fitness)']
+]};
+const enTerms={networker:['("looking for team members" OR "building my team" OR "join my team") ("network marketing" OR "direct selling")','("team leader" OR "team development" OR "business builder") ("network marketing" OR "direct sales")','("growing my organization" OR "expanding my team") network marketing','("independent distributor" OR "brand partner") (team OR leadership OR training)','("new team members" OR "business opportunity") wellness'],exnetworker:['("former network marketer" OR "former distributor" OR "ex direct seller")','("new business project" OR "career transition") collaboration','("direct sales experience" OR "network marketing experience") professional','("sales team management" OR "sales training") network marketing','("former team leader" OR "former distributor") entrepreneur'],wellness:['("personal trainer" OR nutritionist OR naturopath OR osteopath)','(wellness OR nutrition OR fitness) collaboration professional','("independent professional" OR consultant) wellness','("wellness education" OR "nutrition coaching") professional','("new services" OR partnership) wellness'],business:['(entrepreneur OR consultant OR professional) ("business development" OR partnership)','("independent consultant" OR freelancer) networking','("business development" OR "sales development") professional','("team management" OR leadership) entrepreneur','("side business" OR "new business project") professional'],customers:['("looking for advice" OR "looking for information") (wellness OR nutrition)','("how to improve" OR "recommendations for") wellness nutrition','(forum OR community OR discussion) wellness nutrition','("healthy lifestyle" OR "wellness journey") information','("looking for a professional" OR "expert advice") wellness nutrition']};
+function build(){
+ const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
+ let base=templates[seg],terms=base.map(x=>x[1]);
+ if(lang==='en')terms=enTerms[seg];
+ if(lang==='both')terms=terms.concat(enTerms[seg].slice(0,2));
+ generated=terms.slice(0,5).map((q,i)=>{
+   let full=q+' "'+area+'"'+(platform?' site:'+platform:'')+(extra?' '+extra:'');
+   if(seg==='networker')full+=' -offerte di lavoro -annunci generici -franchising';
+   if(seg==='customers')full+=' -diagnosi -terapie -dati sanitari';
+   return {label:base[i]?.[0]||(lang==='en'?'English query':'Ricerca'),query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full)};
+ });
+ $('summary').textContent=generated.length+' query create · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · '+(platform||'tutto il web')+' · Area: '+area;
+ render();
+}
+function render(){
+ const root=$('results');root.replaceChildren();
+ generated.forEach((x,i)=>{const card=document.createElement('article');card.className='query';const head=document.createElement('div');head.className='queryhead';const title=document.createElement('strong');title.textContent=(i+1)+'. '+x.label;const tag=document.createElement('span');tag.className='tag';tag.textContent='Query '+(i+1);head.append(title,tag);const pre=document.createElement('pre');pre.textContent=x.query;const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='btn';open.href=x.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Apri ricerca';const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia';copy.addEventListener('click',()=>navigator.clipboard?.writeText(x.query));actions.append(open,copy);card.append(head,pre,actions);root.append(card)});
+}
+$('generate').addEventListener('click',build);
+$('copyall').addEventListener('click',()=>{if(!generated.length)build();navigator.clipboard?.writeText(generated.map((x,i)=>(i+1)+'. '+x.label+'\n'+x.query).join('\n\n'))});
+$('download').addEventListener('click',()=>{if(!generated.length)build();const rows=[['numero','categoria','query','url'],...generated.map((x,i)=>[i+1,x.label,x.query,x.url])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-batteria-ricerche.csv';a.click();URL.revokeObjectURL(a.href)});
+build();
+</script>
+</body></html>
