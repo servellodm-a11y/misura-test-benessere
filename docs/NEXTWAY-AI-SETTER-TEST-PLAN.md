@@ -499,3 +499,5 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Completare un follow-up dalla coda e verificare che scompaia dalla lista aperta.
 - [ ] Verificare che il partner veda solo attività collegate ai propri Lead; platform_admin segue le policy globali.
 - Stato codice: API e UI implementate su GitHub; migrazione 012 non applicata e test runtime non eseguiti.
+
+- Collaudo navigazione dalla coda: verificare che Apri Lead azzeri solo i filtri incompatibili, visualizzi il Lead corretto e apra il pannello attività; commit UI d52bb4a6be55d29739a7789a224ec191130a411e e 2d621cc496ac25739e1eb966a9ddd8501ea479eb; validatore d0ba03a12984dbd150ade024bed952a47a67ca90.
