@@ -173,6 +173,7 @@ assert.match(setter, /p_request_id: createRequest\.request_id/);
 assert.match(setter, /p_request_hash: createRequest\.request_hash/);
 assert.match(setter, /clearPendingLeadCreateRequest\(\)/);
 assert.match(setter, /pendingLeadCreateRequest\.payload/);
+assert.match(setter, /await generateDraft\(pendingCreatedConversationId, pendingCreatedGoal\);\s*clearPendingCreate\(\);\s*clearPendingLeadCreateRequest\(\);/);
 assert.match(leadCreationIdempotency, /create table if not exists public\.nextway_lead_creation_requests/i);
 assert.match(leadCreationIdempotency, /primary key \(owner_profile_id, request_id\)/i);
 assert.match(leadCreationIdempotency, /enable row level security/i);
