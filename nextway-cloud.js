@@ -13,10 +13,10 @@ function init(){
  header.insertAdjacentElement('afterend',root);
  const $=id=>document.getElementById(id),say=t=>{$('nw-message').textContent=t};
  const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());return ['http:','https:'].includes(u.protocol)&&u.hostname&&!u.username&&!u.password?u.href:''}catch{return ''}};
- let client=null,clientConfig='',session=null;
+ let client=null,clientConfig='',session=null,authListenerBound=false;
  try{const cfg=JSON.parse(localStorage.getItem(CFG)||'{}');$('nw-url').value=cfg.url||'';$('nw-key').value=cfg.key||'';}catch(e){}
  function getConfig(){return {url:$('nw-url').value.trim().replace(/\/$/,''),key:$('nw-key').value.trim()};}
- function setup(){const c=getConfig();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(c.url)||!c.key){throw new Error('Inserisci URL Supabase valido e publishable key.');}if(!window.supabase||!window.supabase.createClient)throw new Error('Libreria Supabase non caricata. Ricarica la pagina.');localStorage.setItem(CFG,JSON.stringify(c));if(!client||clientConfig!==c.url+'|'+c.key){client=window.supabase.createClient(c.url,c.key);clientConfig=c.url+'|'+c.key;}return client;}
+ function setup(){const c=getConfig();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(c.url)||!c.key){throw new Error('Inserisci URL Supabase valido e publishable key.');}if(!window.supabase||!window.supabase.createClient)throw new Error('Libreria Supabase non caricata. Ricarica la pagina.');localStorage.setItem(CFG,JSON.stringify(c));if(!client||clientConfig!==c.url+'|'+c.key){client=window.supabase.createClient(c.url,c.key);clientConfig=c.url+'|'+c.key;if(!authListenerBound){client.auth.onAuthStateChange((event,nextSession)=>{session=nextSession;if(session){try{activateLocalArchive(session.user.id)}catch(e){clearLocalArchive()}}else clearLocalArchive();status();});authListenerBound=true;}}return client;}
  function requireClient(){return client||setup();}
  function status(){const s=session?('Connesso: '+(session.user.email||session.user.id)):'Non autenticato';$('nw-status').textContent=s;}
  $('nw-config').onclick=()=>{try{setup();say('Configurazione salvata. Ora accedi con il tuo account Supabase.');}catch(e){say(e.message)}};
