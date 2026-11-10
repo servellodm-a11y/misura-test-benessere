@@ -124,12 +124,12 @@
       if (!conversationId) throw new Error('Seleziona o crea prima una conversazione.');
       if (isGenerating) return;
       isGenerating = true;
-      const { s } = await cloud.active();
-      const cfg = cloud.getConfig();
       say('Generazione della bozza in corso…');
       $('nwst-generate').disabled = true;
       $('nwst-create-button').disabled = true;
       try {
+        const { s } = await cloud.active();
+        const cfg = cloud.getConfig();
         const response = await fetch(cfg.url + ENDPOINT, {
           method: 'POST',
           headers: {
