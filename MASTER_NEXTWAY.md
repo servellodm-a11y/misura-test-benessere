@@ -537,7 +537,7 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 
 ## 33. Diagnostica permessi AI Setter (10 novembre 2026)
 
-- Preparata `supabase/diagnostics/nextway_setter_permissions_readonly.sql`, query read-only che rileva colonne, stato RLS/FORCE RLS, policy USING/WITH CHECK, grants client e foreign key delle tabelle `nextway_setter_conversations` e `nextway_setter_messages`.
+- Preparata `supabase/diagnostics/nextway_setter_permissions_readonly.sql`, query read-only che rileva colonne, stato RLS/FORCE RLS, policy USING/WITH CHECK, grants, foreign key, firme/SECURITY DEFINER/privilegi EXECUTE delle RPC AI Setter e indici delle tabelle conversazioni, messaggi e tabelle di servizio `nextway_setter_generation_requests` / `nextway_api_rate_limits`.
 - La diagnostica non legge record applicativi e non modifica schema, dati o permessi.
 - I permessi delle conversazioni e dei messaggi restano non certificati finché non viene esaminato l'output del progetto Supabase live. Non dedurre i permessi dalla matrice Lead.
 
