@@ -26,11 +26,11 @@ begin
 
   if p_generated_output is null
     or jsonb_typeof(p_generated_output) <> 'object'
-    or jsonb_typeof(p_generated_output -> 'message') <> 'string'
-    or jsonb_typeof(p_generated_output -> 'strategy') <> 'string'
-    or jsonb_typeof(p_generated_output -> 'objective') <> 'string'
-    or jsonb_typeof(p_generated_output -> 'tone') <> 'string'
-    or jsonb_typeof(p_generated_output -> 'next_step') <> 'string'
+    or jsonb_typeof(p_generated_output -> 'message') is distinct from 'string'
+    or jsonb_typeof(p_generated_output -> 'strategy') is distinct from 'string'
+    or jsonb_typeof(p_generated_output -> 'objective') is distinct from 'string'
+    or jsonb_typeof(p_generated_output -> 'tone') is distinct from 'string'
+    or jsonb_typeof(p_generated_output -> 'next_step') is distinct from 'string'
     or length(btrim(p_generated_output ->> 'message')) = 0
     or length(p_generated_output ->> 'message') > 10000 then
     raise exception 'Output generato non valido' using errcode = '22023';
