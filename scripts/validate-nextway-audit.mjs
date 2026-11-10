@@ -306,3 +306,7 @@ assert.match(leadActivities, /grant select, insert on table public\.nextway_lead
 assert.match(leadActivities, /grant update \(next_action_status\) on table public\.nextway_lead_activities to authenticated/i);
 assert.doesNotMatch(leadActivities, /grant delete on table public\.nextway_lead_activities/i);
 console.log("NEXTWAY CRM activity log and follow-up: cloud API, UI and owner-scoped RLS migration: PASS");
+
+assert.match(leadUiScript, /activityBtn\.disabled=!x\.cloud_id/);
+assert.match(leadUiScript, /if\(x\.archived_at\)\{save\.disabled=true;feedback\.textContent='Lead archiviato/);
+console.log("NEXTWAY CRM archived Lead: activity history remains readable while new activity entry is disabled: PASS");
