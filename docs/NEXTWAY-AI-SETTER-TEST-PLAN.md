@@ -131,3 +131,21 @@ La UI è preparata nel repository ma resta non verificata live fino ad applicazi
 ### Limite funzionale
 
 Il rilevamento e la prevenzione della sovrascrittura sono predisposti nel codice; la risoluzione interattiva dei conflitti (confronto campo per campo e scelta esplicita locale/cloud) è ancora da implementare. Nessun test multi-dispositivo è stato eseguito in produzione.
+
+
+## Test UI risoluzione conflitti Lead
+
+- [ ] Un Lead con _sync_conflict mostra il comando “Confronta versioni”.
+- [ ] Il confronto recupera la versione cloud corrente autenticata e mostra i campi locali e cloud affiancati.
+- [ ] I campi divergenti sono evidenziati; il sistema non sceglie automaticamente una versione.
+- [ ] “Conserva versione cloud” sostituisce la copia locale con la versione cloud letta e azzera local_dirty e _sync_conflict.
+- [ ] “Conserva versione locale e aggiorna cloud” richiede conferma esplicita.
+- [ ] La risoluzione locale esegue UPDATE con filtro sia su id sia su updated_at della versione cloud mostrata.
+- [ ] Se il cloud cambia tra confronto e salvataggio, l'UPDATE non modifica righe, la UI mostra un errore controllato e il conflitto resta aperto.
+- [ ] Dopo una risoluzione riuscita, cloud_updated_at viene aggiornato e local_dirty / _sync_conflict vengono azzerati.
+- [ ] Partner A non può risolvere conflitti di Lead appartenenti a Partner B; platform_admin opera secondo le policy previste.
+- [ ] Test concorrente: due dispositivi tentano di risolvere lo stesso conflitto; soltanto la prima scelta basata sulla versione corrente può riuscire.
+
+### Limiti
+
+La schermata e le API sono state aggiunte al repository. I test sopra sono ancora da eseguire; nessun risultato statico o commit dimostra da solo il comportamento live di RLS, trigger o concorrenza su Supabase.
