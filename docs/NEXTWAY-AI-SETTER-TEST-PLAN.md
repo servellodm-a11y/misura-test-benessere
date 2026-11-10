@@ -114,3 +114,20 @@ La sincronizzazione locale/cloud ora prova ad aggiornare i record già collegati
 - [ ] L'archiviazione non elimina conversazioni né messaggi associati; verificarne il comportamento e la conservazione.
 
 La UI è preparata nel repository ma resta non verificata live fino ad applicazione migrazione, deploy e test autenticati.
+
+
+## Test di concorrenza e conflitti di sincronizzazione
+
+- [ ] Un Lead cloud non modificato localmente non viene aggiornato inutilmente dal push.
+- [ ] Una modifica locale marcata `local_dirty` viene inviata solo se `updated_at` cloud coincide con `cloud_updated_at` salvato localmente.
+- [ ] Se un secondo dispositivo modifica il Lead prima del push, l'UPDATE condizionale non restituisce righe: il record viene segnalato come conflitto e i dati locali restano intatti.
+- [ ] Il pull di un record non modificato localmente aggiorna i campi dal cloud e la versione di base.
+- [ ] Il pull di un record modificato localmente, ma con versione cloud invariata, conserva la modifica locale senza conflitto.
+- [ ] Il pull di un record modificato localmente e anche sul cloud marca il conflitto senza sovrascrivere la copia locale.
+- [ ] Un record legacy collegato senza `cloud_updated_at` viene segnalato per revisione e non viene inviato alla cieca.
+- [ ] Dopo un push riuscito, `cloud_updated_at` viene aggiornato e `local_dirty` viene azzerato.
+- [ ] Dopo archiviazione/ripristino riusciti, la versione cloud locale viene aggiornata per evitare falsi conflitti al push successivo.
+
+### Limite funzionale
+
+Il rilevamento e la prevenzione della sovrascrittura sono predisposti nel codice; la risoluzione interattiva dei conflitti (confronto campo per campo e scelta esplicita locale/cloud) è ancora da implementare. Nessun test multi-dispositivo è stato eseguito in produzione.
