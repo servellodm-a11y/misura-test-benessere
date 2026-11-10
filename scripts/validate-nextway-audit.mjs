@@ -30,7 +30,7 @@ assert.ok(inlineScripts.length > 0, "Nessuno script inline trovato in nextway-ai
 const leadUiScript = inlineScripts.join("\n");
 assert.ok(html.includes("const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());"), "Lead UI must define strict HTTP(S) URL validation");
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
-assert.match(leadUiScript, /\(sourceUrl\?'<a target="_blank" rel="noopener noreferrer" href='/);
+assert.ok(leadUiScript.includes("sourceUrl?'<a target=\"_blank\" rel=\"noopener noreferrer\" href="), "Valid historical source URL must render as a safe external link");
 assert.match(leadUiScript, /'<span aria-disabled="true">Fonte non valida<\/span>'/);
 assert.doesNotMatch(leadUiScript, /href="\'+esc\(safeHttpUrl\(x\.url\)\|\|\x27#\x27\)/);
 assert.match(leadUiScript, /if\(!safeHttpUrl\(x\.url\)\)/);
