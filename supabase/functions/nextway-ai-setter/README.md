@@ -84,3 +84,10 @@ Il frontend NEXTWAY AI include ora `nextway-setter.js`, caricato da `nextway-ai.
 ## Deploy
 
 Nessun deploy è stato eseguito da questa attività. Eseguire il deploy solo dopo confronto con la versione live, revisione delle policy e test in ambiente controllato.
+
+
+### Contratto RPC usato dal frontend
+
+Il frontend chiama `public.nextway_create_lead_with_conversation` con questi parametri: `p_display_name`, `p_category`, `p_source_name`, `p_source_url`, `p_public_evidence`, `p_objective`, `p_channel`. La firma registrata nel contesto operativo è: `(text, text, text, text, text, text DEFAULT, text DEFAULT) RETURNS jsonb`. La funzione crea il lead e la conversazione in modo atomico usando `auth.uid()` e restituisce `success`, `lead_id`, `conversation_id`. Il frontend accetta la risposta solo se contiene `success=true` e un `conversation_id`.
+
+Il frontend carica le conversazioni ordinate per `created_at` decrescente. Questa corrispondenza del contratto è stata ricostruita dalla registrazione del lavoro precedente; la chiamata live resta da testare.
