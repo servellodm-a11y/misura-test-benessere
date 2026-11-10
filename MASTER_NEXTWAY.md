@@ -629,3 +629,15 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit UI Lead: `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465` e correzione rendering `47f413fa26aee03f22aceff2b9a2075f3795b27c`; connessione/ricerca: `483c908a381ea28453b9799ecbd70c28cbed736f`; validatore: `e5901c59cbcb3b3e4ebaf24affd73ce824bc557e`.
 - GitHub Actions run `42806931080`: **SUCCESS**, validazione statica Node e type-check Deno superati anche dopo la correzione finale che rimuove completamente il collegamento per gli URL storici non validi. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42806931080.
 - Nessun dato preesistente modificato; nessuna migrazione applicata; nessun deploy Supabase o Netlify eseguito.
+
+## 41. Isolamento dell'archivio Lead locale per account (10 novembre 2026)
+
+- L'archivio locale non viene più letto/scritto con una chiave browser globale condivisa: la chiave è `nextway_ai_records_v1:<profile UUID>`.
+- L'area Lead parte vuota fino all'autenticazione. Creazione, importazione, ripristino e cancellazione richiedono un profilo autenticato.
+- Login, ripristino sessione e cambi di stato Supabase attivano l'archivio del profilo corrente. Logout o sessione assente svuotano i dati dalla memoria della pagina e ripuliscono i risultati/registro visibili.
+- Sincronizzazione e caricamento cloud usano esclusivamente la chiave locale derivata dall'ID del profilo autenticato; i Lead nuovi ricevono comunque `owner_profile_id = auth.uid()`. RLS resta il controllo server-side.
+- Il vecchio archivio globale `nextway_ai_records_v1` non viene letto, sovrascritto o cancellato. Rimane conservato ma isolato: non viene assegnato automaticamente al primo utente che effettua login, perché il browser non può dimostrarne il proprietario.
+- Commit: UI `4d65326eb3df2777f9eedb5b9dc782a2dd4948f9`; cloud `33615b41f9d10f554069cf05d2a2eac3afcd83a6`; pulizia su auth change `65f219f8e15247f69f55d49d099c0453eb484e8f`; validatore `8688654a3ccc3d7f40ab3c6f219b398f1ab4b83e`.
+- GitHub Actions run `42807466889`: verificare esito finale del type-check Deno; la validazione statica Node è superata.
+- Test browser ancora necessari: due account sullo stesso browser, logout/login, cambio account senza refresh, sessione scaduta, import/backup, sync/pull, e conservazione dell'archivio legacy.
+- Nessuna migrazione Supabase, nessun deploy Supabase o Netlify.
