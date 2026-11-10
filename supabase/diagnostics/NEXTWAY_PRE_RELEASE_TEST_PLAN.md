@@ -64,13 +64,14 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Una richiesta valida con `request_id` UUID acquisisce la chiave e genera una sola bozza.
 - [ ] Due richieste concorrenti dello stesso utente con stessa chiave e conversazione: una sola acquisisce la prenotazione; l'altra riceve HTTP 409.
 - [ ] Due schede/dispositivi dello stesso utente con chiavi diverse sulla stessa conversazione: una sola generazione pending; l'altra riceve HTTP 409.
+- [ ] Proprietario e platform_admin che tentano simultaneamente la generazione sulla stessa conversazione: una sola prenotazione pending globale; la seconda richiesta riceve HTTP 409.
 - [ ] Ripetere una richiesta completata con la stessa chiave: viene restituita la stessa bozza e non viene chiamato OpenAI una seconda volta.
 - [ ] Riutilizzare la stessa chiave per una conversazione diversa: richiesta rifiutata.
 - [ ] Usare una nuova chiave per una rigenerazione intenzionale: viene creata una nuova bozza.
 - [ ] Simulare interruzione dopo la prenotazione: la stessa chiave resta occupata per la lease e può essere riacquisita dopo 2 minuti.
 - [ ] Verificare che inserimento messaggio e memorizzazione della risposta siano atomici: nessun messaggio duplicato in caso di ripetizione.
 - [ ] Verificare isolamento: chiave di Partner A non leggibile né riutilizzabile da Partner B.
-- [ ] La tabella ha vincolo univoco su `(user_id, idempotency_key)` e non è direttamente accessibile ai ruoli applicativi.
+- [ ] La tabella ha vincolo univoco su `(user_id, idempotency_key)` e indice univoco parziale su `conversation_id` per le richieste pending; non è direttamente accessibile ai ruoli applicativi.
 - [ ] Le RPC sono eseguibili da authenticated ma non da anon; le funzioni SECURITY DEFINER verificano proprietario conversazione o platform_admin e non espongono la tabella direttamente ai ruoli applicativi.
 - [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
 
