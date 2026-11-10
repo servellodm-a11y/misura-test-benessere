@@ -319,3 +319,10 @@ assert.match(leadUiScript, /getOpenLeadActivities\(100\)/);
 assert.match(leadUiScript, /Completa/);
 assert.match(leadUiScript, /Apri Lead/);
 console.log("NEXTWAY CRM follow-up queue: due-date ordering, lead navigation and completion action: PASS");
+
+assert.match(cloud, /async function getLeadById\(cloudId\)/);
+assert.match(cloud, /getLeadById/);
+assert.match(leadUiScript, /api\.getLeadById\(ev\.lead_id\)/);
+assert.match(leadUiScript, /data\.unshift\(result\.record\)/);
+assert.match(leadUiScript, /if\(!data\.some\(item=>item\.cloud_id===ev\.lead_id\)\)/);
+console.log("NEXTWAY CRM follow-up navigation: retrieves missing Lead through authenticated RLS before opening its activity panel: PASS");
