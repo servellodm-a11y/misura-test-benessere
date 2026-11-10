@@ -605,3 +605,16 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - La migrazione è solo preparata nel repository: non applicata su Supabase. Il wrapper presuppone che la RPC live a 7 parametri `nextway_create_lead_with_conversation` esista con la firma e il comportamento già verificati; la diagnostica read-only è stata estesa per controllare la nuova RPC e la nuova tabella dopo l'eventuale applicazione.
 - Prima dell'applicazione live restano necessari: verifica della firma RPC sottostante, revisione SQL sul progetto, test con due chiamate concorrenti e stesso/differente payload, test RLS con due utenti e test di errore/rollback.
 - Nessun deploy Supabase o Netlify eseguito; nessuna migrazione applicata.
+
+
+## 39. Hardening finale idempotenza e isolamento sessione (10 novembre 2026)
+
+- La richiesta Lead sospesa in `sessionStorage` è associata al profilo autenticato che l'ha avviata. Dopo un cambio account, NEXTWAY non ripristina il payload personale nel modulo e impedisce il retry dal profilo diverso.
+- Anche l'ID della conversazione sospesa dopo una creazione confermata è associato al profilo proprietario; il retry viene bloccato se l'utente autenticato non coincide.
+- Corretto il recupero in cui, dopo una risposta RPC ricevuta, restassero temporaneamente sia l'ID conversazione sia la chiave della richiesta: il completamento del retry cancella entrambi gli stati locali.
+- Aggiunta alla migrazione 011 la funzione manuale admin-only `nextway_prune_lead_creation_requests()`, che elimina le chiavi più vecchie di 30 giorni. Non è stato creato alcun job automatico.
+- La diagnostica read-only include anche la nuova RPC di pulizia e la tabella `nextway_lead_creation_requests`.
+- Commit cleanup SQL: `69a0ef1ff1a3cee6cdc7eff956ca542a5862c6c0`; diagnostica: `d77acb2dee269bee3c20a6b01f434667040099e9`.
+- Commit frontend profilo conversazione: `d717f99c98a285c9b7923eb49f1469827cd1f5b7`; validatore finale: `1e39155596a89093a07a153f74ff227546bcb3c7`.
+- GitHub Actions run `42806035763`: **SUCCESS**; validazione statica Node e type-check Deno superati.
+- Nessuna migrazione applicata e nessun deploy Supabase/Netlify eseguito. I test runtime, SQL, RLS multiutente e concorrenza restano da svolgere dopo autorizzazione e verifica della RPC sottostante.
