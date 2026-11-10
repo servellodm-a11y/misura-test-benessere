@@ -680,6 +680,7 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 
 - La funzione pullCloud non si ferma più ai primi 1.000 Lead: recupera i record autorizzati in pagine da 1.000 con range Supabase, fino all'ultima pagina.
 - Mantiene invariati i controlli per proprietario tramite RLS, gestione dei record locali dirty, rilevamento conflitti e merge senza sovrascrivere modifiche locali.
-- Commit cloud: 5f1b05ddd61105f4992be4743b8b291c1391af62.
-- Commit validatore: c098b17de97d5722dfd26b5d31d1172c96a1e649.
+- La paginazione usa ordinamento stabile secondario per ID, così record con lo stesso timestamp non dipendono da un ordinamento ambiguo tra pagine.
+- Commit cloud iniziale: 5f1b05ddd61105f4992be4743b8b291c1391af62; stabilizzazione ordinamento: deac2d1883db9b2fbcfd6cf7a80523344389e8e3.
+- Commit validatore: c098b17de97d5722dfd26b5d31d1172c96a1e649; controllo ordinamento stabile: d1f91719811459325be2f46e1a5c72fb031c4b70.
 - Controllo statico dedicato aggiunto; il run CI non è ancora stato confermato in questa sessione. Nessun deploy o migrazione.
