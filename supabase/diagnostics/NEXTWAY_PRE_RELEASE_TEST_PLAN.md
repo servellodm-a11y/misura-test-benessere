@@ -59,6 +59,19 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Bozza salvata con ai_generated=true, approved_by=null e sent_at=null.
 - [ ] Nessuna chiamata o integrazione invia messaggi all'esterno.
 
+### 5. Idempotenza AI Setter
+- [ ] Applicare la migrazione `20261110000200_nextway_setter_idempotency.sql` in ambiente di test dopo aver verificato schema e permessi.
+- [ ] Una richiesta valida con `request_id` UUID acquisisce la chiave e genera una sola bozza.
+- [ ] Due richieste concorrenti dello stesso utente con stessa chiave e conversazione: una sola acquisisce la prenotazione; l'altra riceve HTTP 409.
+- [ ] Ripetere una richiesta completata con la stessa chiave: viene restituita la stessa bozza e non viene chiamato OpenAI una seconda volta.
+- [ ] Riutilizzare la stessa chiave per una conversazione diversa: richiesta rifiutata.
+- [ ] Usare una nuova chiave per una rigenerazione intenzionale: viene creata una nuova bozza.
+- [ ] Simulare interruzione dopo la prenotazione: la stessa chiave resta occupata per la lease e può essere riacquisita dopo 2 minuti.
+- [ ] Verificare che inserimento messaggio e memorizzazione della risposta siano atomici: nessun messaggio duplicato in caso di ripetizione.
+- [ ] Verificare isolamento: chiave di Partner A non leggibile né riutilizzabile da Partner B.
+- [ ] Verificare che le funzioni SECURITY DEFINER controllino esplicitamente proprietario conversazione o ruolo platform_admin e non espongano la tabella direttamente ai ruoli anon/authenticated.
+- [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
+
 ### 5. Ricerca web
 - [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413 prima di contattare Tavily.
 - [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
@@ -79,7 +92,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] A nuova finestra di 60 secondi il contatore riparte da 1.
 - [ ] Se la RPC rate limit fallisce, nessuna chiamata OpenAI/Tavily parte e la funzione restituisce HTTP 503.
 - [ ] Utenti anonimi non possono eseguire la RPC o leggere/modificare direttamente la tabella.
-- [ ] Verificare il comportamento in caso di doppio clic/ritentativo: evitare bozze duplicate involontarie e definire se la rigenerazione esplicita debba creare una nuova bozza.
+- [ ] Verificare doppio clic/ritentativo secondo la sezione Idempotenza AI Setter: stessa chiave = stessa operazione; nuova chiave = nuova generazione esplicita.
 - [ ] Definire soglie distinte per AI Setter e ricerca, con risposta controllata quando il limite viene raggiunto.
 - [ ] Definire budget e alert per OpenAI e Tavily.
 - [ ] Verificare log: nessun token, chiave o dato personale non necessario.
