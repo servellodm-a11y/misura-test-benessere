@@ -77,6 +77,10 @@ Obiettivi ammessi: `first_contact`, `follow_up`, `reply`, `presentation`, `appoi
 - Il comportamento delle policy RLS sulle due tabelle non è deducibile dal solo codice della funzione e non è ancora stato verificato in questo repository.
 - Il codice gestisce `status === "incomplete"` e l'assenza di testo; gli altri errori del provider sono ricondotti a un errore generico 500.
 
+## Integrazione frontend (10 novembre 2026)
+
+Il frontend NEXTWAY AI include ora `nextway-setter.js`, caricato da `nextway-ai.html`. Riutilizza la sessione Supabase esistente esposta da `nextway-cloud.js`, crea prospect e conversazione tramite RPC `nextway_create_lead_with_conversation`, poi invoca il generatore e mostra la bozza. Il frontend usa il percorso `/functions/v1/rapid-function`, indicato in precedenza come endpoint effettivo; la corrispondenza con la funzione live resta da testare. Nessun invio viene eseguito.
+
 ## Deploy
 
 Nessun deploy è stato eseguito da questa attività. Eseguire il deploy solo dopo confronto con la versione live, revisione delle policy e test in ambiente controllato.
