@@ -134,21 +134,48 @@ Deno.serve(async (req) => {
       return respond({ error: "Utente non autorizzato" }, 401, responseOrigin);
     }
 
-    const rawBody = await req.text();
-    if (new TextEncoder().encode(rawBody).byteLength > 16_384) {
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > 16_384) {
       return respond({ error: "Richiesta troppo grande" }, 413, responseOrigin);
     }
 
-    let body: Record<string, unknown>;
+    const reader = req.body?.getReader();
+    if (!reader) {
+      return respond({ error: "Corpo della richiesta mancante" }, 400, responseOrigin);
+    }
+
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > 16_384) {
+        await reader.cancel();
+        return respond({ error: "Richiesta troppo grande" }, 413, responseOrigin);
+      }
+      chunks.push(value);
+    }
+
+    const rawBytes = new Uint8Array(totalBytes);
+    let offset = 0;
+    for (const chunk of chunks) {
+      rawBytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    const rawBody = new TextDecoder().decode(rawBytes);
+
+    let parsedBody: unknown;
     try {
-      body = JSON.parse(rawBody);
+      parsedBody = JSON.parse(rawBody);
     } catch {
       return respond({ error: "JSON non valido" }, 400, responseOrigin);
     }
 
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
+    if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
       return respond({ error: "Richiesta non valida" }, 400, responseOrigin);
     }
+    const body = parsedBody as Record<string, unknown>;
 
     const conversationId = body.conversation_id;
     const goal = body.goal;
@@ -274,6 +301,7 @@ Deno.serve(async (req) => {
         signal: AbortSignal.timeout(60000),
         body: JSON.stringify({
           model,
+          max_output_tokens: 1200,
           instructions: `
 Sei NEXTWAY AI Setter, assistente professionale
 per lo sviluppo delle relazioni commerciali.
