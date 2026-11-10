@@ -98,6 +98,8 @@
     const $ = id => document.getElementById(id);
     const say = message => { $('nwst-status').textContent = message; };
     let lastDraft = '';
+    let isGenerating = false;
+    let isCreating = false;
 
     async function loadConversations() {
       const { c } = await cloud.active();
@@ -120,6 +122,8 @@
 
     async function generateDraft(conversationId, goal) {
       if (!conversationId) throw new Error('Seleziona o crea prima una conversazione.');
+      if (isGenerating) return;
+      isGenerating = true;
       const { s } = await cloud.active();
       const cfg = cloud.getConfig();
       say('Generazione della bozza in corso…');
@@ -149,6 +153,7 @@
         $('nwst-copy').disabled = !lastDraft;
         say('Bozza generata e salvata. Nessun messaggio è stato inviato.');
       } finally {
+        isGenerating = false;
         $('nwst-generate').disabled = false;
         $('nwst-create-button').disabled = false;
       }
@@ -164,9 +169,15 @@
     });
     $('nwst-create').addEventListener('submit', async event => {
       event.preventDefault();
+      if (isCreating) return;
+      isCreating = true;
       const form = event.currentTarget;
       const values = Object.fromEntries(new FormData(form).entries());
-      if (!/^https?:\/\//i.test(values.source_url)) { say('Inserisci un URL pubblico http o https valido.'); return; }
+      if (!/^https?:\/\//i.test(values.source_url)) {
+        isCreating = false;
+        say('Inserisci un URL pubblico http o https valido.');
+        return;
+      }
       try {
         const { c } = await cloud.active();
         $('nwst-create-button').disabled = true;
@@ -190,6 +201,7 @@
       } catch (error) {
         say('Creazione o generazione non riuscita: ' + error.message);
       } finally {
+        isCreating = false;
         $('nwst-create-button').disabled = false;
       }
     });
