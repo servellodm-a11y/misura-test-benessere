@@ -71,8 +71,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Verificare che inserimento messaggio e memorizzazione della risposta siano atomici: nessun messaggio duplicato in caso di ripetizione.
 - [ ] Verificare isolamento: chiave di Partner A non leggibile né riutilizzabile da Partner B.
 - [ ] La tabella ha vincolo univoco su `(user_id, idempotency_key)` e non è direttamente accessibile ai ruoli applicativi.
-- [ ] Le RPC sono eseguibili da authenticated ma non da anon; la funzione SECURITY DEFINER verifica proprietario conversazione o platform_admin.
-- [ ] Verificare che le funzioni SECURITY DEFINER controllino esplicitamente proprietario conversazione o ruolo platform_admin e non espongano la tabella direttamente ai ruoli anon/authenticated.
+- [ ] Le RPC sono eseguibili da authenticated ma non da anon; le funzioni SECURITY DEFINER verificano proprietario conversazione o platform_admin e non espongono la tabella direttamente ai ruoli applicativi.
 - [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
 
 ### 6. Ricerca web
