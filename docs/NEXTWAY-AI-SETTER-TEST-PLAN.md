@@ -392,3 +392,18 @@ Controllo statico GitHub Actions: run `42804560636` — SUCCESS, commit `1f4a6c7
 Stato codice: commit Edge Function `91f09c0cd8dcb95e5b6964fa7c33442c1cc2409c`; validazione statica GitHub Actions run `42804794248` — SUCCESS. La funzione non è stata distribuita su Supabase e i test runtime/GDPR restano da eseguire.
 
 Verifica CI aggiuntiva: GitHub Actions run `42805023373` — SUCCESS. Il workflow esegue ora anche `deno check supabase/functions/nextway-ai-setter/index.ts` con Deno 2; il controllo statico Node e il type-check Deno sono entrambi superati. Questo non equivale al deploy o al test runtime della funzione.
+
+
+## 38. Idempotenza della creazione Lead/conversazione
+
+- [ ] Verificare in Supabase che la RPC sottostante `nextway_create_lead_with_conversation` esista con sette argomenti nell'ordine previsto e restituisca `success`, `lead_id`, `conversation_id`.
+- [ ] Applicare la migrazione 011 soltanto dopo revisione della firma live e approvazione esplicita.
+- [ ] Con un utente autenticato, inviare due volte la stessa coppia `request_id` + SHA-256 e lo stesso payload: la seconda risposta deve restituire gli stessi ID con `idempotent_replay=true`; il database deve contenere un solo Lead e una sola conversazione.
+- [ ] Riutilizzare la stessa chiave con hash differente: la RPC deve rifiutare la richiesta senza creare altri record.
+- [ ] Simulare due chiamate concorrenti con la stessa chiave: una sola esecuzione deve creare Lead/conversazione; l'altra deve recuperare la risposta originaria.
+- [ ] Simulare errore della RPC sottostante: la transazione deve annullare anche la prenotazione idempotente, consentendo un retry corretto.
+- [ ] Verificare RLS con due profili partner: ciascuno deve leggere soltanto le proprie chiavi; nessun accesso incrociato.
+- [ ] Nel browser, interrompere la connessione dopo l'invio ma prima della risposta; ricaricare la stessa scheda e ripetere la richiesta. Il modulo deve ripristinare il payload e riutilizzare la stessa chiave.
+- [ ] Verificare che il payload personale non venga memorizzato nella tabella idempotenza: devono essere presenti soltanto hash, chiave, proprietario, risposta con ID e timestamp.
+
+Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`, frontend e validatore salvati su GitHub. GitHub Actions run `42805580487` — SUCCESS per validazione statica Node e type-check Deno. Migrazione non applicata; test SQL, RLS, concorrenza e browser da eseguire in ambiente autorizzato.
