@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const ENDPOINT = '/functions/v1/rapid-function';
+  const ENDPOINT = '/functions/v1/nextway-ai-setter';
 
   function init() {
     if (document.getElementById('nw-setter')) return;
