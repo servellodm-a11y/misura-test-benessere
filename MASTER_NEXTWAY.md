@@ -489,3 +489,11 @@ Rilievi da risolvere/verificare:
 - Rimossa l'assegnazione impropria local_dirty=false dopo la modifica di archiviazione: la funzione non deve nascondere modifiche locali pendenti.
 - La cronologia per Lead mostra già il nome dell'operatore dai campi profiles e partner_details; aggiunto controllo statico per questa risoluzione.
 - Stato: codice e documentazione salvati su GitHub; validazione GitHub Actions da eseguire. Nessun deploy Netlify e nessuna migrazione Supabase.
+
+
+## 30. Concorrenza sicura su archiviazione e ripristino (10 novembre 2026)
+
+- Le operazioni di archiviazione/ripristino richiedono la versione cloud aggiornata del Lead.
+- UPDATE condizionato su id + updated_at: se il record è stato modificato nel frattempo da un'altra sessione, nessuna modifica viene applicata e la UI chiede di ricaricare.
+- Il timestamp viene passato dalla scheda Lead a entrambe le operazioni; il validatore statico controlla l'intero percorso.
+- Stato: sorgenti e documentazione salvati su GitHub; GitHub Actions da verificare. Nessun deploy Netlify e nessuna migrazione Supabase.
