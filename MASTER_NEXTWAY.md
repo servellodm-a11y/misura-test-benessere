@@ -697,3 +697,6 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit migrazione iniziale: 56c63be3fbecc039f51ced195ff0c6d255048e7d; correzione ambito RLS: 0cdb56387da92c30b78c09b7af5ab23b7ddb065a.
 - Commit API cloud: 20f906e17114f4450cfea0aa8d21a130ae0b9b28; UI attività: b2c313acb5dcfd87680e77650da9d6065d185153; validatore: 760fa1ed8ad9d67cdd7e7956e81ac3735baceed1.
 - Migrazione non applicata su Supabase. Il modulo attività richiede l'applicazione della migrazione prima dell'uso cloud. Test runtime e run CI ancora da confermare; nessun deploy Netlify.
+
+- Correzione UI successiva: i Lead archiviati mantengono consultabile il registro attività, mentre il pulsante di registrazione resta disabilitato. Commit UI: f14736c1912f68f524e19eee8340d6056236fe72; controllo statico aggiuntivo: a12df0dc2edc5c613500e1bcaea23386a7ec77a2.
+- Il repository non ha restituito workflow run né commit status per l'ultimo commit del validatore: CI non confermata. Non dichiarare superati i test statici fino a un esito effettivo.
