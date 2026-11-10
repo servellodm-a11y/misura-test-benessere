@@ -501,3 +501,14 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - Stato codice: API e UI implementate su GitHub; migrazione 012 non applicata e test runtime non eseguiti.
 
 - Collaudo navigazione dalla coda: verificare che Apri Lead azzeri solo i filtri incompatibili, visualizzi il Lead corretto e apra il pannello attività; commit UI d52bb4a6be55d29739a7789a224ec191130a411e e 2d621cc496ac25739e1eb966a9ddd8501ea479eb; validatore d0ba03a12984dbd150ade024bed952a47a67ca90.
+
+
+## 48. Collaudo apertura Lead dalla coda follow-up
+
+- [ ] Creare un follow-up su un Lead sincronizzato.
+- [ ] In un browser/profilo con cache locale vuota ma sessione autenticata, caricare la coda follow-up e selezionare "Apri Lead".
+- [ ] Verificare che il Lead venga recuperato dal cloud tramite RLS e aggiunto alla cache del solo profilo autenticato.
+- [ ] Verificare che il Lead si apra senza sovrascrivere eventuali modifiche locali già presenti.
+- [ ] Verificare che un Lead non autorizzato/non visibile tramite RLS non venga recuperato.
+- Commit API: 812378019f9d7751c7c2c92385349b988695a5a3; UI: f6c2f8d270aa06c52bc6103c193efa24527c3dcb; validatore: b5771aaf00bed9bc018792583217044e880223d6.
+- Stato: codice salvato su GitHub; test runtime non eseguiti.
