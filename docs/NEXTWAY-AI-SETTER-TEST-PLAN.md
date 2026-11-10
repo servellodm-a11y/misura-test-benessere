@@ -200,6 +200,17 @@ Prerequisito: migrazioni rate limit/idempotenza e ciclo di vita Lead applicate n
 - [ ] Revocando il ruolo `platform_admin` durante la sessione, una nuova richiesta non deve più restituire il registro.
 - [ ] Verificare la gestione UI quando la migrazione audit non è ancora applicata o la tabella non è accessibile.
 
+### Test risoluzione nomi proprietario e operatore
+
+Prerequisito: migrazioni audit applicate su ambiente di test e accesso con account autorizzato.
+
+- [ ] Se un profilo ha `profiles.full_name`, il registro mostra il nome completo.
+- [ ] Se `full_name` è vuoto ma esistono `partner_details.first_name/last_name`, il registro mostra nome e cognome.
+- [ ] Se sono disponibili entrambi, verificare e documentare la precedenza del nome proveniente da `partner_details`.
+- [ ] Se una query anagrafica è negata da RLS o non restituisce un nome, il registro continua a mostrare gli eventi con fallback neutro.
+- [ ] Le query anagrafiche sono limitate agli ID presenti negli eventi caricati e non selezionano email o telefono.
+- [ ] Verificare la corretta visualizzazione distinta di proprietario e operatore, inclusi actor null dopo eliminazione del profilo.
+
 ### Limiti noti
 
 La UI e la query sono predisposte nel repository. La lettura del ruolo richiede che l'utente possa leggere il proprio record in `profiles`. La proiezione JSON PostgREST per `lead_name` deve essere verificata contro la versione live. Nessuno dei test sopra è considerato superato prima del collaudo autenticato su Supabase.
@@ -224,3 +235,6 @@ Prerequisito: applicare prima la migrazione 009 e poi `20261110001000_nextway_au
 - [ ] Confermare esito verde per parsing di `nextway-cloud.js` e script inline HTML.
 - [ ] Confermare i controlli strutturali su migrazione audit, autorizzazione amministratore, filtri/paginazione e snapshot minimizzati.
 - [ ] Non interpretare il workflow statico come prova di funzionamento SQL, RLS o Supabase live.
+
+
+- [x] Validazione statica dei campi profilo/partner, fallback e gate amministrativo nel workflow GitHub Actions (run `42801788640`, SUCCESS).
