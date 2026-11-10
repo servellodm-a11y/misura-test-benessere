@@ -29,6 +29,17 @@ assert.ok(inlineScripts.length > 0, "Nessuno script inline trovato in nextway-ai
 
 const leadUiScript = inlineScripts.join("\n");
 assert.ok(html.includes("const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());"), "Lead UI must define strict HTTP(S) URL validation");
+assert.match(leadUiScript, /let activeOwnerId=null,data=\[\]/);
+assert.match(leadUiScript, /localStorage\.getItem\(KEY\+':'\+userId\)/);
+assert.match(leadUiScript, /localStorage\.setItem\(KEY\+':'\+activeOwnerId/);
+assert.match(leadUiScript, /if\(!activeOwnerId\)\{alert\('Accedi con il tuo account NEXTWAY prima di creare un Lead\.'/);
+assert.match(leadUiScript, /window\.NEXTWAY_LOCAL_ARCHIVE=\{activate:activateLocalAccount,clear:clearLocalAccount/);
+assert.doesNotMatch(leadUiScript, /localStorage\.(?:getItem|setItem)\(KEY(?:\)|,)/, "Lead UI must not read or write the unscoped legacy archive key");
+assert.match(cloud, /function localArchiveKey\(userId\)/);
+assert.match(cloud, /localStorage\.getItem\(localArchiveKey\(s\.user\.id\)\)/);
+assert.match(cloud, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\)/);
+assert.match(cloud, /client\.auth\.onAuthStateChange/);
+assert.match(cloud, /clearLocalArchive\(\)/);
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
 assert.ok(leadUiScript.includes("sourceUrl?'<a target=\"_blank\" rel=\"noopener noreferrer\" href="), "Valid historical source URL must render as a safe external link");
 assert.match(leadUiScript, /'<span aria-disabled="true">Fonte non valida<\/span>'/);
