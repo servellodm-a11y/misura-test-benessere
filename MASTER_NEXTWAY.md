@@ -468,3 +468,12 @@ Rilievi da risolvere/verificare:
 - Commit piano di test: `886cff668f51f136a8149a1d22b38b51822b27ab`.
 - Workflow GitHub Actions run `42802356565`: avviato; esito da verificare.
 - Nessuna migrazione applicata e nessun deploy eseguito. I test live restano subordinati a un ambiente Supabase di test e all'applicazione autorizzata delle migrazioni.
+
+
+## 29. Rifinitura del flusso amministrativo Lead (10 novembre 2026)
+
+- La cronologia del singolo Lead risolve ora il nome dell’operatore tramite i campi verificati di `profiles` e `partner_details`, con fallback neutro e query limitate agli ID presenti negli eventi.
+- L’annullamento del prompt del motivo interrompe l’archiviazione: non viene più interpretato come conferma con motivo vuoto.
+- Il comando di rimozione dall’archivio locale è stato rinominato **Rimuovi copia locale** e chiarisce che non elimina il record cloud né la cronologia; una sincronizzazione successiva può reimportare il record cloud.
+- Il validatore statico controlla questi comportamenti insieme ai controlli esistenti su audit, identità e archiviazione.
+- Stato: modifiche committate su GitHub; test statici automatici da verificare dopo il push. Nessuna migrazione Supabase, nessun deploy e nessun test runtime eseguiti.
