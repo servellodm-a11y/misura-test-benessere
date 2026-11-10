@@ -57,12 +57,11 @@ function respond(data: unknown, status = 200, origin = "") {
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin") ?? "";
+  const responseOrigin = origin || allowedOrigins[0] || "";
 
   if (!isAllowedOrigin(origin)) {
-    return respond({ error: "Origin non autorizzata" }, 403, responseOrigin);
+    return respond({ error: "Origin non autorizzata" }, 403);
   }
-
-  const responseOrigin = origin || allowedOrigins[0] || "";
 
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -70,7 +69,7 @@ Deno.serve(async (req) => {
         ...corsHeaders,
         "Access-Control-Allow-Origin": responseOrigin,
       },
-    }, 200, responseOrigin);
+    });
   }
 
   if (req.method !== "POST") {
@@ -349,4 +348,4 @@ Non inviarla: deve rimanere una bozza.
       error: "Operazione non completata",
     }, 500, responseOrigin);
   }
-}, 200, responseOrigin);
+});
