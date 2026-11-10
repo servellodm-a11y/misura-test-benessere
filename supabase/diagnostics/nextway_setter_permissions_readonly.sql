@@ -147,7 +147,8 @@ from information_schema.columns c
 where c.table_schema = 'public'
   and c.table_name in (
     'nextway_setter_generation_requests',
-    'nextway_api_rate_limits'
+    'nextway_api_rate_limits',
+    'nextway_lead_creation_requests'
   )
 order by c.table_name, c.ordinal_position;
 
@@ -165,7 +166,8 @@ from pg_policies
 where schemaname = 'public'
   and tablename in (
     'nextway_setter_generation_requests',
-    'nextway_api_rate_limits'
+    'nextway_api_rate_limits',
+    'nextway_lead_creation_requests'
   )
 order by tablename, policyname;
 
@@ -178,7 +180,8 @@ from information_schema.table_privileges
 where table_schema = 'public'
   and table_name in (
     'nextway_setter_generation_requests',
-    'nextway_api_rate_limits'
+    'nextway_api_rate_limits',
+    'nextway_lead_creation_requests'
   )
   and grantee in ('anon', 'authenticated', 'PUBLIC')
 order by table_name, grantee, privilege_type;
@@ -192,6 +195,7 @@ from pg_indexes
 where schemaname = 'public'
   and tablename in (
     'nextway_setter_generation_requests',
-    'nextway_api_rate_limits'
+    'nextway_api_rate_limits',
+    'nextway_lead_creation_requests'
   )
 order by tablename, indexname;
