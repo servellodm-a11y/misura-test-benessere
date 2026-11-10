@@ -326,3 +326,12 @@ Rilievi da risolvere/verificare:
 2. Preparare UI esplicita per archiviazione/ripristino e indicatore di sincronizzazione, senza confondere cancellazione locale e cloud.
 3. Definire risoluzione conflitti tra modifiche provenienti da dispositivi diversi.
 4. Eseguire i test RLS con account distinti Partner A, Partner B e platform_admin dopo applicazione controllata delle migrazioni.
+
+
+## 18. Gestione UI archiviazione e ripristino Lead (10 novembre 2026)
+
+- `nextway-cloud.js` espone ora `archiveLead(cloudId, reason)` e `restoreLead(cloudId)` tramite sessione Supabase autenticata. Le operazioni aggiornano `archived_at` e `archive_reason`; `archived_by` resta gestito dal trigger database della migrazione 008.
+- `nextway-ai.html` aggiunge filtro Lead attivi/archiviati/tutti e comando Archivia/Ripristina. Il comando è disponibile solo per record con `cloud_id`: un Lead solo locale deve essere sincronizzato prima. La UI non esegue cancellazioni fisiche cloud.
+- Il pull aggiorna lo stato di archiviazione dei record locali già collegati, senza sovrascrivere gli altri campi modificati localmente. Non è ancora una risoluzione generale dei conflitti multi-dispositivo.
+- I conteggi principali escludono gli archiviati e il filtro predefinito mostra i Lead attivi.
+- Stato: **CODICE COMMITTATO NEL REPOSITORY**; **NON PUBBLICATO SU NETLIFY**; dipende dalla migrazione 008 non ancora applicata e da test Supabase live non eseguiti. Non considerare archiviazione/ripristino operativi in produzione finché prerequisiti e test non sono completati.
