@@ -10,6 +10,7 @@ const leadSchema = read("../supabase/nextway_leads.sql");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
+const leadCreationIdempotency = read("../supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql");
 
 new Function(cloud);
 new Function(setter);
@@ -160,3 +161,29 @@ const leadSelectBlock = setterFunction.match(/\.from\("nextway_leads"\)[\s\S]*?\
 assert.ok(leadSelectBlock, "AI Setter lead select block missing");
 assert.doesNotMatch(leadSelectBlock[0], /notes/);
 console.log("AI Setter provider data minimization: explicit allowlist, free notes excluded, email/phone/URL redaction: PASS");
+
+ 
+// Lead creation idempotency: same user/key/hash must replay the first result atomically.
+assert.match(setter, /const PENDING_LEAD_CREATE_KEY = 'nextway_setter_pending_lead_create_v1'/);
+assert.match(setter, /sessionStorage\.setItem\(PENDING_LEAD_CREATE_KEY/);
+assert.match(setter, /sessionStorage\.getItem\(PENDING_LEAD_CREATE_KEY/);
+assert.match(setter, /crypto\.subtle\.digest\('SHA-256'/);
+assert.match(setter, /nextway_create_lead_with_conversation_idempotent/);
+assert.match(setter, /p_request_id: createRequest\.request_id/);
+assert.match(setter, /p_request_hash: createRequest\.request_hash/);
+assert.match(setter, /clearPendingLeadCreateRequest\(\)/);
+assert.match(setter, /pendingLeadCreateRequest\.payload/);
+assert.match(leadCreationIdempotency, /create table if not exists public\.nextway_lead_creation_requests/i);
+assert.match(leadCreationIdempotency, /primary key \(owner_profile_id, request_id\)/i);
+assert.match(leadCreationIdempotency, /enable row level security/i);
+assert.match(leadCreationIdempotency, /using \(owner_profile_id = auth\.uid\(\)\)/i);
+assert.match(leadCreationIdempotency, /with check \(owner_profile_id = auth\.uid\(\)\)/i);
+assert.match(leadCreationIdempotency, /security invoker/i);
+assert.match(leadCreationIdempotency, /on conflict \(owner_profile_id, request_id\) do nothing/i);
+assert.match(leadCreationIdempotency, /v_existing_hash <> p_request_hash/i);
+assert.match(leadCreationIdempotency, /idempotent_replay/i);
+assert.match(leadCreationIdempotency, /public\.nextway_create_lead_with_conversation\(/i);
+assert.match(leadCreationIdempotency, /raise exception[\s\S]*?annulla l'intera transazione/i);
+assert.doesNotMatch(leadCreationIdempotency, /request_payload\s+jsonb/i);
+assert.match(leadCreationIdempotency, /revoke all on function public\.nextway_create_lead_with_conversation_idempotent/i);
+console.log("Lead creation idempotency: browser-persisted key, SHA-256 payload fingerprint, owner-scoped RPC replay and atomic rollback: PASS");
