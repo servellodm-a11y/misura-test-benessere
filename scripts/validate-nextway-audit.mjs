@@ -275,3 +275,6 @@ assert.match(cloud, /const pageSize=1000;let data=\[\],offset=0;while\(true\)/);
 assert.match(cloud, /\.range\(offset,offset\+pageSize-1\)/);
 assert.match(cloud, /data\.push\(\.\.\.page\);offset\+=page\.length;if\(page\.length<pageSize\)break/);
 console.log("NEXTWAY CRM cloud pull pagination: all pages are loaded without the previous 1,000-row cap: PASS");
+
+assert.match(cloud, /\.order\('created_at',\{ascending:false\}\)\.order\('id',\{ascending:true\}\)\.range\(offset,offset\+pageSize-1\)/);
+console.log("NEXTWAY CRM cloud pagination: deterministic ordering across page boundaries: PASS");
