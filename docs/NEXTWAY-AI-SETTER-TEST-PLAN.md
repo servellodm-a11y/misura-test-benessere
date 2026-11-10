@@ -290,3 +290,15 @@ Limiti: codice salvato su GitHub ma non pubblicato su Netlify; migrazioni audit 
 - Test statici verificano parametro, filtro updated_at, gestione del conflitto e passaggio del timestamp dalla UI.
 
 Validazione statica GitHub Actions: PASS nel run 42803042485 sul commit daae610. Il comportamento va comunque confermato con test runtime Supabase quando le migrazioni saranno applicate; nessuna migrazione o deploy eseguiti in questo passaggio.
+
+
+## 31. Verifica statica delle autorizzazioni audit e dei trigger di archiviazione
+
+Il validatore controlla ora anche:
+- lettura audit limitata al proprietario storico o a platform_admin;
+- concessione SELECT a authenticated e assenza di policy di scrittura diretta sull'audit;
+- trigger di archiviazione che richiede un utente autenticato e registra auth.uid() in archived_by;
+- ripristino che azzera archived_by e archive_reason;
+- revoca dell'esecuzione diretta della funzione trigger.
+
+Questi sono controlli testuali/statici sul sorgente SQL, non sostituiscono l'esecuzione delle migrazioni e i test RLS reali su Supabase.
