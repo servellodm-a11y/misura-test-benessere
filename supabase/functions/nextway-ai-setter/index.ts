@@ -53,6 +53,19 @@ function sanitizeModelText(value: unknown, maxLength: number) {
     .slice(0, maxLength);
 }
 
+function logSafeFailure(label: string, error: unknown) {
+  const details = error && typeof error === "object"
+    ? error as Record<string, unknown>
+    : {};
+  const code = typeof details.code === "string"
+    ? details.code.slice(0, 32)
+    : undefined;
+  const status = typeof details.status === "number"
+    ? details.status
+    : undefined;
+  console.error(label, { code, status });
+}
+
 function respond(data: unknown, status = 200, origin = "") {
   return new Response(JSON.stringify(data), {
     status,
@@ -221,7 +234,7 @@ Deno.serve(async (req) => {
     );
     const rateLimit = Array.isArray(limitRows) ? limitRows[0] : null;
     if (limitError || !rateLimit) {
-      console.error("Rate limit check failed:", limitError);
+      logSafeFailure("Rate limit check failed", limitError);
       return respond({ error: "Controllo di sicurezza temporaneamente non disponibile" }, 503, responseOrigin);
     }
     if (!rateLimit.allowed) {
@@ -302,7 +315,7 @@ Deno.serve(async (req) => {
     );
     const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
     if (claimError || !claim) {
-      console.error("Idempotency claim failed:", claimError);
+      logSafeFailure("Idempotency claim failed", claimError);
       return respond({ error: "Controllo duplicazioni temporaneamente non disponibile" }, 503, responseOrigin);
     }
     if (claim.completed && claim.cached_response) {
@@ -361,7 +374,7 @@ Deno.serve(async (req) => {
       { p_idempotency_key: requestId },
     );
     if (stagedReadError) {
-      console.error("Staged output read failed:", stagedReadError);
+      logSafeFailure("Staged output read failed", stagedReadError);
       throw new Error("Recupero generazione precedente non riuscito");
     }
 
@@ -426,8 +439,7 @@ Non inviarla: deve rimanere una bozza.
       );
 
       if (!aiResponse.ok) {
-        const details = await aiResponse.text();
-        console.error("OpenAI error:", details);
+        console.error("OpenAI request failed:", { status: aiResponse.status });
         throw new Error("Generazione AI non riuscita");
       }
 
@@ -475,7 +487,7 @@ Non inviarla: deve rimanere una bozza.
             error: "La conversazione è stata chiusa o archiviata durante la generazione. La bozza non è stata salvata.",
           },  409, responseOrigin);
         }
-        console.error("Staged output save failed:", stageError);
+        logSafeFailure("Staged output save failed", stageError);
         throw new Error("Persistenza temporanea della generazione non riuscita");
       }
       if (staged !== true) {
@@ -516,7 +528,7 @@ Non inviarla: deve rimanere una bozza.
           error: "La conversazione è stata chiusa o archiviata durante la generazione. La bozza non è stata salvata.",
         }, 409, responseOrigin);
       }
-      console.error("Idempotent completion failed:", completeError);
+      logSafeFailure("Idempotent completion failed", completeError);
       throw new Error("Salvataggio bozza non riuscito");
     }
     if (!completedResponse) {
@@ -526,7 +538,7 @@ Non inviarla: deve rimanere una bozza.
     return respond(completedResponse, 200, responseOrigin);
 
   } catch (error) {
-    console.error("NEXTWAY AI Setter:", error);
+    console.error("NEXTWAY AI Setter request failed");
 
     return respond({
       error: "Operazione non completata",
