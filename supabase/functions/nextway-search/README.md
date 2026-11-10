@@ -32,6 +32,10 @@ Limiti applicati:
 
 La funzione restituisce URL, titolo, snippet, score del provider e data pubblicata, ma NON inserisce automaticamente persone nel database. La selezione e la verifica umana restano obbligatorie.
 
+## Rate limit server-side
+
+La funzione chiama `nextway_consume_api_rate_limit('public_search')`: massimo 3 richieste per utente in ogni finestra fissa di 60 secondi, condivise tra schede e dispositivi. Ogni richiesta può contenere fino a 5 query Tavily. Se il controllo database non è disponibile, la funzione non chiama Tavily e restituisce HTTP 503; superato il limite restituisce HTTP 429. Applicare prima la migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit.sql`. Le finestre fisse possono consentire burst ravvicinati al confine; non costituiscono un budget giornaliero o mensile.
+
 ## Deploy
 1. Eseguire prima la migrazione `supabase/nextway_leads.sql`.
 2. Impostare i secrets sopra nel progetto Supabase.
