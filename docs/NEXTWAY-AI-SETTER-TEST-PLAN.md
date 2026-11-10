@@ -101,3 +101,16 @@ Fino al completamento di questi passaggi, il codice è da considerare preparato 
 ### Limiti attuali da non confondere con funzionalità completate
 
 La sincronizzazione locale/cloud ora prova ad aggiornare i record già collegati tramite `cloud_id`, oltre a inserire nuovi record. Il codice non implementa ancora una gestione completa dei conflitti tra dispositivi, una coda di sincronizzazione offline o un comando UI completo per archiviare/ripristinare. L'archiviazione logica è predisposta nello schema tramite la migrazione 008, ma non è considerata attiva finché la migrazione non è applicata e i test RLS non sono superati. La cancellazione locale non elimina il record cloud.
+
+
+## Test UI archiviazione e ripristino Lead
+
+- [ ] Il filtro predefinito mostra soltanto Lead attivi; il filtro archiviati mostra soltanto Lead con `archived_at` valorizzato.
+- [ ] Il comando Archivia è disabilitato/nega l'azione per Lead non ancora sincronizzati (`cloud_id` assente) e indica di sincronizzare prima.
+- [ ] Un Lead sincronizzato può essere archiviato con account proprietario; `archived_at` e `archive_reason` vengono salvati e `archived_by` è valorizzato dal trigger.
+- [ ] Un Lead archiviato può essere ripristinato; i metadati vengono azzerati dal trigger.
+- [ ] Partner diverso non può archiviare o ripristinare il Lead; `platform_admin` può agire secondo policy.
+- [ ] Se la migrazione 008 non è applicata, la UI mostra un errore controllato e non dichiara l'operazione completata.
+- [ ] L'archiviazione non elimina conversazioni né messaggi associati; verificarne il comportamento e la conservazione.
+
+La UI è preparata nel repository ma resta non verificata live fino ad applicazione migrazione, deploy e test autenticati.
