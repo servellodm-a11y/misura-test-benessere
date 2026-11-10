@@ -31,8 +31,13 @@ begin
     or jsonb_typeof(p_generated_output -> 'objective') is distinct from 'string'
     or jsonb_typeof(p_generated_output -> 'tone') is distinct from 'string'
     or jsonb_typeof(p_generated_output -> 'next_step') is distinct from 'string'
+    or (p_generated_output - array['message','strategy','objective','tone','next_step']) <> '{}'::jsonb
     or length(btrim(p_generated_output ->> 'message')) = 0
-    or length(p_generated_output ->> 'message') > 10000 then
+    or length(p_generated_output ->> 'message') > 10000
+    or length(p_generated_output ->> 'strategy') > 2000
+    or length(p_generated_output ->> 'objective') > 1000
+    or length(p_generated_output ->> 'tone') > 200
+    or length(p_generated_output ->> 'next_step') > 2000 then
     raise exception 'Output generato non valido' using errcode = '22023';
   end if;
 
