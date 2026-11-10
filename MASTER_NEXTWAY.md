@@ -1,5 +1,16 @@
 # MASTER NEXTWAY
 
+## AGGIORNAMENTO OPERATIVO — 10 NOVEMBRE 2026 (integrazione frontend AI Setter)
+
+- Aggiunto `nextway-setter.js`: interfaccia AI Setter con creazione prospect/conversazione tramite RPC `nextway_create_lead_with_conversation`, selezione conversazioni esistenti e generazione di bozze.
+- Aggiornato `nextway-cloud.js`: espone al modulo Setter il client Supabase autenticato e la configurazione già esistente, senza duplicare login o memorizzare password.
+- Aggiornato `nextway-ai.html`: carica il nuovo modulo e aggiunge il collegamento alla sezione AI Setter.
+- La UI chiama l'endpoint precedentemente indicato dall'utente: `/functions/v1/rapid-function`. L'endpoint effettivo deve ancora essere confermato con un test live; non è stato effettuato alcun deploy manuale della Edge Function.
+- La bozza viene mostrata e copiata; non esiste invio automatico né pulsante di invio.
+- Modifiche salvate su GitHub `main`. Deploy Netlify e test end-to-end non ancora verificati.
+- Prossimo passo: verificare deploy Netlify, login, RPC, endpoint AI Setter e salvataggio della bozza con una conversazione di test controllata. Non ripetere verifiche generiche di RLS già effettuate.
+
+
 Ultimo aggiornamento: 10 novembre 2026
 Repository: https://github.com/servellodm-a11y/misura-test-benessere
 Branch di riferimento: main
