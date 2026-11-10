@@ -51,7 +51,8 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 ### 4. AI Setter
 - [ ] Primo contatto produce una bozza coerente con i dati disponibili.
 - [ ] Follow-up considera lo storico e non ripete il testo precedente.
-- [ ] Una conversazione chiusa o archiviata restituisce HTTP 409.
+- [ ] Una conversazione già chiusa o archiviata restituisce HTTP 409 prima della generazione.
+- [ ] Se una conversazione viene chiusa durante la chiamata OpenAI, la RPC di completamento la ricontrolla sotto lock, non salva la bozza e l'Edge Function restituisce HTTP 409.
 - [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413, anche senza header Content-Length.
 - [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
 - [ ] La generazione OpenAI termina entro il timeout di 60 secondi.
