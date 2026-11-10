@@ -197,6 +197,14 @@ Deno.serve(async (req) => {
       return respond({ error: "Obiettivo non valido" }, 400, responseOrigin);
     }
 
+    const requestId = body.request_id;
+    if (
+      typeof requestId !== "string" ||
+      !uuidPattern.test(requestId)
+    ) {
+      return respond({ error: "Identificativo richiesta non valido" }, 400, responseOrigin);
+    }
+
     // Rate limit atomico per utente: il limite è imposto dal database.
     const { data: limitRows, error: limitError } = await supabase.rpc(
       "nextway_consume_api_rate_limit",
@@ -274,6 +282,29 @@ Deno.serve(async (req) => {
       return respond({
         error: "Profilo prospect non disponibile",
       }, 404, responseOrigin);
+    }
+
+    // Claim idempotente condiviso nel database, dopo i controlli di accesso al prospect.
+    const { data: claimRows, error: claimError } = await supabase.rpc(
+      "nextway_begin_setter_generation",
+      {
+        p_conversation_id: conversationId,
+        p_idempotency_key: requestId,
+      },
+    );
+    const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
+    if (claimError || !claim) {
+      console.error("Idempotency claim failed:", claimError);
+      return respond({ error: "Controllo duplicazioni temporaneamente non disponibile" }, 503, responseOrigin);
+    }
+    if (claim.completed && claim.cached_response) {
+      return respond(claim.cached_response, 200, responseOrigin);
+    }
+    if (!claim.claimed) {
+      return respond({
+        error: "Questa generazione è già in corso. Attendi prima di riprovare.",
+        retry_after_seconds: claim.retry_after_seconds || 2,
+      }, 409, responseOrigin);
     }
 
     // Recupero ultime 20 comunicazioni
@@ -398,39 +429,25 @@ Non inviarla: deve rimanere una bozza.
       throw new Error("Bozza non valida");
     }
 
-    // Salvataggio esclusivamente come bozza
-    const { data: saved, error: saveError } =
-      await supabase
-        .from("nextway_setter_messages")
-        .insert({
-          conversation_id: conversationId,
-          owner_profile_id: conversation.owner_profile_id,
-          direction: "outgoing",
-          content: draft.message.trim(),
-          message_type: "text",
-          ai_generated: true,
-          approved_by: null,
-          sent_at: null,
-        })
-        .select("id, content, created_at")
-        .single();
+    // Inserimento bozza e completamento chiave idempotente nella stessa transazione DB.
+    const { data: completedResponse, error: completeError } = await supabase.rpc(
+      "nextway_complete_setter_generation",
+      {
+        p_idempotency_key: requestId,
+        p_message: draft.message.trim(),
+        p_strategy: typeof draft.strategy === "string" ? draft.strategy : "",
+        p_objective: typeof draft.objective === "string" ? draft.objective : "",
+        p_tone: typeof draft.tone === "string" ? draft.tone : "",
+        p_next_step: typeof draft.next_step === "string" ? draft.next_step : "",
+      },
+    );
 
-    if (saveError) {
-      console.error("Save error:", saveError);
+    if (completeError || !completedResponse) {
+      console.error("Idempotent completion failed:", completeError);
       throw new Error("Salvataggio bozza non riuscito");
     }
 
-    return respond({
-      success: true,
-      draft_id: saved.id,
-      message: saved.content,
-      strategy: draft.strategy,
-      objective: draft.objective,
-      tone: draft.tone,
-      next_step: draft.next_step,
-      sent: false,
-      approved: false,
-    }, 200, responseOrigin);
+    return respond(completedResponse, 200, responseOrigin);
 
   } catch (error) {
     console.error("NEXTWAY AI Setter:", error);
