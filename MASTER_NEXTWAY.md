@@ -641,3 +641,13 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - GitHub Actions run `42807466889`: **SUCCESS**, validazione statica Node e type-check Deno superati. Run successiva `42807634403`: **SUCCESS**, include anche i controlli statici sullo svuotamento della UI al cambio account. Ultimo controllo dopo reset configurazione Supabase: run `42807685905`: **SUCCESS**, validazione statica Node e type-check Deno superati. Link: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42807685905.
 - Test browser ancora necessari: due account sullo stesso browser, logout/login, cambio account senza refresh, sessione scaduta, import/backup, sync/pull, e conservazione dell'archivio legacy.
 - Nessuna migrazione Supabase, nessun deploy Supabase o Netlify.
+
+## 42. Minimizzazione dei log AI Setter (10 novembre 2026)
+
+- I log della Edge Function non stampano più oggetti di errore Supabase completi, corpi di errore OpenAI o eccezioni complete, che potrebbero contenere dettagli della richiesta o dati contestuali.
+- Aggiunta `logSafeFailure`: registra soltanto codice errore e status numerico, quando presenti.
+- Gli errori OpenAI registrano soltanto lo status HTTP; il catch generale registra un messaggio fisso senza contenuto dell'eccezione.
+- Le risposte HTTP al client restano generiche e non espongono dettagli interni.
+- Commit Edge Function `67cc1253f5fab12af16e7917560269d0ca19651f`; validatore `482781a8dc2d0377d51d371875c4a5a223c22ad1`.
+- GitHub Actions run `42807835076`: **SUCCESS**, validazione statica Node e type-check Deno superati. https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42807835076.
+- La verifica è statica/type-check; nessuna chiamata runtime a OpenAI o Supabase eseguita. Nessun deploy Supabase/Netlify.
