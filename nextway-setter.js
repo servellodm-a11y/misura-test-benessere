@@ -329,6 +329,7 @@
           $('nwst-goal').value = pendingCreatedGoal;
           await generateDraft(pendingCreatedConversationId, pendingCreatedGoal);
           clearPendingCreate();
+          clearPendingLeadCreateRequest();
           updateCreateButtonLabel();
           return;
         }
