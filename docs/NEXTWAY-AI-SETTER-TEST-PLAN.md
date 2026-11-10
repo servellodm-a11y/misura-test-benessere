@@ -464,3 +464,11 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Verificare che l'ordinamento selezionato resti coerente con tutti i filtri.
 - [ ] Verificare che i filtri non modifichino i dati e non attivino richieste cloud.
 - Stato codice: UI commit a65f24ebc44ee3cfe6891bfda72aa14e7016a34a; validatore commit 3bfa2b371f26bb470696876741e08a4a41f8aad8. CI non ancora confermata; test browser/runtime da eseguire.
+
+
+## 45. Collaudo NEXTWAY CRM – sincronizzazione oltre 1.000 Lead
+
+- [ ] Con più di 1.000 Lead autorizzati, verificare che il pull recuperi tutte le pagine e non soltanto i primi 1.000.
+- [ ] Verificare che i record locali con local_dirty=true restino invariati e che i conflitti vengano segnalati.
+- [ ] Verificare il pull con RLS attiva per due account: ogni account deve ricevere esclusivamente i Lead autorizzati dal database.
+- Stato codice: commit cloud 5f1b05ddd61105f4992be4743b8b291c1391af62; test statico aggiunto in c098b17de97d5722dfd26b5d31d1172c96a1e649. Test runtime Supabase ancora da eseguire.
