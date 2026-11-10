@@ -44,6 +44,15 @@ const outputSchema = {
   ],
 };
 
+function sanitizeModelText(value: unknown, maxLength: number) {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[email rimosso]")
+    .replace(/https?:\/\/[^\s<>"']+/gi, "[collegamento rimosso]")
+    .replace(/\+?\d[\d\s().-]{7,}\d/g, "[numero rimosso]")
+    .slice(0, maxLength);
+}
+
 function respond(data: unknown, status = 200, origin = "") {
   return new Response(JSON.stringify(data), {
     status,
@@ -272,8 +281,7 @@ Deno.serve(async (req) => {
         public_signal,
         public_evidence,
         identity_check,
-        qualification,
-        notes
+        qualification
       `)
       .eq("id", conversation.lead_id)
       .single();
@@ -320,24 +328,28 @@ Deno.serve(async (req) => {
       throw new Error("Lettura storico non riuscita");
     }
 
+    // Allowlist esplicita e minimizzazione: non inviare note libere,
+    // recapiti, URL o numeri telefonici al provider AI.
     const context = {
       prospect: {
-        ...lead,
-        public_evidence: typeof lead.public_evidence === "string"
-          ? lead.public_evidence.slice(0, 3000)
-          : lead.public_evidence,
-        notes: typeof lead.notes === "string" ? lead.notes.slice(0, 2000) : lead.notes,
+        display_name: sanitizeModelText(lead.display_name, 120),
+        profession: sanitizeModelText(lead.profession, 160),
+        company_brand: sanitizeModelText(lead.company_brand, 160),
+        location: sanitizeModelText(lead.location, 120),
+        category: lead.category,
+        partner_type: sanitizeModelText(lead.partner_type, 120),
+        discovery_mode: sanitizeModelText(lead.discovery_mode, 120),
+        public_signal: sanitizeModelText(lead.public_signal, 1000),
+        public_evidence: sanitizeModelText(lead.public_evidence, 2000),
+        identity_check: lead.identity_check,
+        qualification: lead.qualification,
       },
       channel: conversation.channel,
-      conversation_objective: typeof conversation.objective === "string"
-        ? conversation.objective.slice(0, 500)
-        : "",
+      conversation_objective: sanitizeModelText(conversation.objective, 500),
       requested_goal: goal,
       history: (history || []).reverse().map((message) => ({
         direction: message.direction,
-        content: typeof message.content === "string"
-          ? message.content.slice(0, 2000)
-          : "",
+        content: sanitizeModelText(message.content, 1500),
         created_at: message.created_at,
       })),
     };
