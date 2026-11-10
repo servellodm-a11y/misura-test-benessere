@@ -173,6 +173,7 @@ declare
   v_user_id uuid := auth.uid();
   v_request public.nextway_setter_generation_requests%rowtype;
   v_owner_id uuid;
+  v_conversation_status text;
   v_is_admin boolean := false;
   v_saved_id uuid;
   v_saved_content text;
@@ -203,9 +204,11 @@ begin
     raise exception 'Prenotazione generazione scaduta' using errcode = '40001';
   end if;
 
-  select c.owner_profile_id into v_owner_id
+  select c.owner_profile_id, c.status
+  into v_owner_id, v_conversation_status
   from public.nextway_setter_conversations c
-  where c.id = v_request.conversation_id;
+  where c.id = v_request.conversation_id
+  for update;
 
   select exists (
     select 1 from public.profiles p
@@ -214,6 +217,11 @@ begin
 
   if v_owner_id is null or (v_owner_id <> v_user_id and not v_is_admin) then
     raise exception 'Conversazione non autorizzata' using errcode = '42501';
+  end if;
+
+  if v_conversation_status in ('closed', 'archived') then
+    raise exception 'Conversazione chiusa o archiviata: bozza non salvata'
+      using errcode = '55000';
   end if;
 
   insert into public.nextway_setter_messages (
