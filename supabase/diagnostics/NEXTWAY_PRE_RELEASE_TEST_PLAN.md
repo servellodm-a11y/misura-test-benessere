@@ -21,7 +21,7 @@ Documento operativo per il collaudo dopo la riattivazione dei deploy. Non esegui
 | Director | Da definire e verificare | Non concedere per supposizione | Da definire |
 | Platform admin | Consentito su tutti | Consentito | Consentito secondo policy admin |
 
-Il modello attualmente documentato garantisce al proprietario e a `platform_admin` l'accesso ai Lead. La visibilità gerarchica per sponsor, team leader e director non deve essere aggiunta finché non sono definite regole precise basate sulla relazione organizzativa.
+Il modello attualmente documentato garantisce al proprietario e a `platform_admin` l'accesso ai Lead. L'AI Setter legge conversazione e Lead tramite il JWT e le policy RLS; le RPC idempotenti consentono la generazione solo al proprietario della conversazione o a `platform_admin`. La visibilità gerarchica per sponsor, team leader e director non deve essere aggiunta finché non sono definite regole precise basate sulla relazione organizzativa. Il solo ruolo non deve mai concedere accesso ai dati di altri partner.
 
 ## Test funzionali
 
@@ -36,6 +36,9 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Partner A legge e modifica il proprio Lead.
 - [ ] Partner B non legge, modifica o elimina il Lead di A.
 - [ ] Platform admin può consultare i Lead di entrambi.
+- [ ] Partner B non può leggere lo storico né generare bozze sulla conversazione di Partner A.
+- [ ] Sponsor, team leader e director non ottengono accesso a Lead/conversazioni altrui per il solo ruolo.
+- [ ] Platform admin può leggere lo storico e generare bozze su conversazioni altrui secondo la policy admin.
 - [ ] URL duplicato per lo stesso proprietario viene rifiutato.
 - [ ] Punteggi fuori scala e qualifica non supportata dai requisiti vengono rifiutati.
 
