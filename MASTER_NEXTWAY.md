@@ -497,3 +497,11 @@ Rilievi da risolvere/verificare:
 - UPDATE condizionato su id + updated_at: se il record è stato modificato nel frattempo da un'altra sessione, nessuna modifica viene applicata e la UI chiede di ricaricare.
 - Il timestamp viene passato dalla scheda Lead a entrambe le operazioni; il validatore statico controlla l'intero percorso.
 - Stato: sorgenti e documentazione salvati su GitHub; GitHub Actions run 42803042485 = SUCCESS sul commit daae610. Validazione solo statica; nessun deploy Netlify e nessuna migrazione Supabase.
+
+
+## 31. Controllo statico delle autorizzazioni audit e trigger soft-archive (10 novembre 2026)
+
+- Validatore esteso alla policy SELECT dell'audit: proprietario storico o platform_admin.
+- Verificata staticamente l'assenza di policy dirette INSERT/UPDATE/DELETE sull'audit e la concessione SELECT ai soli utenti autenticati.
+- Verificati staticamente i trigger soft-archive: autenticazione obbligatoria, archived_by = auth.uid(), pulizia dei metadati al ripristino e revoca EXECUTE della funzione trigger.
+- Questi controlli non sono test runtime: le migrazioni 008-010 restano da applicare e collaudare su Supabase con profili distinti.
