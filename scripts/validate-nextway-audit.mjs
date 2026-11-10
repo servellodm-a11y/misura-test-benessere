@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const cloud = read("../nextway-cloud.js");
 const html = read("../nextway-ai.html");
+const leadSchema = read("../supabase/nextway_leads.sql");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
@@ -108,3 +109,18 @@ assert.match(html, /non cancella il Lead dal cloud né la sua cronologia/);
 console.log("Lead history identities and safe local removal/archive cancellation: PASS");
 assert.match(html, /LEAD ARCHIVIATO · '\+new Date\(x\.archived_at\)\.toLocaleString\('it-IT'\)\+' · Motivo: '/);
 console.log("Archived Lead date and reason are visible in the card: PASS");
+
+
+// Explicit role matrix: non-admin roles are owner-scoped; platform_admin has cross-owner access.
+for (const operation of ["select", "insert", "update", "delete"]) {
+  const start = leadSchema.toLowerCase().indexOf(`on public.nextway_leads for ${operation} to authenticated`);
+  assert.ok(start >= 0, `Missing Lead RLS policy for ${operation}`);
+  const end = leadSchema.indexOf(';', start);
+  const policy = leadSchema.slice(start, end + 1);
+  assert.match(policy, /owner_profile_id = auth\.uid\(\)/i, `Lead ${operation}: owner scope missing`);
+  assert.match(policy, /p\.id = auth\.uid\(\) and p\.role = 'platform_admin'/i, `Lead ${operation}: admin scope missing`);
+  assert.doesNotMatch(policy, /role\s*=\s*'(director|team_leader|sponsor|partner)'/i, `Lead ${operation}: unexpected hierarchical privilege`);
+}
+assert.match(audit, /lead_owner_profile_id = auth\.uid\(\)/i);
+assert.match(audit, /p\.id = auth\.uid\(\) and p\.role = 'platform_admin'/i);
+console.log("Lead permissions matrix: owner-scoped roles and platform_admin cross-owner access: PASS");
