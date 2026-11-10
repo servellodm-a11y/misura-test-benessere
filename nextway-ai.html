@@ -87,7 +87,7 @@ if(x.archived_at){const archiveInfo=document.createElement('p');archiveInfo.clas
    });
   }catch(err){historyBox.replaceChildren();const msg=document.createElement('p');msg.className='small';msg.textContent='Cronologia non disponibile: '+err.message+'. Verifica che la migrazione audit sia stata applicata su Supabase e che il tuo account abbia accesso al Lead.';historyBox.append(msg);}
  });
- const activityBtn=document.createElement('button');activityBtn.className='btn alt';activityBtn.textContent='Attività e follow-up';activityBtn.disabled=!x.cloud_id||!!x.archived_at;activityBtn.title=!x.cloud_id?'Sincronizza il Lead prima di registrare attività':x.archived_at?'Ripristina il Lead per aggiungere attività':'Registra contatti e prossime azioni';
+ const activityBtn=document.createElement('button');activityBtn.className='btn alt';activityBtn.textContent='Attività e follow-up';activityBtn.disabled=!x.cloud_id;activityBtn.title=!x.cloud_id?'Sincronizza il Lead prima di registrare attività':x.archived_at?'Consulta la cronologia; per nuove attività ripristina il Lead':'Registra contatti e prossime azioni';
  const activityBox=document.createElement('div');activityBox.className='panel';activityBox.style.margin='10px 0';activityBox.hidden=true;
  const activityTypes={call:'Telefonata',message:'Messaggio',email:'Email',meeting:'Incontro',note:'Nota',task:'Attività'};
  activityBtn.addEventListener('click',async()=>{
@@ -103,7 +103,7 @@ if(x.archived_at){const archiveInfo=document.createElement('p');archiveInfo.clas
   const next=document.createElement('input');next.type='datetime-local';
   form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next));
   const detailsWrap=field('Dettagli',details);detailsWrap.style.gridColumn='1 / -1';form.append(detailsWrap);
-  const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Registra attività';const feedback=document.createElement('p');feedback.className='small';feedback.setAttribute('aria-live','polite');feedback.style.gridColumn='1 / -1';form.append(save,feedback);activityBox.append(form);
+  const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Registra attività';const feedback=document.createElement('p');feedback.className='small';feedback.setAttribute('aria-live','polite');feedback.style.gridColumn='1 / -1';form.append(save,feedback);if(x.archived_at){save.disabled=true;feedback.textContent='Lead archiviato: puoi consultare la cronologia, ma non registrare nuove attività.';}activityBox.append(form);
   const list=document.createElement('div');activityBox.append(list);
   const renderEvents=events=>{
    list.replaceChildren();const sub=document.createElement('p');sub.className='small';sub.textContent=events.length+' attività registrate · massimo 100';list.append(sub);
