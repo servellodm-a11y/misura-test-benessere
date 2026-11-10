@@ -108,12 +108,12 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Corpo JSON non valido." }, 400, responseOrigin);
   }
 
-  const queries = Array.isArray(body.queries)
-    ? body.queries.map((q) => typeof q === "string" ? q.trim() : "")
-      .filter((q) => q.length > 0 && q.length <= 400).slice(0, 5)
-    : [];
-  if (queries.length === 0) {
+  if (!Array.isArray(body.queries) || body.queries.length < 1 || body.queries.length > 5) {
     return json({ error: "Inserire da 1 a 5 query valide." }, 400, responseOrigin);
+  }
+  const queries = body.queries.map((q) => typeof q === "string" ? q.trim() : "");
+  if (queries.some((q) => q.length === 0 || q.length > 400)) {
+    return json({ error: "Ogni query deve contenere da 1 a 400 caratteri." }, 400, responseOrigin);
   }
   const requestedMax = Number(body.max_results ?? 5);
   const maxResults = Number.isFinite(requestedMax)
