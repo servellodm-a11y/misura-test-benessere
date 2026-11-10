@@ -53,7 +53,7 @@ using (
   exists (
     select 1 from public.nextway_leads l
     where l.id = lead_id
-      and l.owner_profile_id = owner_profile_id
+      and l.owner_profile_id = nextway_lead_activities.owner_profile_id
       and (
         l.owner_profile_id = auth.uid()
         or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
@@ -70,7 +70,7 @@ with check (
   and exists (
     select 1 from public.nextway_leads l
     where l.id = lead_id
-      and l.owner_profile_id = owner_profile_id
+      and l.owner_profile_id = nextway_lead_activities.owner_profile_id
       and (
         l.owner_profile_id = auth.uid()
         or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
@@ -86,7 +86,7 @@ using (
   exists (
     select 1 from public.nextway_leads l
     where l.id = lead_id
-      and l.owner_profile_id = owner_profile_id
+      and l.owner_profile_id = nextway_lead_activities.owner_profile_id
       and (
         l.owner_profile_id = auth.uid()
         or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
@@ -97,7 +97,7 @@ with check (
   exists (
     select 1 from public.nextway_leads l
     where l.id = lead_id
-      and l.owner_profile_id = owner_profile_id
+      and l.owner_profile_id = nextway_lead_activities.owner_profile_id
       and (
         l.owner_profile_id = auth.uid()
         or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
