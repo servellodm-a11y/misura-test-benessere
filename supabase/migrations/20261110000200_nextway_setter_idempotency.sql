@@ -22,7 +22,7 @@ create index if not exists nextway_setter_generation_requests_created_idx
 -- Impedisce due generazioni simultanee sulla stessa conversazione anche
 -- quando schede o dispositivi differenti usano chiavi distinte.
 create unique index if not exists nextway_setter_one_pending_per_conversation_uidx
-  on public.nextway_setter_generation_requests (user_id, conversation_id)
+  on public.nextway_setter_generation_requests (conversation_id)
   where status = 'pending';
 
 alter table public.nextway_setter_generation_requests enable row level security;
@@ -98,8 +98,7 @@ begin
     -- conversazione: blocca la seconda scheda/dispositivo.
     select r.* into v_request
     from public.nextway_setter_generation_requests r
-    where r.user_id = v_user_id
-      and r.conversation_id = p_conversation_id
+    where r.conversation_id = p_conversation_id
       and r.status = 'pending'
     for update;
 
@@ -115,7 +114,8 @@ begin
 
       -- La prenotazione precedente è scaduta: la nuova richiesta la rileva.
       update public.nextway_setter_generation_requests
-      set idempotency_key = p_idempotency_key,
+      set user_id = v_user_id,
+          idempotency_key = p_idempotency_key,
           lease_expires_at = clock_timestamp() + interval '2 minutes',
           updated_at = clock_timestamp()
       where id = v_request.id;
