@@ -720,3 +720,5 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Il pulsante "Apri Lead" recupera il Lead solo se manca dalla cache, lo inserisce nell'archivio locale associato al profilo e lo mostra rimuovendo i filtri UI incompatibili. Non sovrascrive record locali già presenti o modifiche locali non sincronizzate.
 - Commit API: 812378019f9d7751c7c2c92385349b988695a5a3; UI: f6c2f8d270aa06c52bc6103c193efa24527c3dcb; validatore: b5771aaf00bed9bc018792583217044e880223d6.
 - Test runtime non eseguiti; migrazione 012 non applicata e deploy Netlify non effettuato.
+
+- Rifinitura coda follow-up: riepilogo conteggi per attività scadute, in scadenza oggi ed entro 7 giorni; tipi di contatto tradotti in italiano. Commit UI: 153bc556e9a681b97a792b44168bf3a540da75da; validatore: 28c0850a4b5b5e0c5092db29b79a20a8fac16eb6.
