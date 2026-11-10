@@ -63,6 +63,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Applicare la migrazione `20261110000200_nextway_setter_idempotency.sql` in ambiente di test dopo aver verificato schema e permessi.
 - [ ] Una richiesta valida con `request_id` UUID acquisisce la chiave e genera una sola bozza.
 - [ ] Due richieste concorrenti dello stesso utente con stessa chiave e conversazione: una sola acquisisce la prenotazione; l'altra riceve HTTP 409.
+- [ ] Due schede/dispositivi dello stesso utente con chiavi diverse sulla stessa conversazione: una sola generazione pending; l'altra riceve HTTP 409.
 - [ ] Ripetere una richiesta completata con la stessa chiave: viene restituita la stessa bozza e non viene chiamato OpenAI una seconda volta.
 - [ ] Riutilizzare la stessa chiave per una conversazione diversa: richiesta rifiutata.
 - [ ] Usare una nuova chiave per una rigenerazione intenzionale: viene creata una nuova bozza.
