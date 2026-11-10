@@ -378,3 +378,5 @@ Nota: il frontend versionato usa `/functions/v1/nextway-ai-setter`; una preceden
 - [ ] Verificare che dati sessionStorage non validi o con obiettivi non ammessi vengano ignorati.
 
 Nota: sessionStorage copre reload e ripristino della stessa scheda. Non garantisce recupero dopo chiusura definitiva della scheda o su un altro dispositivo. La RPC di creazione Lead non è ancora idempotente contro un timeout ambiguo prima della risposta al client.
+
+Controllo statico GitHub Actions: run `42804560636` — SUCCESS, commit `1f4a6c79c120cbf8e760d7f53900c3e0c6cc7e80`. I test browser restano da eseguire.
