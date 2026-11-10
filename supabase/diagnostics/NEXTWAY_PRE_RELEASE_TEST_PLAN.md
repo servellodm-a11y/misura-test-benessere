@@ -91,16 +91,18 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
 ### 7. Costi e abuso
-- [ ] Applicare in ambiente di test prima `20261110000100_nextway_distributed_rate_limit.sql` e poi `20261110000200_nextway_setter_idempotency.sql`.
+- [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`.
 - [ ] AI Setter: 5 richieste nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
-- [ ] Ricerca: 3 richieste nella stessa finestra per utente ammesse; la quarta restituisce HTTP 429.
+- [ ] AI Setter: 5 generazioni nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
+- [ ] Ricerca Tavily: 10 query complessive nella stessa finestra per utente ammesse; l'unità che supera 10 restituisce HTTP 429.
+- [ ] Una richiesta di ricerca con 5 query consuma 5 unità, non una sola; due richieste da 5 query consumano il limite completo.
 - [ ] Il contatore è condiviso tra due schede/dispositivi dello stesso utente.
 - [ ] Due utenti distinti hanno contatori separati.
 - [ ] A nuova finestra di 60 secondi il contatore riparte da 1.
 - [ ] Se la RPC rate limit fallisce, nessuna chiamata OpenAI/Tavily parte e la funzione restituisce HTTP 503.
 - [ ] Utenti anonimi non possono eseguire la RPC o leggere/modificare direttamente la tabella.
 - [ ] Verificare doppio clic/ritentativo secondo la sezione Idempotenza AI Setter: stessa chiave = stessa operazione; nuova chiave = nuova generazione esplicita.
-- [ ] Definire soglie distinte per AI Setter e ricerca, con risposta controllata quando il limite viene raggiunto.
+- [ ] Verificare soglie distinte: 5 generazioni AI Setter/minuto e 10 query Tavily/minuto per utente.
 - [ ] Definire budget e alert per OpenAI e Tavily.
 - [ ] Verificare log: nessun token, chiave o dato personale non necessario.
 - [ ] Verificare comportamento in caso di provider indisponibile.
