@@ -49,6 +49,17 @@ Comportamento previsto:
 
 L'idempotenza protegge la creazione delle bozze persistite. Non garantisce che OpenAI venga addebitato una sola volta in ogni possibile interruzione: se OpenAI ha risposto ma la funzione non è riuscita a completare la transazione, un tentativo successivo dopo la scadenza della lease può richiedere una nuova generazione.
 
+## Modello autorizzativo
+
+L'Edge Function legge conversazione e lead tramite il JWT dell'utente e quindi rispetta le policy RLS delle tabelle. Le RPC di idempotenza verificano esplicitamente che l'utente sia proprietario della conversazione oppure abbia il ruolo `platform_admin`.
+
+Con il modello attualmente documentato:
+- `partner`: può operare sulle proprie conversazioni e sui propri Lead;
+- `platform_admin`: può operare anche sulle conversazioni e sui Lead degli altri utenti, secondo le policy admin;
+- `sponsor`, `team_leader` e `director`: non ricevono accesso ai dati dei partner della propria linea per il solo fatto di avere quel ruolo. La visibilità gerarchica resta da definire e implementare esplicitamente.
+
+Non ampliare l'accesso gerarchico prima di definire le relazioni organizzative e testare l'isolamento con account distinti.
+
 ## Rate limit distribuito
 
 La migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit.sql` crea il controllo atomico condiviso nel database.
