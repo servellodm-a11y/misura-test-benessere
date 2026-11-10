@@ -651,3 +651,16 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit Edge Function `67cc1253f5fab12af16e7917560269d0ca19651f`; validatore `482781a8dc2d0377d51d371875c4a5a223c22ad1`.
 - GitHub Actions run `42807835076`: **SUCCESS**, validazione statica Node e type-check Deno superati. https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42807835076.
 - La verifica è statica/type-check; nessuna chiamata runtime a OpenAI o Supabase eseguita. Nessun deploy Supabase/Netlify.
+
+
+## 43. NEXTWAY CRM – modifica Lead e ordinamento operativo (10 novembre 2026)
+
+- Aggiunto il flusso di modifica dei Lead esistenti nel modulo nextway-ai.html: il pulsante apre il modulo con i dati correnti; il salvataggio aggiorna il record locale esistente senza generare un nuovo ID o duplicare il Lead.
+- La modifica conserva i metadati di sincronizzazione (cloud_id, cloud_updated_at e proprietario implicito nella sessione) e imposta local_dirty=true, così il normale comando di sincronizzazione applica l'UPDATE condizionato dalla versione cloud. Se il record remoto è cambiato, la logica esistente rileva il conflitto e non sovrascrive silenziosamente.
+- Il flusso impedisce la modifica di Lead archiviati o in conflitto; il pulsante resta disabilitato in questi casi. Sono presenti annullamento modifica e controllo duplicati URL che esclude il record in corso di modifica.
+- Le regole di qualificazione restano applicate anche durante la modifica: identità confermata e punteggio minimo 50 per lo stato "Qualificato".
+- Aggiunto ordinamento archivio per punteggio, data più recente, data meno recente e nome A-Z, mantenendo attivi i filtri già presenti.
+- Commit UI modifica Lead: 86d9b06de85d38c94dcd3579061cc012268a6014; ordinamento: 1d48f8eee4c88ba6a3dc9414ea04bf79fd5d2cb1.
+- Commit validatore modifica: b3e99c286f4bd1a75dc17b7ddaafecd6947b2f9d; ordinamento: 726f2d145ad7c36afff8280f5845debe343d1a19.
+- Il workflow statico è configurato per avviarsi sui cambiamenti di nextway-ai.html e del validatore. Non dichiaro ancora superato il run generato da questi ultimi commit: lo stato del run non è stato recuperato in questa sessione.
+- Test browser/runtime e verifica effettiva della sincronizzazione restano da completare. Nessuna migrazione Supabase e nessun deploy Netlify eseguiti.
