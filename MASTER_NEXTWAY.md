@@ -392,7 +392,7 @@ Rilievi da risolvere/verificare:
 - Filtri disponibili: data iniziale, data finale, tipo operazione (INSERT/UPDATE/DELETE) e UUID del profilo proprietario. Ordinamento cronologico decrescente e paginazione a blocchi di 100 eventi.
 - Le operazioni di archiviazione/ripristino, quando la migrazione 008 sarà applicata, risultano nel registro come UPDATE con i campi di archiviazione modificati. La risoluzione di un conflitto compare come UPDATE del Lead: non viene inventato un evento separato di conflitto risolto.
 - Per i Lead eliminati il nome viene recuperato dallo snapshot precedente; se non disponibile, viene mostrato un identificativo descrittivo neutro.
-- I nomi leggibili di partner e operatori non sono ancora mostrati: il registro usa gli UUID perché lo schema dei campi anagrafici di `profiles` non è stato verificato.
+- I nomi leggibili di partner e operatori sono stati aggiunti successivamente: la risoluzione usa `profiles.full_name` e `partner_details.first_name/last_name`; i dettagli sono documentati nella sezione 25.
 - Tutti i contenuti dinamici vengono inseriti con `textContent`; nessuno snapshot o contenuto audit viene interpretato come HTML.
 
 ### Stato e limiti
@@ -436,3 +436,13 @@ Rilievi da risolvere/verificare:
 - La risoluzione dei nomi usa query separate e limitate agli ID effettivamente presenti negli eventi caricati; non recupera email né numeri telefonici.
 - Commit codice: `0fd2e88bd95bff97a0640e30d9d830d9af851942`.
 - Stato: schema verificato dall'output SQL condiviso dall'utente; codice committato nel repository. Test PostgREST/RLS e browser live ancora da eseguire. Nessun deploy Netlify o Supabase eseguito. Netlify resta in attesa del ripristino dei crediti il 4 dicembre 2026.
+
+
+## 26. Validazione della risoluzione identità nel registro (10 novembre 2026)
+
+- Esteso `scripts/validate-nextway-audit.mjs` per controllare che la UI usi esclusivamente i campi anagrafici verificati: `profiles.id/full_name` e `partner_details.profile_id/first_name/last_name`.
+- I controlli verificano anche l'associazione dei nomi a proprietario e operatore, i fallback quando il nome non è disponibile, il controllo `platform_admin` e l'assenza di selezione di email e telefono nelle query anagrafiche.
+- Commit del validatore: `a60517b1d2186e35bbce323c8b73793833dd8b50`.
+- GitHub Actions run `42801788640`: **SUCCESS**, job `validate` completato.
+- Questo esito conferma parsing e controlli statici; non prova che le query PostgREST siano autorizzate dalle policy RLS live o che la UI funzioni in browser.
+- Nessuna migrazione applicata e nessun deploy eseguito.
