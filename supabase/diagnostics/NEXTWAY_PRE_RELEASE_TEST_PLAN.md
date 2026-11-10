@@ -72,7 +72,15 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Verificare che le funzioni SECURITY DEFINER controllino esplicitamente proprietario conversazione o ruolo platform_admin e non espongano la tabella direttamente ai ruoli anon/authenticated.
 - [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
 
-### 5. Ricerca web
+### 5. Idempotenza AI Setter
+- [ ] La tabella `nextway_setter_generation_requests` ha vincolo univoco su `(user_id, idempotency_key)`.
+- [ ] Le RPC `nextway_begin_setter_generation` e `nextway_complete_setter_generation` sono eseguibili dagli utenti autenticati ma non da anonimi.
+- [ ] La tabella non è leggibile o modificabile direttamente dai ruoli applicativi.
+- [ ] La RPC di completamento salva il messaggio e la risposta cache nella stessa transazione.
+- [ ] Verificare lease di 2 minuti e recupero dopo scadenza.
+- [ ] Verificare che il proprietario e platform admin rispettino il modello di accesso previsto.
+
+### 6. Ricerca web
 - [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413 prima di contattare Tavily.
 - [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
 - [ ] Da 1 a 5 query, ciascuna entro 400 caratteri.
@@ -83,8 +91,8 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Risposte upstream malformate non interrompono la funzione con errore non gestito.
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
-### 6. Costi e abuso
-- [ ] Applicare la migrazione `20261110000100_nextway_distributed_rate_limit.sql` in ambiente di test.
+### 7. Costi e abuso
+- [ ] Applicare in ambiente di test prima `20261110000100_nextway_distributed_rate_limit.sql` e poi `20261110000200_nextway_setter_idempotency.sql`.
 - [ ] AI Setter: 5 richieste nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
 - [ ] Ricerca: 3 richieste nella stessa finestra per utente ammesse; la quarta restituisce HTTP 429.
 - [ ] Il contatore è condiviso tra due schede/dispositivi dello stesso utente.
