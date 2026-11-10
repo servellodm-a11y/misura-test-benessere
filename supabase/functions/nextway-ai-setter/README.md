@@ -42,7 +42,7 @@ La migrazione `supabase/migrations/20261110000200_nextway_setter_idempotency.sql
 Comportamento previsto:
 - stessa chiave e stessa conversazione già completata: restituisce la risposta memorizzata e lo stesso `draft_id`, senza creare un altro messaggio;
 - stessa chiave mentre la generazione è in corso: restituisce conflitto e un tempo indicativo di attesa;
-- anche una chiave diversa sulla stessa conversazione non può avviare una seconda generazione mentre la prima è pending: il vincolo univoco parziale blocca schede e dispositivi differenti;
+- anche una chiave diversa sulla stessa conversazione non può avviare una seconda generazione mentre la prima è pending: il vincolo univoco parziale su `conversation_id` blocca schede, dispositivi e account differenti;
 - stessa chiave associata a una conversazione diversa: rifiuta la richiesta;
 - prenotazione scaduta: consente un nuovo tentativo con la stessa chiave;
 - tabella non direttamente accessibile ai ruoli applicativi; le RPC sono eseguibili dagli utenti autenticati e verificano l'identità e l'accesso alla conversazione.
