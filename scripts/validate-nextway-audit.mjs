@@ -80,3 +80,5 @@ assert.match(html, /if\(entered===null\)return/);
 assert.match(html, /Rimuovi copia locale/);
 assert.match(html, /non cancella il Lead dal cloud né la sua cronologia/);
 console.log("Lead history identities and safe local removal/archive cancellation: PASS");
+assert.match(html, /LEAD ARCHIVIATO · '\+new Date\(x\.archived_at\)\.toLocaleString\('it-IT'\)\+' · Motivo: '/);
+console.log("Archived Lead date and reason are visible in the card: PASS");
