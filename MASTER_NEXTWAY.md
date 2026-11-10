@@ -618,3 +618,14 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit frontend profilo conversazione: `d717f99c98a285c9b7923eb49f1469827cd1f5b7`; validatore finale: `1e39155596a89093a07a153f74ff227546bcb3c7`.
 - GitHub Actions run `42806035763`: **SUCCESS**; validazione statica Node e type-check Deno superati.
 - Nessuna migrazione applicata e nessun deploy Supabase/Netlify eseguito. I test runtime, SQL, RLS multiutente e concorrenza restano da svolgere dopo autorizzazione e verifica della RPC sottostante.
+
+
+## 40. Validazione rigorosa URL esterni (10 novembre 2026)
+
+- Aggiunto `safeHttpUrl` nella UI Lead e nella connessione centrale: accetta soltanto URL assoluti HTTP/HTTPS con hostname e senza credenziali incorporate.
+- La UI Lead applica la validazione in inserimento manuale e import CSV; i record storici non validi non ricevono un collegamento attivo nella visualizzazione.
+- La ricerca web assistita scarta i risultati privi di URL valido prima di renderizzare il collegamento o trasferire la fonte nel modulo Lead.
+- Il validatore statico verifica la presenza e l'uso della validazione nei due frontend.
+- Commit UI Lead: `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465`; connessione/ricerca: `483c908a381ea28453b9799ecbd70c28cbed736f`; validatore: `a2dfcfb7172e0c72bb11f176dcb81af02d7551c1`.
+- GitHub Actions run `42806623550`: **SUCCESS**, validazione statica Node e type-check Deno superati.
+- Nessun dato preesistente modificato; nessuna migrazione applicata; nessun deploy Supabase o Netlify eseguito.
