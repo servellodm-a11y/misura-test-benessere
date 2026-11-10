@@ -302,3 +302,5 @@ Il validatore controlla ora anche:
 - revoca dell'esecuzione diretta della funzione trigger.
 
 Questi sono controlli testuali/statici sul sorgente SQL, non sostituiscono l'esecuzione delle migrazioni e i test RLS reali su Supabase.
+
+Esito GitHub Actions per la sezione 31: SUCCESS, run 42803134517, commit 4355756. Conferma esclusivamente i controlli statici sopra descritti.
