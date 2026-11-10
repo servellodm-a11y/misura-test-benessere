@@ -477,3 +477,5 @@ Rilievi da risolvere/verificare:
 - Il comando di rimozione dall’archivio locale è stato rinominato **Rimuovi copia locale** e chiarisce che non elimina il record cloud né la cronologia; una sincronizzazione successiva può reimportare il record cloud.
 - Il validatore statico controlla questi comportamenti insieme ai controlli esistenti su audit, identità e archiviazione.
 - Stato: modifiche committate su GitHub; test statici automatici da verificare dopo il push. Nessuna migrazione Supabase, nessun deploy e nessun test runtime eseguiti.
+
+- Rifinita la scheda Lead: quando il record è archiviato, mostra chiaramente data/ora e motivo dell’archiviazione; se il motivo è assente usa un fallback neutro. Il controllo è incluso nel validatore statico.
