@@ -294,3 +294,35 @@ Rilievi da risolvere/verificare:
 3. Correggere il codice in un'unica revisione controllata dopo aver chiarito i rilievi; non fare patch ripetitive non testate.
 4. Testare generazione e salvataggio bozza con account autorizzato, account partner diverso, token scaduto e conversazione non accessibile.
 5. Solo dopo, collegare il frontend e testare approvazione manuale; mantenere disabilitato qualsiasi invio automatico.
+
+
+## 17. Controllo ciclo di vita Lead e sincronizzazione (10 novembre 2026)
+
+### Esiti dell'audit statico
+- Il file `supabase/nextway_leads.sql` definisce RLS per SELECT/INSERT/UPDATE/DELETE: il proprietario gestisce i propri Lead; `platform_admin` può gestire tutti i Lead.
+- La policy UPDATE usa sia `USING` sia `WITH CHECK`: un partner non può trasferire il Lead cambiando `owner_profile_id`, perché il nuovo proprietario deve restare l'utente autenticato. L'amministratore può effettuare un trasferimento.
+- L'indice univoco impedisce URL duplicati per lo stesso proprietario, normalizzati con `lower(btrim(source_url))`.
+- Il frontend sincronizzava solo nuovi record e saltava quelli già dotati di `cloud_id`: le modifiche successive restavano locali.
+- La cancellazione dal browser rimuove soltanto la copia locale; non cancella il record Supabase.
+- La lettura cloud rispetta RLS, ma il merge locale non è ancora una sincronizzazione conflitti-aware tra dispositivi.
+- La RPC `nextway_create_lead_with_conversation` non risulta presente nelle migrazioni versionate: la sua definizione effettiva e le policy delle tabelle conversazioni devono essere verificate nel progetto Supabase prima di certificare il flusso completo Lead+conversazione.
+
+### Modifiche apportate al repository
+- Migrazione `supabase/migrations/20261110000800_nextway_leads_soft_archive.sql`: aggiunge `archived_at`, `archived_by`, `archive_reason`, indici per Lead attivi/archiviati e trigger per valorizzare/azzerare i metadati di archiviazione. Non cancella fisicamente i record.
+- `nextway-cloud.js`: la sincronizzazione aggiorna i record già collegati tramite `cloud_id` e inserisce quelli nuovi. Gli aggiornamenti non cambiano `owner_profile_id`; RLS resta il controllo effettivo sull'autorizzazione.
+- Piano di collaudo aggiornato con test per Partner A, Partner B, platform_admin, archiviazione, ripristino, duplicati, conflitti e cancellazione locale/cloud.
+
+### Limiti e stato
+- Audit statico schema RLS Lead: **COMPLETATO**; le policy nel file SQL sono coerenti con proprietà individuale e amministratore.
+- Sincronizzazione push di nuovi Lead e aggiornamento record collegati: **CODICE AGGIORNATO**, non testato contro Supabase live.
+- Archiviazione logica: **MIGRAZIONE PREPARATA**, non applicata a Supabase e non ancora esposta da un comando UI dedicato.
+- Ripristino, conflitti multi-dispositivo e sincronizzazione offline: **DA IMPLEMENTARE/TESTARE**.
+- Cancellazione cloud: non eseguita dal pulsante locale; resta distinta dalla cancellazione fisica amministrativa.
+- RPC Lead/conversazione e isolamento RLS conversazioni: **DA VERIFICARE LIVE**.
+- Nessun deploy Netlify o Supabase effettuato in questo controllo.
+
+### Prossimi controlli
+1. Verificare la definizione live della RPC `nextway_create_lead_with_conversation` e la coerenza dei campi/foreign key.
+2. Preparare UI esplicita per archiviazione/ripristino e indicatore di sincronizzazione, senza confondere cancellazione locale e cloud.
+3. Definire risoluzione conflitti tra modifiche provenienti da dispositivi diversi.
+4. Eseguire i test RLS con account distinti Partner A, Partner B e platform_admin dopo applicazione controllata delle migrazioni.
