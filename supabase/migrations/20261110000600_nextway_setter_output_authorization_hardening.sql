@@ -130,7 +130,7 @@ begin
     return null;
   end if;
 
-  if v_owner_id <> v_user_id and not v_is_admin then
+  if v_owner_id is null or (v_owner_id <> v_user_id and not v_is_admin) then
     raise exception 'Conversazione non autorizzata' using errcode = '42501';
   end if;
 
