@@ -84,7 +84,24 @@ Deno.serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const rawPublishable = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "";
+    let supabaseKey: string | undefined;
+
+    if (rawPublishable.trim()) {
+      try {
+        const parsed = JSON.parse(rawPublishable);
+        supabaseKey = typeof parsed === "string"
+          ? parsed
+          : (parsed.default ?? parsed[Object.keys(parsed)[0]]);
+      } catch {
+        supabaseKey = rawPublishable.trim();
+      }
+    }
+
+    supabaseKey = supabaseKey ||
+      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+      Deno.env.get("SUPABASE_ANON_KEY");
+
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     const model = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
 
