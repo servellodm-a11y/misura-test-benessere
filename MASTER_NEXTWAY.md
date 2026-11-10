@@ -601,7 +601,7 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit frontend: `7eaf8cd2d20aff0c2e1cdead2a6f1f5065ebcd73`.
 - Commit validatore: `5adf96007802fe1337647e9ff0bde707eef276af`.
 - Commit workflow: `4ebc44be7f16014895904a7f8e0ecf7f7db296e5`.
-- GitHub Actions run `42805580487`: **SUCCESS**, validazione statica Node e type-check Deno superati sul commit con migrazione, frontend e test.
+- GitHub Actions run `42805580487` e run finale `42805604904`: **SUCCESS**; job `validate`, validazione statica Node e type-check Deno superati. Run finale: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42805604904.
 - La migrazione è solo preparata nel repository: non applicata su Supabase. Il wrapper presuppone che la RPC live a 7 parametri `nextway_create_lead_with_conversation` esista con la firma e il comportamento già verificati; la diagnostica read-only è stata estesa per controllare la nuova RPC e la nuova tabella dopo l'eventuale applicazione.
 - Prima dell'applicazione live restano necessari: verifica della firma RPC sottostante, revisione SQL sul progetto, test con due chiamate concorrenti e stesso/differente payload, test RLS con due utenti e test di errore/rollback.
 - Nessun deploy Supabase o Netlify eseguito; nessuna migrazione applicata.
