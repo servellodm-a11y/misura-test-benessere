@@ -203,3 +203,16 @@ Prerequisito: migrazioni rate limit/idempotenza e ciclo di vita Lead applicate n
 ### Limiti noti
 
 La UI e la query sono predisposte nel repository. La lettura del ruolo richiede che l'utente possa leggere il proprio record in `profiles`. La proiezione JSON PostgREST per `lead_name` deve essere verificata contro la versione live. Nessuno dei test sopra è considerato superato prima del collaudo autenticato su Supabase.
+
+
+## Test minimizzazione dati audit (migrazione 010)
+
+Prerequisito: applicare prima la migrazione 009 e poi `20261110001000_nextway_audit_data_minimization.sql` su un ambiente di test.
+
+- [ ] INSERT: il nuovo snapshot `after_data` non contiene le chiavi `notes` e `public_evidence`.
+- [ ] UPDATE: cambiando soltanto `notes` o `public_evidence`, viene comunque registrato un evento UPDATE e i nomi dei campi compaiono in `changed_fields`.
+- [ ] UPDATE: gli snapshot before/after non contengono i valori dei due campi esclusi.
+- [ ] DELETE: `before_data` non contiene le due chiavi escluse.
+- [ ] Gli altri campi necessari alla cronologia, incluso `display_name`, restano disponibili.
+- [ ] La cronologia Lead UI mostra `[valore non registrato per riservatezza]` per i due campi.
+- [ ] Verificare che gli eventi precedenti alla migrazione restino invariati: la migrazione 010 non effettua redazione retroattiva.
