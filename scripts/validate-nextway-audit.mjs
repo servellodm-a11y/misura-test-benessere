@@ -39,6 +39,7 @@ assert.match(cloud, /function localArchiveKey\(userId\)/);
 assert.match(cloud, /localStorage\.getItem\(localArchiveKey\(s\.user\.id\)\)/);
 assert.match(cloud, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\)/);
 assert.match(cloud, /client\.auth\.onAuthStateChange/);
+assert.match(cloud, /if\(previousId!==nextId\)\{clearLocalArchive\(\);\$\('nw-results'\)\.replaceChildren\(\);\$\('nw-act-results'\)\.replaceChildren\(\);\$\('nw-org-activity'\)\.hidden=true/);
 assert.match(cloud, /clearLocalArchive\(\)/);
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
 assert.ok(leadUiScript.includes("sourceUrl?'<a target=\"_blank\" rel=\"noopener noreferrer\" href="), "Valid historical source URL must render as a safe external link");
