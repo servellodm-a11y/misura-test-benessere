@@ -369,6 +369,7 @@ assert.doesNotMatch(leadConversion, /insert into public\.(clients|profiles|partn
 assert.match(cloud, /async function createLeadConversionRequest\(cloudId,request\)/);
 assert.match(cloud, /async function getLeadConversionQueue\(\)/);
 assert.match(cloud, /async function reviewLeadConversionRequest\(requestId,status,notes=''/);
+assert.match(cloud, /status==='rejected'&&!reviewNotes/);
 assert.match(cloud, /getLeadConversionQueue,reviewLeadConversionRequest/);
 assert.match(cloud, /Esiste già una richiesta attiva per questo Lead o per questo indirizzo email/);
 assert.match(cloud, /Accesso riservato a platform_admin/);
