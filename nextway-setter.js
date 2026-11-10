@@ -102,6 +102,13 @@
     let isCreating = false;
     let pendingRequestScope = '';
     let pendingRequestId = '';
+    let pendingCreatedConversationId = '';
+
+    function updateCreateButtonLabel() {
+      $('nwst-create-button').textContent = pendingCreatedConversationId
+        ? 'Riprova generazione sulla conversazione creata'
+        : 'Crea conversazione e genera bozza';
+    }
 
     function getIdempotencyKey(conversationId, goal) {
       const scope = 'nextway_setter_idem:' + conversationId + ':' + goal;
@@ -134,14 +141,17 @@
       if (error) throw error;
       const select = $('nwst-conversation');
       select.replaceChildren(new Option('Seleziona una conversazione', ''));
-      (data || []).forEach(row => {
+      const available = (data || []).filter(row =>
+        !['closed', 'archived'].includes(String(row.status || '').toLowerCase())
+      );
+      available.forEach(row => {
         const label = [row.objective || 'Conversazione', row.channel || 'manual', row.status || '', row.id.slice(0, 8)]
           .filter(Boolean).join(' · ');
         select.add(new Option(label, row.id));
       });
-      say((data || []).length
-        ? 'Conversazioni caricate: ' + data.length + '.'
-        : 'Nessuna conversazione presente. Puoi crearne una dal modulo qui sotto.');
+      say(available.length
+        ? 'Conversazioni utilizzabili caricate: ' + available.length + '.'
+        : 'Nessuna conversazione aperta presente. Puoi crearne una dal modulo qui sotto.');
     }
 
     async function generateDraft(conversationId, goal) {
@@ -202,13 +212,23 @@
       if (isCreating) return;
       isCreating = true;
       const form = event.currentTarget;
-      const values = Object.fromEntries(new FormData(form).entries());
-      if (!/^https?:\/\//i.test(values.source_url)) {
-        isCreating = false;
-        say('Inserisci un URL pubblico http o https valido.');
-        return;
-      }
       try {
+        if (pendingCreatedConversationId) {
+          $('nwst-create-button').disabled = true;
+          await loadConversations();
+          $('nwst-conversation').value = pendingCreatedConversationId;
+          await generateDraft(pendingCreatedConversationId, $('nwst-goal').value);
+          pendingCreatedConversationId = '';
+          updateCreateButtonLabel();
+          return;
+        }
+
+        const values = Object.fromEntries(new FormData(form).entries());
+        if (!/^https?:\/\//i.test(values.source_url)) {
+          say('Inserisci un URL pubblico http o https valido.');
+          return;
+        }
+
         const { c } = await cloud.active();
         $('nwst-create-button').disabled = true;
         say('Creazione prospect e conversazione…');
@@ -224,15 +244,26 @@
         if (error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
         if (!result || !result.success || !result.conversation_id) throw new Error((result && result.error) || 'La RPC non ha restituito un ID conversazione.');
-        await loadConversations();
-        $('nwst-conversation').value = result.conversation_id;
-        await generateDraft(result.conversation_id, $('nwst-goal').value);
+
+        // Conserva l'ID prima di ogni altra operazione: un errore successivo non deve
+        // indurre l'utente a creare un secondo Lead/conversazione al retry.
+        pendingCreatedConversationId = result.conversation_id;
         form.reset();
+        updateCreateButtonLabel();
+        say('Prospect e conversazione creati. Preparazione della bozza…');
+        await loadConversations();
+        $('nwst-conversation').value = pendingCreatedConversationId;
+        await generateDraft(pendingCreatedConversationId, $('nwst-goal').value);
+        pendingCreatedConversationId = '';
+        updateCreateButtonLabel();
       } catch (error) {
-        say('Creazione o generazione non riuscita: ' + error.message);
+        say(pendingCreatedConversationId
+          ? 'Prospect e conversazione sono già stati creati. La bozza non è ancora pronta: premi “Riprova generazione” per riprendere la stessa conversazione, senza creare duplicati. Dettaglio: ' + error.message
+          : 'Creazione non riuscita: ' + error.message);
       } finally {
         isCreating = false;
         $('nwst-create-button').disabled = false;
+        updateCreateButtonLabel();
       }
     });
     $('nwst-copy').addEventListener('click', async () => {
