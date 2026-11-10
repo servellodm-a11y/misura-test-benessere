@@ -64,14 +64,14 @@ Obiettivi ammessi: `first_contact`, `follow_up`, `reply`, `presentation`, `appoi
 4. Verificare che la policy INSERT dei messaggi autorizzi il proprietario della conversazione e l'amministratore secondo le regole volute, senza consentire l'assegnazione arbitraria di `owner_profile_id`.
 5. Verificare che la lettura dello storico rispetti l'isolamento per conversazione e proprietario.
 6. Verificare che `NEXTWAY_ALLOWED_ORIGINS` contenga tutti e soli gli origin autorizzati. Il codice applica un'allowlist; CORS non sostituisce l'autorizzazione server-side.
-7. Implementare e testare un rate limit server-side distribuito per utente; il codice attuale limita il body e i token di output, ma non il numero di richieste.
+7. Applicare la migrazione `20261110000100_nextway_distributed_rate_limit.sql` e testare il rate limit server-side atomico per utente.
 8. Testare token valido, token scaduto, conversazione inesistente, conversazione di altro partner, lead non accessibile, errore OpenAI, risposta incompleta e errore di inserimento.
 9. Verificare che il record salvato resti una bozza e che nessun processo successivo lo invii senza approvazione esplicita.
 
 ## Limiti noti del sorgente acquisito
 
 - CORS usa `NEXTWAY_ALLOWED_ORIGINS` (default: dominio Netlify noto); l'assenza dell'header Origin è ammessa per chiamate non-browser autenticate.
-- Non è ancora presente un rate limit server-side distribuito; i blocchi frontend non proteggono da richieste dirette o multi-dispositivo.
+- Il codice chiama `nextway_consume_api_rate_limit('ai_setter')`: massimo 5 richieste per utente in ogni finestra fissa di 60 secondi. Il limite è atomico e condiviso nel database; se il controllo non è disponibile, la funzione fallisce in modo chiuso con HTTP 503; superato il limite restituisce HTTP 429.
 - Il body è limitato a 16 KB e la generazione a 1.200 token; i campi del contesto sono troncati nel codice.
 - Le conversazioni con stato `closed` o `archived` vengono rifiutate; gli altri stati dipendono dal valore effettivo presente nel database.
 - Il comportamento delle policy RLS sulle due tabelle non è deducibile dal solo codice della funzione e non è ancora stato verificato in questo repository.
@@ -80,6 +80,10 @@ Obiettivi ammessi: `first_contact`, `follow_up`, `reply`, `presentation`, `appoi
 ## Integrazione frontend (10 novembre 2026)
 
 Il frontend NEXTWAY AI include `nextway-setter.js`, caricato da `nextway-ai.html`. Riutilizza la sessione Supabase esistente esposta da `nextway-cloud.js`, crea prospect e conversazione tramite RPC `nextway_create_lead_with_conversation`, poi invoca il generatore e mostra la bozza. Il percorso configurato nel frontend versionato è `/functions/v1/nextway-ai-setter`; la corrispondenza con la funzione effettivamente distribuita su Supabase resta da verificare. Nessun invio viene eseguito.
+
+## Rate limit server-side
+
+La migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit.sql` crea `nextway_api_rate_limits` e la RPC `nextway_consume_api_rate_limit(text)`. Il database impone 5 richieste/minuto per utente su `ai_setter`; la tabella non è direttamente accessibile ai ruoli applicativi. La funzione Edge chiama la RPC con il JWT dell'utente. Il contatore è condiviso tra schede e dispositivi, ma usa finestre fisse da 60 secondi: ai confini della finestra possono verificarsi burst ravvicinati. Non è un budget giornaliero o mensile.
 
 ## Deploy
 
