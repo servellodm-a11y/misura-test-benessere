@@ -13,6 +13,7 @@ const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_m
 const leadCreationIdempotency = read("../supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql");
 const leadActivities = read("../supabase/migrations/20261110001200_nextway_lead_activities.sql");
 const leadLifecycle = read("../supabase/migrations/20261110001300_nextway_lead_lifecycle.sql");
+const leadConversion = read("../supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql");
 
 new Function(cloud);
 new Function(setter);
@@ -350,3 +351,32 @@ assert.match(leadUiScript, /id="stageEvaluation"/);
 assert.match(leadUiScript, /id="stageConverted"/);
 assert.match(leadUiScript, /stageConverted.*Convertito cliente.*Convertito partner/);
 console.log("NEXTWAY CRM lifecycle: 9 stages synchronized across SQL, UI, import and cloud sync; funnel counters present: PASS");
+
+
+// NEXTWAY CRM: conversion requests are staged, owner-bound and reviewed by platform_admin.
+// No client/partner/auth profile is provisioned by this workflow.
+assert.match(leadConversion, /create table if not exists public\.nextway_lead_conversion_requests/i);
+assert.match(leadConversion, /conversion_type text not null check \(conversion_type in \('customer','partner'\)\)/i);
+assert.match(leadConversion, /sponsor_profile_id = owner_profile_id/i);
+assert.match(leadConversion, /l\.status = 'In valutazione'/i);
+assert.match(leadConversion, /l\.archived_at is null/i);
+assert.match(leadConversion, /nextway_conversion_active_lead_unique/i);
+assert.match(leadConversion, /nextway_conversion_active_email_unique/i);
+assert.match(leadConversion, /p\.role = 'platform_admin'/i);
+assert.match(leadConversion, /for update to authenticated/i);
+assert.match(leadConversion, /grant update \(status, review_notes, reviewed_by, reviewed_at\)/i);
+assert.doesNotMatch(leadConversion, /insert into public\.(clients|profiles|partner_details)/i);
+assert.match(cloud, /async function createLeadConversionRequest\(cloudId,request\)/);
+assert.match(cloud, /async function getLeadConversionQueue\(\)/);
+assert.match(cloud, /async function reviewLeadConversionRequest\(requestId,status,notes=''/);
+assert.match(cloud, /getLeadConversionQueue,reviewLeadConversionRequest/);
+assert.match(cloud, /Esiste già una richiesta attiva per questo Lead o per questo indirizzo email/);
+assert.match(cloud, /Accesso riservato a platform_admin/);
+assert.match(cloud, /nw-conversion-queue/);
+assert.match(cloud, /Verifica e prepara attivazione/);
+assert.match(leadUiScript, /Avvia conversione/);
+assert.match(leadUiScript, /x\.status!=='In valutazione'/);
+assert.match(leadUiScript, /createLeadConversionRequest\(x\.cloud_id/);
+assert.match(leadUiScript, /Richiesta già presente|Ultima richiesta/);
+assert.match(leadUiScript, /Non crea account o profili/);
+console.log("NEXTWAY CRM conversion workflow: duplicate guard, owner/sponsor binding, admin review queue and no premature provisioning: PASS");
