@@ -422,3 +422,14 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Ricerca web assistita: risultati con URL non valido devono essere ignorati; URL validi devono aprire solo HTTP/HTTPS e trasferire al modulo lo stesso URL validato.
 - [ ] Verificare che nessun dato storico venga riscritto dalla sola visualizzazione o validazione.
 - Stato codice: commit UI Lead `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465`, correzione rendering `47f413fa26aee03f22aceff2b9a2075f3795b27c`, connessione/ricerca `483c908a381ea28453b9799ecbd70c28cbed736f`, validatore `e5901c59cbcb3b3e4ebaf24affd73ce824bc557e`. GitHub Actions run `42806931080` — SUCCESS (validazione statica Node e type-check Deno). Test browser ancora da eseguire.
+
+## 41. Test account isolation dell'archivio locale
+
+- [ ] Senza login, creazione, importazione, ripristino e cancellazione Lead devono essere bloccati.
+- [ ] Dopo login con account A, la UI deve leggere/scrivere solo `nextway_ai_records_v1:<A>`.
+- [ ] Dopo logout, i dati A devono sparire dalla memoria della pagina e i pannelli con dati account-specifici devono essere svuotati.
+- [ ] Dopo login con account B nello stesso browser, nessun Lead locale di A deve apparire; sync/pull devono usare solo la chiave B.
+- [ ] Cambio account/sessione in un'altra scheda deve attivare il profilo corretto o svuotare i dati quando la sessione termina.
+- [ ] La chiave legacy globale `nextway_ai_records_v1` deve rimanere intatta e non deve essere importata automaticamente in A o B.
+- [ ] Testare anche refresh, token scaduto, import CSV, backup JSON e conflitti di sincronizzazione.
+- Stato: codice e validatore statico presenti; test browser multi-account ancora da eseguire.
