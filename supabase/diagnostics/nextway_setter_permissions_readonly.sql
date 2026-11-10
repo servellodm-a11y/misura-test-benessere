@@ -113,7 +113,8 @@ where n.nspname = 'public'
     'nextway_get_staged_setter_output',
     'nextway_prune_setter_generation_requests',
     'nextway_clear_stale_setter_output',
-    'nextway_create_lead_with_conversation_idempotent'
+    'nextway_create_lead_with_conversation_idempotent',
+    'nextway_prune_lead_creation_requests'
   ])
 order by p.proname, pg_get_function_identity_arguments(p.oid);
 
