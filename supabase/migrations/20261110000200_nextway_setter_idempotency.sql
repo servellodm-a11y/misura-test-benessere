@@ -19,6 +19,12 @@ create table if not exists public.nextway_setter_generation_requests (
 create index if not exists nextway_setter_generation_requests_created_idx
   on public.nextway_setter_generation_requests (created_at);
 
+-- Impedisce due generazioni simultanee sulla stessa conversazione anche
+-- quando schede o dispositivi differenti usano chiavi distinte.
+create unique index if not exists nextway_setter_one_pending_per_conversation_uidx
+  on public.nextway_setter_generation_requests (user_id, conversation_id)
+  where status = 'pending';
+
 alter table public.nextway_setter_generation_requests enable row level security;
 revoke all on table public.nextway_setter_generation_requests from public, anon, authenticated;
 
@@ -86,6 +92,29 @@ begin
   where r.user_id = v_user_id
     and r.idempotency_key = p_idempotency_key
   for update;
+
+  if not found then
+    -- Un'altra chiave può già detenere la prenotazione pending della stessa
+    -- conversazione: blocca la seconda scheda/dispositivo.
+    select r.* into v_request
+    from public.nextway_setter_generation_requests r
+    where r.user_id = v_user_id
+      and r.conversation_id = p_conversation_id
+      and r.status = 'pending'
+    for update;
+
+    if found then
+      return query select
+        false,
+        false,
+        null::jsonb,
+        greatest(1, ceil(extract(epoch from (v_request.lease_expires_at - clock_timestamp())))::integer);
+      return;
+    end if;
+
+    raise exception 'Impossibile acquisire la prenotazione di generazione'
+      using errcode = '40001';
+  end if;
 
   if v_request.conversation_id <> p_conversation_id then
     raise exception 'Chiave idempotenza già associata a un''altra conversazione'
