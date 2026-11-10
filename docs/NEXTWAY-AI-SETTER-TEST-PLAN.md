@@ -252,3 +252,14 @@ Prerequisito: migrazioni `20261110000800_nextway_leads_soft_archive.sql` e `2026
 - [ ] Verificare che il Lead archiviato non venga confuso con un Lead eliminato e che la cronologia resti consultabile.
 - [ ] Confermare che nessuna azione di archiviazione comporti DELETE fisico.
 - [x] Controlli statici sull'API archive/restore, sui metadati restituiti e sul limite del motivo aggiunti al validatore GitHub Actions.
+
+
+## Test amministrazione Lead – identità cronologia e rimozione locale (10 novembre 2026)
+
+- [ ] La cronologia del singolo Lead mostra il nome dell’operatore usando prima `profiles.full_name` e poi `partner_details.first_name/last_name`; se non disponibile usa un fallback neutro.
+- [ ] Il mancato accesso alle tabelle anagrafiche non impedisce la lettura degli eventi audit autorizzati.
+- [ ] Annullando il prompt del motivo di archiviazione, l’operazione viene annullata e non viene inviata alcuna UPDATE.
+- [ ] Il comando di rimozione locale chiarisce che elimina soltanto la copia del browser, non il record cloud né la cronologia.
+- [ ] Verificare che una successiva sincronizzazione possa ripristinare localmente un Lead ancora presente nel cloud.
+- [x] Controlli statici aggiunti per risoluzione identità attore, annullamento prompt e distinzione tra rimozione locale e cancellazione cloud.
+
