@@ -390,3 +390,5 @@ Controllo statico GitHub Actions: run `42804560636` — SUCCESS, commit `1f4a6c7
 - [ ] Eseguire un test controllato della Edge Function dopo il deploy Supabase autorizzato; verificare il comportamento del prompt e la qualità della bozza dopo la minimizzazione.
 
 Stato codice: commit Edge Function `91f09c0cd8dcb95e5b6964fa7c33442c1cc2409c`; validazione statica GitHub Actions run `42804794248` — SUCCESS. La funzione non è stata distribuita su Supabase e i test runtime/GDPR restano da eseguire.
+
+Verifica CI aggiuntiva: GitHub Actions run `42805023373` — SUCCESS. Il workflow esegue ora anche `deno check supabase/functions/nextway-ai-setter/index.ts` con Deno 2; il controllo statico Node e il type-check Deno sono entrambi superati. Questo non equivale al deploy o al test runtime della funzione.
