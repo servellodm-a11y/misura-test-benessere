@@ -40,6 +40,7 @@ declare
   v_user_id uuid := auth.uid();
   v_owner_id uuid;
   v_is_admin boolean := false;
+  v_inserted_id uuid;
   v_request public.nextway_setter_generation_requests%rowtype;
 begin
   if v_user_id is null then
@@ -70,7 +71,15 @@ begin
     (user_id, conversation_id, idempotency_key)
   values
     (v_user_id, p_conversation_id, p_idempotency_key)
-  on conflict (user_id, idempotency_key) do nothing;
+  on conflict (user_id, idempotency_key) do nothing
+  returning id into v_inserted_id;
+
+  -- La richiesta appena inserita è già stata acquisita: non deve essere
+  -- scambiata per una richiesta concorrente con lease ancora attiva.
+  if v_inserted_id is not null then
+    return query select true, false, null::jsonb, 0;
+    return;
+  end if;
 
   select r.* into v_request
   from public.nextway_setter_generation_requests r
