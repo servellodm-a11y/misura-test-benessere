@@ -70,6 +70,18 @@ La migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit
 
 Le finestre fisse possono consentire richieste ravvicinate ai confini di due finestre. Il rate limit non costituisce un budget giornaliero o mensile.
 
+## Conservazione e manutenzione delle chiavi idempotenti
+
+La migrazione `20261110000400_nextway_idempotency_retention.sql` aggiunge una manutenzione manuale, eseguibile solo da `platform_admin` tramite RPC `nextway_prune_setter_generation_requests()`.
+
+- Le richieste completate vengono conservate per 30 giorni dall'ultimo aggiornamento.
+- Le prenotazioni `pending` con lease scaduta da oltre 24 ore possono essere eliminate.
+- Le prenotazioni appena scadute non vengono cancellate subito: restano disponibili per il normale recupero tramite la logica di lease.
+- La funzione restituisce il numero di record eliminati per ciascuna categoria.
+- Non viene creato alcun cron o processo automatico: la pulizia deve essere avviata consapevolmente da un amministratore.
+
+Dopo 30 giorni una vecchia chiave completata non è più garantita come replay idempotente: se viene riutilizzata manualmente, potrà essere trattata come una nuova operazione. La retention è quindi una scelta esplicita tra spazio database e finestra temporale di protezione dai replay.
+
 ## Variabili d'ambiente
 
 Richieste:
@@ -99,14 +111,15 @@ La risposta contiene `success`, `draft_id`, `message`, `strategy`, `objective`, 
 
 ## Verifiche ancora necessarie
 
-1. Applicare in ambiente di test nell'ordine: `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`.
+1. Applicare in ambiente di test nell'ordine: `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`.
 2. Verificare che le colonne e le foreign key delle tabelle conversazioni e messaggi corrispondano alla migrazione.
 3. Testare utente proprietario, utente non proprietario e platform admin.
 4. Testare richieste concorrenti con la stessa chiave, replay dopo completamento e riutilizzo della chiave su un'altra conversazione.
 5. Testare scadenza della lease dopo errore/timeout e verificare che non si creino messaggi duplicati.
 6. Verificare rate limit, timeout OpenAI, output incompleto e indisponibilità delle RPC.
 7. Confermare che il record salvato abbia `ai_generated=true`, `approved_by=null` e `sent_at=null`.
-8. Confrontare il sorgente con la versione distribuita e verificare endpoint e secrets.
+8. Verificare la retention: un utente non admin non può eseguire la pulizia; platform_admin può eseguirla e riceve i conteggi; i record completati entro 30 giorni e i pending scaduti da meno di 24 ore restano presenti.
+9. Confrontare il sorgente con la versione distribuita e verificare endpoint e secrets.
 
 ## Deploy
 
