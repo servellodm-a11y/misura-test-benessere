@@ -95,3 +95,19 @@ Nessun deploy è stato eseguito da questa attività. Eseguire il deploy solo dop
 Il frontend chiama `public.nextway_create_lead_with_conversation` con questi parametri: `p_display_name`, `p_category`, `p_source_name`, `p_source_url`, `p_public_evidence`, `p_objective`, `p_channel`. La firma registrata nel contesto operativo è: `(text, text, text, text, text, text DEFAULT, text DEFAULT) RETURNS jsonb`. La funzione crea il lead e la conversazione in modo atomico usando `auth.uid()` e restituisce `success`, `lead_id`, `conversation_id`. Il frontend accetta la risposta solo se contiene `success=true` e un `conversation_id`.
 
 Il frontend carica le conversazioni ordinate per `created_at` decrescente. Questa corrispondenza del contratto è stata ricostruita dalla registrazione del lavoro precedente; la chiamata live resta da testare.
+
+
+## Idempotenza server-side (10 novembre 2026)
+
+La migrazione `20261110000200_nextway_setter_idempotency.sql` aggiunge una prenotazione transazionale per ogni coppia utente/chiave UUID:
+
+1. La Edge Function richiede `request_id` (UUID) insieme a `conversation_id` e `goal`.
+2. `nextway_begin_setter_generation` acquisisce atomicamente la chiave. Una richiesta concorrente con la stessa chiave riceve HTTP 409; una chiave già completata restituisce la risposta salvata senza chiamare OpenAI.
+3. La prenotazione pending ha una lease di 2 minuti. Se il processo si interrompe prima del completamento, la stessa chiave può essere riacquisita dopo la scadenza.
+4. `nextway_complete_setter_generation` inserisce il messaggio e registra la risposta JSON nella stessa transazione. Una ripetizione successiva restituisce il risultato già registrato.
+
+La chiave è legata all'utente e alla conversazione: riutilizzarla per un'altra conversazione viene rifiutato. La generazione esplicita successiva deve usare una nuova chiave. Il frontend conserva la chiave in `sessionStorage` finché non riceve una risposta positiva, così un ritentativo nella stessa sessione riusa la medesima operazione.
+
+La garanzia vale quando il chiamante riutilizza lo stesso `request_id`. Non deduplica due azioni intenzionali che generano chiavi differenti. Il rate limit viene consumato prima del controllo idempotente: anche un ritentativo con chiave già completata consuma una richiesta del limite AI Setter.
+
+La migrazione non è ancora applicata a Supabase e il comportamento non è stato testato in runtime. La lease di 2 minuti, i permessi delle funzioni SECURITY DEFINER e la corrispondenza effettiva delle colonne devono essere collaudati nell'ambiente Supabase prima del rilascio.
