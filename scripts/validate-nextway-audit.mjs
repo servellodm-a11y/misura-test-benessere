@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const cloud = read("../nextway-cloud.js");
 const setter = read("../nextway-setter.js");
+const setterFunction = read("../supabase/functions/nextway-ai-setter/index.ts");
 const html = read("../nextway-ai.html");
 const leadSchema = read("../supabase/nextway_leads.sql");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
@@ -143,3 +144,17 @@ assert.match(setter, /form\.reset\(\)/);
 assert.match(setter, /Riprova generazione sulla conversazione creata/);
 assert.match(setter, /\['closed', 'archived'\]\.includes\(String\(row\.status \|\| ''\)\.toLowerCase\(\)\)/);
 console.log("AI Setter retry safety: pending conversation and goal restored across reload; duplicate creation avoided; closed conversations excluded: PASS");
+
+// AI Setter provider payload: allowlist and minimization of prospect/history data.
+assert.match(setterFunction, /function sanitizeModelText\(value: unknown, maxLength: number\)/);
+assert.match(setterFunction, /\.replace\(\/\\b\[A-Z0-9\.\_ %\+\-\]\+@/);
+assert.match(setterFunction, /\[email rimosso\]/);
+assert.match(setterFunction, /\[collegamento rimosso\]/);
+assert.match(setterFunction, /\[numero rimosso\]/);
+const aiContextBlock = setterFunction.match(/const context = \{([\s\S]*?)\n    \};/);
+assert.ok(aiContextBlock, "AI Setter context allowlist block missing");
+assert.doesNotMatch(aiContextBlock[1], /\bnotes\b/);
+assert.match(aiContextBlock[1], /public_evidence: sanitizeModelText\(lead\.public_evidence, 2000\)/);
+assert.match(aiContextBlock[1], /content: sanitizeModelText\(message\.content, 1500\)/);
+assert.doesNotMatch(setterFunction.match(/\.select\([\s\S]*?\)\n      \.eq\("id", conversation\.lead_id\)/)?.[0] || "", /notes/);
+console.log("AI Setter provider data minimization: explicit allowlist, free notes excluded, email/phone/URL redaction: PASS");
