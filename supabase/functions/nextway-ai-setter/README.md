@@ -89,7 +89,7 @@ Non inserire valori segreti nel repository, nel frontend o nei log. Il codice us
 - Timeout OpenAI: 60 secondi.
 - Output OpenAI massimo: 1.200 token.
 - Campi del contesto troncati prima di inviare i dati al modello.
-- Conversazioni `closed` o `archived` rifiutate.
+- Conversazioni `closed` o `archived` rifiutate prima della generazione e ricontrollate con lock della riga nella transazione di salvataggio: se vengono chiuse durante la chiamata OpenAI, la bozza non viene salvata e la funzione restituisce HTTP 409.
 - CORS limitato da `NEXTWAY_ALLOWED_ORIGINS`; CORS non sostituisce l'autorizzazione.
 - Se la generazione fallisce, la bozza non viene salvata. La prenotazione resta pendente fino alla scadenza della lease (2 minuti), poi può essere acquisita nuovamente con la stessa chiave.
 
