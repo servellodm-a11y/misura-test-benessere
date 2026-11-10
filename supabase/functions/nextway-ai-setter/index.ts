@@ -134,15 +134,19 @@ Deno.serve(async (req) => {
       return respond({ error: "Utente non autorizzato" }, 401, responseOrigin);
     }
 
-    let body;
+    const rawBody = await req.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 16_384) {
+      return respond({ error: "Richiesta troppo grande" }, 413, responseOrigin);
+    }
 
+    let body: Record<string, unknown>;
     try {
-      body = await req.json();
+      body = JSON.parse(rawBody);
     } catch {
       return respond({ error: "JSON non valido" }, 400, responseOrigin);
     }
 
-    if (!body || typeof body !== "object") {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
       return respond({ error: "Richiesta non valida" }, 400, responseOrigin);
     }
 
@@ -191,6 +195,12 @@ Deno.serve(async (req) => {
       }, 400, responseOrigin);
     }
 
+    if (conversation.status === "closed" || conversation.status === "archived") {
+      return respond({
+        error: "La conversazione è chiusa o archiviata e non può generare nuove bozze",
+      }, 409, responseOrigin);
+    }
+
     // Recupero prospect tramite RLS
     const { data: lead, error: leadError } = await supabase
       .from("nextway_leads")
@@ -231,11 +241,25 @@ Deno.serve(async (req) => {
     }
 
     const context = {
-      prospect: lead,
+      prospect: {
+        ...lead,
+        public_evidence: typeof lead.public_evidence === "string"
+          ? lead.public_evidence.slice(0, 3000)
+          : lead.public_evidence,
+        notes: typeof lead.notes === "string" ? lead.notes.slice(0, 2000) : lead.notes,
+      },
       channel: conversation.channel,
-      conversation_objective: conversation.objective,
+      conversation_objective: typeof conversation.objective === "string"
+        ? conversation.objective.slice(0, 500)
+        : "",
       requested_goal: goal,
-      history: (history || []).reverse(),
+      history: (history || []).reverse().map((message) => ({
+        direction: message.direction,
+        content: typeof message.content === "string"
+          ? message.content.slice(0, 2000)
+          : "",
+        created_at: message.created_at,
+      })),
     };
 
     // Generazione AI
