@@ -44,7 +44,7 @@ function init(){
   const profileNames={};
   if(profileIds.length){
    const {data:profiles,error:profilesError}=await c.from('profiles').select('id,full_name').in('id',profileIds);
-   if(!profilesError)(profiles||[]).forEach(p=>{if(p.full_name)profileNames[p.id]=p.full_name;});
+   if(!profilesError)(profiles||[]).forEach(p=>{const name=String(p.full_name||'').trim();if(name)profileNames[p.id]=name;});
    const {data:partners,error:partnersError}=await c.from('partner_details').select('profile_id,first_name,last_name').in('profile_id',profileIds);
    if(!partnersError)(partners||[]).forEach(p=>{
     const name=[p.first_name,p.last_name].filter(Boolean).join(' ').trim();
