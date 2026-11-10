@@ -104,11 +104,23 @@ begin
     for update;
 
     if found then
-      return query select
-        false,
-        false,
-        null::jsonb,
-        greatest(1, ceil(extract(epoch from (v_request.lease_expires_at - clock_timestamp())))::integer);
+      if v_request.lease_expires_at > clock_timestamp() then
+        return query select
+          false,
+          false,
+          null::jsonb,
+          greatest(1, ceil(extract(epoch from (v_request.lease_expires_at - clock_timestamp())))::integer);
+        return;
+      end if;
+
+      -- La prenotazione precedente è scaduta: la nuova richiesta la rileva.
+      update public.nextway_setter_generation_requests
+      set idempotency_key = p_idempotency_key,
+          lease_expires_at = clock_timestamp() + interval '2 minutes',
+          updated_at = clock_timestamp()
+      where id = v_request.id;
+
+      return query select true, false, null::jsonb, 0;
       return;
     end if;
 
