@@ -123,21 +123,20 @@
       const saved = JSON.parse(sessionStorage.getItem(PENDING_LEAD_CREATE_KEY) || 'null');
       if (saved && typeof saved.request_id === 'string'
         && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.request_id)
+        && typeof saved.owner_profile_id === 'string'
+        && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.owner_profile_id)
         && typeof saved.request_hash === 'string'
         && /^[a-f0-9]{64}$/.test(saved.request_hash)
         && typeof saved.payload_json === 'string') {
         const savedPayload = JSON.parse(saved.payload_json);
         if (isValidLeadCreatePayload(savedPayload)) {
           pendingLeadCreateRequest = {
+            owner_profile_id: saved.owner_profile_id,
             request_id: saved.request_id,
             request_hash: saved.request_hash,
             payload_json: saved.payload_json,
             payload: savedPayload
           };
-          Object.entries(savedPayload).forEach(([name, value]) => {
-            const field = $('nwst-create').elements.namedItem(name);
-            if (field) field.value = value;
-          });
         }
       }
     } catch (_) {
@@ -152,19 +151,29 @@
       return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
     }
 
-    async function prepareLeadCreateRequest(payload) {
+    function restorePendingLeadCreateForm() {
+      if (!pendingLeadCreateRequest) return;
+      Object.entries(pendingLeadCreateRequest.payload).forEach(([name, value]) => {
+        const field = $('nwst-create').elements.namedItem(name);
+        if (field) field.value = value;
+      });
+    }
+
+    async function prepareLeadCreateRequest(payload, ownerProfileId) {
+      // Una richiesta sospesa appartiene al profilo che l'ha iniziata.
+      if (pendingLeadCreateRequest && pendingLeadCreateRequest.owner_profile_id !== ownerProfileId) {
+        throw new Error('Esiste una richiesta sospesa da un altro account. Accedi con il profilo originario per riprenderla.');
+      }
       // Se una richiesta precedente non ha ricevuto risposta, si ripete
       // ESATTAMENTE il payload originale con la stessa chiave.
       if (pendingLeadCreateRequest) {
-        Object.entries(pendingLeadCreateRequest.payload).forEach(([name, value]) => {
-          const field = $('nwst-create').elements.namedItem(name);
-          if (field) field.value = value;
-        });
+        restorePendingLeadCreateForm();
         return pendingLeadCreateRequest;
       }
 
       const payloadJson = JSON.stringify(payload);
       const request = {
+        owner_profile_id: ownerProfileId,
         request_id: crypto.randomUUID(),
         request_hash: await sha256Hex(payloadJson),
         payload_json: payloadJson,
@@ -172,6 +181,7 @@
       };
       // Persistenza obbligatoria prima della chiamata di rete.
       sessionStorage.setItem(PENDING_LEAD_CREATE_KEY, JSON.stringify({
+        owner_profile_id: request.owner_profile_id,
         request_id: request.request_id,
         request_hash: request.request_hash,
         payload_json: request.payload_json
@@ -351,12 +361,12 @@
           return;
         }
 
-        const { c } = await cloud.active();
+        const { c, s } = await cloud.active();
         $('nwst-create-button').disabled = true;
         say(pendingLeadCreateRequest
           ? 'Ripresa della stessa richiesta di creazione…'
           : 'Preparazione della richiesta sicura…');
-        const createRequest = await prepareLeadCreateRequest(values);
+        const createRequest = await prepareLeadCreateRequest(values, s.user.id);
         say('Creazione prospect e conversazione…');
         const { data, error } = await c.rpc('nextway_create_lead_with_conversation_idempotent', {
           p_request_id: createRequest.request_id,
@@ -405,8 +415,14 @@
     });
 
     updateCreateButtonLabel();
-    cloud.active().then(async () => {
+    cloud.active().then(async ({ s }) => {
       await loadConversations();
+      if (pendingLeadCreateRequest && pendingLeadCreateRequest.owner_profile_id !== s.user.id) {
+        $('nwst-create').reset();
+        say('È presente una richiesta sospesa da un altro account. Per proteggere i dati, il modulo non viene ripristinato: accedi con il profilo originario per completare la richiesta.');
+        return;
+      }
+      if (pendingLeadCreateRequest) restorePendingLeadCreateForm();
       if (pendingCreatedConversationId) {
         $('nwst-conversation').value = pendingCreatedConversationId;
         $('nwst-goal').value = pendingCreatedGoal;
