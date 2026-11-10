@@ -268,3 +268,10 @@ assert.match(leadUiScript, /!qualification\|\|x\.qualification===qualification/)
 assert.match(leadUiScript, /!partner\|\|x\.partner_type===partner/);
 assert.match(leadUiScript, /'qualificationFilter','partnerFilter','sort'/);
 console.log("NEXTWAY CRM search: company/source/evidence/notes plus qualification and partner filters: PASS");
+
+
+// NEXTWAY CRM: cloud pull must page through the full authorized result set.
+assert.match(cloud, /const pageSize=1000;let data=\[\],offset=0;while\(true\)/);
+assert.match(cloud, /\.range\(offset,offset\+pageSize-1\)/);
+assert.match(cloud, /data\.push\(\.\.\.page\);offset\+=page\.length;if\(page\.length<pageSize\)break/);
+console.log("NEXTWAY CRM cloud pull pagination: all pages are loaded without the previous 1,000-row cap: PASS");
