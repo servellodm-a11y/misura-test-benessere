@@ -346,3 +346,20 @@ Rilievi da risolvere/verificare:
 - I record legacy collegati ma privi di versione cloud di base non vengono aggiornati alla cieca: richiedono revisione, perché non è possibile stabilire se la copia locale sia più recente.
 - Limite deliberato: non è ancora presente una schermata di risoluzione guidata per scegliere tra versione locale e cloud; il sistema rileva e conserva il conflitto, ma non applica una scelta automatica.
 - Stato: **CODICE COMMITTATO NEL REPOSITORY**; nessun deploy o test runtime effettuato. I test richiedono migrazioni e ambiente Supabase attivo.
+
+
+## 20. Risoluzione guidata conflitti Lead (10 novembre 2026)
+
+- nextway-cloud.js espone getLeadForConflict(cloudId) per leggere la versione cloud corrente e resolveLeadConflict(cloudId, expectedRemoteUpdatedAt, localRecord) per applicare la scelta locale con UPDATE condizionale su id e updated_at.
+- La risoluzione locale è compare-and-swap: se il timestamp cloud è cambiato dopo il confronto, l'UPDATE non restituisce righe e la scelta viene rifiutata senza sovrascrivere il nuovo dato.
+- nextway-ai.html aggiunge il confronto affiancato dei campi locali e cloud e due azioni esplicite: conservare la versione cloud oppure conservare quella locale e aggiornarla sul cloud.
+- La scelta cloud sostituisce la copia locale con la versione appena letta e azzera local_dirty e _sync_conflict. La scelta locale aggiorna il cloud solo dopo conferma e verifica atomica della versione.
+- Se il cloud cambia nuovamente durante la risoluzione, il sistema mostra l'errore e mantiene aperto il conflitto; l'utente può aggiornare il confronto e decidere di nuovo.
+- Il confronto mostra valori dei campi principali, evidenziando in grassetto i valori divergenti. La decisione resta manuale; nessuna strategia last-write-wins.
+
+### Stato e limiti
+- UI e API di risoluzione: CODICE COMMITTATO NEL REPOSITORY.
+- Controllo ottimistico finale sull'UPDATE: IMPLEMENTATO NEL CODICE, non ancora verificato su Supabase live.
+- Test runtime con due dispositivi, race condition e ruoli distinti: DA ESEGUIRE.
+- Deploy Netlify e Supabase: NON ESEGUITI. Netlify resta in attesa del ripristino crediti del 4 dicembre 2026.
+- La funzione locale/cloud non deve essere considerata operativa in produzione fino ad applicazione delle migrazioni richieste, deploy e collaudo autenticato.
