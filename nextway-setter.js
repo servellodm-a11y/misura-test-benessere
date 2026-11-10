@@ -100,6 +100,30 @@
     let lastDraft = '';
     let isGenerating = false;
     let isCreating = false;
+    let pendingRequestScope = '';
+    let pendingRequestId = '';
+
+    function getIdempotencyKey(conversationId, goal) {
+      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal;
+      if (pendingRequestScope !== scope) {
+        pendingRequestScope = scope;
+        pendingRequestId = '';
+      }
+      if (!pendingRequestId) {
+        try { pendingRequestId = sessionStorage.getItem(scope) || ''; } catch (_) {}
+      }
+      if (!pendingRequestId) {
+        pendingRequestId = crypto.randomUUID();
+        try { sessionStorage.setItem(scope, pendingRequestId); } catch (_) {}
+      }
+      return pendingRequestId;
+    }
+
+    function clearIdempotencyKey(conversationId, goal) {
+      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal;
+      try { sessionStorage.removeItem(scope); } catch (_) {}
+      if (pendingRequestScope === scope) pendingRequestId = '';
+    }
 
     async function loadConversations() {
       const { c } = await cloud.active();
@@ -130,7 +154,7 @@
       try {
         const { s } = await cloud.active();
         const cfg = cloud.getConfig();
-        const requestId = crypto.randomUUID();
+        const requestId = getIdempotencyKey(conversationId, goal);
         const response = await fetch(cfg.url + ENDPOINT, {
           method: 'POST',
           headers: {
@@ -146,6 +170,7 @@
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload.success) throw new Error(payload.error || ('Errore HTTP ' + response.status));
+        clearIdempotencyKey(conversationId, goal);
         lastDraft = payload.message || '';
         $('nwst-draft').textContent = lastDraft;
         $('nwst-meta').textContent = [
