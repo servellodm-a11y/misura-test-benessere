@@ -412,3 +412,13 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Salvare una richiesta sospesa con il profilo A, uscire e autenticarsi con il profilo B nella stessa scheda: il modulo non deve ripristinare i dati di A e il retry deve essere bloccato.
 - [ ] Ripetere il controllo con una conversazione già creata e bozza incompleta: il profilo B non deve poter riprendere l'ID della conversazione di A.
 - [ ] Verificare che `nextway_prune_lead_creation_requests()` sia eseguibile soltanto da `platform_admin` e rimuova esclusivamente chiavi più vecchie di 30 giorni.
+
+
+## 40. Test URL esterni e collegamenti
+
+- [ ] Inserimento manuale: verificare che siano accettati URL HTTP/HTTPS assoluti con hostname e rifiutati `javascript:`, `data:`, `file:`, URL relativi e URL con credenziali.
+- [ ] Import CSV: verificare gli stessi casi; gli URL non validi devono essere conteggiati come record non validi e non importati.
+- [ ] Visualizzazione archivio: record preesistenti con URL non valido non devono produrre collegamenti cliccabili.
+- [ ] Ricerca web assistita: risultati con URL non valido devono essere ignorati; URL validi devono aprire solo HTTP/HTTPS e trasferire al modulo lo stesso URL validato.
+- [ ] Verificare che nessun dato storico venga riscritto dalla sola visualizzazione o validazione.
+- Stato codice: commit UI Lead `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465`, connessione/ricerca `483c908a381ea28453b9799ecbd70c28cbed736f`, validatore `a2dfcfb7172e0c72bb11f176dcb81af02d7551c1`. GitHub Actions run `42806623550` — SUCCESS (validazione statica Node e type-check Deno). Test browser ancora da eseguire.
