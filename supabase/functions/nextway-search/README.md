@@ -36,6 +36,19 @@ La funzione restituisce URL, titolo, snippet, score del provider e data pubblica
 
 La funzione chiama `nextway_consume_api_rate_limit('public_search', queries.length)`: ogni query inoltrata a Tavily consuma un'unità, fino a 10 query per utente in ogni finestra fissa di 60 secondi, condivise tra schede e dispositivi. Una richiesta con 5 query consuma 5 unità. Se il controllo database non è disponibile, la funzione non chiama Tavily e restituisce HTTP 503; superato il limite restituisce HTTP 429. Applicare le migrazioni `20261110000100_nextway_distributed_rate_limit.sql` e successivamente `20261110000300_nextway_rate_limit_units.sql`. Le finestre fisse possono consentire burst ravvicinati al confine; non costituiscono un budget giornaliero o mensile.
 
+## Gestione delle ricerche parziali
+
+Le query Tavily vengono elaborate singolarmente. Se una query fallisce, la funzione conserva i risultati delle query già completate e continua con le successive.
+
+La risposta indica:
+- `queries_requested`: numero di query inviate.
+- `queries_completed`: numero di query completate.
+- `queries_failed`: numero di query fallite.
+- `partial`: `true` se almeno una query non è riuscita.
+- `failures`: dettagli sintetici per query, senza esporre chiavi o messaggi interni del provider.
+
+Se tutte le query falliscono, la funzione restituisce un errore HTTP controllato. Le unità di rate limit sono conteggiate prima delle chiamate: anche i tentativi falliti consumano unità, scelta conservativa per proteggere il budget e limitare gli abusi.
+
 ## Deploy
 1. Eseguire prima la migrazione `supabase/nextway_leads.sql`.
 2. Impostare i secrets sopra nel progetto Supabase.
