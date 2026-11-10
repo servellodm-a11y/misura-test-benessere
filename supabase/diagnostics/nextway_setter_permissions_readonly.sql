@@ -112,7 +112,8 @@ where n.nspname = 'public'
     'nextway_store_setter_generation_output',
     'nextway_get_staged_setter_output',
     'nextway_prune_setter_generation_requests',
-    'nextway_clear_stale_setter_output'
+    'nextway_clear_stale_setter_output',
+    'nextway_create_lead_with_conversation_idempotent'
   ])
 order by p.proname, pg_get_function_identity_arguments(p.oid);
 
@@ -127,7 +128,8 @@ join pg_namespace n on n.oid = cls.relnamespace
 where n.nspname = 'public'
   and cls.relname in (
     'nextway_setter_generation_requests',
-    'nextway_api_rate_limits'
+    'nextway_api_rate_limits',
+    'nextway_lead_creation_requests'
   )
   and cls.relkind = 'r'
 order by cls.relname;
