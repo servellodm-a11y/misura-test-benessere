@@ -380,3 +380,13 @@ Nota: il frontend versionato usa `/functions/v1/nextway-ai-setter`; una preceden
 Nota: sessionStorage copre reload e ripristino della stessa scheda. Non garantisce recupero dopo chiusura definitiva della scheda o su un altro dispositivo. La RPC di creazione Lead non è ancora idempotente contro un timeout ambiguo prima della risposta al client.
 
 Controllo statico GitHub Actions: run `42804560636` — SUCCESS, commit `1f4a6c79c120cbf8e760d7f53900c3e0c6cc7e80`. I test browser restano da eseguire.
+
+## 37. Minimizzazione dati prima dell'invio al provider AI
+
+- [ ] Verificare che la query Lead usata dalla Edge Function non legga il campo `notes`.
+- [ ] Inserire valori di prova in `public_evidence` e nello storico contenenti email, telefono e URL; verificare che il contesto inviato al provider contenga i segnaposto e non i recapiti originali.
+- [ ] Verificare che il contesto AI includa soltanto i campi esplicitamente ammessi e che non venga usato uno spread dell'intero record Lead.
+- [ ] Verificare i limiti di lunghezza per evidenza pubblica, campi testuali e messaggi storici.
+- [ ] Eseguire un test controllato della Edge Function dopo il deploy Supabase autorizzato; verificare il comportamento del prompt e la qualità della bozza dopo la minimizzazione.
+
+Stato codice: commit Edge Function `91f09c0cd8dcb95e5b6964fa7c33442c1cc2409c`; validazione statica GitHub Actions run `42804794248` — SUCCESS. La funzione non è stata distribuita su Supabase e i test runtime/GDPR restano da eseguire.
