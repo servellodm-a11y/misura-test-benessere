@@ -1,11 +1,21 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Vary": "Origin",
 };
+
+const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+function isAllowedOrigin(origin: string) {
+  return !origin || allowedOrigins.includes(origin);
+}
 
 const goals = [
   "first_contact",
@@ -34,30 +44,44 @@ const outputSchema = {
   ],
 };
 
-function respond(data: unknown, status = 200) {
+function respond(data: unknown, status = 200, origin = "") {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       ...corsHeaders,
+      "Access-Control-Allow-Origin": origin || allowedOrigins[0] || "",
       "Content-Type": "application/json",
     },
   });
 }
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get("origin") ?? "";
+
+  if (!isAllowedOrigin(origin)) {
+    return respond({ error: "Origin non autorizzata" }, 403, responseOrigin);
+  }
+
+  const responseOrigin = origin || allowedOrigins[0] || "";
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", {
+      headers: {
+        ...corsHeaders,
+        "Access-Control-Allow-Origin": responseOrigin,
+      },
+    }, 200, responseOrigin);
   }
 
   if (req.method !== "POST") {
-    return respond({ error: "Metodo non consentito" }, 405);
+    return respond({ error: "Metodo non consentito" }, 405, responseOrigin);
   }
 
   try {
     const authorization = req.headers.get("Authorization");
 
     if (!authorization?.startsWith("Bearer ")) {
-      return respond({ error: "Autenticazione richiesta" }, 401);
+      return respond({ error: "Autenticazione richiesta" }, 401, responseOrigin);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -68,7 +92,7 @@ Deno.serve(async (req) => {
     if (!supabaseUrl || !supabaseKey || !openaiKey) {
       return respond({
         error: "Configurazione server incompleta",
-      }, 500);
+      }, 500, responseOrigin);
     }
 
     const supabase = createClient(
@@ -91,7 +115,7 @@ Deno.serve(async (req) => {
       await supabase.auth.getUser(token);
 
     if (authError || !auth.user) {
-      return respond({ error: "Utente non autorizzato" }, 401);
+      return respond({ error: "Utente non autorizzato" }, 401, responseOrigin);
     }
 
     let body;
@@ -99,11 +123,11 @@ Deno.serve(async (req) => {
     try {
       body = await req.json();
     } catch {
-      return respond({ error: "JSON non valido" }, 400);
+      return respond({ error: "JSON non valido" }, 400, responseOrigin);
     }
 
     if (!body || typeof body !== "object") {
-      return respond({ error: "Richiesta non valida" }, 400);
+      return respond({ error: "Richiesta non valida" }, 400, responseOrigin);
     }
 
     const conversationId = body.conversation_id;
@@ -116,14 +140,14 @@ Deno.serve(async (req) => {
       typeof conversationId !== "string" ||
       !uuidPattern.test(conversationId)
     ) {
-      return respond({ error: "Conversazione non valida" }, 400);
+      return respond({ error: "Conversazione non valida" }, 400, responseOrigin);
     }
 
     if (
       typeof goal !== "string" ||
       !goals.includes(goal)
     ) {
-      return respond({ error: "Obiettivo non valido" }, 400);
+      return respond({ error: "Obiettivo non valido" }, 400, responseOrigin);
     }
 
     // Recupero conversazione tramite RLS
@@ -139,7 +163,7 @@ Deno.serve(async (req) => {
     if (conversationError || !conversation) {
       return respond({
         error: "Conversazione non trovata o non autorizzata",
-      }, 404);
+      }, 404, responseOrigin);
     }
 
     if (
@@ -148,7 +172,7 @@ Deno.serve(async (req) => {
     ) {
       return respond({
         error: "Dati della conversazione incompleti",
-      }, 400);
+      }, 400, responseOrigin);
     }
 
     // Recupero prospect tramite RLS
@@ -174,7 +198,7 @@ Deno.serve(async (req) => {
     if (leadError || !lead) {
       return respond({
         error: "Profilo prospect non disponibile",
-      }, 404);
+      }, 404, responseOrigin);
     }
 
     // Recupero ultime 20 comunicazioni
@@ -316,13 +340,13 @@ Non inviarla: deve rimanere una bozza.
       next_step: draft.next_step,
       sent: false,
       approved: false,
-    });
+    }, 200, responseOrigin);
 
   } catch (error) {
     console.error("NEXTWAY AI Setter:", error);
 
     return respond({
       error: "Operazione non completata",
-    }, 500);
+    }, 500, responseOrigin);
   }
-});
+}, 200, responseOrigin);
