@@ -12,6 +12,7 @@ const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
 const leadCreationIdempotency = read("../supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql");
 const leadActivities = read("../supabase/migrations/20261110001200_nextway_lead_activities.sql");
+const leadLifecycle = read("../supabase/migrations/20261110001300_nextway_lead_lifecycle.sql");
 
 new Function(cloud);
 new Function(setter);
@@ -330,3 +331,22 @@ console.log("NEXTWAY CRM follow-up navigation: retrieves missing Lead through au
 assert.match(leadUiScript, /Scaduti: '\+overdue\+' · Oggi: '\+today\+' · Entro 7 giorni: '\+week/);
 assert.match(leadUiScript, /call:'Telefonata',message:'Messaggio',email:'Email',meeting:'Incontro'/);
 console.log("NEXTWAY CRM follow-up queue: overdue/today/7-day summary and localized activity types: PASS");
+
+
+// NEXTWAY CRM: explicit lifecycle stages are consistent across schema, browser UI and cloud sync.
+const lifecycleStages = ["Da verificare","Verificato","Contattato","In follow-up","In valutazione","Convertito cliente","Convertito partner","Non interessato","Escluso"];
+for (const stage of lifecycleStages) {
+  assert.ok(leadLifecycle.includes("'" + stage + "'"), "Lifecycle migration missing stage: " + stage);
+  assert.ok(html.includes("<option>" + stage + "</option>"), "Lead state filter missing stage: " + stage);
+  assert.ok(cloud.includes("'" + stage + "'"), "Cloud sync whitelist missing stage: " + stage);
+  assert.ok(leadUiScript.includes("'" + stage + "'"), "Lead UI/import stage missing stage: " + stage);
+}
+assert.match(leadLifecycle, /drop constraint if exists nextway_leads_status_check/i);
+assert.match(leadLifecycle, /add constraint nextway_leads_status_check/i);
+assert.match(leadLifecycle, /non crea automaticamente un record cliente o partner/i);
+assert.match(leadUiScript, /id="stageContacted"/);
+assert.match(leadUiScript, /id="stageFollowup"/);
+assert.match(leadUiScript, /id="stageEvaluation"/);
+assert.match(leadUiScript, /id="stageConverted"/);
+assert.match(leadUiScript, /stageConverted.*Convertito cliente.*Convertito partner/);
+console.log("NEXTWAY CRM lifecycle: 9 stages synchronized across SQL, UI, import and cloud sync; funnel counters present: PASS");
