@@ -6,7 +6,7 @@ function init(){
  if(document.getElementById('nw-cloud'))return;
  const header=document.querySelector('header');if(!header)return;
  const root=document.createElement('section');root.id='nw-cloud';
- root.innerHTML=`<style>${style}</style><div class="nwbox"><h2 style="margin:0 0 8px">NEXTWAY · Connessione centrale</h2><p class="nwmuted">Autenticazione personale, ricerca pubblica assistita e archivio Supabase. I risultati non diventano Lead finché non li verifichi e li acquisisci manualmente.</p><div class="nwgrid"><label>URL progetto Supabase<input id="nw-url" type="url" placeholder="https://xxxx.supabase.co"></label><label>Publishable key<input id="nw-key" type="password" autocomplete="off" placeholder="sb_publishable_..."></label></div><div><button id="nw-config">Salva configurazione</button><span id="nw-status" class="nwstatus">Non configurato</span></div><div class="nwgrid"><label>Email<input id="nw-email" type="email" autocomplete="username" placeholder="email account"></label><label>Password<input id="nw-password" type="password" autocomplete="current-password" placeholder="Password Supabase"></label></div><button id="nw-login">Accedi</button><button id="nw-logout" class="secondary">Esci</button><button id="nw-sync" class="secondary">Sincronizza archivio locale</button><button id="nw-pull" class="secondary">Carica archivio cloud</button><p id="nw-message" class="nwmuted" aria-live="polite">La configurazione salva solo URL e publishable key nel browser. La password non viene memorizzata.</p></div><div class="nwbox"><h3 style="margin:0 0 8px">Ricerca web assistita</h3><label>Query di ricerca<textarea id="nw-query" rows="2" placeholder='Es. "network marketing" "cerco collaboratori" Italia'></textarea></label><button id="nw-search">Cerca sul web</button><span class="nwmuted">La ricerca richiede login e Edge Function pubblicata su Supabase.</span><div id="nw-results"></div></div>`;
+ root.innerHTML=`<style>${style}</style><div class="nwbox"><h2 style="margin:0 0 8px">NEXTWAY · Connessione centrale</h2><p class="nwmuted">Autenticazione personale, ricerca pubblica assistita e archivio Supabase. I risultati non diventano Lead finché non li verifichi e li acquisisci manualmente.</p><div class="nwgrid"><label>URL progetto Supabase<input id="nw-url" type="url" placeholder="https://xxxx.supabase.co"></label><label>Publishable key<input id="nw-key" type="password" autocomplete="off" placeholder="sb_publishable_..."></label></div><div><button id="nw-config">Salva configurazione</button><span id="nw-status" class="nwstatus">Non configurato</span></div><div class="nwgrid"><label>Email<input id="nw-email" type="email" autocomplete="username" placeholder="email account"></label><label>Password<input id="nw-password" type="password" autocomplete="current-password" placeholder="Password Supabase"></label></div><button id="nw-login">Accedi</button><button id="nw-logout" class="secondary">Esci</button><button id="nw-sync" class="secondary">Sincronizza archivio locale</button><button id="nw-pull" class="secondary">Carica archivio cloud</button><p id="nw-message" class="nwmuted" aria-live="polite">La configurazione salva solo URL e publishable key nel browser. La password non viene memorizzata.</p></div><div class="nwbox"><h3 style="margin:0 0 8px">Ricerca web assistita</h3><label>Query di ricerca<textarea id="nw-query" rows="2" placeholder='Es. "network marketing" "cerco collaboratori" Italia'></textarea></label><button id="nw-search">Cerca sul web</button><span class="nwmuted">La ricerca richiede login e Edge Function pubblicata su Supabase.</span><div id="nw-results"></div></div><div class="nwbox" id="nw-org-activity" hidden><h3 style="margin:0 0 8px">Registro attività organizzazione</h3><p class="nwmuted">Vista amministratore · eventi audit Lead · massimo 100 per caricamento. Non mostra snapshot o note personali.</p><div class="nwgrid"><label>Dal<input id="nw-act-from" type="date"></label><label>Al<input id="nw-act-to" type="date"></label><label>Operazione<select id="nw-act-action"><option value="">Tutte</option><option value="INSERT">Creazione</option><option value="UPDATE">Modifica</option><option value="DELETE">Eliminazione</option></select></label><label>Profilo proprietario (UUID)<input id="nw-act-owner" type="text" placeholder="Facoltativo"></label></div><button id="nw-act-load">Applica filtri</button><button id="nw-act-more" class="secondary" disabled>Carica altri</button><span id="nw-act-status" class="nwmuted" aria-live="polite"></span><div id="nw-act-results"></div></div>`;
  header.insertAdjacentElement('afterend',root);
  const $=id=>document.getElementById(id),say=t=>{$('nw-message').textContent=t};
  let client=null,clientConfig='',session=null;
@@ -16,9 +16,71 @@ function init(){
  function requireClient(){return client||setup();}
  function status(){const s=session?('Connesso: '+(session.user.email||session.user.id)):'Non autenticato';$('nw-status').textContent=s;}
  $('nw-config').onclick=()=>{try{setup();say('Configurazione salvata. Ora accedi con il tuo account Supabase.');}catch(e){say(e.message)}};
- $('nw-login').onclick=async()=>{try{const c=requireClient();const {data,error}=await c.auth.signInWithPassword({email:$('nw-email').value.trim(),password:$('nw-password').value});if(error)throw error;session=data.session;$('nw-password').value='';status();say('Accesso effettuato. Archivio e ricerca sono disponibili.');}catch(e){say('Accesso non riuscito: '+e.message)}};
- $('nw-logout').onclick=async()=>{try{if(client)await client.auth.signOut();session=null;status();say('Sessione chiusa.');}catch(e){say(e.message)}};
+ $('nw-login').onclick=async()=>{try{const c=requireClient();const {data,error}=await c.auth.signInWithPassword({email:$('nw-email').value.trim(),password:$('nw-password').value});if(error)throw error;session=data.session;$('nw-password').value='';status();refreshOrgActivityVisibility();say('Accesso effettuato. Archivio e ricerca sono disponibili.');}catch(e){say('Accesso non riuscito: '+e.message)}};
+ $('nw-logout').onclick=async()=>{try{if(client)await client.auth.signOut();session=null;status();refreshOrgActivityVisibility();say('Sessione chiusa.');}catch(e){say(e.message)}};
  async function active(){const c=requireClient();const {data,error}=await c.auth.getSession();if(error)throw error;session=data.session;if(!session)throw new Error('Accedi prima di procedere.');return {c,s:session};}
+ async function isPlatformAdmin(){
+  const {c,s}=await active();
+  const {data,error}=await c.from('profiles').select('role').eq('id',s.user.id).maybeSingle();
+  if(error)throw error;
+  return data?.role==='platform_admin';
+ }
+ async function getOrganizationActivity(filters={}){
+  const {c}=await active();
+  if(!(await isPlatformAdmin()))throw new Error('Accesso riservato a platform_admin.');
+  const limit=Math.min(100,Math.max(1,Number(filters.limit)||100));
+  const offset=Math.max(0,Number(filters.offset)||0);
+  let q=c.from('nextway_lead_audit_logs')
+   .select('id,lead_id,lead_owner_profile_id,actor_profile_id,action,changed_fields,created_at,lead_name:after_data->>display_name')
+   .order('created_at',{ascending:false}).range(offset,offset+limit-1);
+  if(filters.from)q=q.gte('created_at',filters.from);
+  if(filters.to)q=q.lte('created_at',filters.to);
+  if(filters.action)q=q.eq('action',filters.action);
+  if(filters.ownerId)q=q.eq('lead_owner_profile_id',filters.ownerId);
+  const {data,error}=await q;
+  if(error)throw error;
+  return {events:data||[],offset,limit,hasMore:(data||[]).length===limit};
+ }
+ async function refreshOrgActivityVisibility(){
+  const panel=$('nw-org-activity');if(!panel)return;
+  panel.hidden=true;
+  if(!session)return;
+  try{if(await isPlatformAdmin())panel.hidden=false;}catch(e){panel.hidden=true;}
+ }
+ function renderOrganizationActivity(events,append=false){
+  const target=$('nw-act-results');if(!append)target.replaceChildren();
+  if(!events.length&&!append){const p=document.createElement('p');p.className='nwmuted';p.textContent='Nessuna attività trovata con i filtri selezionati.';target.append(p);return;}
+  events.forEach(ev=>{
+   const item=document.createElement('div');item.className='nwresult';
+   const title=document.createElement('strong');
+   const verb=ev.action==='INSERT'?'Creato':ev.action==='DELETE'?'Eliminato':'Modificato';
+   title.textContent=verb+' · '+(ev.lead_name||'Lead non più disponibile')+' · '+new Date(ev.created_at).toLocaleString('it-IT');
+   const meta=document.createElement('p');meta.className='nwmuted';
+   meta.textContent='Proprietario: '+(ev.lead_owner_profile_id||'n/d')+' · Operatore: '+(ev.actor_profile_id||'identità non disponibile');
+   const fields=document.createElement('p');fields.textContent='Campi: '+((ev.changed_fields||[]).join(', ')||'nessun dettaglio');
+   const id=document.createElement('p');id.className='nwmuted';id.textContent='Lead ID: '+ev.lead_id;
+   item.append(title,meta,fields,id);target.append(item);
+  });
+ }
+ async function loadOrganizationActivity(append=false){
+  const statusEl=$('nw-act-status'),more=$('nw-act-more');
+  try{
+   const ownerId=$('nw-act-owner').value.trim();
+   if(ownerId&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(ownerId))throw new Error('UUID proprietario non valido.');
+   const from=$('nw-act-from').value?new Date($('nw-act-from').value+'T00:00:00').toISOString():null;
+   const to=$('nw-act-to').value?new Date($('nw-act-to').value+'T23:59:59.999').toISOString():null;
+   if(from&&to&&from>to)throw new Error('Intervallo date non valido.');
+   const offset=append?orgActivityOffset:0;
+   statusEl.textContent='Caricamento…';more.disabled=true;
+   const result=await getOrganizationActivity({from,to,action:$('nw-act-action').value,ownerId,limit:100,offset});
+   renderOrganizationActivity(result.events,append);orgActivityOffset=offset+result.events.length;
+   more.disabled=!result.hasMore;statusEl.textContent=result.events.length+' eventi caricati.';
+  }catch(e){statusEl.textContent='Registro non disponibile: '+e.message;more.disabled=true;}
+ }
+ let orgActivityOffset=0;
+ $('nw-act-load').addEventListener('click',()=>{orgActivityOffset=0;loadOrganizationActivity(false);});
+ $('nw-act-more').addEventListener('click',()=>loadOrganizationActivity(true));
+
  async function setLeadArchived(cloudId, archived, reason=''){
   if(!cloudId)throw new Error('Questo Lead non è ancora sincronizzato. Sincronizza prima l’archivio.');
   const {c}=await active();
@@ -82,7 +144,7 @@ async function getLeadForConflict(cloudId){
  $('nw-sync').onclick=async()=>{try{say('Sincronizzazione in corso…');await syncLocal();}catch(e){say('Sincronizzazione non riuscita: '+e.message)}};
  $('nw-pull').onclick=async()=>{try{say('Lettura archivio cloud…');await pullCloud();}catch(e){say('Lettura non riuscita: '+e.message)}};
  $('nw-search').onclick=async()=>{const query=$('nw-query').value.trim();if(!query){say('Scrivi una query prima di avviare la ricerca.');return;}try{const {c,s}=await active();const cfg=getConfig();say('Ricerca in corso…');const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({queries:[query],max_results:10})});const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));const target=$('nw-results');target.replaceChildren();(payload.results||[]).forEach(group=>(group.results||[]).forEach(item=>{const box=document.createElement('div');box.className='nwresult';const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';const p=document.createElement('p');p.textContent=item.snippet||'';const a=document.createElement('a');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Apri fonte originale';const use=document.createElement('button');use.className='secondary';use.textContent='Usa URL nel modulo Lead';use.onclick=()=>{const form=document.querySelector('#form')||document.querySelector('#capture');if(!form){say('Apri Gestione Lead o Ricerca assistita per acquisire il risultato.');return;}const source=form.querySelector('[name="source"]'),url=form.querySelector('[name="url"]'),evidence=form.querySelector('[name="evidence"]');if(source)source.value=new URL(item.url).hostname;if(url)url.value=item.url;if(evidence)evidence.value=(item.title||'')+' — '+(item.snippet||'').slice(0,650);form.scrollIntoView({behavior:'smooth',block:'start'});say('Fonte trasferita nel modulo. Completa manualmente nome, verifica identità ed evidenza prima di salvare.');};box.append(title,p,a,document.createTextNode(' '),use);target.append(box);}));say('Ricerca completata: '+(payload.results||[]).reduce((n,g)=>n+(g.results||[]).length,0)+' risultati. Verifica ogni fonte manualmente.');}catch(e){say('Ricerca non riuscita: '+e.message)}};
- try{if(window.supabase?.createClient&&getConfig().url&&getConfig().key){client=setup();client.auth.getSession().then(({data})=>{session=data.session;status();}).catch(()=>status());}else status();}catch(e){status();}
+ try{if(window.supabase?.createClient&&getConfig().url&&getConfig().key){client=setup();client.auth.getSession().then(({data})=>{session=data.session;status();refreshOrgActivityVisibility();}).catch(()=>status());}else status();}catch(e){status();}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
