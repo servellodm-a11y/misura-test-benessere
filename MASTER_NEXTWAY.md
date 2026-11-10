@@ -711,3 +711,12 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Dipendenza: migrazione 20261110001200 non applicata; coda e registro attività cloud diventano disponibili dopo l'applicazione della migrazione. CI e test runtime non confermati.
 
 - Ultima rifinitura coda: il comando Apri Lead rimuove i filtri che impedivano la visualizzazione e apre il pannello attività; commit UI d52bb4a6be55d29739a7789a224ec191130a411e e 2d621cc496ac25739e1eb966a9ddd8501ea479eb. Ultimo validatore coda: d0ba03a12984dbd150ade024bed952a47a67ca90.
+
+
+## 48. Robustezza apertura Lead dalla coda follow-up (10 novembre 2026)
+
+- Risolto il caso in cui un follow-up è presente nel cloud ma il Lead collegato non è ancora nella cache locale del browser.
+- `nextway-cloud.js` espone `getLeadById(cloudId)`, che recupera un singolo Lead tramite sessione autenticata e RLS Supabase, restituendo il record normalizzato e la versione cloud.
+- Il pulsante "Apri Lead" recupera il Lead solo se manca dalla cache, lo inserisce nell'archivio locale associato al profilo e lo mostra rimuovendo i filtri UI incompatibili. Non sovrascrive record locali già presenti o modifiche locali non sincronizzate.
+- Commit API: 812378019f9d7751c7c2c92385349b988695a5a3; UI: f6c2f8d270aa06c52bc6103c193efa24527c3dcb; validatore: b5771aaf00bed9bc018792583217044e880223d6.
+- Test runtime non eseguiti; migrazione 012 non applicata e deploy Netlify non effettuato.
