@@ -505,3 +505,5 @@ Rilievi da risolvere/verificare:
 - Verificata staticamente l'assenza di policy dirette INSERT/UPDATE/DELETE sull'audit e la concessione SELECT ai soli utenti autenticati.
 - Verificati staticamente i trigger soft-archive: autenticazione obbligatoria, archived_by = auth.uid(), pulizia dei metadati al ripristino e revoca EXECUTE della funzione trigger.
 - Questi controlli non sono test runtime: le migrazioni 008-010 restano da applicare e collaudare su Supabase con profili distinti.
+
+- Validazione statica sezione 31: GitHub Actions run 42803134517 = SUCCESS (commit 4355756). Non equivale a test RLS o SQL runtime.
