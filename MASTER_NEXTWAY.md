@@ -382,3 +382,23 @@ Rilievi da risolvere/verificare:
 - Consultazione: massimo 50 eventi per Lead; paginazione/filtri avanzati non implementati.
 - Test runtime RLS, trigger, insert/update/delete e conservazione dopo cancellazione: DA ESEGUIRE su Supabase.
 - Migrazione NON applicata; nessun deploy Supabase o Netlify eseguito. Netlify resta in attesa del 4 dicembre 2026.
+
+
+## 22. Registro attività dell’organizzazione (10 novembre 2026)
+
+- `nextway-cloud.js` aggiunge la vista **Registro attività organizzazione** alla Connessione centrale.
+- Il pannello è visibile solo dopo autenticazione e verifica del ruolo `platform_admin` leggendo il profilo corrente. La funzione `getOrganizationActivity()` ripete il controllo del ruolo prima di ogni lettura: la sola visibilità UI non è considerata un controllo di sicurezza.
+- La query legge `nextway_lead_audit_logs` e seleziona esclusivamente ID Lead, proprietario, attore, azione, campi modificati, timestamp e nome pubblico del Lead estratto dagli snapshot. Non scarica gli snapshot completi, le note o le evidenze.
+- Filtri disponibili: data iniziale, data finale, tipo operazione (INSERT/UPDATE/DELETE) e UUID del profilo proprietario. Ordinamento cronologico decrescente e paginazione a blocchi di 100 eventi.
+- Le operazioni di archiviazione/ripristino, quando la migrazione 008 sarà applicata, risultano nel registro come UPDATE con i campi di archiviazione modificati. La risoluzione di un conflitto compare come UPDATE del Lead: non viene inventato un evento separato di conflitto risolto.
+- Per i Lead eliminati il nome viene recuperato dallo snapshot precedente; se non disponibile, viene mostrato un identificativo descrittivo neutro.
+- I nomi leggibili di partner e operatori non sono ancora mostrati: il registro usa gli UUID perché lo schema dei campi anagrafici di `profiles` non è stato verificato.
+- Tutti i contenuti dinamici vengono inseriti con `textContent`; nessuno snapshot o contenuto audit viene interpretato come HTML.
+
+### Stato e limiti
+
+- API, pannello amministrativo e filtri: **COMMITTATI NEL REPOSITORY**.
+- Verifica sintattica JavaScript del file `nextway-cloud.js`: SUPERATA dopo l’ultima correzione.
+- Query PostgREST, autorizzazioni RLS, visibilità del ruolo, paginazione e resa UI: **DA TESTARE SU SUPABASE**.
+- La vista dipende dalla migrazione `20261110000900_nextway_lead_audit_trail.sql`, che non risulta applicata al database live.
+- Nessun deploy Netlify o Supabase eseguito. Netlify resta in attesa del ripristino dei crediti il 4 dicembre 2026.
