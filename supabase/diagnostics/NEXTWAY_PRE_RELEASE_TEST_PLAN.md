@@ -71,7 +71,14 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
 ### 6. Costi e abuso
-- [ ] Implementare e testare un rate limit server-side distribuito per utente prima del rilascio; i blocchi frontend non proteggono da richieste dirette o multi-dispositivo.
+- [ ] Applicare la migrazione `20261110000100_nextway_distributed_rate_limit.sql` in ambiente di test.
+- [ ] AI Setter: 5 richieste nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
+- [ ] Ricerca: 3 richieste nella stessa finestra per utente ammesse; la quarta restituisce HTTP 429.
+- [ ] Il contatore è condiviso tra due schede/dispositivi dello stesso utente.
+- [ ] Due utenti distinti hanno contatori separati.
+- [ ] A nuova finestra di 60 secondi il contatore riparte da 1.
+- [ ] Se la RPC rate limit fallisce, nessuna chiamata OpenAI/Tavily parte e la funzione restituisce HTTP 503.
+- [ ] Utenti anonimi non possono eseguire la RPC o leggere/modificare direttamente la tabella.
 - [ ] Verificare il comportamento in caso di doppio clic/ritentativo: evitare bozze duplicate involontarie e definire se la rigenerazione esplicita debba creare una nuova bozza.
 - [ ] Definire soglie distinte per AI Setter e ricerca, con risposta controllata quando il limite viene raggiunto.
 - [ ] Definire budget e alert per OpenAI e Tavily.
