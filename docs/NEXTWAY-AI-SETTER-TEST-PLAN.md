@@ -266,3 +266,17 @@ Prerequisito: migrazioni `20261110000800_nextway_leads_soft_archive.sql` e `2026
 - [ ] Nella scheda di un Lead archiviato sono visibili data/ora e motivo dell’archiviazione, con fallback se il motivo è assente.
 - [x] Controllo statico aggiunto per la visualizzazione dei metadati di archiviazione nella scheda Lead.
 
+
+
+## 29. Gestione Lead — coerenza UI e protezione della sincronizzazione
+
+Verifiche statiche introdotte:
+- la UI mostra data e motivo di archiviazione nei Lead archiviati;
+- archiviazione e ripristino sono bloccati se il Lead contiene modifiche locali non sincronizzate;
+- archiviazione e ripristino sono bloccati in presenza di conflitto di sincronizzazione;
+- il motivo inserito dall'utente è limitato a 500 caratteri anche lato interfaccia;
+- il codice non azzera più il flag local_dirty dopo l'archiviazione: l'operazione non deve mascherare modifiche locali non sincronizzate.
+
+La cronologia per Lead già risolve il nome dell'operatore tramite profiles e partner_details; il validatore ora controlla anche questa funzione.
+
+Limiti: codice salvato su GitHub ma non pubblicato su Netlify; migrazioni audit e soft-archive non applicate a Supabase; test runtime Supabase/Postgres e browser live non eseguiti.
