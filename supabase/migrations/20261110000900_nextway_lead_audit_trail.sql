@@ -34,7 +34,7 @@ create policy nextway_lead_audit_logs_select_owner_or_admin
     )
   );
 
-revoke all on table public.nextway_lead_audit_logs from public, anon;
+revoke all on table public.nextway_lead_audit_logs from public, anon, authenticated;
 grant select on table public.nextway_lead_audit_logs to authenticated;
 
 create or replace function public.nextway_capture_lead_audit()
