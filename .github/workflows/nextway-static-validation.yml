@@ -1,0 +1,34 @@
+name: NEXTWAY static validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "nextway-cloud.js"
+      - "nextway-ai.html"
+      - "supabase/migrations/**"
+      - "scripts/validate-nextway-audit.mjs"
+      - ".github/workflows/nextway-static-validation.yml"
+  pull_request:
+    paths:
+      - "nextway-cloud.js"
+      - "nextway-ai.html"
+      - "supabase/migrations/**"
+      - "scripts/validate-nextway-audit.mjs"
+      - ".github/workflows/nextway-static-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate NEXTWAY audit
+        run: node scripts/validate-nextway-audit.mjs
