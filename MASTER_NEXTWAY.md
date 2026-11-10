@@ -709,3 +709,5 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - La navigazione verso il Lead rimuove filtri incompatibili solo quando il Lead non è già visibile; non modifica i dati del record.
 - Commit API: f7a47b3cd537c1e583e13d0ed28b19821071ceb1; UI iniziale: d52bb4a6be55d29739a7789a224ec191130a411e; correzione navigazione: 2d621cc496ac25739e1eb966a9ddd8501ea479eb; validatore: d0ba03a12984dbd150ade024bed952a47a67ca90.
 - Dipendenza: migrazione 20261110001200 non applicata; coda e registro attività cloud diventano disponibili dopo l'applicazione della migrazione. CI e test runtime non confermati.
+
+- Ultima rifinitura coda: il comando Apri Lead rimuove i filtri che impedivano la visualizzazione e apre il pannello attività; commit UI d52bb4a6be55d29739a7789a224ec191130a411e e 2d621cc496ac25739e1eb966a9ddd8501ea479eb. Ultimo validatore coda: d0ba03a12984dbd150ade024bed952a47a67ca90.
