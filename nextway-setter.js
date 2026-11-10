@@ -102,7 +102,37 @@
     let isCreating = false;
     let pendingRequestScope = '';
     let pendingRequestId = '';
+    const PENDING_CREATE_KEY = 'nextway_setter_pending_create_v1';
     let pendingCreatedConversationId = '';
+    let pendingCreatedGoal = 'first_contact';
+
+    // Ripristina il contesto dopo un reload: l'ID e l'obiettivo vengono
+    // conservati nella sessione del browser, non nei dati cloud condivisi.
+    try {
+      const savedPending = JSON.parse(sessionStorage.getItem(PENDING_CREATE_KEY) || 'null');
+      if (savedPending && typeof savedPending.conversation_id === 'string'
+        && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(savedPending.conversation_id)
+        && ['first_contact', 'follow_up', 'reply', 'presentation', 'appointment'].includes(savedPending.goal)) {
+        pendingCreatedConversationId = savedPending.conversation_id;
+        pendingCreatedGoal = savedPending.goal;
+      }
+    } catch (_) {}
+
+    function persistPendingCreate() {
+      if (!pendingCreatedConversationId) return;
+      try {
+        sessionStorage.setItem(PENDING_CREATE_KEY, JSON.stringify({
+          conversation_id: pendingCreatedConversationId,
+          goal: pendingCreatedGoal
+        }));
+      } catch (_) {}
+    }
+
+    function clearPendingCreate() {
+      pendingCreatedConversationId = '';
+      pendingCreatedGoal = 'first_contact';
+      try { sessionStorage.removeItem(PENDING_CREATE_KEY); } catch (_) {}
+    }
 
     function updateCreateButtonLabel() {
       $('nwst-create-button').textContent = pendingCreatedConversationId
@@ -217,8 +247,9 @@
           $('nwst-create-button').disabled = true;
           await loadConversations();
           $('nwst-conversation').value = pendingCreatedConversationId;
-          await generateDraft(pendingCreatedConversationId, $('nwst-goal').value);
-          pendingCreatedConversationId = '';
+          $('nwst-goal').value = pendingCreatedGoal;
+          await generateDraft(pendingCreatedConversationId, pendingCreatedGoal);
+          clearPendingCreate();
           updateCreateButtonLabel();
           return;
         }
@@ -248,13 +279,16 @@
         // Conserva l'ID prima di ogni altra operazione: un errore successivo non deve
         // indurre l'utente a creare un secondo Lead/conversazione al retry.
         pendingCreatedConversationId = result.conversation_id;
+        pendingCreatedGoal = $('nwst-goal').value;
+        persistPendingCreate();
         form.reset();
         updateCreateButtonLabel();
         say('Prospect e conversazione creati. Preparazione della bozza…');
         await loadConversations();
         $('nwst-conversation').value = pendingCreatedConversationId;
-        await generateDraft(pendingCreatedConversationId, $('nwst-goal').value);
-        pendingCreatedConversationId = '';
+        $('nwst-goal').value = pendingCreatedGoal;
+        await generateDraft(pendingCreatedConversationId, pendingCreatedGoal);
+        clearPendingCreate();
         updateCreateButtonLabel();
       } catch (error) {
         say(pendingCreatedConversationId
@@ -272,8 +306,18 @@
       catch (_) { say('Copia automatica non disponibile. Seleziona il testo della bozza e copialo manualmente.'); }
     });
 
-    cloud.active().then(loadConversations).catch(() => {
-      say('Accedi dalla sezione Connessione centrale per usare AI Setter.');
+    updateCreateButtonLabel();
+    cloud.active().then(async () => {
+      await loadConversations();
+      if (pendingCreatedConversationId) {
+        $('nwst-conversation').value = pendingCreatedConversationId;
+        $('nwst-goal').value = pendingCreatedGoal;
+        say('È presente una conversazione creata in precedenza senza bozza completata. Premi “Riprova generazione” per riprendere la stessa conversazione, senza crearne un’altra.');
+      }
+    }).catch(() => {
+      say(pendingCreatedConversationId
+        ? 'È presente una conversazione da riprendere. Accedi dalla sezione Connessione centrale: l’ID è conservato nella sessione del browser.'
+        : 'Accedi dalla sezione Connessione centrale per usare AI Setter.');
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
