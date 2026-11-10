@@ -684,3 +684,16 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit cloud iniziale: 5f1b05ddd61105f4992be4743b8b291c1391af62; stabilizzazione ordinamento: deac2d1883db9b2fbcfd6cf7a80523344389e8e3.
 - Commit validatore: c098b17de97d5722dfd26b5d31d1172c96a1e649; controllo ordinamento stabile: d1f91719811459325be2f46e1a5c72fb031c4b70.
 - Controllo statico dedicato aggiunto; il run CI non è ancora stato confermato in questa sessione. Nessun deploy o migrazione.
+
+
+## 46. NEXTWAY CRM – registro interazioni e follow-up (10 novembre 2026)
+
+- Aggiunta la migrazione additiva `20261110001200_nextway_lead_activities.sql` per il registro delle attività collegate ai Lead: telefonata, messaggio, email, incontro, nota e attività.
+- Ogni evento conserva oggetto, dettagli, data/ora, autore e prossima azione facoltativa. Le prossime azioni hanno stato aperto/completato/annullato.
+- RLS verifica il proprietario effettivo del Lead collegato oppure il ruolo platform_admin; l'autore è sempre l'utente autenticato. I client possono leggere/inserire e aggiornare esclusivamente lo stato del follow-up; nessun grant DELETE. La tabella non espone i dati agli account anonimi.
+- `nextway-cloud.js` espone API per leggere, inserire e completare/annullare follow-up; recupera il proprietario dal record Lead lato server prima dell'inserimento.
+- `nextway-ai.html` aggiunge il pannello Attività e follow-up in ogni scheda Lead sincronizzata: registra contatti e note, mostra gli ultimi 100 eventi e permette di completare/annullare promemoria aperti. I Lead locali non sincronizzati e quelli archiviati non possono ricevere attività.
+- La UI usa textContent per i contenuti inseriti dagli utenti; i dettagli non vengono inseriti come HTML.
+- Commit migrazione iniziale: 56c63be3fbecc039f51ced195ff0c6d255048e7d; correzione ambito RLS: 0cdb56387da92c30b78c09b7af5ab23b7ddb065a.
+- Commit API cloud: 20f906e17114f4450cfea0aa8d21a130ae0b9b28; UI attività: b2c313acb5dcfd87680e77650da9d6065d185153; validatore: 760fa1ed8ad9d67cdd7e7956e81ac3735baceed1.
+- Migrazione non applicata su Supabase. Il modulo attività richiede l'applicazione della migrazione prima dell'uso cloud. Test runtime e run CI ancora da confermare; nessun deploy Netlify.
