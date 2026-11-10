@@ -280,3 +280,13 @@ Verifiche statiche introdotte:
 La cronologia per Lead già risolve il nome dell'operatore tramite profiles e partner_details; il validatore ora controlla anche questa funzione.
 
 Limiti: codice salvato su GitHub ma non pubblicato su Netlify; migrazioni audit e soft-archive non applicate a Supabase; test runtime Supabase/Postgres e browser live non eseguiti.
+
+
+## 30. Archiviazione e ripristino — controllo concorrenza ottimistico
+
+- Ogni operazione richiede il timestamp cloud (updated_at) già noto alla scheda Lead.
+- L'UPDATE viene eseguito solo se id e updated_at coincidono con la versione letta: un aggiornamento concorrente da un'altra scheda/utente non viene sovrascritto.
+- Se il record è cambiato o la versione cloud manca, l'operazione si interrompe e chiede di ricaricare l'archivio.
+- Test statici verificano parametro, filtro updated_at, gestione del conflitto e passaggio del timestamp dalla UI.
+
+Limite: il comportamento va confermato con test runtime Supabase quando le migrazioni saranno applicate; nessuna migrazione o deploy eseguiti in questo passaggio.
