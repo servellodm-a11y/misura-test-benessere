@@ -248,3 +248,12 @@ assert.match(leadUiScript, /edit\.textContent='Modifica Lead'/);
 assert.match(leadUiScript, /edit\.disabled=!!x\.archived_at\|\|!!x\._sync_conflict/);
 assert.match(leadUiScript, /bar\.append\(edit,archive,sel,del\)/);
 console.log("NEXTWAY CRM Lead editing: edit form, duplicate protection, existing-record update and sync dirty flag: PASS");
+
+
+// NEXTWAY CRM: deterministic list sorting must coexist with existing filters.
+assert.match(html, /id="sort" aria-label="Ordina Lead"/);
+assert.match(leadUiScript, /sort==='recent'\?new Date\(b\.created\|\|0\)-new Date\(a\.created\|\|0\)/);
+assert.match(leadUiScript, /sort==='oldest'\?new Date\(a\.created\|\|0\)-new Date\(b\.created\|\|0\)/);
+assert.match(leadUiScript, /sort==='name'\?String\(a\.name\|\|'\)\.localeCompare/);
+assert.match(leadUiScript, /\['query','cat','state','archiveFilter','sort'\]\.forEach/);
+console.log("NEXTWAY CRM sorting: score, newest, oldest and alphabetical order: PASS");
