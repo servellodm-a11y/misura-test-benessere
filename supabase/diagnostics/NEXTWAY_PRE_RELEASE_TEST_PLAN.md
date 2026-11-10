@@ -49,7 +49,10 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Primo contatto produce una bozza coerente con i dati disponibili.
 - [ ] Follow-up considera lo storico e non ripete il testo precedente.
 - [ ] Una conversazione chiusa o archiviata restituisce HTTP 409.
-- [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413.
+- [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413, anche senza header Content-Length.
+- [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
+- [ ] La generazione OpenAI termina entro il timeout di 60 secondi.
+- [ ] L'output OpenAI è limitato a 1.200 token e la bozza resta entro il limite applicativo.
 - [ ] ID conversazione e obiettivo non validi vengono rifiutati.
 - [ ] Prospect non accessibile tramite RLS non genera bozze.
 - [ ] Timeout o errore OpenAI non crea un messaggio fittizio.
@@ -68,9 +71,9 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
 ### 6. Costi e abuso
-- [ ] Verificare limiti di utilizzo per utente prima del rilascio.
+- [ ] Implementare e testare un rate limit server-side distribuito per utente prima del rilascio; i blocchi frontend non proteggono da richieste dirette o multi-dispositivo.
 - [ ] Verificare il comportamento in caso di doppio clic/ritentativo: evitare bozze duplicate involontarie e definire se la rigenerazione esplicita debba creare una nuova bozza.
-- [ ] Definire rate limit server-side per AI Setter e ricerca.
+- [ ] Definire soglie distinte per AI Setter e ricerca, con risposta controllata quando il limite viene raggiunto.
 - [ ] Definire budget e alert per OpenAI e Tavily.
 - [ ] Verificare log: nessun token, chiave o dato personale non necessario.
 - [ ] Verificare comportamento in caso di provider indisponibile.
