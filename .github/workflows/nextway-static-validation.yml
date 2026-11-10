@@ -14,7 +14,9 @@ on:
   pull_request:
     paths:
       - "nextway-cloud.js"
+      - "nextway-setter.js"
       - "nextway-ai.html"
+      - "supabase/functions/nextway-ai-setter/**"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
       - ".github/workflows/nextway-static-validation.yml"
