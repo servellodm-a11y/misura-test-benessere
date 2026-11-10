@@ -56,7 +56,17 @@ assert.match(cloud, /if\(!\(await isPlatformAdmin\(\)\)\)throw new Error\('Acces
 assert.doesNotMatch(cloud, /select\('id,email,full_name/);
 assert.doesNotMatch(cloud, /select\('profile_id,first_name,last_name,phone/);
 
+// Lead soft-archive API: verify logical archive/restore, bounded reason and returned metadata.
+assert.match(cloud, /async function setLeadArchived\(cloudId, archived, reason=''/);
+assert.match(cloud, /archive_reason:String\(reason\|\|'Archiviazione manuale'\)\.slice\(0,500\)/);
+assert.match(cloud, /archived\?\{archived_at:new Date\(\)\.toISOString\(\),archive_reason:/);
+assert.match(cloud, /:\{archived_at:null,archive_reason:null\}/);
+assert.match(cloud, /archiveLead:\(id,reason\)=>setLeadArchived\(id,true,reason\)/);
+assert.match(cloud, /restoreLead:id=>setLeadArchived\(id,false\)/);
+assert.match(cloud, /select\('id,archived_at,archived_by,archive_reason,updated_at'\)/);
+
 console.log("NEXTWAY audit static checks: PASS");
 console.log(`Inline scripts parsed: ${inlineScripts.length}`);
 console.log("Privacy snapshots: notes/public_evidence excluded from new audit events");
 console.log("Readable audit identities: profile/partner fields, fallbacks and admin gate: PASS");
+console.log("Lead soft-archive API: archive/restore metadata and bounded reason: PASS");
