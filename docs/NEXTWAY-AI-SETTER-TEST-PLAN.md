@@ -238,3 +238,17 @@ Prerequisito: applicare prima la migrazione 009 e poi `20261110001000_nextway_au
 
 
 - [x] Validazione statica dei campi profilo/partner, fallback e gate amministrativo nel workflow GitHub Actions (run `42801788640`, SUCCESS).
+
+
+## Test archiviazione logica Lead
+
+Prerequisito: migrazioni `20261110000800_nextway_leads_soft_archive.sql` e `20261110000900_nextway_lead_audit_trail.sql` applicate in ambiente di test; usare un Lead di prova.
+
+- [ ] Archiviazione: valorizzare `archived_at`, `archived_by` e `archive_reason`; verificare che il record resti nel database.
+- [ ] Verificare che il trigger registri un evento UPDATE e i campi di archiviazione modificati.
+- [ ] Ripristino: azzerare `archived_at`, `archived_by` e `archive_reason` secondo il trigger; verificare un secondo evento UPDATE.
+- [ ] Verificare che un utente non proprietario e non amministratore non possa archiviare o ripristinare il Lead.
+- [ ] Verificare che il motivo venga limitato a 500 caratteri dall'API frontend.
+- [ ] Verificare che il Lead archiviato non venga confuso con un Lead eliminato e che la cronologia resti consultabile.
+- [ ] Confermare che nessuna azione di archiviazione comporti DELETE fisico.
+- [x] Controlli statici sull'API archive/restore, sui metadati restituiti e sul limite del motivo aggiunti al validatore GitHub Actions.
