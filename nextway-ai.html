@@ -71,7 +71,7 @@ let bar=document.createElement('div');bar.className='actions';if(x._sync_conflic
     (ev.changed_fields||[]).forEach(key=>{
      const before=ev.before_data?ev.before_data[key]:undefined,after=ev.after_data?ev.after_data[key]:undefined;
      const row=document.createElement('p');row.className='small';const label=document.createElement('b');label.textContent=(names[key]||key)+': ';row.append(label);
-     const val=document.createElement('span');val.textContent=ev.action==='INSERT'?String(after??'—'):ev.action==='DELETE'?String(before??'—'):(String(before??'—')+' → '+String(after??'—'));row.append(val);item.append(row);
+     const val=document.createElement('span');if(key==='notes'||key==='public_evidence'){val.textContent='[valore non registrato per riservatezza]';}else{val.textContent=ev.action==='INSERT'?String(after??'—'):ev.action==='DELETE'?String(before??'—'):(String(before??'—')+' → '+String(after??'—'));}row.append(val);item.append(row);
     });
     historyBox.append(item);
    });
