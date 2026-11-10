@@ -70,3 +70,13 @@ console.log(`Inline scripts parsed: ${inlineScripts.length}`);
 console.log("Privacy snapshots: notes/public_evidence excluded from new audit events");
 console.log("Readable audit identities: profile/partner fields, fallbacks and admin gate: PASS");
 console.log("Lead soft-archive API: archive/restore metadata and bounded reason: PASS");
+// Lead history identity and local-only removal/archive prompt safeguards.
+assert.match(cloud, /const actorIds=\[\.\.\.new Set\(events\.map\(ev=>ev\.actor_profile_id\)\.filter\(Boolean\)\)\]/);
+assert.match(cloud, /select\('id,full_name'\)\.in\('id',actorIds\)/);
+assert.match(cloud, /select\('profile_id,first_name,last_name'\)\.in\('profile_id',actorIds\)/);
+assert.match(cloud, /ev\.actor_name=ev\.actor_profile_id\?/);
+assert.match(html, /ev\.actor_name\|\|'identità non disponibile'/);
+assert.match(html, /if\(entered===null\)return/);
+assert.match(html, /Rimuovi copia locale/);
+assert.match(html, /non cancella il Lead dal cloud né la sua cronologia/);
+console.log("Lead history identities and safe local removal/archive cancellation: PASS");
