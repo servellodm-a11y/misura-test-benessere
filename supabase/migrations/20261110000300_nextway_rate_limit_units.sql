@@ -56,7 +56,7 @@ begin
     set window_start = excluded.window_start,
         request_count = case
           when current_limit.window_start = excluded.window_start
-            then current_limit.request_count + excluded.request_count
+            then least(current_limit.request_count + excluded.request_count, v_limit + 1)
           else excluded.request_count
         end,
         updated_at = clock_timestamp()
