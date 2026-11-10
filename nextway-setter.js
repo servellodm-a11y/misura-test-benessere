@@ -130,6 +130,7 @@
       try {
         const { s } = await cloud.active();
         const cfg = cloud.getConfig();
+        const requestId = crypto.randomUUID();
         const response = await fetch(cfg.url + ENDPOINT, {
           method: 'POST',
           headers: {
@@ -137,7 +138,11 @@
             'Authorization': 'Bearer ' + s.access_token,
             'apikey': cfg.key
           },
-          body: JSON.stringify({ conversation_id: conversationId, goal: goal })
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            goal: goal,
+            request_id: requestId
+          })
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload.success) throw new Error(payload.error || ('Errore HTTP ' + response.status));
