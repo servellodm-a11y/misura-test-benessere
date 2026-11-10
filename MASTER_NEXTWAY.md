@@ -553,3 +553,11 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - GitHub Actions run `42803941984`: **SUCCESS**, job `validate`, step `Validate NEXTWAY audit`.
 - Questo esito certifica parsing e controlli statici, non il comportamento runtime del browser, RPC o Supabase live.
 - Nessuna migrazione applicata; nessun deploy Netlify o Supabase eseguito.
+
+## 35. Verifica endpoint Edge Function AI Setter — discrepanza da risolvere
+
+- Il frontend versionato in `nextway-setter.js` usa attualmente `ENDPOINT = '/functions/v1/nextway-ai-setter'`.
+- Nelle precedenti verifiche della dashboard Supabase era stato riferito l'endpoint effettivo `/functions/v1/rapid-function`, mentre `nextway-ai-setter` era il nome mostrato della funzione. Non è disponibile una verifica live aggiornata che dimostri che l'URL sia stato rinominato o che esista un alias.
+- Non modificare automaticamente il frontend verso `rapid-function` e non dichiarare funzionante l'integrazione: il nome visualizzato e l'URL invocabile devono essere confrontati con il valore esatto mostrato da Supabase nella scheda della funzione.
+- Stato: **BLOCCATO DA CONFERMA ENDPOINT LIVE**. Il test GitHub statico non verifica la raggiungibilità dell'Edge Function.
+- Nessun deploy Supabase eseguito.
