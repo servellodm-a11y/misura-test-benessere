@@ -514,3 +514,15 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - Stato: codice salvato su GitHub; test runtime non eseguiti.
 
 - Verificare riepilogo dei follow-up scaduti, in scadenza oggi ed entro 7 giorni e le etichette italiane dei tipi di attività. Commit UI: 153bc556e9a681b97a792b44168bf3a540da75da; validatore: 28c0850a4b5b5e0c5092db29b79a20a8fac16eb6.
+
+
+## 49. Collaudo ciclo di vita commerciale Lead
+
+- [ ] Applicare la migrazione 013 solo dopo verifica esplicita del progetto Supabase corretto.
+- [ ] Verificare che Lead esistenti con i quattro stati precedenti continuino a essere letti e sincronizzati.
+- [ ] Provare tutte le nove fasi dal selettore Lead e verificare che il filtro per stato restituisca i record corretti.
+- [ ] Sincronizzare un Lead in ciascuna nuova fase e verificare che il valore non venga riportato a "Da verificare".
+- [ ] Importare CSV con una fase nuova e verificare che sia accettata senza duplicare record.
+- [ ] Verificare i conteggi contattati, in follow-up, in valutazione e convertiti.
+- [ ] Verificare che "Convertito cliente" e "Convertito partner" siano solo stati CRM e non creino automaticamente record in `clients` o `profiles`.
+- Stato: codice e migrazione predisposti su GitHub; migrazione non applicata; test runtime da eseguire.
