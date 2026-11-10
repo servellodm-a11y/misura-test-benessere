@@ -197,6 +197,28 @@ Deno.serve(async (req) => {
       return respond({ error: "Obiettivo non valido" }, 400, responseOrigin);
     }
 
+    // Rate limit atomico per utente: il limite è imposto dal database.
+    const { data: limitRows, error: limitError } = await supabase.rpc(
+      "nextway_consume_api_rate_limit",
+      { p_scope: "ai_setter" },
+    );
+    const rateLimit = Array.isArray(limitRows) ? limitRows[0] : null;
+    if (limitError || !rateLimit) {
+      console.error("Rate limit check failed:", limitError);
+      return respond({ error: "Controllo di sicurezza temporaneamente non disponibile" }, 503, responseOrigin);
+    }
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.max(
+        1,
+        Math.ceil((new Date(rateLimit.reset_at).getTime() - Date.now()) / 1000),
+      );
+      return respond({
+        error: "Limite NEXTWAY AI Setter raggiunto. Riprova tra poco.",
+        retry_after_seconds: retryAfter,
+        remaining: 0,
+      }, 429, responseOrigin);
+    }
+
     // Recupero conversazione tramite RLS
     const { data: conversation, error: conversationError } =
       await supabase
