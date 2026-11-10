@@ -473,3 +473,16 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Verificare il pull con RLS attiva per due account: ogni account deve ricevere esclusivamente i Lead autorizzati dal database.
 - Verificare anche che l'ordinamento secondario per ID mantenga pagine deterministiche quando più record condividono created_at.
 - Stato codice: commit cloud 5f1b05ddd61105f4992be4743b8b291c1391af62; stabilizzazione ordine deac2d1883db9b2fbcfd6cf7a80523344389e8e3; validatore paginazione c098b17de97d5722dfd26b5d31d1172c96a1e649 e ordine stabile d1f91719811459325be2f46e1a5c72fb031c4b70. Test runtime Supabase ancora da eseguire.
+
+
+## 46. Collaudo NEXTWAY CRM – registro attività e follow-up
+
+- [ ] Applicare la migrazione 20261110001200 solo dopo aver confermato che il progetto Supabase è quello NEXTWAY corretto.
+- [ ] Con account partner A, registrare telefonata, messaggio, email, incontro, nota e attività su un proprio Lead sincronizzato.
+- [ ] Verificare che il pannello mostri data, tipo, oggetto e dettagli usando testo non interpretato come HTML.
+- [ ] Inserire un follow-up futuro, verificare lo stato aperto e completarlo; ripetere annullandolo.
+- [ ] Verificare che non sia possibile aggiungere attività a Lead non sincronizzati o archiviati.
+- [ ] Con account partner B, verificare che non possa leggere, inserire o aggiornare le attività del Lead di A.
+- [ ] Verificare il comportamento platform_admin sui Lead visibili in base alle policy esistenti.
+- [ ] Verificare il limite UI di 100 eventi e l'ordinamento per data decrescente con ID come criterio stabile.
+- Stato codice: migrazione 012, API cloud e UI implementate su GitHub; test statico dedicato aggiunto. Migrazione non applicata e test runtime Supabase/browser non eseguiti.
