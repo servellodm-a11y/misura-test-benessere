@@ -77,6 +77,9 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({ error: "Corpo JSON non valido." }, 400, responseOrigin);
   }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return json({ error: "Corpo della richiesta non valido." }, 400, responseOrigin);
+  }
 
   const queries = Array.isArray(body.queries)
     ? body.queries.map((q) => typeof q === "string" ? q.trim() : "")
@@ -92,19 +95,30 @@ Deno.serve(async (req: Request) => {
 
   const results = [];
   for (const query of queries) {
-    const upstream = await fetch("https://api.tavily.com/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: tavilyKey,
-        query,
-        topic: "general",
-        search_depth: "basic",
-        max_results: maxResults,
-        include_answer: false,
-        include_raw_content: false,
-      }),
-    });
+    let upstream: Response;
+    try {
+      upstream = await fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({
+          api_key: tavilyKey,
+          query,
+          topic: "general",
+          search_depth: "basic",
+          max_results: maxResults,
+          include_answer: false,
+          include_raw_content: false,
+        }),
+      });
+    } catch (error) {
+      const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+      return json({
+        error: timedOut
+          ? "La ricerca ha superato il tempo massimo. Riprova."
+          : "Servizio di ricerca temporaneamente non raggiungibile.",
+      }, timedOut ? 504 : 502, responseOrigin);
+    }
 
     if (!upstream.ok) {
       const status = upstream.status === 429 ? 429 : 502;
@@ -116,7 +130,12 @@ Deno.serve(async (req: Request) => {
       }, status, responseOrigin);
     }
 
-    const payload = await upstream.json();
+    let payload: { results?: unknown };
+    try {
+      payload = await upstream.json();
+    } catch {
+      return json({ error: "Il servizio di ricerca ha restituito una risposta non valida." }, 502, responseOrigin);
+    }
     const items = Array.isArray(payload.results) ? payload.results : [];
     results.push({
       query,
