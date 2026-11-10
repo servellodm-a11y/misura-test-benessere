@@ -335,3 +335,14 @@ Rilievi da risolvere/verificare:
 - Il pull aggiorna lo stato di archiviazione dei record locali già collegati, senza sovrascrivere gli altri campi modificati localmente. Non è ancora una risoluzione generale dei conflitti multi-dispositivo.
 - I conteggi principali escludono gli archiviati e il filtro predefinito mostra i Lead attivi.
 - Stato: **CODICE COMMITTATO NEL REPOSITORY**; **NON PUBBLICATO SU NETLIFY**; dipende dalla migrazione 008 non ancora applicata e da test Supabase live non eseguiti. Non considerare archiviazione/ripristino operativi in produzione finché prerequisiti e test non sono completati.
+
+
+## 19. Sincronizzazione con rilevamento conflitti (10 novembre 2026)
+
+- `nextway-cloud.js` conserva per ogni Lead collegato la versione cloud `cloud_updated_at` e lo stato locale `local_dirty`.
+- Il push aggiorna un record esistente solo se il record è marcato come modificato localmente e la versione `updated_at` coincide con quella letta in precedenza. L'UPDATE usa quindi un controllo ottimistico atomico (`WHERE id = ... AND updated_at = ...`). Se nessuna riga viene restituita, il record viene segnalato come conflitto e non viene sovrascritto.
+- Il pull aggiorna i campi cloud dei record locali solo quando non risultano modifiche locali pendenti e la versione di base è disponibile. Se il cloud è cambiato mentre esistono modifiche locali, il record viene marcato con `_sync_conflict` e i dati locali restano intatti.
+- I Lead creati o modificati tramite il modulo principale e i cambi di stato vengono marcati `local_dirty`. Le operazioni di archiviazione/ripristino registrano la nuova versione `updated_at` restituita da Supabase.
+- I record legacy collegati ma privi di versione cloud di base non vengono aggiornati alla cieca: richiedono revisione, perché non è possibile stabilire se la copia locale sia più recente.
+- Limite deliberato: non è ancora presente una schermata di risoluzione guidata per scegliere tra versione locale e cloud; il sistema rileva e conserva il conflitto, ma non applica una scelta automatica.
+- Stato: **CODICE COMMITTATO NEL REPOSITORY**; nessun deploy o test runtime effettuato. I test richiedono migrazioni e ambiente Supabase attivo.
