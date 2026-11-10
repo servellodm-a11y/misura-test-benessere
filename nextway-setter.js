@@ -11,7 +11,7 @@
     const panel = document.createElement('section');
     panel.id = 'nw-setter';
     panel.style.cssText = 'max-width:1160px;margin:18px auto;padding:0 18px;font:14px system-ui;color:#172033';
-    panel.innerHTML = \`
+    panel.innerHTML = `
       <style>
         #nw-setter .nwst-box{background:#fff;border:1px solid #dce4ef;border-radius:12px;padding:16px;margin:10px 0}
         #nw-setter .nwst-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -92,7 +92,7 @@
         <p id="nwst-meta" class="nwst-muted"></p>
         <button id="nwst-copy" class="secondary" type="button" disabled>Copia bozza</button>
         <p class="nwst-muted">La bozza viene salvata nello storico come non approvata e non inviata. L'invio non è disponibile in questa versione.</p>
-      </div>\`;
+      </div>`;
     anchor.insertAdjacentElement('afterend', panel);
 
     const $ = id => document.getElementById(id);
