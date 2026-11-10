@@ -11,6 +11,7 @@ const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_tra
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
 const leadCreationIdempotency = read("../supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql");
+const leadActivities = read("../supabase/migrations/20261110001200_nextway_lead_activities.sql");
 
 new Function(cloud);
 new Function(setter);
@@ -278,3 +279,30 @@ console.log("NEXTWAY CRM cloud pull pagination: all pages are loaded without the
 
 assert.match(cloud, /\.order\('created_at',\{ascending:false\}\)\.order\('id',\{ascending:true\}\)\.range\(offset,offset\+pageSize-1\)/);
 console.log("NEXTWAY CRM cloud pagination: deterministic ordering across page boundaries: PASS");
+
+
+// NEXTWAY CRM: cloud interaction history and follow-up lifecycle.
+assert.match(cloud, /async function getLeadActivities\(cloudId\)/);
+assert.match(cloud, /async function addLeadActivity\(cloudId,activity\)/);
+assert.match(cloud, /async function setLeadActivityStatus\(activityId,status\)/);
+assert.match(cloud, /nextway_lead_activities/);
+assert.match(cloud, /owner_profile_id:lead\.owner_profile_id,created_by:s\.user\.id/);
+assert.match(cloud, /getLeadActivities,addLeadActivity,setLeadActivityStatus/);
+assert.match(cloud, /owner_profile_id:r\.owner_profile_id/);
+assert.match(leadUiScript, /Attività e follow-up/);
+assert.match(leadUiScript, /Registra attività/);
+assert.match(leadUiScript, /Segna completato/);
+assert.match(leadUiScript, /Annulla follow-up/);
+assert.match(leadUiScript, /getLeadActivities\(x\.cloud_id\)/);
+assert.match(leadUiScript, /addLeadActivity\(x\.cloud_id/);
+assert.match(leadActivities, /create table if not exists public\.nextway_lead_activities/i);
+assert.match(leadActivities, /enable row level security/i);
+assert.match(leadActivities, /for select to authenticated/i);
+assert.match(leadActivities, /for insert to authenticated/i);
+assert.match(leadActivities, /for update to authenticated/i);
+assert.match(leadActivities, /l\.owner_profile_id = nextway_lead_activities\.owner_profile_id/i);
+assert.match(leadActivities, /created_by = auth\.uid\(\)/i);
+assert.match(leadActivities, /grant select, insert on table public\.nextway_lead_activities to authenticated/i);
+assert.match(leadActivities, /grant update \(next_action_status\) on table public\.nextway_lead_activities to authenticated/i);
+assert.doesNotMatch(leadActivities, /grant delete on table public\.nextway_lead_activities/i);
+console.log("NEXTWAY CRM activity log and follow-up: cloud API, UI and owner-scoped RLS migration: PASS");
