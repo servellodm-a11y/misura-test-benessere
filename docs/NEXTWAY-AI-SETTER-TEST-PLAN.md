@@ -216,3 +216,11 @@ Prerequisito: applicare prima la migrazione 009 e poi `20261110001000_nextway_au
 - [ ] Gli altri campi necessari alla cronologia, incluso `display_name`, restano disponibili.
 - [ ] La cronologia Lead UI mostra `[valore non registrato per riservatezza]` per i due campi.
 - [ ] Verificare che gli eventi precedenti alla migrazione restino invariati: la migrazione 010 non effettua redazione retroattiva.
+
+
+## Validazione automatica repository
+
+- [ ] Verificare il workflow `NEXTWAY static validation` dopo un push o una pull request che tocchi i file monitorati.
+- [ ] Confermare esito verde per parsing di `nextway-cloud.js` e script inline HTML.
+- [ ] Confermare i controlli strutturali su migrazione audit, autorizzazione amministratore, filtri/paginazione e snapshot minimizzati.
+- [ ] Non interpretare il workflow statico come prova di funzionamento SQL, RLS o Supabase live.
