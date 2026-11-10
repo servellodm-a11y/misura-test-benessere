@@ -817,4 +817,4 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - 10-11-2026: recuperata la versione corrente di `MASTER_NEXTWAY.md` dal branch `main` prima dell'aggiornamento.
 - 10-11-2026: esaminati gli ultimi commit GitHub, i file di migrazione/API/UI/diagnostica/validatore/workflow e il run Actions #100.
 - 10-11-2026: aggiunta questa sezione; nessun codice applicativo, database o configurazione modificati.
-- Dopo il commit, rileggere il file dal repository e confermare il contenuto aggiornato.
+- 10-11-2026: dopo il commit `0ef734b4c55c8699449c11dfeaff4069e4c8f5a4`, il MASTER è stato recuperato nuovamente da GitHub; sezione 50, sezione 12 aggiornata, tabella stati e sezioni storiche 48–49 risultano presenti. Blob SHA verificato: `64150e29368f4397fb62147082b0f43a916a4cc1`.
