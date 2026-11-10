@@ -1,6 +1,14 @@
 # MASTER NEXTWAY
 
-## AGGIORNAMENTO OPERATIVO — 10 NOVEMBRE 2026 (integrazione frontend AI Setter)
+## AGGIORNAMENTO OPERATIVO — 10 NOVEMBRE 2026 (CRM conversioni assistite e stato validazione)
+
+- Aggiunto nel CRM un flusso di conversione assistita Lead → cliente/partner: richiesta collegata al proprietario del Lead, sponsor proposto uguale al proprietario, invio alla coda di revisione `platform_admin` e nessuna creazione automatica di account o profili.
+- Versionati la migrazione `20261110001400_nextway_lead_conversion_requests.sql`, l'API cloud, la UI del Lead, la coda amministrativa e la diagnostica read-only `nextway_conversion_schema_readonly.sql`. La migrazione non risulta applicata a Supabase.
+- La revisione è progettata come decisione amministrativa singola e immutabile; la UI richiede un motivo per il rifiuto. La migrazione deve ancora essere corretta: il body della funzione trigger usa il delimitatore `as $ ... $;` invece di `as $ ... $;`; non applicare la migrazione in questo stato. Inoltre il vincolo del motivo di rifiuto è verificato nel client, ma non è imposto dal database.
+- GitHub Actions run #100 (`42811158172`) è **FAILURE**: il validatore statico cerca una vecchia espressione `if(!safeHttpUrl(x.url))` che non corrisponde più alla UI corrente, che usa `sourceUrl=safeHttpUrl(x.url)`. Il job si interrompe prima del type-check Deno, che risulta skipped. Il codice applicativo non è stato modificato in questa attività documentale.
+- In questa sessione non è disponibile un connettore Supabase: schema live, policy effettive, applicazione della migrazione, deploy e secrets non sono stati interrogati. Nessun deploy o cambiamento database è stato eseguito.
+
+## AGGIORNAMENTO OPERATIVO PRECEDENTE — 10 NOVEMBRE 2026 (integrazione frontend AI Setter)
 
 - Aggiunto `nextway-setter.js`: interfaccia AI Setter con creazione prospect/conversazione tramite RPC `nextway_create_lead_with_conversation`, selezione conversazioni esistenti e generazione di bozze.
 - Aggiornato `nextway-cloud.js`: espone al modulo Setter il client Supabase autenticato e la configurazione già esistente, senza duplicare login o memorizzare password.
@@ -176,7 +184,10 @@ Il documento riferisce una verifica sintattica JavaScript delle tre pagine e del
 | RPC creazione lead/conversazione | **ESEGUITO MA NON VERIFICATO** |
 | Test RLS con due partner e admin | **DA COMPLETARE** |
 | WhatsApp Business Platform | **DA COMPLETARE**; non risulta attivata |
-| MASTER NEXTWAY | **IN CREAZIONE** fino a rilettura dopo commit |
+| Flusso conversione assistita Lead → cliente/partner | **ESEGUITO MA NON VERIFICATO** nel runtime; sorgenti presenti, migrazione non applicata e CI fallita |
+| Diagnostica read-only conversione | **COMPLETATO E VERIFICATO** come file nel repository; esecuzione su Supabase non verificata |
+| Validazione GitHub Actions | **BLOCCATO** da asserzione statica non allineata alla UI; type-check Deno saltato nel run più recente |
+| MASTER NEXTWAY | **COMPLETATO E VERIFICATO** dopo aggiornamento e rilettura GitHub |
 
 ## 12. Prossimo percorso operativo
 
@@ -732,3 +743,77 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Sync e import: whitelist estesa alle nove fasi, così gli stati non vengono degradati a "Da verificare" durante sincronizzazione/importazione.
 - Commit migrazione: d38d7ce53fd7259b331ec057b5de60dfc1eb958d; UI: 89c2e9dc338b3b8f6a42a1e73a7eb7bf8b91cbaa; sync: edded501faf1e852b8992232c4d336b1b409154e; validatore: a09a1f9a3f722fcca126f54f5730788dc5a4bf56.
 - Migrazione non applicata live; test runtime non eseguiti; deploy Netlify non effettuato.
+
+
+## 50. NEXTWAY CRM — conversione assistita Lead → cliente/partner e stato CI (10 novembre 2026)
+
+### Modifiche effettivamente presenti nel repository
+
+- Migrazione: `supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql`.
+- Diagnostica read-only: `supabase/diagnostics/nextway_conversion_schema_readonly.sql`.
+- API cloud: `nextway-cloud.js`.
+- UI Lead e coda amministrativa: `nextway-ai.html`.
+- Validatore: `scripts/validate-nextway-audit.mjs`.
+- Workflow: `.github/workflows/nextway-static-validation.yml`.
+
+### Funzionamento implementato nel codice
+
+- Un Lead può avviare una richiesta solo se è sincronizzato nel cloud, non è archiviato, non è in conflitto e si trova nello stato `In valutazione`.
+- La richiesta distingue `customer` e `partner`; richiede nome ed email e accetta un telefono facoltativo.
+- L'API recupera il Lead autenticato tramite Supabase, imposta `owner_profile_id` dal record cloud, imposta `sponsor_profile_id` uguale al proprietario e registra `created_by` come utente autenticato.
+- La tabella `nextway_lead_conversion_requests` prevede: `id`, `lead_id`, `owner_profile_id`, `sponsor_profile_id`, `created_by`, `conversion_type`, `full_name`, `email`, `phone`, `status`, `review_notes`, `reviewed_by`, `reviewed_at`, `created_at`, `updated_at`.
+- Gli stati previsti sono `pending`, `ready_for_activation`, `rejected`. Indici parziali univoci impediscono richieste attive duplicate per lo stesso Lead o per la stessa email normalizzata.
+- RLS nel file SQL: SELECT per proprietario o `platform_admin`; INSERT per il proprietario autenticato del Lead o `platform_admin`, con controllo su proprietà, sponsor, Lead non archiviato e stato `In valutazione`; UPDATE riservato a `platform_admin`. Non è concesso DELETE.
+- La coda amministrativa carica fino a 100 richieste pendenti. La revisione può impostare `ready_for_activation` o `rejected`; il codice client richiede una motivazione per il rifiuto.
+- Le richieste respinte possono essere ripresentate; una richiesta pendente o pronta blocca un'altra richiesta attiva sullo stesso Lead/email.
+- Il trigger di revisione intende rendere la decisione singola e i dati originari immutabili.
+- Il flusso **non** crea account Auth, `profiles`, `partner_details` o `clients`: `ready_for_activation` significa soltanto “pronta per un processo separato”, non attivazione completata.
+
+### Commit rilevanti esaminati
+
+- Migrazione iniziale: `d7767d65b7ff96f7fb040631e263d03d180463bd`.
+- API cloud: `0bf4aa44082dad3bd42c1776bcdef7722937366b`.
+- UI richiesta: `9a083d64c6405f79259f2f0ee2307bf2bca24e4b`.
+- Coda amministrativa: `71852ab13904fd53be08cf73650a49d08c6dcde1`.
+- Vincolo fase `In valutazione`: `4df52ba3cfdb63aeb42ae1856bc10c55cd2057be`.
+- Ripresentazione dopo rifiuto: `168956b7224c95817025f2531b3731ea40f996b5`.
+- Validatore del flusso: `51c23531a2fdd072fd42b813998053d54bfbd087`.
+- Motivo obbligatorio nel client: `033347fa452efd32d1f583df08ce8843cbde2898`.
+- Revisione amministrativa singola/immutabile: `85eb4cb7487a403ad794467f42176644880e2cdb`.
+- Controlli statici aggiuntivi: `7c80651f1b2ab906848f1e69084456dab5ab2d9d` e `7e1b5d4a3c0cd9c17036d3c0117b77b8ee0e12d9`.
+- Diagnostica read-only: `1e6bedae92927a8bcf8935bf04ce55ec12667766`.
+
+### Rilievi tecnici emersi dalla lettura statica
+
+1. **Blocco sintattico potenziale nella migrazione:** in `nextway_guard_conversion_request_review()` il file contiene `as $` e chiude con `$;`. Il delimitatore dollar-quoted PostgreSQL deve essere valido (per esempio `$$ ... $$;`). La migrazione non deve essere applicata prima della correzione.
+2. **Motivo del rifiuto non imposto dal database:** il frontend rifiuta una motivazione vuota, ma il trigger SQL non verifica che `review_notes` sia valorizzato quando lo stato diventa `rejected`. Un aggiornamento diretto autenticato potrebbe aggirare il controllo client. Aggiungere il controllo nel trigger o in un vincolo SQL.
+3. **Validatore statico non allineato alla UI:** `scripts/validate-nextway-audit.mjs` richiede ancora la stringa `if(!safeHttpUrl(x.url))`; la UI corrente calcola `sourceUrl=safeHttpUrl(x.url)` e usa il risultato per mostrare un link sicuro oppure il testo “Fonte non valida”. L'asserzione fallisce anche se la logica UI attuale usa la funzione di validazione.
+4. Nel run #100 il job si è fermato allo step `Validate NEXTWAY audit`; gli step `Setup Deno` e `Type-check AI Setter Edge Function` sono stati saltati. Non è quindi disponibile un esito positivo del type-check in quel run.
+
+### Evidenze CI e stato live
+
+- Ultimo run osservato: GitHub Actions run `42811158172`, run #100, commit `7e1b5d4a3c0cd9c17036d3c0117b77b8ee0e12d9`, conclusione **failure**.
+- Errore esatto: asserzione del validatore non soddisfatta su `/if\(!safeHttpUrl\(x\.url\)\)/`; Node 22 ha terminato `Validate NEXTWAY audit` con exit code 1.
+- Anche il run #99 (`42811145876`) risulta failure nello stesso step. La lista dei 12 run più recenti mostrava i run #92–#100 tutti con conclusione failure; il log dettagliato è stato letto per il run #100.
+- La presenza dei file e dei commit su GitHub è verificata. La migrazione non risulta applicata da alcuna evidenza disponibile; non sono stati eseguiti test runtime di inserimento/revisione.
+- La sessione non espone un connettore Supabase: non sono stati interrogati schema, policy, grants o stato effettivo della migrazione sul progetto live. Nessun deploy Supabase/Netlify è stato eseguito da questa attività.
+
+### Stato per componente
+
+| Componente | Stato |
+|---|---|
+| Codice UI/API conversione assistita nel repository | **COMPLETATO E VERIFICATO** come presenza dei file e lettura statica; runtime non testato |
+| Migrazione SQL 014 | **BLOCCATO**: delimitatore della funzione da correggere; non applicata |
+| RLS/policy conversion requests | **ESEGUITO MA NON VERIFICATO**: definite nel file SQL, non confrontate con Supabase live |
+| Diagnostica conversione read-only | **COMPLETATO E VERIFICATO** come file presente; non eseguita su Supabase |
+| Motivo obbligatorio di rifiuto | **DA COMPLETARE** lato database; attualmente verificato solo dal client |
+| Validazione GitHub Actions | **BLOCCATO** da asserzione statica obsoleta; type-check Deno saltato nel run #100 |
+| Attivazione effettiva cliente/partner | **DA COMPLETARE**; deliberatamente non implementata dal flusso di richiesta |
+| Deploy Supabase e Netlify | **NON VERIFICATI**; nessun deploy eseguito in questa attività |
+
+### Registro del MASTER
+
+- 10-11-2026: recuperata la versione corrente di `MASTER_NEXTWAY.md` dal branch `main` prima dell'aggiornamento.
+- 10-11-2026: esaminati gli ultimi commit GitHub, i file di migrazione/API/UI/diagnostica/validatore/workflow e il run Actions #100.
+- 10-11-2026: aggiunta questa sezione; nessun codice applicativo, database o configurazione modificati.
+- Dopo il commit, rileggere il file dal repository e confermare il contenuto aggiornato.
