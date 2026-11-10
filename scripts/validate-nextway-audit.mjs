@@ -38,6 +38,10 @@ assert.match(privacy, /v_before_full - 'notes' - 'public_evidence'/);
 assert.match(privacy, /jsonb_each\(v_after_full\)/);
 assert.doesNotMatch(privacy, /update public\.nextway_lead_audit_logs/i);
 assert.match(html, /\[valore non registrato per riservatezza\]/);
+assert.match(html, /x\.local_dirty\)\{alert\('Questo Lead contiene modifiche locali non sincronizzate/);
+assert.match(html, /x\._sync_conflict\)\{alert\('Risolvi prima il conflitto di sincronizzazione/);
+assert.match(html, /Archiviato:/);
+assert.match(html, /reason=entered\.trim\(\)\.slice\(0,500\)/);
 
 // Identità leggibili nel registro: verifica i campi reali dello schema Supabase.
 assert.match(cloud, /select\('id,full_name'\)\.in\('id',profileIds\)/);
@@ -64,6 +68,9 @@ assert.match(cloud, /:\{archived_at:null,archive_reason:null\}/);
 assert.match(cloud, /archiveLead:\(id,reason\)=>setLeadArchived\(id,true,reason\)/);
 assert.match(cloud, /restoreLead:id=>setLeadArchived\(id,false\)/);
 assert.match(cloud, /select\('id,archived_at,archived_by,archive_reason,updated_at'\)/);
+assert.match(cloud, /select\('id,full_name'\)\.in\('id',actorIds\)/);
+assert.match(cloud, /select\('profile_id,first_name,last_name'\)\.in\('profile_id',actorIds\)/);
+assert.match(cloud, /ev\.actor_name=ev\.actor_profile_id\?/);
 
 console.log("NEXTWAY audit static checks: PASS");
 console.log(`Inline scripts parsed: ${inlineScripts.length}`);
