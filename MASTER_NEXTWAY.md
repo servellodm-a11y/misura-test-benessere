@@ -496,4 +496,4 @@ Rilievi da risolvere/verificare:
 - Le operazioni di archiviazione/ripristino richiedono la versione cloud aggiornata del Lead.
 - UPDATE condizionato su id + updated_at: se il record è stato modificato nel frattempo da un'altra sessione, nessuna modifica viene applicata e la UI chiede di ricaricare.
 - Il timestamp viene passato dalla scheda Lead a entrambe le operazioni; il validatore statico controlla l'intero percorso.
-- Stato: sorgenti e documentazione salvati su GitHub; GitHub Actions da verificare. Nessun deploy Netlify e nessuna migrazione Supabase.
+- Stato: sorgenti e documentazione salvati su GitHub; GitHub Actions run 42803042485 = SUCCESS sul commit daae610. Validazione solo statica; nessun deploy Netlify e nessuna migrazione Supabase.
