@@ -180,3 +180,27 @@ Il documento riferisce una verifica sintattica JavaScript delle tre pagine e del
 ## 13. Limiti di questa fotografia
 
 Questa versione è stata compilata confrontando i file accessibili nel repository GitHub e il contesto conversazionale disponibile al 10 novembre 2026. Non è una scansione live completa di Supabase, Netlify, OpenAI, Tavily o Meta. Le informazioni conversazionali sono esplicitamente indicate come tali. Aggiornare lo stato solo dopo nuove evidenze.
+
+
+## 14. Integrazione AI Setter — confronto repository/conversazioni (10 novembre 2026)
+
+Recupero dalla conversazione del 9 novembre:
+- La funzione è elencata in Supabase con nome `nextway-ai-setter`, ma l'endpoint effettivo mostrato all'utente era `/functions/v1/rapid-function`. Non chiamarla usando il nome visualizzato finché l'URL reale non è verificato.
+- Metodo previsto: POST/OPTIONS; autenticazione Bearer JWT tramite `supabase.auth.getUser`.
+- Variabili riportate come presenti dall'utente: `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`. `OPENAI_MODEL` risultava assente e il codice ricordato usava default `gpt-4o-mini`. Stato attuale dei secrets non interrogato.
+- Il codice ricordato usa OpenAI Responses API e le tabelle `nextway_setter_conversations`, `nextway_leads`, `nextway_setter_messages`; recupera le ultime 20 comunicazioni.
+- Output JSON previsto: `message`, `strategy`, `objective`, `tone`, `next_step`; obiettivi ammessi `first_contact`, `follow_up`, `reply`, `presentation`, `appointment`.
+- Output finale include `sent:false` e `approved:false`; salva esclusivamente una bozza. Nessun invio automatico.
+
+Confronto con il repository:
+- La directory `supabase/functions` contiene solo `nextway-search`; non contiene `nextway-ai-setter`.
+- La ricerca dei riferimenti `nextway-ai-setter`, `nextway_setter_conversations` e `nextway_create_lead_with_conversation` nel codice indicizzato del repository non ha restituito risultati.
+- `nextway-cloud.js` chiama `/functions/v1/nextway-search`; non contiene un collegamento alla funzione AI Setter.
+- Quindi la funzione AI Setter è stata riferita come pubblicata in Supabase, ma il suo codice non è versionato nel repository consultato e l'integrazione dal frontend non risulta implementata in questo file.
+
+Stato aggiornato:
+- Funzione AI Setter in Supabase: **ESEGUITO MA NON VERIFICATO** (esistenza riferita, codice/endpoint live non interrogati).
+- Codice versionato AI Setter: **DA COMPLETARE**.
+- Collegamento frontend al generatore di bozze: **DA COMPLETARE**.
+- Secrets: **RIFERITI DALL'UTENTE, NON VERIFICATI LIVE**.
+- Prossimo intervento tecnico: recuperare dal pannello Supabase il codice attualmente pubblicato e l'URL effettivo, quindi salvarli nel repository in `supabase/functions/nextway-ai-setter/index.ts` e documentare il deploy. Non ricostruire il codice da supposizioni e non cambiare endpoint senza prima verificare quello reale.
