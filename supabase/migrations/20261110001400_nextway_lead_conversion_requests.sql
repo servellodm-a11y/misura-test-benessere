@@ -89,7 +89,10 @@ drop policy if exists nextway_conversion_update_admin
   on public.nextway_lead_conversion_requests;
 create policy nextway_conversion_update_admin
 on public.nextway_lead_conversion_requests for update to authenticated
-using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin'))
+using (
+  status = 'pending'
+  and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
+)
 with check (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'platform_admin')
   and reviewed_by = auth.uid()
@@ -101,6 +104,47 @@ revoke all on table public.nextway_lead_conversion_requests from public, anon, a
 grant select, insert on table public.nextway_lead_conversion_requests to authenticated;
 grant update (status, review_notes, reviewed_by, reviewed_at) on table public.nextway_lead_conversion_requests to authenticated;
 revoke all on function public.nextway_set_conversion_request_updated_at() from public, anon, authenticated;
+ 
+-- Una richiesta può essere revisionata una sola volta; i dati di origine sono immutabili.
+create or replace function public.nextway_guard_conversion_request_review()
+returns trigger
+language plpgsql
+set search_path = pg_catalog
+as $
+begin
+  if old.status <> 'pending' then
+    raise exception 'La richiesta conversione è già stata revisionata.';
+  end if;
+  if auth.uid() is null or new.reviewed_by is distinct from auth.uid() then
+    raise exception 'Revisore non valido.';
+  end if;
+  if new.status not in ('ready_for_activation','rejected') or new.reviewed_at is null then
+    raise exception 'Esito di revisione non valido.';
+  end if;
+  if new.id is distinct from old.id
+    or new.lead_id is distinct from old.lead_id
+    or new.owner_profile_id is distinct from old.owner_profile_id
+    or new.sponsor_profile_id is distinct from old.sponsor_profile_id
+    or new.created_by is distinct from old.created_by
+    or new.conversion_type is distinct from old.conversion_type
+    or new.full_name is distinct from old.full_name
+    or new.email is distinct from old.email
+    or new.phone is distinct from old.phone
+    or new.created_at is distinct from old.created_at then
+    raise exception 'I dati originari della richiesta non possono essere modificati.';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists nextway_conversion_review_guard
+  on public.nextway_lead_conversion_requests;
+create trigger nextway_conversion_review_guard
+before update on public.nextway_lead_conversion_requests
+for each row execute function public.nextway_guard_conversion_request_review();
+
+revoke all on function public.nextway_guard_conversion_request_review() from public, anon, authenticated;
+
 
 comment on table public.nextway_lead_conversion_requests is
   'Richieste di conversione CRM. Non crea account Auth, profiles, partner_details o clients; la futura attivazione richiede un processo server-side separato.';
