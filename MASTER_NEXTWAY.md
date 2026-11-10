@@ -446,3 +446,15 @@ Rilievi da risolvere/verificare:
 - GitHub Actions run `42801788640`: **SUCCESS**, job `validate` completato.
 - Questo esito conferma parsing e controlli statici; non prova che le query PostgREST siano autorizzate dalle policy RLS live o che la UI funzioni in browser.
 - Nessuna migrazione applicata e nessun deploy eseguito.
+
+
+## 27. Normalizzazione dei nomi nel registro (10 novembre 2026)
+
+- Normalizzato `profiles.full_name` con `trim()` prima di inserirlo nella mappa dei nomi: stringhe vuote o composte da spazi non vengono visualizzate come nomi validi.
+- La risoluzione da `partner_details.first_name/last_name` resta prioritaria quando entrambi i campi producono un nome, perché viene applicata dopo il fallback `profiles.full_name`.
+- Le query anagrafiche continuano a essere non bloccanti: eventuali errori di lettura non interrompono il registro e producono il fallback neutro.
+- Validatore aggiornato per controllare normalizzazione, comportamento non bloccante e fallback.
+- Commit codice: `ef431cfdcf10a6c8498b66fe15296ae4db2ee8f1`.
+- Commit validatore: `3c7f9027bcb6c17d5a2a5bb177eb68fe71a67c4d`.
+- GitHub Actions run `42801908730`: **SUCCESS**, job `validate` e step `Validate NEXTWAY audit` superati.
+- Test live PostgREST/RLS e browser ancora da eseguire dopo disponibilità del deploy; nessuna migrazione o pubblicazione eseguita.
