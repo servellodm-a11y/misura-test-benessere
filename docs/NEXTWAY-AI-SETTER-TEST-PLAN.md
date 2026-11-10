@@ -489,3 +489,13 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 
 - Verificare anche che le attività già registrate restino consultabili sui Lead archiviati e che la registrazione di nuove attività sia disabilitata.
 - Ultimi commit UI/validatore: f14736c1912f68f524e19eee8340d6056236fe72 e a12df0dc2edc5c613500e1bcaea23386a7ec77a2. Il run CI non risulta disponibile nel recupero GitHub effettuato; esito non certificato.
+
+
+## 47. Collaudo NEXTWAY CRM – coda follow-up
+
+- [ ] Caricare la coda con follow-up aperti e verificare ordinamento dalla scadenza più vicina.
+- [ ] Verificare l'evidenza delle attività scadute.
+- [ ] Aprire un Lead dalla coda anche quando i filtri correnti lo escludono.
+- [ ] Completare un follow-up dalla coda e verificare che scompaia dalla lista aperta.
+- [ ] Verificare che il partner veda solo attività collegate ai propri Lead; platform_admin segue le policy globali.
+- Stato codice: API e UI implementate su GitHub; migrazione 012 non applicata e test runtime non eseguiti.
