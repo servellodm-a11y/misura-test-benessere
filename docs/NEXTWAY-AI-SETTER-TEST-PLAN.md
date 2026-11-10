@@ -14,6 +14,7 @@ Applicare le migrazioni in ordine cronologico, dopo aver verificato lo stato eff
 6. `20261110000600_nextway_setter_output_authorization_hardening.sql`
 7. `20261110000700_nextway_clear_stale_staged_output.sql`
 8. `20261110000800_nextway_leads_soft_archive.sql`
+9. `20261110000900_nextway_lead_audit_trail.sql`
 
 La migrazione 007 elimina l'output temporaneo quando una prenotazione pending viene riassegnata a un altro utente, a un'altra chiave o a un'altra conversazione. Evita che il nuovo titolare recuperi una risposta OpenAI generata per la prenotazione precedente.
 
