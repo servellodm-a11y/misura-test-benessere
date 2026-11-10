@@ -326,3 +326,7 @@ assert.match(leadUiScript, /api\.getLeadById\(ev\.lead_id\)/);
 assert.match(leadUiScript, /data\.unshift\(result\.record\)/);
 assert.match(leadUiScript, /if\(!data\.some\(item=>item\.cloud_id===ev\.lead_id\)\)/);
 console.log("NEXTWAY CRM follow-up navigation: retrieves missing Lead through authenticated RLS before opening its activity panel: PASS");
+
+assert.match(leadUiScript, /Scaduti: '\+overdue\+' · Oggi: '\+today\+' · Entro 7 giorni: '\+week/);
+assert.match(leadUiScript, /call:'Telefonata',message:'Messaggio',email:'Email',meeting:'Incontro'/);
+console.log("NEXTWAY CRM follow-up queue: overdue/today/7-day summary and localized activity types: PASS");
