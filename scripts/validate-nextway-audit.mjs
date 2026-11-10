@@ -228,3 +228,23 @@ assert.match(leadCreationIdempotency, /p\.role = 'platform_admin'/i);
 assert.match(leadCreationIdempotency, /interval '30 days'/i);
 assert.match(leadCreationIdempotency, /revoke all on function public\.nextway_prune_lead_creation_requests\(\) from public, anon/i);
 console.log("Lead creation idempotency: browser-persisted key, SHA-256 payload fingerprint, owner-scoped RPC replay and atomic rollback: PASS");
+
+
+// NEXTWAY CRM: Lead editing must update the existing local record, not create a duplicate.
+assert.match(html, /id="formTitle">Nuovo Lead/);
+assert.match(html, /id="formSubmit" type="submit">Salva Lead/);
+assert.match(html, /id="cancelEdit" type="button" hidden/);
+assert.match(leadUiScript, /let editingLeadId=''/);
+assert.match(leadUiScript, /function startEdit\(lead\)/);
+assert.match(leadUiScript, /function cancelEdit\(\)/);
+assert.match(leadUiScript, /editingLeadId=lead\.id/);
+assert.match(leadUiScript, /Object\.entries\(fields\)\.forEach/);
+assert.match(leadUiScript, /const existing=editingLeadId\?data\.find\(y=>y\.id===editingLeadId\):null/);
+assert.match(leadUiScript, /data\.some\(y=>y!==existing&&!y\.is_test&&y\.url&&values\.url/);
+assert.match(leadUiScript, /if\(existing\)\{Object\.assign\(existing,values\)/);
+assert.match(leadUiScript, /existing\.local_dirty=true/);
+assert.match(leadUiScript, /values\.id=Date\.now\(\)\.toString\(36\)/);
+assert.match(leadUiScript, /edit\.textContent='Modifica Lead'/);
+assert.match(leadUiScript, /edit\.disabled=!!x\.archived_at\|\|!!x\._sync_conflict/);
+assert.match(leadUiScript, /bar\.append\(edit,archive,sel,del\)/);
+console.log("NEXTWAY CRM Lead editing: edit form, duplicate protection, existing-record update and sync dirty flag: PASS");
