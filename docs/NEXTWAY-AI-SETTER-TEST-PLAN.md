@@ -206,7 +206,7 @@ Prerequisito: migrazioni audit applicate su ambiente di test e accesso con accou
 
 - [ ] Se un profilo ha `profiles.full_name`, il registro mostra il nome completo.
 - [ ] Se `full_name` è vuoto ma esistono `partner_details.first_name/last_name`, il registro mostra nome e cognome.
-- [ ] Se sono disponibili entrambi, verificare e documentare la precedenza del nome proveniente da `partner_details`.
+- [ ] Se sono disponibili entrambi, verificare che `partner_details.first_name/last_name` prevalga su `profiles.full_name`.
 - [ ] Se una query anagrafica è negata da RLS o non restituisce un nome, il registro continua a mostrare gli eventi con fallback neutro.
 - [ ] Le query anagrafiche sono limitate agli ID presenti negli eventi caricati e non selezionano email o telefono.
 - [ ] Verificare la corretta visualizzazione distinta di proprietario e operatore, inclusi actor null dopo eliminazione del profilo.
