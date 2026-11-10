@@ -99,6 +99,28 @@ Deno.serve(async (req: Request) => {
     ? Math.max(1, Math.min(10, Math.floor(requestedMax)))
     : 5;
 
+  // Rate limit atomico per utente: massimo 3 richieste di ricerca al minuto.
+  const { data: limitRows, error: limitError } = await supabase.rpc(
+    "nextway_consume_api_rate_limit",
+    { p_scope: "public_search" },
+  );
+  const rateLimit = Array.isArray(limitRows) ? limitRows[0] : null;
+  if (limitError || !rateLimit) {
+    console.error("Rate limit check failed:", limitError);
+    return json({ error: "Controllo di sicurezza temporaneamente non disponibile." }, 503, responseOrigin);
+  }
+  if (!rateLimit.allowed) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((new Date(rateLimit.reset_at).getTime() - Date.now()) / 1000),
+    );
+    return json({
+      error: "Limite NEXTWAY Ricerca raggiunto. Riprova tra poco.",
+      retry_after_seconds: retryAfter,
+      remaining: 0,
+    }, 429, responseOrigin);
+  }
+
   const results = [];
   for (const query of queries) {
     let upstream: Response;
