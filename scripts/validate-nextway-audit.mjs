@@ -135,6 +135,11 @@ assert.match(setter, /const PENDING_CREATE_KEY = 'nextway_setter_pending_create_
 assert.match(setter, /sessionStorage\.getItem\(PENDING_CREATE_KEY\)/);
 assert.match(setter, /sessionStorage\.setItem\(PENDING_CREATE_KEY/);
 assert.match(setter, /sessionStorage\.removeItem\(PENDING_CREATE_KEY\)/);
+assert.match(setter, /pendingCreatedOwnerProfileId = savedPending\.owner_profile_id/);
+assert.match(setter, /owner_profile_id: pendingCreatedOwnerProfileId/);
+assert.match(setter, /pendingCreatedOwnerProfileId !== s\.user\.id/);
+assert.match(setter, /pendingLeadCreateRequest\.owner_profile_id !== s\.user\.id/);
+assert.match(setter, /owner_profile_id: request\.owner_profile_id/);
 assert.match(setter, /pendingCreatedGoal = savedPending\.goal/);
 assert.match(setter, /await generateDraft\(pendingCreatedConversationId, pendingCreatedGoal\)/);
 assert.match(setter, /È presente una conversazione creata in precedenza senza bozza completata/);
