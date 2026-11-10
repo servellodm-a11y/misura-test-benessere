@@ -191,13 +191,14 @@ Il documento riferisce una verifica sintattica JavaScript delle tre pagine e del
 
 ## 12. Prossimo percorso operativo
 
-1. Salvare e rileggere questo MASTER nel repository.
-2. Confrontare `supabase/functions/nextway-ai-setter/index.ts` con il sorgente live in Supabase e verificare l'endpoint effettivo; non effettuare deploy finché il confronto e i test non sono conclusi.
-3. Verificare la definizione effettiva della RPC di creazione lead/conversazione e la coerenza con le tabelle reali.
-4. Preparare il primo inserimento controllato di un lead di test e la relativa conversazione, solo quando la funzione/RPC e le policy sono coerenti.
-5. Testare il flusso AI Setter: generazione bozza, salvataggio, approvazione manuale; nessun invio automatico.
-6. Testare isolamento RLS con account distinti partner A, partner B e platform_admin.
-7. Solo dopo il superamento dei test, passare alle integrazioni successive.
+1. Correggere il validatore statico: sostituire l'asserzione obsoleta sull'URL con un controllo coerente con `sourceUrl=safeHttpUrl(x.url)` e con il rendering sicuro attuale.
+2. Correggere la migrazione `20261110001400_nextway_lead_conversion_requests.sql`: usare un delimitatore PostgreSQL valido `$ ... $` per la funzione trigger e imporre anche lato database il motivo obbligatorio quando `status='rejected'`.
+3. Rilanciare GitHub Actions e verificare che passino sia `Validate NEXTWAY audit` sia `Type-check AI Setter Edge Function`; non considerare superato il controllo finché il run non è `success`.
+4. Eseguire in Supabase la diagnostica read-only `supabase/diagnostics/nextway_conversion_schema_readonly.sql` e verificare schema, foreign key, indici, RLS, policy e grants effettivi.
+5. Confrontare la migrazione corretta con lo schema live e applicarla solo in un intervento separato, controllato e autorizzato; questa attività documentale non modifica il database.
+6. Testare il flusso con partner proprietario e `platform_admin`: richiesta valida, duplicato Lead/email, Lead archiviato o fuori fase, rifiuto con motivo, rifiuto senza motivo via API, revisione ripetuta e nuova richiesta dopo rifiuto.
+7. Verificare che la revisione `ready_for_activation` non crei ancora account Auth, `profiles`, `partner_details` o `clients`; progettare l'attivazione come processo separato con controlli idempotenti.
+8. Riprendere i test AI Setter: confronto sorgente live/endpoint, schema e RLS conversazioni/messaggi, generazione e salvataggio bozza; poi collegamento frontend. Nessun invio automatico.
 
 ## 13. Limiti di questa fotografia
 
