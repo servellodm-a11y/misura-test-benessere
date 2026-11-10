@@ -263,3 +263,6 @@ Prerequisito: migrazioni `20261110000800_nextway_leads_soft_archive.sql` e `2026
 - [ ] Verificare che una successiva sincronizzazione possa ripristinare localmente un Lead ancora presente nel cloud.
 - [x] Controlli statici aggiunti per risoluzione identità attore, annullamento prompt e distinzione tra rimozione locale e cancellazione cloud.
 
+- [ ] Nella scheda di un Lead archiviato sono visibili data/ora e motivo dell’archiviazione, con fallback se il motivo è assente.
+- [x] Controllo statico aggiunto per la visualizzazione dei metadati di archiviazione nella scheda Lead.
+
