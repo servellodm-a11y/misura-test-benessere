@@ -674,3 +674,12 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit UI: a65f24ebc44ee3cfe6891bfda72aa14e7016a34a.
 - Commit validatore: 3bfa2b371f26bb470696876741e08a4a41f8aad8.
 - Controlli statici dedicati aggiunti; lo stato CI del nuovo commit non è stato ancora confermato in questa sessione. Nessun deploy o migrazione.
+
+
+## 45. NEXTWAY CRM – sincronizzazione cloud con paginazione completa (10 novembre 2026)
+
+- La funzione pullCloud non si ferma più ai primi 1.000 Lead: recupera i record autorizzati in pagine da 1.000 con range Supabase, fino all'ultima pagina.
+- Mantiene invariati i controlli per proprietario tramite RLS, gestione dei record locali dirty, rilevamento conflitti e merge senza sovrascrivere modifiche locali.
+- Commit cloud: 5f1b05ddd61105f4992be4743b8b291c1391af62.
+- Commit validatore: c098b17de97d5722dfd26b5d31d1172c96a1e649.
+- Controllo statico dedicato aggiunto; il run CI non è ancora stato confermato in questa sessione. Nessun deploy o migrazione.
