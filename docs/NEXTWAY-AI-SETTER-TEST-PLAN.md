@@ -304,3 +304,30 @@ Il validatore controlla ora anche:
 Questi sono controlli testuali/statici sul sorgente SQL, non sostituiscono l'esecuzione delle migrazioni e i test RLS reali su Supabase.
 
 Esito GitHub Actions per la sezione 31: SUCCESS, run 42803134517, commit 4355756. Conferma esclusivamente i controlli statici sopra descritti.
+
+
+## 32. Matrice autorizzazioni Lead per i cinque ruoli
+
+La matrice seguente è ricavata dalle policy presenti in `supabase/nextway_leads.sql`; non rappresenta un'estensione gerarchica dei permessi.
+
+| Ruolo | SELECT | INSERT | UPDATE (incluso archivio/ripristino) | DELETE | Audit |
+|---|---|---|---|---|---|
+| platform_admin | Tutti i Lead | Tutti | Tutti | Tutti | Tutti gli eventi |
+| director | Solo owner | Solo owner | Solo owner | Solo owner | Solo propri Lead |
+| team_leader | Solo owner | Solo owner | Solo owner | Solo owner | Solo propri Lead |
+| sponsor | Solo owner | Solo owner | Solo owner | Solo owner | Solo propri Lead |
+| partner | Solo owner | Solo owner | Solo owner | Solo owner | Solo propri Lead |
+
+### Controlli statici automatici
+- [ ] La policy SELECT limita i ruoli non amministrativi a `owner_profile_id = auth.uid()`.
+- [ ] La policy INSERT impedisce di creare Lead assegnandoli a un altro proprietario, salvo platform_admin.
+- [ ] Le policy UPDATE USING e WITH CHECK impediscono il trasferimento autonomo della proprietà.
+- [ ] La policy DELETE limita la cancellazione fisica al proprietario o a platform_admin.
+- [ ] Nessuna policy Lead attribuisce privilegi trasversali a director, team_leader o sponsor.
+- [ ] La policy audit consente SELECT al proprietario storico o a platform_admin e non abilita scritture dirette.
+- [ ] Test runtime con due partner, un director/team_leader/sponsor e platform_admin: da eseguire su Supabase dopo l'allineamento dello schema live.
+
+### Confini
+- La matrice non certifica permessi di conversazioni e messaggi: vanno verificati separatamente.
+- I test statici verificano il testo delle policy versionate, non l'effettiva configurazione RLS live.
+- L'accesso gerarchico a Lead del proprio ramo è una decisione di prodotto ancora da specificare; non viene attivato implicitamente dal ruolo.
