@@ -455,8 +455,19 @@ Non inviarla: deve rimanere una bozza.
           p_generated_output: draft,
         },
       );
-      if (stageError || staged !== true) {
+      if (stageError) {
+        const stageMessage = String(stageError.message ?? "");
+        const stageCode = String(stageError.code ?? "");
+        if (stageCode === "55000" || /chiusa o archiviata/i.test(stageMessage)) {
+          return respond({
+            error: "La conversazione è stata chiusa o archiviata durante la generazione. La bozza non è stata salvata.",
+          },  409, responseOrigin);
+        }
         console.error("Staged output save failed:", stageError);
+        throw new Error("Persistenza temporanea della generazione non riuscita");
+      }
+      if (staged !== true) {
+        console.error("Staged output save returned an unexpected result");
         throw new Error("Persistenza temporanea della generazione non riuscita");
       }
     }
