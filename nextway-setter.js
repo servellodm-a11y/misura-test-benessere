@@ -105,6 +105,7 @@
     const PENDING_CREATE_KEY = 'nextway_setter_pending_create_v1';
     let pendingCreatedConversationId = '';
     let pendingCreatedGoal = 'first_contact';
+    let pendingCreatedOwnerProfileId = '';
     const PENDING_LEAD_CREATE_KEY = 'nextway_setter_pending_lead_create_v1';
     let pendingLeadCreateRequest = null;
 
@@ -201,9 +202,12 @@
       const savedPending = JSON.parse(sessionStorage.getItem(PENDING_CREATE_KEY) || 'null');
       if (savedPending && typeof savedPending.conversation_id === 'string'
         && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(savedPending.conversation_id)
+        && typeof savedPending.owner_profile_id === 'string'
+        && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(savedPending.owner_profile_id)
         && ['first_contact', 'follow_up', 'reply', 'presentation', 'appointment'].includes(savedPending.goal)) {
         pendingCreatedConversationId = savedPending.conversation_id;
         pendingCreatedGoal = savedPending.goal;
+        pendingCreatedOwnerProfileId = savedPending.owner_profile_id;
       }
     } catch (_) {}
 
@@ -212,7 +216,8 @@
       try {
         sessionStorage.setItem(PENDING_CREATE_KEY, JSON.stringify({
           conversation_id: pendingCreatedConversationId,
-          goal: pendingCreatedGoal
+          goal: pendingCreatedGoal,
+          owner_profile_id: pendingCreatedOwnerProfileId
         }));
       } catch (_) {}
     }
@@ -220,6 +225,7 @@
     function clearPendingCreate() {
       pendingCreatedConversationId = '';
       pendingCreatedGoal = 'first_contact';
+      pendingCreatedOwnerProfileId = '';
       try { sessionStorage.removeItem(PENDING_CREATE_KEY); } catch (_) {}
     }
 
@@ -333,6 +339,10 @@
       const form = event.currentTarget;
       try {
         if (pendingCreatedConversationId) {
+          const { s } = await cloud.active();
+          if (pendingCreatedOwnerProfileId !== s.user.id) {
+            throw new Error('La conversazione sospesa appartiene a un altro account. Accedi con il profilo originario per riprenderla.');
+          }
           $('nwst-create-button').disabled = true;
           await loadConversations();
           $('nwst-conversation').value = pendingCreatedConversationId;
@@ -387,6 +397,7 @@
         // indurre l'utente a creare un secondo Lead/conversazione al retry.
         pendingCreatedConversationId = result.conversation_id;
         pendingCreatedGoal = $('nwst-goal').value;
+        pendingCreatedOwnerProfileId = s.user.id;
         persistPendingCreate();
         clearPendingLeadCreateRequest();
         form.reset();
@@ -417,9 +428,10 @@
     updateCreateButtonLabel();
     cloud.active().then(async ({ s }) => {
       await loadConversations();
-      if (pendingLeadCreateRequest && pendingLeadCreateRequest.owner_profile_id !== s.user.id) {
+      if ((pendingLeadCreateRequest && pendingLeadCreateRequest.owner_profile_id !== s.user.id)
+        || (pendingCreatedConversationId && pendingCreatedOwnerProfileId !== s.user.id)) {
         $('nwst-create').reset();
-        say('È presente una richiesta sospesa da un altro account. Per proteggere i dati, il modulo non viene ripristinato: accedi con il profilo originario per completare la richiesta.');
+        say('È presente un’attività sospesa da un altro account. Per proteggere i dati, il modulo non viene ripristinato: accedi con il profilo originario per completarla.');
         return;
       }
       if (pendingLeadCreateRequest) restorePendingLeadCreateForm();
