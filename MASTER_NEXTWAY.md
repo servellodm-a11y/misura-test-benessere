@@ -160,7 +160,7 @@ Il documento riferisce una verifica sintattica JavaScript delle tre pagine e del
 | SQL `nextway_leads.sql` | **PRESENTE NEL REPOSITORY**; applicazione live da verificare se necessaria |
 | Migrazione `nw_*` | **DA COMPLETARE** solo dopo audit e decisione |
 | Edge Function `nextway-search` | **PRESENTE NEL REPOSITORY**; deploy/configurazione/test live da verificare |
-| Edge Function `nextway-ai-setter` | **ESEGUITO MA NON VERIFICATO** nel repository e nell'ambiente live |
+| Edge Function `nextway-ai-setter` | **SORGENTE VERSIONATO** nel repository; deploy e configurazione live non verificati |
 | Tabelle lead/conversazioni | **NESSUN RECORD** per il profilo admin nelle query del 10 novembre |
 | RPC creazione lead/conversazione | **ESEGUITO MA NON VERIFICATO** |
 | Test RLS con due partner e admin | **DA COMPLETARE** |
@@ -170,7 +170,7 @@ Il documento riferisce una verifica sintattica JavaScript delle tre pagine e del
 ## 12. Prossimo percorso operativo
 
 1. Salvare e rileggere questo MASTER nel repository.
-2. Allineare il codice effettivo della funzione `nextway-ai-setter` e i relativi endpoint/configurazioni con quanto già riportato in chat, senza inventare URL.
+2. Confrontare `supabase/functions/nextway-ai-setter/index.ts` con il sorgente live in Supabase e verificare l'endpoint effettivo; non effettuare deploy finché il confronto e i test non sono conclusi.
 3. Verificare la definizione effettiva della RPC di creazione lead/conversazione e la coerenza con le tabelle reali.
 4. Preparare il primo inserimento controllato di un lead di test e la relativa conversazione, solo quando la funzione/RPC e le policy sono coerenti.
 5. Testare il flusso AI Setter: generazione bozza, salvataggio, approvazione manuale; nessun invio automatico.
@@ -200,10 +200,11 @@ Confronto con il repository:
 
 Stato aggiornato:
 - Funzione AI Setter in Supabase: **ESEGUITO MA NON VERIFICATO** (esistenza riferita, codice/endpoint live non interrogati).
-- Codice versionato AI Setter: **DA COMPLETARE**.
+- Codice versionato AI Setter: **COMPLETATO E VERIFICATO** come copia del sorgente fornito dall'utente il 10 novembre; non equivale a verifica della versione live.
 - Collegamento frontend al generatore di bozze: **DA COMPLETARE**.
 - Secrets: **RIFERITI DALL'UTENTE, NON VERIFICATI LIVE**.
-- Prossimo intervento tecnico: recuperare dal pannello Supabase il codice attualmente pubblicato e l'URL effettivo, quindi salvarli nel repository in `supabase/functions/nextway-ai-setter/index.ts` e documentare il deploy. Non ricostruire il codice da supposizioni e non cambiare endpoint senza prima verificare quello reale.
+- Il 10 novembre l'utente ha fornito il codice completo. È stato salvato in `supabase/functions/nextway-ai-setter/index.ts` e documentato in `supabase/functions/nextway-ai-setter/README.md`. Il codice archiviato è quello ricevuto, non è stato dichiarato identico al deploy live.
+- Prossimo intervento: verificare il sorgente live, l'endpoint effettivo, lo schema e le policy delle tabelle conversazioni/messaggi. Non cambiare endpoint e non effettuare deploy senza verifica.
 
 
 ## 15. Audit codice frontend/cloud e Edge Function ricerca (10 novembre 2026)
@@ -238,3 +239,47 @@ Stato di questo audit:
 - Coerenza dei campi sync con SQL nel repository: **COMPLETATO E VERIFICATO** (solo statica).
 - Test end-to-end Supabase/Netlify: **DA COMPLETARE**.
 - Recupero sorgente live `nextway-ai-setter`: **BLOCCATO** dall'assenza di accesso Supabase nella sessione.
+
+
+## 16. Sorgente AI Setter ricevuto e versionato (10 novembre 2026)
+
+### File aggiunti al repository
+- `supabase/functions/nextway-ai-setter/index.ts`: copia integrale del codice incollato dall'utente in chat.
+- `supabase/functions/nextway-ai-setter/README.md`: contratto richiesta/risposta, variabili d'ambiente, flusso previsto, controlli pre-deploy e limiti noti.
+- Commit di aggiunta sorgente: `849f52eb089026909071b23c660b97f675ef90be`.
+- Commit di documentazione: `c972006ecad48456b3c13ff8d834d08ddbe092f5`.
+
+### Revisione statica iniziale del codice ricevuto
+Aspetti positivi:
+- Autenticazione Supabase tramite Bearer JWT e `auth.getUser(token)`.
+- Uso del client Supabase con il JWT dell'utente; non è presente una service-role key.
+- Lettura di conversazione, prospect e storico tramite RLS.
+- Recupero massimo delle ultime 20 comunicazioni.
+- Generazione strutturata tramite OpenAI Responses API e schema JSON.
+- Inserimento come bozza con `direction: "outgoing"`, `ai_generated: true`, `approved_by: null`, `sent_at: null`.
+- Risposta esplicita `sent: false` e `approved: false`; nessuna chiamata di invio esterno nel codice.
+
+Rilievi da risolvere/verificare:
+1. CORS attualmente consente `Access-Control-Allow-Origin: *`; restringere agli origin NEXTWAY previsti, coerentemente con la funzione `nextway-search`.
+2. Non è presente rate limiting applicativo; valutare limiti per utente e per finestra temporale per contenere abuso e costi OpenAI.
+3. Non sono imposti limiti espliciti alla dimensione del body e ai campi testuali di lead/storico inseriti nel contesto.
+4. Non viene controllato lo stato della conversazione prima della generazione; definire il comportamento per conversazioni chiuse/archiviate.
+5. Le policy RLS e lo schema effettivo di `nextway_setter_conversations` e `nextway_setter_messages` non sono presenti nei file SQL recuperati in questo audit: non si può certificare che SELECT/INSERT funzionino né che l'ownership sia coerente.
+6. Non è stato verificato che la policy INSERT impedisca di associare un messaggio a un proprietario non autorizzato, mantenendo l'eccezione amministratore solo dove voluta.
+7. Il codice intercetta lo stato OpenAI `incomplete` e l'assenza di output; gli errori del provider vengono ricondotti a 500 generico. Da testare anche refusal, timeout e risposte non conformi.
+
+### Stato e limiti
+- Sorgente ricevuto e salvato nel repository: **COMPLETATO E VERIFICATO** (copia del testo ricevuto).
+- README e istruzioni operative: **COMPLETATO E VERIFICATO** (file aggiunto).
+- Identità tra sorgente archiviato e versione distribuita su Supabase: **DA VERIFICARE**.
+- Endpoint effettivo: **DA VERIFICARE**; non usare un URL dedotto dal nome funzione.
+- Schema e policy RLS conversazioni/messaggi: **DA VERIFICARE**.
+- Deploy, secrets e test live: **NON ESEGUITI**.
+- Integrazione dal frontend NEXTWAY: **DA COMPLETARE** solo dopo verifica del backend e dell'endpoint.
+
+### Prossimo percorso
+1. Recuperare dal pannello Supabase il sorgente live e confrontarlo con il file archiviato.
+2. Recuperare/verificare schema, foreign key e policy RLS delle due tabelle conversazioni e messaggi.
+3. Correggere il codice in un'unica revisione controllata dopo aver chiarito i rilievi; non fare patch ripetitive non testate.
+4. Testare generazione e salvataggio bozza con account autorizzato, account partner diverso, token scaduto e conversazione non accessibile.
+5. Solo dopo, collegare il frontend e testare approvazione manuale; mantenere disabilitato qualsiasi invio automatico.
