@@ -586,3 +586,22 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - GitHub Actions run `42805023373`, commit `e87081095b48939099abcb43d681c3eaa8c1a4f1`: **SUCCESS**; job `validate`, step `Validate NEXTWAY audit` e nuovo step `Type-check AI Setter Edge Function` superati con Deno 2.
 - La validazione è statica: non è un test Deno runtime né una verifica della chiamata effettiva a OpenAI. La modifica Edge Function è salvata su GitHub ma non è stata distribuita su Supabase.
 - Nota di conformità: la sanitizzazione riduce l'invio accidentale di recapiti evidenti, ma non garantisce anonimizzazione completa né sostituisce informativa, base giuridica e valutazione GDPR del trattamento.
+
+
+## 38. Idempotenza transazionale creazione Lead/conversazione (10 novembre 2026)
+
+- Preparata la migrazione `supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql`.
+- La nuova RPC `nextway_create_lead_with_conversation_idempotent` riceve `request_id` UUID e fingerprint SHA-256 del payload; la chiave è univoca per `owner_profile_id`.
+- La tabella `nextway_lead_creation_requests` conserva soltanto proprietario, chiave, hash, risposta con ID Lead/conversazione e timestamp: non conserva il payload personale.
+- La tabella usa RLS owner-scoped. La RPC è `SECURITY INVOKER`, con `search_path` fissato e privilegi EXECUTE revocati a `public`/ `anon`, concessi ad `authenticated`.
+- La funzione registra la chiave, richiama la RPC esistente `nextway_create_lead_with_conversation` nella stessa transazione e salva la risposta. Richieste ripetute con la stessa chiave e lo stesso hash ricevono la risposta originaria; una chiave riutilizzata con hash diverso viene rifiutata. Errori o risposte incomplete provocano rollback, inclusa la prenotazione della chiave.
+- `nextway-setter.js` conserva prima della chiamata di rete la chiave, il fingerprint e il payload nella sessione della scheda. Se non riceve risposta, ripete esattamente la richiesta originale; il modulo viene ripristinato al reload. La memoria viene rimossa soltanto dopo una risposta di creazione confermata.
+- Il payload viene serializzato nel browser e il suo SHA-256 è calcolato con Web Crypto. Se sessionStorage o Web Crypto non sono disponibili, la chiamata non viene inviata senza protezione idempotente.
+- Commit migrazione: `df95e3e53ffa96e50bc8a745a9359f0b67fa6bf4` (successiva correzione rollback `c4e13e8a95ae9c847d7b466165006911454d9f6c`).
+- Commit frontend: `7eaf8cd2d20aff0c2e1cdead2a6f1f5065ebcd73`.
+- Commit validatore: `5adf96007802fe1337647e9ff0bde707eef276af`.
+- Commit workflow: `4ebc44be7f16014895904a7f8e0ecf7f7db296e5`.
+- GitHub Actions run `42805580487`: **SUCCESS**, validazione statica Node e type-check Deno superati sul commit con migrazione, frontend e test.
+- La migrazione è solo preparata nel repository: non applicata su Supabase. Il wrapper presuppone che la RPC live a 7 parametri `nextway_create_lead_with_conversation` esista con la firma e il comportamento già verificati; la diagnostica read-only è stata estesa per controllare la nuova RPC e la nuova tabella dopo l'eventuale applicazione.
+- Prima dell'applicazione live restano necessari: verifica della firma RPC sottostante, revisione SQL sul progetto, test con due chiamate concorrenti e stesso/differente payload, test RLS con due utenti e test di errore/rollback.
+- Nessun deploy Supabase o Netlify eseguito; nessuna migrazione applicata.
