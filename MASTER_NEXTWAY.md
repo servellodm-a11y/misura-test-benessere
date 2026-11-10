@@ -613,7 +613,7 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Anche l'ID della conversazione sospesa dopo una creazione confermata è associato al profilo proprietario; il retry viene bloccato se l'utente autenticato non coincide.
 - Corretto il recupero in cui, dopo una risposta RPC ricevuta, restassero temporaneamente sia l'ID conversazione sia la chiave della richiesta: il completamento del retry cancella entrambi gli stati locali.
 - Aggiunta alla migrazione 011 la funzione manuale admin-only `nextway_prune_lead_creation_requests()`, che elimina le chiavi più vecchie di 30 giorni. Non è stato creato alcun job automatico.
-- La diagnostica read-only include anche la nuova RPC di pulizia e la tabella `nextway_lead_creation_requests`.
+- La diagnostica read-only include anche la nuova RPC di pulizia e la tabella `nextway_lead_creation_requests` in tutte le sezioni: colonne, RLS, policy, grants e indici. Ultima correzione diagnostica: commit `01e823d5680e7469333db7a13aaec4c46c752be2`.
 - Commit cleanup SQL: `69a0ef1ff1a3cee6cdc7eff956ca542a5862c6c0`; diagnostica: `d77acb2dee269bee3c20a6b01f434667040099e9`.
 - Commit frontend profilo conversazione: `d717f99c98a285c9b7923eb49f1469827cd1f5b7`; validatore finale: `1e39155596a89093a07a153f74ff227546bcb3c7`.
 - GitHub Actions run `42806035763`: **SUCCESS**; validazione statica Node e type-check Deno superati.
