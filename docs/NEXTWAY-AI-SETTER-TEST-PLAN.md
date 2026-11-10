@@ -441,3 +441,17 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] In caso di eccezione inattesa, verificare che il catch non registri messaggi, stack o payload.
 - [ ] Verificare che il client riceva soltanto il messaggio generico previsto.
 - Stato codice: implementato e validato staticamente; type-check Deno superato con GitHub Actions run `42807835076`. Test runtime/log effettivi ancora da eseguire dopo deploy autorizzato.
+
+
+## 43. Collaudo NEXTWAY CRM – modifica Lead e ordinamento
+
+- [ ] Aprire un Lead locale e verificare che il modulo venga popolato con tutti i campi modificabili.
+- [ ] Modificare nome, fonte, URL, evidenza, categoria, qualificazione, punteggi e note; salvare e verificare che il record mantenga lo stesso ID e che non compaia un duplicato.
+- [ ] Annullare la modifica e usare il pulsante "Pulisci": il modulo deve tornare allo stato "Nuovo Lead".
+- [ ] Tentare di salvare un URL già assegnato a un altro Lead: il salvataggio deve essere bloccato; lo stesso URL del Lead in modifica deve essere consentito.
+- [ ] Verificare i vincoli: qualificazione "Qualificato" non consentita senza identità confermata o con punteggio inferiore a 50.
+- [ ] Modificare un Lead sincronizzato: deve essere impostato local_dirty=true; dopo sincronizzazione il record cloud deve essere aggiornato mantenendo lo stesso ID.
+- [ ] Modificare contemporaneamente il record cloud da un secondo client: la sincronizzazione deve rilevare il conflitto e non sovrascrivere la versione remota.
+- [ ] Verificare che Lead archiviati o con conflitto non risolto non possano essere modificati.
+- [ ] Verificare i quattro ordinamenti (punteggio, più recenti, meno recenti, nome A-Z) in combinazione con ricerca, categoria, stato e archivio.
+- Stato codice: implementato su GitHub nei commit 86d9b06de85d38c94dcd3579061cc012268a6014 e 1d48f8eee4c88ba6a3dc9414ea04bf79fd5d2cb1; controlli statici dedicati aggiunti al validatore nei commit b3e99c286f4bd1a75dc17b7ddaafecd6947b2f9d e 726f2d145ad7c36afff8280f5845debe343d1a19. Test browser/runtime ancora da eseguire.
