@@ -433,3 +433,11 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] La chiave legacy globale `nextway_ai_records_v1` deve rimanere intatta e non deve essere importata automaticamente in A o B.
 - [ ] Testare anche refresh, token scaduto, import CSV, backup JSON e conflitti di sincronizzazione.
 - Stato: codice e validatore statico presenti; test browser multi-account ancora da eseguire.
+
+## 42. Verifica privacy-safe logging AI Setter
+
+- [ ] In caso di errore Supabase, verificare nei log runtime che compaiano solo codice e status, senza oggetti errore o contenuti.
+- [ ] In caso di errore OpenAI, verificare che venga registrato soltanto lo status HTTP e non il corpo della risposta.
+- [ ] In caso di eccezione inattesa, verificare che il catch non registri messaggi, stack o payload.
+- [ ] Verificare che il client riceva soltanto il messaggio generico previsto.
+- Stato codice: implementato e validato staticamente; type-check Deno superato con GitHub Actions run `42807835076`. Test runtime/log effettivi ancora da eseguire dopo deploy autorizzato.
