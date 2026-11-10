@@ -152,3 +152,27 @@ La schermata e le API sono state aggiunte al repository. I test sopra sono ancor
 
 - [ ] Se il cloud cambia mentre il confronto è aperto, la scelta “Conserva versione cloud” rilegge il record al momento della conferma e importa la versione più recente, non lo snapshot precedente.
 - [ ] Se il cloud cambia mentre il confronto è aperto e viene scelta la versione locale, l'UPDATE condizionale fallisce e richiede un nuovo confronto.
+
+
+## Test cronologia e tracciabilità Lead
+
+Prerequisito: applicare `20261110000900_nextway_lead_audit_trail.sql` dopo aver verificato lo schema live e completato le migrazioni precedenti necessarie.
+
+- [ ] INSERT Lead genera un evento INSERT con actor_profile_id, proprietario, timestamp e snapshot after_data.
+- [ ] UPDATE di uno o più campi genera un evento UPDATE con changed_fields e snapshot before/after.
+- [ ] UPDATE che cambia soltanto updated_at non genera un evento audit.
+- [ ] DELETE genera un evento DELETE e la cronologia resta presente anche dopo la cancellazione del Lead.
+- [ ] Utente anonimo/non autenticato non può leggere la tabella audit.
+- [ ] Partner A può leggere la cronologia dei propri Lead ma non quella di Partner B.
+- [ ] Partner B non può leggere né modificare direttamente gli eventi audit.
+- [ ] platform_admin può leggere la cronologia di Lead di tutti i partner.
+- [ ] authenticated non può inserire, aggiornare o cancellare direttamente righe audit.
+- [ ] La funzione trigger non può essere invocata direttamente dal client.
+- [ ] Se actor_profile_id viene eliminato, l'evento resta e actor_profile_id diventa NULL.
+- [ ] UI mostra data/ora, azione, UUID attore e valori prima/dopo senza interpretare contenuto audit come HTML.
+- [ ] La UI gestisce tabella/migrazione non ancora presente con messaggio controllato.
+- [ ] Un Lead non sincronizzato non consente la consultazione cloud della cronologia.
+
+### Limiti
+
+La cronologia non è retroattiva: registra solo operazioni eseguite dopo l'applicazione della migrazione. L'interfaccia mostra al momento l'UUID del profilo, non un nome; non inventare un'identità leggibile prima di verificare i campi disponibili nella tabella profiles live. Tutti i test sono da eseguire in Supabase.
