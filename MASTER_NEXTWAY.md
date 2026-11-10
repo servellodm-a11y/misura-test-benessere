@@ -626,6 +626,6 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - La UI Lead applica la validazione in inserimento manuale e import CSV; i record storici non validi non ricevono un collegamento attivo nella visualizzazione.
 - La ricerca web assistita scarta i risultati privi di URL valido prima di renderizzare il collegamento o trasferire la fonte nel modulo Lead.
 - Il validatore statico verifica la presenza e l'uso della validazione nei due frontend.
-- Commit UI Lead: `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465`; connessione/ricerca: `483c908a381ea28453b9799ecbd70c28cbed736f`; validatore: `a2dfcfb7172e0c72bb11f176dcb81af02d7551c1`.
-- GitHub Actions run `42806623550`: **SUCCESS**, validazione statica Node e type-check Deno superati.
+- Commit UI Lead: `5b3212de459718c0fd2e8ed7e6e2aabb2a6e3465` e correzione rendering `47f413fa26aee03f22aceff2b9a2075f3795b27c`; connessione/ricerca: `483c908a381ea28453b9799ecbd70c28cbed736f`; validatore: `e5901c59cbcb3b3e4ebaf24affd73ce824bc557e`.
+- GitHub Actions run `42806931080`: **SUCCESS**, validazione statica Node e type-check Deno superati anche dopo la correzione finale che rimuove completamente il collegamento per gli URL storici non validi. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42806931080.
 - Nessun dato preesistente modificato; nessuna migrazione applicata; nessun deploy Supabase o Netlify eseguito.
