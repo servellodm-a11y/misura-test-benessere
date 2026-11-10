@@ -21,7 +21,7 @@ La funzione non contiene un'azione di invio verso WhatsApp, email o altri canali
 
 Richieste dal codice:
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- `SUPABASE_PUBLISHABLE_KEYS` oppure `SUPABASE_PUBLISHABLE_KEY` oppure `SUPABASE_ANON_KEY`
 - `OPENAI_API_KEY`
 
 Facoltativa:
@@ -63,16 +63,16 @@ Obiettivi ammessi: `first_contact`, `follow_up`, `reply`, `presentation`, `appoi
 3. Verificare schema, foreign key e policy RLS di `nextway_setter_conversations` e `nextway_setter_messages`.
 4. Verificare che la policy INSERT dei messaggi autorizzi il proprietario della conversazione e l'amministratore secondo le regole volute, senza consentire l'assegnazione arbitraria di `owner_profile_id`.
 5. Verificare che la lettura dello storico rispetti l'isolamento per conversazione e proprietario.
-6. Limitare CORS agli origin NEXTWAY autorizzati: il codice attuale usa `Access-Control-Allow-Origin: *`. CORS non sostituisce l'autorizzazione server-side, ma l'allowlist evita chiamate browser da origini estranee.
-7. Valutare limiti di frequenza/costo, dimensione massima del body e lunghezza dei campi di contesto.
+6. Verificare che `NEXTWAY_ALLOWED_ORIGINS` contenga tutti e soli gli origin autorizzati. Il codice applica un'allowlist; CORS non sostituisce l'autorizzazione server-side.
+7. Implementare e testare un rate limit server-side distribuito per utente; il codice attuale limita il body e i token di output, ma non il numero di richieste.
 8. Testare token valido, token scaduto, conversazione inesistente, conversazione di altro partner, lead non accessibile, errore OpenAI, risposta incompleta e errore di inserimento.
 9. Verificare che il record salvato resti una bozza e che nessun processo successivo lo invii senza approvazione esplicita.
 
 ## Limiti noti del sorgente acquisito
 
-- CORS è permissivo (`*`).
-- Non è presente un rate limit applicativo.
-- Non è imposto un limite esplicito alla dimensione del body o ai campi testuali recuperati.
+- CORS usa `NEXTWAY_ALLOWED_ORIGINS` (default: dominio Netlify noto); l'assenza dell'header Origin è ammessa per chiamate non-browser autenticate.
+- Non è ancora presente un rate limit server-side distribuito; i blocchi frontend non proteggono da richieste dirette o multi-dispositivo.
+- Il body è limitato a 16 KB e la generazione a 1.200 token; i campi del contesto sono troncati nel codice.
 - Non viene controllato lo stato della conversazione prima di generare una bozza.
 - Il comportamento delle policy RLS sulle due tabelle non è deducibile dal solo codice della funzione e non è ancora stato verificato in questo repository.
 - Il codice gestisce `status === "incomplete"` e l'assenza di testo; gli altri errori del provider sono ricondotti a un errore generico 500.
