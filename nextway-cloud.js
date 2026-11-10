@@ -26,7 +26,25 @@ function init(){
   const {data,error}=await c.from('nextway_leads').update(patch).eq('id',cloudId).select('id,archived_at,archived_by,archive_reason,updated_at').maybeSingle();
   if(error)throw error;if(!data)throw new Error('Lead non trovato o non autorizzato.');return data;
 }
-window.NEXTWAY_CLOUD={active,getConfig,archiveLead:(id,reason)=>setLeadArchived(id,true,reason),restoreLead:id=>setLeadArchived(id,false)};
+async function getLeadForConflict(cloudId){
+  if(!cloudId)throw new Error('Lead non collegato al cloud.');
+  const {c}=await active();
+  const {data,error}=await c.from('nextway_leads').select('*').eq('id',cloudId).maybeSingle();
+  if(error)throw error;if(!data)throw new Error('Lead non trovato o non autorizzato.');
+  return {record:fromCloud(data),updated_at:data.updated_at};
+ }
+ function leadPayload(x){
+  return {display_name:String(x.name||'').slice(0,120),profession:x.profession||null,company_brand:x.company_brand||null,location:x.location||null,category:['potential_partner','final_customer','wellness_professional'].includes(x.category)?x.category:'potential_partner',partner_type:x.partner_type||null,discovery_mode:x.mode||null,public_signal:x.signal_type||null,source_name:String(x.source||'').slice(0,200),source_url:x.url,public_evidence:String(x.evidence||'').slice(0,4000),verified_at:x.verified_at||null,identity_check:['pending','confirmed','uncertain'].includes(x.identity_check)?x.identity_check:'pending',qualification:['Da approfondire','Qualificato','Escluso'].includes(x.qualification)?x.qualification:'Da approfondire',score_fit:Number(x.fit||0),score_activity:Number(x.activity||0),score_presence:Number(x.presence||0),score_interest:Number(x.interest||0),score_approach:Number(x.approach||0),status:['Da verificare','Verificato','Escluso','Contattato'].includes(x.status)?x.status:'Da verificare',notes:x.notes||null};
+ }
+ async function resolveLeadConflict(cloudId,expectedRemoteUpdatedAt,localRecord){
+  if(!cloudId||!expectedRemoteUpdatedAt)throw new Error('Manca la versione cloud di confronto. Ricarica il conflitto.');
+  const {c}=await active();
+  const {data,error}=await c.from('nextway_leads').update(leadPayload(localRecord)).eq('id',cloudId).eq('updated_at',expectedRemoteUpdatedAt).select('*').maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('Il cloud è cambiato ancora durante la risoluzione. Nessuna modifica applicata: ricarica il confronto.');
+  return {record:fromCloud(data),updated_at:data.updated_at};
+ }
+ window.NEXTWAY_CLOUD={active,getConfig,archiveLead:(id,reason)=>setLeadArchived(id,true,reason),restoreLead:id=>setLeadArchived(id,false),getLeadForConflict,resolveLeadConflict};
  function fromCloud(r){return {id:r.id,cloud_id:r.id,name:r.display_name,profession:r.profession||'',company_brand:r.company_brand||'',location:r.location||'',category:r.category,partner_type:r.partner_type||'',mode:r.discovery_mode||'',signal_type:r.public_signal||'',source:r.source_name,url:r.source_url,evidence:r.public_evidence,verified_at:r.verified_at||'',identity_check:r.identity_check,qualification:r.qualification,fit:r.score_fit,activity:r.score_activity,presence:r.score_presence,interest:r.score_interest,approach:r.score_approach,status:r.status,notes:r.notes||'',created:r.created_at,archived_at:r.archived_at||null,archive_reason:r.archive_reason||'',cloud_updated_at:r.updated_at,local_dirty:false};}
  async function syncLocal(){const {c,s}=await active();let rows=[];try{rows=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){throw new Error('Archivio locale non leggibile.');}let added=0,updated=0,skipped=0,failed=0,conflicts=0;
  for(const x of rows){if(x.is_test){skipped++;continue;}if(!x.name||!x.url||!x.source||!x.evidence){failed++;continue;}
