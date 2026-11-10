@@ -142,7 +142,9 @@ Deno.serve(async (req: Request) => {
     }, 429, responseOrigin);
   }
 
-  const results = [];
+  const results: Array<{ query: string; results: Array<Record<string, unknown>> }> = [];
+  const failures: Array<{ query: string; reason: string; provider_status?: number }> = [];
+
   for (const query of queries) {
     let upstream: Response;
     try {
@@ -162,32 +164,34 @@ Deno.serve(async (req: Request) => {
       });
     } catch (error) {
       const timedOut = error instanceof DOMException && error.name === "TimeoutError";
-      return json({
-        error: timedOut
-          ? "La ricerca ha superato il tempo massimo. Riprova."
-          : "Servizio di ricerca temporaneamente non raggiungibile.",
-      }, timedOut ? 504 : 502, responseOrigin);
+      failures.push({
+        query,
+        reason: timedOut ? "timeout" : "provider_unreachable",
+      });
+      continue;
     }
 
     if (!upstream.ok) {
-      const status = upstream.status === 429 ? 429 : 502;
-      return json({
-        error: status === 429
-          ? "Limite temporaneo del servizio di ricerca raggiunto."
-          : "Il servizio di ricerca non ha risposto correttamente.",
+      failures.push({
+        query,
+        reason: upstream.status === 429 ? "provider_rate_limited" : "provider_error",
         provider_status: upstream.status,
-      }, status, responseOrigin);
+      });
+      continue;
     }
 
     let payload: { results?: unknown } | null;
     try {
       payload = await upstream.json();
     } catch {
-      return json({ error: "Il servizio di ricerca ha restituito una risposta non valida." }, 502, responseOrigin);
+      failures.push({ query, reason: "invalid_provider_json" });
+      continue;
     }
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-      return json({ error: "Formato della risposta di ricerca non valido." }, 502, responseOrigin);
+      failures.push({ query, reason: "invalid_provider_payload" });
+      continue;
     }
+
     const items = Array.isArray(payload.results) ? payload.results : [];
     const safeItems = items.flatMap((item: unknown) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return [];
@@ -211,10 +215,25 @@ Deno.serve(async (req: Request) => {
     results.push({ query, results: safeItems });
   }
 
+  if (results.length === 0) {
+    const allRateLimited = failures.length > 0 &&
+      failures.every((failure) => failure.reason === "provider_rate_limited");
+    return json({
+      error: allRateLimited
+        ? "Limite temporaneo del servizio di ricerca raggiunto."
+        : "Nessuna ricerca è stata completata correttamente.",
+      failures,
+    }, allRateLimited ? 429 : 502, responseOrigin);
+  }
+
   return json({
     provider: "tavily",
+    queries_requested: queries.length,
     queries_completed: results.length,
+    queries_failed: failures.length,
     results,
+    failures,
+    partial: failures.length > 0,
     note: "Risultati di ricerca pubblici: verificare manualmente identità, fonte ed evidenza prima di creare un Lead.",
   }, 200, responseOrigin);
 });
