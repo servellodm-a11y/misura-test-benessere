@@ -337,7 +337,7 @@ La matrice seguente è ricavata dalle policy presenti in `supabase/nextway_leads
 
 File: `supabase/diagnostics/nextway_setter_permissions_readonly.sql`.
 
-La query raccoglie soltanto metadati delle tabelle conversazioni e messaggi: colonne, RLS/FORCE RLS, policy, grants e foreign key. Non legge righe applicative e non modifica il database.
+La query raccoglie soltanto metadati di conversazioni, messaggi e tabelle di servizio: colonne, RLS/FORCE RLS, policy, grants, foreign key, indici e firme/SECURITY DEFINER/privilegi EXECUTE delle RPC usate da AI Setter e dalla creazione Lead. Non legge righe applicative e non modifica il database.
 
 - [ ] Verificare che entrambe le tabelle esistano e che le colonne di ownership siano coerenti.
 - [ ] Verificare SELECT/INSERT/UPDATE/DELETE per ciascuna policy e il relativo USING/WITH CHECK.
