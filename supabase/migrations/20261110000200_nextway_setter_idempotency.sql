@@ -77,7 +77,7 @@ begin
     (user_id, conversation_id, idempotency_key)
   values
     (v_user_id, p_conversation_id, p_idempotency_key)
-  on conflict (user_id, idempotency_key) do nothing
+  on conflict do nothing
   returning id into v_inserted_id;
 
   -- La richiesta appena inserita è già stata acquisita: non deve essere
