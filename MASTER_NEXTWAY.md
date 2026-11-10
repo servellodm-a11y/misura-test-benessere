@@ -363,3 +363,22 @@ Rilievi da risolvere/verificare:
 - Test runtime con due dispositivi, race condition e ruoli distinti: DA ESEGUIRE.
 - Deploy Netlify e Supabase: NON ESEGUITI. Netlify resta in attesa del ripristino crediti del 4 dicembre 2026.
 - La funzione locale/cloud non deve essere considerata operativa in produzione fino ad applicazione delle migrazioni richieste, deploy e collaudo autenticato.
+
+
+## 21. Cronologia e tracciabilità modifiche Lead (10 novembre 2026)
+
+- Aggiunta la migrazione `20261110000900_nextway_lead_audit_trail.sql` che crea `nextway_lead_audit_logs`.
+- Un trigger AFTER INSERT/UPDATE/DELETE su `nextway_leads` registra azione, timestamp, actor_profile_id, proprietario del Lead al momento dell'evento, campi modificati e snapshot precedente/successivo.
+- Gli eventi UPDATE vengono registrati solo se cambia almeno un campo diverso da `updated_at`; le modifiche automatiche del solo timestamp non generano rumore.
+- La tabella audit non ha FK verso il Lead: una cancellazione fisica del Lead non cancella la cronologia. actor_profile_id usa ON DELETE SET NULL per conservare l'evento anche se un profilo viene eliminato.
+- RLS è abilitata. La lettura è consentita al proprietario storico del Lead o a platform_admin; agli utenti authenticated viene concesso SELECT, nessuna policy di scrittura è prevista. Scrittura esclusiva tramite trigger SECURITY DEFINER con search_path fisso; EXECUTE della funzione trigger è revocato.
+- `nextway-cloud.js` espone getLeadHistory(cloudId), con query autenticata e limite massimo 50 eventi per Lead.
+- `nextway-ai.html` mostra il pannello Cronologia modifiche nelle schede Lead sincronizzate: data/ora, attore (UUID profilo), azione e valori precedenti/successivi dei campi modificati. I dati audit sono inseriti nel DOM con textContent, non con HTML interpretato.
+
+### Stato e limiti
+- Migrazione, API e UI: COMMITTATE NEL REPOSITORY.
+- Cronologia retroattiva: NON DISPONIBILE. Gli eventi iniziano solo dopo l'applicazione della migrazione e l'attivazione del trigger.
+- Identità dell'attore: per ora viene mostrato l'UUID del profilo. Nome leggibile da profili da aggiungere solo dopo verifica certa dello schema profiles live.
+- Consultazione: massimo 50 eventi per Lead; paginazione/filtri avanzati non implementati.
+- Test runtime RLS, trigger, insert/update/delete e conservazione dopo cancellazione: DA ESEGUIRE su Supabase.
+- Migrazione NON applicata; nessun deploy Supabase o Netlify eseguito. Netlify resta in attesa del 4 dicembre 2026.
