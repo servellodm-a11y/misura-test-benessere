@@ -28,7 +28,7 @@ while ((cursor = html.indexOf("<script", cursor)) !== -1) {
 assert.ok(inlineScripts.length > 0, "Nessuno script inline trovato in nextway-ai.html");
 
 const leadUiScript = inlineScripts.join("\n");
-assert.match(html, /const safeHttpUrl=value=>\{try\{const u=new URL\(String\(value\?\?' '\)\.trim\(\)\)/);
+assert.ok(html.includes("const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());"), "Lead UI must define strict HTTP(S) URL validation");
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
 assert.match(leadUiScript, /if\(!safeHttpUrl\(x\.url\)\)/);
 assert.match(leadUiScript, /!safeHttpUrl\(x\.url\)/);
