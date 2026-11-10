@@ -9,7 +9,7 @@ function init(){
  if(document.getElementById('nw-cloud'))return;
  const header=document.querySelector('header');if(!header)return;
  const root=document.createElement('section');root.id='nw-cloud';
- root.innerHTML=`<style>${style}</style><div class="nwbox"><h2 style="margin:0 0 8px">NEXTWAY · Connessione centrale</h2><p class="nwmuted">Autenticazione personale, ricerca pubblica assistita e archivio Supabase. I risultati non diventano Lead finché non li verifichi e li acquisisci manualmente.</p><div class="nwgrid"><label>URL progetto Supabase<input id="nw-url" type="url" placeholder="https://xxxx.supabase.co"></label><label>Publishable key<input id="nw-key" type="password" autocomplete="off" placeholder="sb_publishable_..."></label></div><div><button id="nw-config">Salva configurazione</button><span id="nw-status" class="nwstatus">Non configurato</span></div><div class="nwgrid"><label>Email<input id="nw-email" type="email" autocomplete="username" placeholder="email account"></label><label>Password<input id="nw-password" type="password" autocomplete="current-password" placeholder="Password Supabase"></label></div><button id="nw-login">Accedi</button><button id="nw-logout" class="secondary">Esci</button><button id="nw-sync" class="secondary">Sincronizza archivio locale</button><button id="nw-pull" class="secondary">Carica archivio cloud</button><p id="nw-message" class="nwmuted" aria-live="polite">La configurazione salva solo URL e publishable key nel browser. La password non viene memorizzata.</p></div><div class="nwbox"><h3 style="margin:0 0 8px">Ricerca web assistita</h3><label>Query di ricerca<textarea id="nw-query" rows="2" placeholder='Es. "network marketing" "cerco collaboratori" Italia'></textarea></label><button id="nw-search">Cerca sul web</button><span class="nwmuted">La ricerca richiede login e Edge Function pubblicata su Supabase.</span><div id="nw-results"></div></div><div class="nwbox" id="nw-org-activity" hidden><h3 style="margin:0 0 8px">Registro attività organizzazione</h3><p class="nwmuted">Vista amministratore · eventi audit Lead · massimo 100 per caricamento. Non mostra snapshot o note personali.</p><div class="nwgrid"><label>Dal<input id="nw-act-from" type="date"></label><label>Al<input id="nw-act-to" type="date"></label><label>Operazione<select id="nw-act-action"><option value="">Tutte</option><option value="INSERT">Creazione</option><option value="UPDATE">Modifica</option><option value="DELETE">Eliminazione</option></select></label><label>ID profilo proprietario (facoltativo)<input id="nw-act-owner" type="text" placeholder="UUID, se necessario"></label></div><button id="nw-act-load">Applica filtri</button><button id="nw-act-more" class="secondary" disabled>Carica altri</button><span id="nw-act-status" class="nwmuted" aria-live="polite"></span><div id="nw-act-results"></div></div>`;
+ root.innerHTML=`<style>${style}</style><div class="nwbox"><h2 style="margin:0 0 8px">NEXTWAY · Connessione centrale</h2><p class="nwmuted">Autenticazione personale, ricerca pubblica assistita e archivio Supabase. I risultati non diventano Lead finché non li verifichi e li acquisisci manualmente.</p><div class="nwgrid"><label>URL progetto Supabase<input id="nw-url" type="url" placeholder="https://xxxx.supabase.co"></label><label>Publishable key<input id="nw-key" type="password" autocomplete="off" placeholder="sb_publishable_..."></label></div><div><button id="nw-config">Salva configurazione</button><span id="nw-status" class="nwstatus">Non configurato</span></div><div class="nwgrid"><label>Email<input id="nw-email" type="email" autocomplete="username" placeholder="email account"></label><label>Password<input id="nw-password" type="password" autocomplete="current-password" placeholder="Password Supabase"></label></div><button id="nw-login">Accedi</button><button id="nw-logout" class="secondary">Esci</button><button id="nw-sync" class="secondary">Sincronizza archivio locale</button><button id="nw-pull" class="secondary">Carica archivio cloud</button><p id="nw-message" class="nwmuted" aria-live="polite">La configurazione salva solo URL e publishable key nel browser. La password non viene memorizzata.</p></div><div class="nwbox"><h3 style="margin:0 0 8px">Ricerca web assistita</h3><label>Query di ricerca<textarea id="nw-query" rows="2" placeholder='Es. "network marketing" "cerco collaboratori" Italia'></textarea></label><button id="nw-search">Cerca sul web</button><span class="nwmuted">La ricerca richiede login e Edge Function pubblicata su Supabase.</span><div id="nw-results"></div></div><div class="nwbox" id="nw-org-activity" hidden><h3 style="margin:0 0 8px">Registro attività organizzazione</h3><p class="nwmuted">Vista amministratore · eventi audit Lead · massimo 100 per caricamento. Non mostra snapshot o note personali.</p><div class="nwgrid"><label>Dal<input id="nw-act-from" type="date"></label><label>Al<input id="nw-act-to" type="date"></label><label>Operazione<select id="nw-act-action"><option value="">Tutte</option><option value="INSERT">Creazione</option><option value="UPDATE">Modifica</option><option value="DELETE">Eliminazione</option></select></label><label>ID profilo proprietario (facoltativo)<input id="nw-act-owner" type="text" placeholder="UUID, se necessario"></label></div><button id="nw-act-load">Applica filtri</button><button id="nw-act-more" class="secondary" disabled>Carica altri</button><span id="nw-act-status" class="nwmuted" aria-live="polite"></span><div id="nw-act-results"></div></div><div class="nwbox" id="nw-conversion-queue" hidden><h3 style="margin:0 0 8px">Richieste conversione Lead</h3><p class="nwmuted">Coda riservata a platform_admin. La verifica non crea ancora account o profili.</p><button id="nw-conv-load">Carica richieste pendenti</button><span id="nw-conv-status" class="nwmuted" aria-live="polite"></span><div id="nw-conv-results"></div></div>`;
  header.insertAdjacentElement('afterend',root);
  const $=id=>document.getElementById(id),say=t=>{$('nw-message').textContent=t};
  const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());return ['http:','https:'].includes(u.protocol)&&u.hostname&&!u.username&&!u.password?u.href:''}catch{return ''}};
@@ -62,10 +62,32 @@ function init(){
   return {events,offset,limit,hasMore:events.length===limit};
  }
  async function refreshOrgActivityVisibility(){
-  const panel=$('nw-org-activity');if(!panel)return;
-  panel.hidden=true;
+  const panel=$('nw-org-activity'),queue=$('nw-conversion-queue');if(!panel||!queue)return;
+  panel.hidden=true;queue.hidden=true;
   if(!session)return;
-  try{if(await isPlatformAdmin())panel.hidden=false;}catch(e){panel.hidden=true;}
+  try{if(await isPlatformAdmin()){panel.hidden=false;queue.hidden=false;}}catch(e){panel.hidden=true;queue.hidden=true;}
+ }
+ async function loadLeadConversionQueue(){
+  const status=$('nw-conv-status'),target=$('nw-conv-results'),button=$('nw-conv-load');
+  button.disabled=true;status.textContent='Caricamento…';target.replaceChildren();
+  try{
+   const requests=await getLeadConversionQueue();
+   if(!requests.length){status.textContent='Nessuna richiesta in attesa.';return;}
+   status.textContent=requests.length+' richieste pendenti (massimo 100).';
+   requests.forEach(req=>{
+    const item=document.createElement('div');item.className='nwresult';
+    const title=document.createElement('strong');title.textContent=(req.conversion_type==='partner'?'Collaboratore / Partner':'Cliente')+' · '+req.full_name;
+    const lead=document.createElement('p');lead.className='nwmuted';lead.textContent='Lead: '+(req.lead?.display_name||'Nome non disponibile')+' · Email: '+req.email+' · Telefono: '+(req.phone||'non indicato');
+    const meta=document.createElement('p');meta.className='nwmuted';meta.textContent='Proprietario / sponsor proposto: '+req.owner_profile_id+' · Richiesta: '+new Date(req.created_at).toLocaleString('it-IT');
+    const actions=document.createElement('div');actions.className='actions';
+    const ready=document.createElement('button');ready.textContent='Verifica e prepara attivazione';
+    ready.addEventListener('click',async()=>{const notes=prompt('Nota amministrativa (facoltativa):','Dati verificati. Pronta per la fase di attivazione.');if(notes===null)return;if(!confirm('Confermi che i dati sono stati verificati? Questa azione NON crea ancora account, profili o clienti.'))return;ready.disabled=true;try{await reviewLeadConversionRequest(req.id,'ready_for_activation',notes);await loadLeadConversionQueue();}catch(err){status.textContent='Revisione non completata: '+err.message;ready.disabled=false;}});
+    const reject=document.createElement('button');reject.className='secondary';reject.textContent='Respinge richiesta';
+    reject.addEventListener('click',async()=>{const notes=prompt('Motivo del rifiuto (obbligatorio):','');if(notes===null)return;if(!notes.trim()){alert('Inserisci il motivo del rifiuto.');return;}if(!confirm('Confermi il rifiuto della richiesta?'))return;reject.disabled=true;try{await reviewLeadConversionRequest(req.id,'rejected',notes);await loadLeadConversionQueue();}catch(err){status.textContent='Revisione non completata: '+err.message;reject.disabled=false;}});
+    actions.append(ready,reject);item.append(title,lead,meta,actions);target.append(item);
+   });
+  }catch(err){status.textContent='Coda non disponibile: '+err.message;}
+  finally{button.disabled=false;}
  }
  function renderOrganizationActivity(events,append=false){
   const target=$('nw-act-results');if(!append)target.replaceChildren();
@@ -101,6 +123,7 @@ function init(){
  let orgActivityOffset=0;
  $('nw-act-load').addEventListener('click',()=>{orgActivityOffset=0;loadOrganizationActivity(false);});
  $('nw-act-more').addEventListener('click',()=>loadOrganizationActivity(true));
+ $('nw-conv-load').addEventListener('click',loadLeadConversionQueue);
 
  async function setLeadArchived(cloudId, archived, reason='', expectedUpdatedAt=''){
   if(!cloudId)throw new Error('Questo Lead non è ancora sincronizzato. Sincronizza prima l’archivio.');
