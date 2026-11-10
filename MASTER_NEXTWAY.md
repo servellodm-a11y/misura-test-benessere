@@ -533,3 +533,10 @@ Rilievi da risolvere/verificare:
 - Nessun accesso gerarchico di director/team_leader/sponsor va aggiunto prima di una decisione funzionale esplicita e di policy RLS dedicate.
 
 Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assenza di privilegi speciali impliciti per i ruoli organizzativi non amministrativi.
+
+
+## 33. Diagnostica permessi AI Setter (10 novembre 2026)
+
+- Preparata `supabase/diagnostics/nextway_setter_permissions_readonly.sql`, query read-only che rileva colonne, stato RLS/FORCE RLS, policy USING/WITH CHECK, grants client e foreign key delle tabelle `nextway_setter_conversations` e `nextway_setter_messages`.
+- La diagnostica non legge record applicativi e non modifica schema, dati o permessi.
+- I permessi delle conversazioni e dei messaggi restano non certificati finché non viene esaminato l'output del progetto Supabase live. Non dedurre i permessi dalla matrice Lead.
