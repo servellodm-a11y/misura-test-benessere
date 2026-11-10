@@ -367,3 +367,14 @@ Controllo statico: GitHub Actions run `42803941984` — SUCCESS. Il controllo in
 - [ ] Non usare il solo nome visualizzato della funzione come prova dell'URL invocabile.
 
 Nota: il frontend versionato usa `/functions/v1/nextway-ai-setter`; una precedente schermata Supabase aveva mostrato `/functions/v1/rapid-function`. La discrepanza resta aperta e non va risolta per supposizione.
+
+## 36. Recupero conversazione dopo ricaricamento pagina
+
+- [ ] Creare un prospect e interrompere il flusso dopo la conferma della RPC ma prima del completamento della bozza.
+- [ ] Ricaricare la pagina nella stessa scheda: il sistema deve ripristinare ID conversazione e obiettivo da sessionStorage.
+- [ ] Verificare che il pulsante mostri l'azione di retry e che il retry richiami la generazione sulla conversazione esistente, senza richiamare la RPC di creazione.
+- [ ] Verificare che l'obiettivo selezionato venga ripristinato anche se l'utente lo aveva cambiato prima del reload.
+- [ ] Verificare che la chiave sessionStorage venga rimossa dopo il completamento e mantenuta in caso di errore.
+- [ ] Verificare che dati sessionStorage non validi o con obiettivi non ammessi vengano ignorati.
+
+Nota: sessionStorage copre reload e ripristino della stessa scheda. Non garantisce recupero dopo chiusura definitiva della scheda o su un altro dispositivo. La RPC di creazione Lead non è ancora idempotente contro un timeout ambiguo prima della risposta al client.
