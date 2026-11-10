@@ -6,6 +6,7 @@ on:
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
+      - "supabase/functions/nextway-ai-setter/**"
       - "nextway-ai.html"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
