@@ -177,3 +177,29 @@ Prerequisito: applicare `20261110000900_nextway_lead_audit_trail.sql` dopo aver 
 ### Limiti
 
 La cronologia non è retroattiva: registra solo operazioni eseguite dopo l'applicazione della migrazione. L'interfaccia mostra al momento l'UUID del profilo, non un nome; non inventare un'identità leggibile prima di verificare i campi disponibili nella tabella profiles live. Tutti i test sono da eseguire in Supabase.
+
+
+## Test registro attività dell’organizzazione
+
+Prerequisito: migrazioni rate limit/idempotenza e ciclo di vita Lead applicate nell’ordine documentato, inclusa `20261110000900_nextway_lead_audit_trail.sql`. Eseguire con almeno due partner e un account `platform_admin`.
+
+- [ ] `platform_admin` autenticato vede il pannello Registro attività organizzazione.
+- [ ] Partner autenticato non vede il pannello e una chiamata diretta a `getOrganizationActivity()` viene rifiutata.
+- [ ] Utente non autenticato non può leggere gli eventi.
+- [ ] L’amministratore vede eventi appartenenti a più proprietari, secondo la policy RLS della tabella audit.
+- [ ] Il filtro data iniziale include gli eventi dal principio della giornata locale selezionata.
+- [ ] Il filtro data finale include gli eventi fino alla fine della giornata locale selezionata.
+- [ ] I filtri INSERT, UPDATE e DELETE restituiscono soltanto l’azione selezionata.
+- [ ] Il filtro UUID proprietario limita correttamente gli eventi e rifiuta un UUID malformato.
+- [ ] Ordinamento decrescente per timestamp e paginazione: il secondo blocco non duplica il primo.
+- [ ] Un evento DELETE mostra il nome del Lead dallo snapshot precedente, quando disponibile.
+- [ ] Archiviazione e ripristino, dopo applicazione migrazione 008, appaiono come UPDATE con i campi pertinenti.
+- [ ] Un conflitto risolto tramite aggiornamento compare come UPDATE; non viene presentato come evento distinto non registrato.
+- [ ] La query non restituisce before_data/after_data completi, note o evidenze pubbliche.
+- [ ] Il contenuto di nome Lead e campi modificati è mostrato come testo e non interpretato come HTML.
+- [ ] Revocando il ruolo `platform_admin` durante la sessione, una nuova richiesta non deve più restituire il registro.
+- [ ] Verificare la gestione UI quando la migrazione audit non è ancora applicata o la tabella non è accessibile.
+
+### Limiti noti
+
+La UI e la query sono predisposte nel repository. La lettura del ruolo richiede che l'utente possa leggere il proprio record in `profiles`. La proiezione JSON PostgREST per `lead_name` deve essere verificata contro la versione live. Nessuno dei test sopra è considerato superato prima del collaudo autenticato su Supabase.
