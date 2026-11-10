@@ -149,3 +149,6 @@ Il rilevamento e la prevenzione della sovrascrittura sono predisposti nel codice
 ### Limiti
 
 La schermata e le API sono state aggiunte al repository. I test sopra sono ancora da eseguire; nessun risultato statico o commit dimostra da solo il comportamento live di RLS, trigger o concorrenza su Supabase.
+
+- [ ] Se il cloud cambia mentre il confronto è aperto, la scelta “Conserva versione cloud” rilegge il record al momento della conferma e importa la versione più recente, non lo snapshot precedente.
+- [ ] Se il cloud cambia mentre il confronto è aperto e viene scelta la versione locale, l'UPDATE condizionale fallisce e richiede un nuovo confronto.
