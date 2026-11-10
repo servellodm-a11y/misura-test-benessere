@@ -187,4 +187,8 @@ assert.match(leadCreationIdempotency, /public\.nextway_create_lead_with_conversa
 assert.match(leadCreationIdempotency, /raise exception[\s\S]*?annulla l'intera transazione/i);
 assert.doesNotMatch(leadCreationIdempotency, /request_payload\s+jsonb/i);
 assert.match(leadCreationIdempotency, /revoke all on function public\.nextway_create_lead_with_conversation_idempotent/i);
+assert.match(leadCreationIdempotency, /function public\.nextway_prune_lead_creation_requests\(\)[\s\S]*?security definer/i);
+assert.match(leadCreationIdempotency, /p\.role = 'platform_admin'/i);
+assert.match(leadCreationIdempotency, /interval '30 days'/i);
+assert.match(leadCreationIdempotency, /revoke all on function public\.nextway_prune_lead_creation_requests\(\) from public, anon/i);
 console.log("Lead creation idempotency: browser-persisted key, SHA-256 payload fingerprint, owner-scoped RPC replay and atomic rollback: PASS");
