@@ -402,3 +402,14 @@ Rilievi da risolvere/verificare:
 - Query PostgREST, autorizzazioni RLS, visibilità del ruolo, paginazione e resa UI: **DA TESTARE SU SUPABASE**.
 - La vista dipende dalla migrazione `20261110000900_nextway_lead_audit_trail.sql`, che non risulta applicata al database live.
 - Nessun deploy Netlify o Supabase eseguito. Netlify resta in attesa del ripristino dei crediti il 4 dicembre 2026.
+
+
+## 23. Minimizzazione degli snapshot audit (10 novembre 2026)
+
+- Nuova migrazione `20261110001000_nextway_audit_data_minimization.sql` sostituisce la funzione trigger `nextway_capture_lead_audit()` mantenendo il trigger esistente.
+- I nuovi snapshot INSERT/UPDATE/DELETE escludono i valori di `notes` e `public_evidence`. I nomi dei campi restano in `changed_fields`, così si continua a sapere che un campo è stato modificato senza conservare il suo contenuto nel registro.
+- Per rilevare le modifiche UPDATE, il confronto avviene sui record completi in memoria della funzione trigger; vengono persistiti soltanto gli snapshot minimizzati.
+- La UI Cronologia Lead mostra un messaggio di valore omesso per questi due campi.
+- **Importante:** la migrazione non modifica gli eventi storici già registrati. Gli snapshot precedenti alla migrazione 010 possono ancora contenere quei valori. La loro eventuale redazione richiede una decisione separata e una migrazione esplicitamente approvata.
+- Ordine migrazioni: prima `20261110000900_nextway_lead_audit_trail.sql`, poi `20261110001000_nextway_audit_data_minimization.sql`.
+- Stato: codice e documentazione nel repository; migrazione non applicata su Supabase; test SQL non eseguiti.
