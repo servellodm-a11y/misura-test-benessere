@@ -570,5 +570,5 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Il valore recuperato viene validato come UUID e l'obiettivo viene accettato solo se appartiene alla lista prevista.
 - Commit frontend: `6cc702d6078eed6ba198b75c28f463023607eeee`.
 - Commit validatore: `a4b0ba4ec6c41709a325023890f6d07e09bbf232`.
-- Validazione GitHub da eseguire sul nuovo commit. Il controllo statico non sostituisce il test runtime di refresh/sessionStorage e la verifica Supabase live.
+- GitHub Actions run `42804560636`, commit `1f4a6c79c120cbf8e760d7f53900c3e0c6cc7e80`: **SUCCESS**; job `validate` e step `Validate NEXTWAY audit` superati. Il controllo statico non sostituisce il test runtime di refresh/sessionStorage e la verifica Supabase live.
 - Limite residuo: la protezione copre il caso in cui il browser abbia ricevuto l'ID dalla RPC; non rende idempotente la RPC di creazione in caso di timeout ambiguo prima che il client riceva la risposta. Non aggiungere idempotenza DB senza migrazione approvata.
