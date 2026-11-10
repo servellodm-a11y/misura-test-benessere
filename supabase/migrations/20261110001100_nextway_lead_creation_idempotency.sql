@@ -162,3 +162,46 @@ comment on function public.nextway_create_lead_with_conversation_idempotent(
   uuid, text, text, text, text, text, text, text, text
 ) is
   'Wrapper idempotente transazionale della RPC nextway_create_lead_with_conversation; stessa chiave e stesso hash restituiscono la risposta originale.';
+
+-- Pulizia manuale delle chiavi oltre 30 giorni, riservata a platform_admin.
+-- Non viene creato alcun job automatico.
+create or replace function public.nextway_prune_lead_creation_requests()
+returns integer
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_is_admin boolean := false;
+  v_deleted integer := 0;
+begin
+  if v_user_id is null then
+    raise exception 'Autenticazione richiesta' using errcode = '28000';
+  end if;
+
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = v_user_id
+      and p.role = 'platform_admin'
+  ) into v_is_admin;
+
+  if not v_is_admin then
+    raise exception 'Operazione riservata a platform_admin'
+      using errcode = '42501';
+  end if;
+
+  delete from public.nextway_lead_creation_requests
+  where created_at < clock_timestamp() - interval '30 days';
+
+  get diagnostics v_deleted = row_count;
+  return v_deleted;
+end;
+$;
+
+revoke all on function public.nextway_prune_lead_creation_requests() from public, anon;
+grant execute on function public.nextway_prune_lead_creation_requests() to authenticated;
+
+comment on function public.nextway_prune_lead_creation_requests() is
+  'Pulizia manuale admin-only delle chiavi idempotenti di creazione Lead più vecchie di 30 giorni.';
