@@ -257,3 +257,14 @@ assert.match(leadUiScript, /sort==='oldest'\?new Date\(a\.created\|\|0\)-new Dat
 assert.match(leadUiScript, /sort==='name'\?String\(a\.name\|\|'\)\.localeCompare/);
 assert.match(leadUiScript, /\['query','cat','state','archiveFilter','sort'\]\.forEach/);
 console.log("NEXTWAY CRM sorting: score, newest, oldest and alphabetical order: PASS");
+
+
+// NEXTWAY CRM: broaden search and add qualification/profile filters.
+assert.match(html, /id="qualificationFilter"/);
+assert.match(html, /id="partnerFilter"/);
+assert.match(leadUiScript, /qualification=el\('qualificationFilter'\)\.value,partner=el\('partnerFilter'\)\.value/);
+assert.match(leadUiScript, /x\.company_brand,x\.location,x\.source,x\.url,x\.evidence,x\.notes/);
+assert.match(leadUiScript, /!qualification\|\|x\.qualification===qualification/);
+assert.match(leadUiScript, /!partner\|\|x\.partner_type===partner/);
+assert.match(leadUiScript, /'qualificationFilter','partnerFilter','sort'/);
+console.log("NEXTWAY CRM search: company/source/evidence/notes plus qualification and partner filters: PASS");
