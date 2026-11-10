@@ -310,3 +310,12 @@ console.log("NEXTWAY CRM activity log and follow-up: cloud API, UI and owner-sco
 assert.match(leadUiScript, /activityBtn\.disabled=!x\.cloud_id/);
 assert.match(leadUiScript, /if\(x\.archived_at\)\{save\.disabled=true;feedback\.textContent='Lead archiviato/);
 console.log("NEXTWAY CRM archived Lead: activity history remains readable while new activity entry is disabled: PASS");
+
+assert.match(cloud, /async function getOpenLeadActivities\(limit=100\)/);
+assert.match(cloud, /next_action_status'\)\.not\('next_action_at','is',null\)/);
+assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity/);
+assert.match(leadUiScript, /id="loadFollowups"/);
+assert.match(leadUiScript, /getOpenLeadActivities\(100\)/);
+assert.match(leadUiScript, /Completa/);
+assert.match(leadUiScript, /Apri Lead/);
+console.log("NEXTWAY CRM follow-up queue: due-date ordering, lead navigation and completion action: PASS");
