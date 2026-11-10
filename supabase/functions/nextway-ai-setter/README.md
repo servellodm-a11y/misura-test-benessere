@@ -62,9 +62,9 @@ Non ampliare l'accesso gerarchico prima di definire le relazioni organizzative e
 
 ## Rate limit distribuito
 
-La migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit.sql` crea il controllo atomico condiviso nel database.
+La migrazione `supabase/migrations/20261110000100_nextway_distributed_rate_limit.sql` crea il controllo atomico condiviso; la migrazione successiva `supabase/migrations/20261110000300_nextway_rate_limit_units.sql` aggiorna la RPC per contare unità di consumo.
 
-- AI Setter: massimo 5 richieste per utente in una finestra fissa di 60 secondi.
+- AI Setter: massimo 5 generazioni per utente in una finestra fissa di 60 secondi (1 unità per generazione).
 - In caso di indisponibilità della RPC, la funzione fallisce in modo chiuso con HTTP 503.
 - Al superamento del limite restituisce HTTP 429.
 
@@ -99,7 +99,7 @@ La risposta contiene `success`, `draft_id`, `message`, `strategy`, `objective`, 
 
 ## Verifiche ancora necessarie
 
-1. Applicare in ambiente di test prima la migrazione rate limit e poi la migrazione idempotenza.
+1. Applicare in ambiente di test nell'ordine: `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`.
 2. Verificare che le colonne e le foreign key delle tabelle conversazioni e messaggi corrispondano alla migrazione.
 3. Testare utente proprietario, utente non proprietario e platform admin.
 4. Testare richieste concorrenti con la stessa chiave, replay dopo completamento e riutilizzo della chiave su un'altra conversazione.
