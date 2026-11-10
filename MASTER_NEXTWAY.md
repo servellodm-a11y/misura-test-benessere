@@ -422,3 +422,5 @@ Rilievi da risolvere/verificare:
 - Il workflow usa Node.js 22 e permessi GitHub in sola lettura (`contents: read`).
 - Stato: script e workflow committati; esecuzione GitHub Actions non ancora osservata. I controlli statici eseguiti in questa sessione sono separati dall'esito futuro del workflow.
 - Questi controlli non sostituiscono test SQL/Postgres, RLS, Supabase Auth, PostgREST o test browser.
+
+- Prima esecuzione GitHub Actions sul commit `b512b7450da927e04cad12c64d572d0d9ad2711b`: **SUCCESS**; job `validate` e step `Validate NEXTWAY audit` completati senza errori. Questo conferma i soli controlli statici definiti nello script.
