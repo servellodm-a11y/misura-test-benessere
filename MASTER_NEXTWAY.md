@@ -429,7 +429,10 @@ Rilievi da risolvere/verificare:
 
 ## 25. Diagnostica schema identità profili (10 novembre 2026)
 
-- Creato `supabase/diagnostics/nextway_profiles_identity_schema.sql`, query esclusivamente read-only su `information_schema.columns` e vincoli FK di `profiles` e `partner_details`.
-- Non legge righe di utenti, email, nomi o altri dati personali; non modifica schema o dati.
-- Serve a verificare i nomi effettivi dei campi e le relazioni prima di aggiungere nomi leggibili al registro amministrativo. Fino a quel riscontro la UI continua a mostrare gli UUID.
-- Stato: query committata nel repository; esecuzione nel SQL Editor Supabase ancora da fare. Non ho accesso diretto al database live da questa sessione.
+- Eseguita dall'utente nel SQL Editor Supabase la diagnostica read-only su `information_schema.columns` e sui vincoli FK di `profiles` e `partner_details`.
+- Schema verificato: `profiles` contiene `id`, `full_name`, `email`, `role`, `sponsor_id`, `team_leg`, `active`, `created_at`, `updated_at`. `partner_details` contiene `profile_id`, `first_name`, `last_name`, `phone`, `language`, `sponsor_profile_id`, `team_side`, `status`, `created_at`, `updated_at`.
+- Relazioni FK verificate: `partner_details.profile_id -> profiles.id`; `partner_details.sponsor_profile_id -> profiles.id`; `profiles.sponsor_id -> profiles.id`.
+- Aggiornato `nextway-cloud.js`: il Registro attività organizzazione raccoglie gli ID proprietario e operatore presenti nella pagina di eventi, prova a risolvere i nomi tramite `profiles.full_name` e poi tramite `partner_details.first_name/last_name`, e mostra i nomi al posto degli UUID. Se una lettura dei profili non è autorizzata o un nome non è disponibile, il registro usa un fallback neutro e continua a visualizzare gli eventi. L'ID proprietario resta disponibile come filtro facoltativo.
+- La risoluzione dei nomi usa query separate e limitate agli ID effettivamente presenti negli eventi caricati; non recupera email né numeri telefonici.
+- Commit codice: `0fd2e88bd95bff97a0640e30d9d830d9af851942`.
+- Stato: schema verificato dall'output SQL condiviso dall'utente; codice committato nel repository. Test PostgREST/RLS e browser live ancora da eseguire. Nessun deploy Netlify o Supabase eseguito. Netlify resta in attesa del ripristino dei crediti il 4 dicembre 2026.
