@@ -407,3 +407,8 @@ Verifica CI aggiuntiva: GitHub Actions run `42805023373` — SUCCESS. Il workflo
 - [ ] Verificare che il payload personale non venga memorizzato nella tabella idempotenza: devono essere presenti soltanto hash, chiave, proprietario, risposta con ID e timestamp.
 
 Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`, frontend e validatore salvati su GitHub. GitHub Actions run `42805580487` e run finale `42805604904` — SUCCESS per validazione statica Node e type-check Deno. Run finale: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42805604904. Migrazione non applicata; test SQL, RLS, concorrenza e browser da eseguire in ambiente autorizzato.
+
+
+- [ ] Salvare una richiesta sospesa con il profilo A, uscire e autenticarsi con il profilo B nella stessa scheda: il modulo non deve ripristinare i dati di A e il retry deve essere bloccato.
+- [ ] Ripetere il controllo con una conversazione già creata e bozza incompleta: il profilo B non deve poter riprendere l'ID della conversazione di A.
+- [ ] Verificare che `nextway_prune_lead_creation_requests()` sia eseguibile soltanto da `platform_admin` e rimuova esclusivamente chiavi più vecchie di 30 giorni.
