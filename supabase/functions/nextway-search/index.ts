@@ -64,6 +64,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const supabase = createClient(supabaseUrl, publishableKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const { data: userData, error: authError } = await supabase.auth.getUser(token);
@@ -71,10 +72,30 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Sessione scaduta o non autorizzata." }, 401, responseOrigin);
   }
 
-  const rawBody = await req.text();
-  if (new TextEncoder().encode(rawBody).byteLength > 16_384) {
-    return json({ error: "Richiesta troppo grande." }, 413, responseOrigin);
+  // Legge il body in streaming e interrompe la lettura appena supera 16 KB.
+  const reader = req.body?.getReader();
+  if (!reader) {
+    return json({ error: "Corpo della richiesta mancante." }, 400, responseOrigin);
   }
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.byteLength;
+    if (totalBytes > 16_384) {
+      await reader.cancel();
+      return json({ error: "Richiesta troppo grande." }, 413, responseOrigin);
+    }
+    chunks.push(value);
+  }
+  const rawBytes = new Uint8Array(totalBytes);
+  let byteOffset = 0;
+  for (const chunk of chunks) {
+    rawBytes.set(chunk, byteOffset);
+    byteOffset += chunk.byteLength;
+  }
+  const rawBody = new TextDecoder().decode(rawBytes);
 
   let body: { queries?: unknown; max_results?: unknown };
   try {
