@@ -70,16 +70,10 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Simulare interruzione dopo la prenotazione: la stessa chiave resta occupata per la lease e può essere riacquisita dopo 2 minuti.
 - [ ] Verificare che inserimento messaggio e memorizzazione della risposta siano atomici: nessun messaggio duplicato in caso di ripetizione.
 - [ ] Verificare isolamento: chiave di Partner A non leggibile né riutilizzabile da Partner B.
+- [ ] La tabella ha vincolo univoco su `(user_id, idempotency_key)` e non è direttamente accessibile ai ruoli applicativi.
+- [ ] Le RPC sono eseguibili da authenticated ma non da anon; la funzione SECURITY DEFINER verifica proprietario conversazione o platform_admin.
 - [ ] Verificare che le funzioni SECURITY DEFINER controllino esplicitamente proprietario conversazione o ruolo platform_admin e non espongano la tabella direttamente ai ruoli anon/authenticated.
 - [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
-
-### 5. Idempotenza AI Setter
-- [ ] La tabella `nextway_setter_generation_requests` ha vincolo univoco su `(user_id, idempotency_key)`.
-- [ ] Le RPC `nextway_begin_setter_generation` e `nextway_complete_setter_generation` sono eseguibili dagli utenti autenticati ma non da anonimi.
-- [ ] La tabella non è leggibile o modificabile direttamente dai ruoli applicativi.
-- [ ] La RPC di completamento salva il messaggio e la risposta cache nella stessa transazione.
-- [ ] Verificare lease di 2 minuti e recupero dopo scadenza.
-- [ ] Verificare che il proprietario e platform admin rispettino il modello di accesso previsto.
 
 ### 6. Ricerca web
 - [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413 prima di contattare Tavily.
