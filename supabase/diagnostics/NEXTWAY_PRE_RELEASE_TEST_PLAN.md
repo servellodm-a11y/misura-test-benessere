@@ -57,6 +57,8 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Nessuna chiamata o integrazione invia messaggi all'esterno.
 
 ### 5. Ricerca web
+- [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413 prima di contattare Tavily.
+- [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
 - [ ] Da 1 a 5 query, ciascuna entro 400 caratteri.
 - [ ] Massimo 10 risultati per query.
 - [ ] Timeout Tavily restituisce errore controllato.
@@ -67,6 +69,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 
 ### 6. Costi e abuso
 - [ ] Verificare limiti di utilizzo per utente prima del rilascio.
+- [ ] Verificare il comportamento in caso di doppio clic/ritentativo: evitare bozze duplicate involontarie e definire se la rigenerazione esplicita debba creare una nuova bozza.
 - [ ] Definire rate limit server-side per AI Setter e ricerca.
 - [ ] Definire budget e alert per OpenAI e Tavily.
 - [ ] Verificare log: nessun token, chiave o dato personale non necessario.
