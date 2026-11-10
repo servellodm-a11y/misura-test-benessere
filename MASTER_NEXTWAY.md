@@ -664,3 +664,13 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit validatore modifica: b3e99c286f4bd1a75dc17b7ddaafecd6947b2f9d; ordinamento: 726f2d145ad7c36afff8280f5845debe343d1a19.
 - Il workflow statico è configurato per avviarsi sui cambiamenti di nextway-ai.html e del validatore. Non dichiaro ancora superato il run generato da questi ultimi commit: lo stato del run non è stato recuperato in questa sessione.
 - Test browser/runtime e verifica effettiva della sincronizzazione restano da completare. Nessuna migrazione Supabase e nessun deploy Netlify eseguiti.
+
+
+## 44. NEXTWAY CRM – ricerca estesa e filtri di qualificazione (10 novembre 2026)
+
+- Estesa la ricerca testuale ai campi nome, professione, azienda/brand, località, fonte, URL, evidenza pubblica e note.
+- Aggiunti filtri indipendenti per esito di prequalificazione e profilo partner, combinabili con categoria, stato, archivio e ordinamento.
+- La ricerca usa normalizzazione locale della stringa in italiano; i filtri operano sui valori strutturati già presenti nel Lead, senza richiedere nuove colonne Supabase.
+- Commit UI: a65f24ebc44ee3cfe6891bfda72aa14e7016a34a.
+- Commit validatore: 3bfa2b371f26bb470696876741e08a4a41f8aad8.
+- Controlli statici dedicati aggiunti; lo stato CI del nuovo commit non è stato ancora confermato in questa sessione. Nessun deploy o migrazione.
