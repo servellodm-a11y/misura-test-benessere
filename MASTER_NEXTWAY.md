@@ -572,3 +572,17 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit validatore: `a4b0ba4ec6c41709a325023890f6d07e09bbf232`.
 - GitHub Actions run `42804560636`, commit `1f4a6c79c120cbf8e760d7f53900c3e0c6cc7e80`: **SUCCESS**; job `validate` e step `Validate NEXTWAY audit` superati. Il controllo statico non sostituisce il test runtime di refresh/sessionStorage e la verifica Supabase live.
 - Limite residuo: la protezione copre il caso in cui il browser abbia ricevuto l'ID dalla RPC; non rende idempotente la RPC di creazione in caso di timeout ambiguo prima che il client riceva la risposta. Non aggiungere idempotenza DB senza migrazione approvata.
+
+## 37. AI Setter — minimizzazione dei dati inviati al provider AI (10 novembre 2026)
+
+- La Edge Function `supabase/functions/nextway-ai-setter/index.ts` ora costruisce il contesto AI tramite allowlist esplicita, senza fare spread dell'intero record Lead.
+- Le note libere (`nextway_leads.notes`) non vengono più lette dalla query usata per la generazione e non vengono inviate al provider.
+- Email, URL e sequenze numeriche compatibili con recapiti telefonici vengono sostituite prima dell'invio al provider; la sanitizzazione è applicata a evidenza pubblica, campi testuali del prospect, obiettivo e storico messaggi.
+- I limiti di lunghezza sono espliciti per campo; il testo dello storico viene limitato a 1.500 caratteri per messaggio e l'evidenza pubblica a 2.000.
+- Il workflow GitHub ora si attiva anche sulle modifiche a `supabase/functions/nextway-ai-setter/**`.
+- Commit Edge Function: `91f09c0cd8dcb95e5b6964fa7c33442c1cc2409c`.
+- Commit validatore: `2bc2f15890d81f3fb2ccdb29ac0b566dc73fe4cf`.
+- Commit workflow: `9b94928aa2e306b928d356e9dd648bf3bf95b6ef`.
+- GitHub Actions run `42804794248`: **SUCCESS**, job `validate`, step `Validate NEXTWAY audit`.
+- La validazione è statica: non è un test Deno runtime né una verifica della chiamata effettiva a OpenAI. La modifica Edge Function è salvata su GitHub ma non è stata distribuita su Supabase.
+- Nota di conformità: la sanitizzazione riduce l'invio accidentale di recapiti evidenti, ma non garantisce anonimizzazione completa né sostituisce informativa, base giuridica e valutazione GDPR del trattamento.
