@@ -26,6 +26,17 @@ while ((cursor = html.indexOf("<script", cursor)) !== -1) {
   cursor = close + 9;
 }
 assert.ok(inlineScripts.length > 0, "Nessuno script inline trovato in nextway-ai.html");
+
+const leadUiScript = inlineScripts.join("\n");
+assert.match(html, /const safeHttpUrl=value=>\{try\{const u=new URL\(String\(value\?\?' '\)\.trim\(\)\)/);
+assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
+assert.match(leadUiScript, /if\(!safeHttpUrl\(x\.url\)\)/);
+assert.match(leadUiScript, /!safeHttpUrl\(x\.url\)/);
+assert.match(cloud, /const safeHttpUrl=value=>/);
+assert.match(cloud, /const safeUrl=safeHttpUrl\(item\.url\);if\(!safeUrl\)return/);
+assert.match(cloud, /a\.href=safeUrl/);
+assert.match(cloud, /new URL\(safeUrl\)\.hostname/);
+console.log("External URL validation: only credential-free HTTP(S) URLs become clickable or importable");
 for (const source of inlineScripts) new Function(source);
 
 assert.match(audit, /create table if not exists public\.nextway_lead_audit_logs/i);
