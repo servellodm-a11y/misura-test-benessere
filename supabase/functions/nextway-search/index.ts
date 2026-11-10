@@ -71,14 +71,20 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Sessione scaduta o non autorizzata." }, 401, responseOrigin);
   }
 
+  const rawBody = await req.text();
+  if (new TextEncoder().encode(rawBody).byteLength > 16_384) {
+    return json({ error: "Richiesta troppo grande." }, 413, responseOrigin);
+  }
+
   let body: { queries?: unknown; max_results?: unknown };
   try {
-    body = await req.json();
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return json({ error: "Corpo della richiesta non valido." }, 400, responseOrigin);
+    }
+    body = parsed as { queries?: unknown; max_results?: unknown };
   } catch {
     return json({ error: "Corpo JSON non valido." }, 400, responseOrigin);
-  }
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return json({ error: "Corpo della richiesta non valido." }, 400, responseOrigin);
   }
 
   const queries = Array.isArray(body.queries)
