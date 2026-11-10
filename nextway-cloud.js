@@ -119,7 +119,17 @@ async function getLeadForConflict(cloudId){
    .select('id,lead_id,actor_profile_id,action,changed_fields,before_data,after_data,created_at')
    .eq('lead_id',cloudId).order('created_at',{ascending:false}).limit(50);
   if(error)throw error;
-  return data||[];
+  const events=data||[];
+  const actorIds=[...new Set(events.map(ev=>ev.actor_profile_id).filter(Boolean))];
+  const names={};
+  if(actorIds.length){
+   const {data:profiles,error:profilesError}=await c.from('profiles').select('id,full_name').in('id',actorIds);
+   if(!profilesError)(profiles||[]).forEach(profile=>{const name=String(profile.full_name||'').trim();if(name)names[profile.id]=name;});
+   const {data:partners,error:partnersError}=await c.from('partner_details').select('profile_id,first_name,last_name').in('profile_id',actorIds);
+   if(!partnersError)(partners||[]).forEach(partner=>{const name=[partner.first_name,partner.last_name].filter(Boolean).join(' ').trim();if(name)names[partner.profile_id]=name;});
+  }
+  events.forEach(ev=>{ev.actor_name=ev.actor_profile_id?(names[ev.actor_profile_id]||'Nome non disponibile'):'identità non disponibile';});
+  return events;
  }
  function leadPayload(x){
   return {display_name:String(x.name||'').slice(0,120),profession:x.profession||null,company_brand:x.company_brand||null,location:x.location||null,category:['potential_partner','final_customer','wellness_professional'].includes(x.category)?x.category:'potential_partner',partner_type:x.partner_type||null,discovery_mode:x.mode||null,public_signal:x.signal_type||null,source_name:String(x.source||'').slice(0,200),source_url:x.url,public_evidence:String(x.evidence||'').slice(0,4000),verified_at:x.verified_at||null,identity_check:['pending','confirmed','uncertain'].includes(x.identity_check)?x.identity_check:'pending',qualification:['Da approfondire','Qualificato','Escluso'].includes(x.qualification)?x.qualification:'Da approfondire',score_fit:Number(x.fit||0),score_activity:Number(x.activity||0),score_presence:Number(x.presence||0),score_interest:Number(x.interest||0),score_approach:Number(x.approach||0),status:['Da verificare','Verificato','Escluso','Contattato'].includes(x.status)?x.status:'Da verificare',notes:x.notes||null};
