@@ -540,3 +540,16 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Preparata `supabase/diagnostics/nextway_setter_permissions_readonly.sql`, query read-only che rileva colonne, stato RLS/FORCE RLS, policy USING/WITH CHECK, grants client e foreign key delle tabelle `nextway_setter_conversations` e `nextway_setter_messages`.
 - La diagnostica non legge record applicativi e non modifica schema, dati o permessi.
 - I permessi delle conversazioni e dei messaggi restano non certificati finché non viene esaminato l'output del progetto Supabase live. Non dedurre i permessi dalla matrice Lead.
+
+## 34. AI Setter — retry sicuro dopo creazione prospect (10 novembre 2026)
+
+- Corretto `nextway-setter.js`: dopo che la RPC ha creato il Lead e la conversazione, l'ID conversazione viene conservato prima di avviare il caricamento e la generazione AI.
+- Se caricamento o generazione falliscono, il pulsante passa a un'azione di retry che riutilizza la conversazione già creata; non richiama la RPC di creazione e quindi evita duplicati causati da un nuovo invio del modulo.
+- Il modulo viene azzerato subito dopo la creazione confermata, non dopo la generazione AI: in caso di errore l'utente non rischia di reinviare gli stessi dati come nuovo prospect.
+- Il selettore delle conversazioni esclude quelle con stato `closed` o `archived`, che l'Edge Function rifiuta comunque per nuove generazioni.
+- Esteso `scripts/validate-nextway-audit.mjs` per includere il parsing JavaScript di `nextway-setter.js` e controlli statici sui percorsi di retry e sull'esclusione delle conversazioni chiuse.
+- Commit frontend: `bbc582a7ff350fffd5c3c908513a698b89cff7e0`.
+- Commit validatore: `3182aeaa0b574d7ba06a36106cbf3c76359278ed`.
+- GitHub Actions run `42803941984`: **SUCCESS**, job `validate`, step `Validate NEXTWAY audit`.
+- Questo esito certifica parsing e controlli statici, non il comportamento runtime del browser, RPC o Supabase live.
+- Nessuna migrazione applicata; nessun deploy Netlify o Supabase eseguito.
