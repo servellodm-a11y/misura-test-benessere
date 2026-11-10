@@ -455,3 +455,12 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Verificare che Lead archiviati o con conflitto non risolto non possano essere modificati.
 - [ ] Verificare i quattro ordinamenti (punteggio, più recenti, meno recenti, nome A-Z) in combinazione con ricerca, categoria, stato e archivio.
 - Stato codice: implementato su GitHub nei commit 86d9b06de85d38c94dcd3579061cc012268a6014 e 1d48f8eee4c88ba6a3dc9414ea04bf79fd5d2cb1; controlli statici dedicati aggiunti al validatore nei commit b3e99c286f4bd1a75dc17b7ddaafecd6947b2f9d e 726f2d145ad7c36afff8280f5845debe343d1a19. Test browser/runtime ancora da eseguire.
+
+
+## 44. Collaudo NEXTWAY CRM – ricerca estesa e filtri
+
+- [ ] Cercare un Lead tramite nome, professione, azienda/brand, località, fonte, URL, evidenza pubblica e note.
+- [ ] Combinare ricerca testuale con categoria, stato, archivio, qualificazione e profilo partner.
+- [ ] Verificare che l'ordinamento selezionato resti coerente con tutti i filtri.
+- [ ] Verificare che i filtri non modifichino i dati e non attivino richieste cloud.
+- Stato codice: UI commit a65f24ebc44ee3cfe6891bfda72aa14e7016a34a; validatore commit 3bfa2b371f26bb470696876741e08a4a41f8aad8. CI non ancora confermata; test browser/runtime da eseguire.
