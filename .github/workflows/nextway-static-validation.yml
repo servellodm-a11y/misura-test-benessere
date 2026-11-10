@@ -34,3 +34,9 @@ jobs:
           node-version: "22"
       - name: Validate NEXTWAY audit
         run: node scripts/validate-nextway-audit.mjs
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check AI Setter Edge Function
+        run: deno check supabase/functions/nextway-ai-setter/index.ts
