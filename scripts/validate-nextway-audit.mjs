@@ -137,7 +137,7 @@ assert.match(setter, /pendingCreatedGoal = savedPending\.goal/);
 assert.match(setter, /await generateDraft\(pendingCreatedConversationId, pendingCreatedGoal\)/);
 assert.match(setter, /È presente una conversazione creata in precedenza senza bozza completata/);
 assert.match(setter, /if \(pendingCreatedConversationId\) \{/);
-assert.match(setter, /await generateDraft\(pendingCreatedConversationId, \$\('nwst-goal'\)\.value\)/);
+assert.match(setter, /await generateDraft\(pendingCreatedConversationId, pendingCreatedGoal\)/);
 assert.match(setter, /pendingCreatedConversationId = result\.conversation_id/);
 assert.match(setter, /form\.reset\(\)/);
 assert.match(setter, /Riprova generazione sulla conversazione creata/);
