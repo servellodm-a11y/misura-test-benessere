@@ -358,3 +358,12 @@ Stato: query preparata su GitHub; non ancora eseguita sul progetto Supabase live
 - [ ] Verificare il comportamento quando la conversazione viene chiusa tra caricamento e generazione: il backend deve rifiutare la richiesta senza salvare la bozza.
 
 Controllo statico: GitHub Actions run `42803941984` — SUCCESS. Il controllo include parsing JavaScript di `nextway-setter.js` e verifiche strutturali sul retry. I test browser/RPC/Edge Function restano da eseguire in ambiente live.
+
+## 35. Verifica endpoint effettivo Supabase
+
+- [ ] Aprire Supabase > Edge Functions > funzione AI Setter e copiare l'URL esatto di invocazione mostrato nella dashboard.
+- [ ] Confrontare il percorso dell'URL con `ENDPOINT` in `nextway-setter.js`.
+- [ ] Verificare una chiamata autenticata POST solo dopo aver confermato endpoint, secrets, migrazioni RPC e policy necessarie.
+- [ ] Non usare il solo nome visualizzato della funzione come prova dell'URL invocabile.
+
+Nota: il frontend versionato usa `/functions/v1/nextway-ai-setter`; una precedente schermata Supabase aveva mostrato `/functions/v1/rapid-function`. La discrepanza resta aperta e non va risolta per supposizione.
