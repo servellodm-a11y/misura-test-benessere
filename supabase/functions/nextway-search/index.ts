@@ -120,10 +120,10 @@ Deno.serve(async (req: Request) => {
     ? Math.max(1, Math.min(10, Math.floor(requestedMax)))
     : 5;
 
-  // Rate limit atomico per utente: massimo 3 richieste di ricerca al minuto.
+  // Rate limit atomico per utente: ogni query Tavily consuma un'unità; massimo 10/minuto.
   const { data: limitRows, error: limitError } = await supabase.rpc(
     "nextway_consume_api_rate_limit",
-    { p_scope: "public_search" },
+    { p_scope: "public_search", p_units: queries.length },
   );
   const rateLimit = Array.isArray(limitRows) ? limitRows[0] : null;
   if (limitError || !rateLimit) {
