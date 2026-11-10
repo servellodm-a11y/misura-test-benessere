@@ -45,7 +45,7 @@ window.NEXTWAY_CLOUD={active,getConfig,archiveLead:(id,reason)=>setLeadArchived(
  localStorage.setItem(KEY,JSON.stringify(rows));say('Sincronizzazione terminata. Nuovi: '+added+' · aggiornati: '+updated+' · invariati: '+skipped+' · conflitti da verificare: '+conflicts+' · errori: '+failed+'. Nessun conflitto è stato sovrascritto.');}
  async function pullCloud(){const {c}=await active();const {data,error}=await c.from('nextway_leads').select('*').order('created_at',{ascending:false}).limit(1000);if(error)throw error;let local=[];try{local=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}let added=0,refreshed=0,conflicts=0;
  for(const r of data){const existing=local.find(x=>x.cloud_id===r.id);if(existing){
-   if(existing.local_dirty){if(existing.cloud_updated_at&&existing.cloud_updated_at!==r.updated_at){existing._sync_conflict={reason:'remote_changed',detected_at:new Date().toISOString(),remote_updated_at:r.updated_at};conflicts++;}continue;}
+   if(existing.local_dirty){if(!existing.cloud_updated_at){existing._sync_conflict={reason:'missing_base_version',detected_at:new Date().toISOString(),remote_updated_at:r.updated_at};conflicts++;}else if(existing.cloud_updated_at!==r.updated_at){existing._sync_conflict={reason:'remote_changed',detected_at:new Date().toISOString(),remote_updated_at:r.updated_at};conflicts++;}continue;}
    if(!existing.cloud_updated_at){existing._sync_conflict={reason:'missing_base_version',detected_at:new Date().toISOString(),remote_updated_at:r.updated_at};conflicts++;continue;}
    Object.assign(existing,fromCloud(r));refreshed++;continue;
   }
