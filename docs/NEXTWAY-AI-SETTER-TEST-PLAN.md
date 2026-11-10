@@ -13,6 +13,7 @@ Applicare le migrazioni in ordine cronologico, dopo aver verificato lo stato eff
 5. `20261110000500_nextway_setter_output_recovery.sql`
 6. `20261110000600_nextway_setter_output_authorization_hardening.sql`
 7. `20261110000700_nextway_clear_stale_staged_output.sql`
+8. `20261110000800_nextway_leads_soft_archive.sql`
 
 La migrazione 007 elimina l'output temporaneo quando una prenotazione pending viene riassegnata a un altro utente, a un'altra chiave o a un'altra conversazione. Evita che il nuovo titolare recuperi una risposta OpenAI generata per la prenotazione precedente.
 
@@ -78,3 +79,25 @@ Il collaudo è superato solo quando:
 5. viene confermato che nessun messaggio è inviato automaticamente.
 
 Fino al completamento di questi passaggi, il codice è da considerare preparato nel repository, non validato in produzione.
+
+
+## Ciclo di vita Lead e sincronizzazione
+
+- [ ] Partner A legge e modifica soltanto i Lead con `owner_profile_id = auth.uid()`.
+- [ ] Partner B non può leggere, modificare, archiviare, ripristinare o cancellare i Lead di Partner A.
+- [ ] `platform_admin` può leggere e gestire i Lead di tutti i partner.
+- [ ] Un partner non può trasferire la proprietà modificando `owner_profile_id`; un eventuale trasferimento è riservato all'amministratore tramite procedura controllata.
+- [ ] Creazione: il nuovo Lead viene inserito con `owner_profile_id` dell'utente autenticato; la RPC di creazione Lead/conversazione deve essere verificata separatamente perché la sua definizione non è versionata nelle migrazioni del repository.
+- [ ] Modifica: la sincronizzazione aggiorna i record già collegati tramite `cloud_id`; RLS deve rifiutare gli aggiornamenti non autorizzati.
+- [ ] Duplicati: URL duplicato per lo stesso proprietario non genera un secondo record; verificare il comportamento quando il duplicato appartiene a un altro partner.
+- [ ] Archiviazione: impostare `archived_at`; il trigger valorizza `archived_by` con l'utente autenticato.
+- [ ] Ripristino: riportare `archived_at` a NULL; il trigger azzera `archived_by` e `archive_reason`.
+- [ ] Un partner non può archiviare o ripristinare Lead altrui; l'amministratore può farlo.
+- [ ] Cancellazione definitiva: verificare permessi e conferma esplicita; preferire archiviazione logica per il normale flusso operativo.
+- [ ] Sincronizzazione bidirezionale: il pull importa i record visibili via RLS; il push aggiorna record collegati e inserisce i nuovi. Verificare conflitti di modifica tra due dispositivi.
+- [ ] La cancellazione di una copia locale non deve essere interpretata come cancellazione del record cloud.
+- [ ] La sincronizzazione deve mostrare conteggi separati per nuovi, aggiornati, non modificati e falliti.
+
+### Limiti attuali da non confondere con funzionalità completate
+
+La sincronizzazione locale/cloud ora prova ad aggiornare i record già collegati tramite `cloud_id`, oltre a inserire nuovi record. Il codice non implementa ancora una gestione completa dei conflitti tra dispositivi, una coda di sincronizzazione offline o un comando UI completo per archiviare/ripristinare. L'archiviazione logica è predisposta nello schema tramite la migrazione 008, ma non è considerata attiva finché la migrazione non è applicata e i test RLS non sono superati. La cancellazione locale non elimina il record cloud.
