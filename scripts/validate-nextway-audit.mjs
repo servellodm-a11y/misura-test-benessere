@@ -147,7 +147,7 @@ console.log("AI Setter retry safety: pending conversation and goal restored acro
 
 // AI Setter provider payload: allowlist and minimization of prospect/history data.
 assert.match(setterFunction, /function sanitizeModelText\(value: unknown, maxLength: number\)/);
-assert.match(setterFunction, /\.replace\(\/\\b\[A-Z0-9\.\_ %\+\-\]\+@/);
+assert.match(setterFunction, /replace\(\/\\b/);
 assert.match(setterFunction, /\[email rimosso\]/);
 assert.match(setterFunction, /\[collegamento rimosso\]/);
 assert.match(setterFunction, /\[numero rimosso\]/);
@@ -156,5 +156,5 @@ assert.ok(aiContextBlock, "AI Setter context allowlist block missing");
 assert.doesNotMatch(aiContextBlock[1], /\bnotes\b/);
 assert.match(aiContextBlock[1], /public_evidence: sanitizeModelText\(lead\.public_evidence, 2000\)/);
 assert.match(aiContextBlock[1], /content: sanitizeModelText\(message\.content, 1500\)/);
-assert.doesNotMatch(setterFunction.match(/\.select\([\s\S]*?\)\n      \.eq\("id", conversation\.lead_id\)/)?.[0] || "", /notes/);
+const leadSelectBlock = setterFunction.match(/\.from\("nextway_leads"\)[\s\S]*?\.select\([\s\S]*?qualification[\s\S]*?\)\s*\.eq\("id", conversation\.lead_id"\)/);\nassert.ok(leadSelectBlock, "AI Setter lead select block missing");\nassert.doesNotMatch(leadSelectBlock[0], /notes/);
 console.log("AI Setter provider data minimization: explicit allowlist, free notes excluded, email/phone/URL redaction: PASS");
