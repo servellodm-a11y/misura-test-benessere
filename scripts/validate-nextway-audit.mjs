@@ -39,6 +39,22 @@ assert.match(privacy, /jsonb_each\(v_after_full\)/);
 assert.doesNotMatch(privacy, /update public\.nextway_lead_audit_logs/i);
 assert.match(html, /\[valore non registrato per riservatezza\]/);
 
+// Identità leggibili nel registro: verifica i campi reali dello schema Supabase.
+assert.match(cloud, /select\('id,full_name'\)\.in\('id',profileIds\)/);
+assert.match(cloud, /select\('profile_id,first_name,last_name'\)\.in\('profile_id',profileIds\)/);
+assert.match(cloud, /profileNames\[p\.id\]=p\.full_name/);
+assert.match(cloud, /profileNames\[p\.profile_id\]=name/);
+assert.match(cloud, /ev\.lead_owner_name=ev\.lead_owner_profile_id\?/);
+assert.match(cloud, /ev\.actor_name=ev\.actor_profile_id\?/);
+assert.match(cloud, /Proprietario: '\+\(ev\.lead_owner_name/);
+assert.match(cloud, /Operatore: '\+\(ev\.actor_name/);
+assert.match(cloud, /'Nome non disponibile'/);
+assert.match(cloud, /'identità non disponibile'/);
+assert.match(cloud, /if\(!\(await isPlatformAdmin\(\)\)\)throw new Error\('Accesso riservato a platform_admin\.'/);
+assert.doesNotMatch(cloud, /select\('id,email,full_name/);
+assert.doesNotMatch(cloud, /select\('profile_id,first_name,last_name,phone/);
+
 console.log("NEXTWAY audit static checks: PASS");
 console.log(`Inline scripts parsed: ${inlineScripts.length}`);
 console.log("Privacy snapshots: notes/public_evidence excluded from new audit events");
+console.log("Readable audit identities: profile/partner fields, fallbacks and admin gate: PASS");
