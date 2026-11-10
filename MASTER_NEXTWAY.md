@@ -424,3 +424,5 @@ Rilievi da risolvere/verificare:
 - Questi controlli non sostituiscono test SQL/Postgres, RLS, Supabase Auth, PostgREST o test browser.
 
 - Prima esecuzione GitHub Actions sul commit `b512b7450da927e04cad12c64d572d0d9ad2711b`: **SUCCESS**; job `validate` e step `Validate NEXTWAY audit` completati senza errori. Questo conferma i soli controlli statici definiti nello script.
+
+- Dopo l'ultima revisione della migrazione 010, GitHub Actions ha eseguito nuovamente il workflow sul commit `d96906a5ba07312e5af1ad9ee97bc27d23e2e14a`: **SUCCESS** (job `validate`).
