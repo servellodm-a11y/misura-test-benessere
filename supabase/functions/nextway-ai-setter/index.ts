@@ -208,7 +208,7 @@ Deno.serve(async (req) => {
     // Rate limit atomico per utente: il limite è imposto dal database.
     const { data: limitRows, error: limitError } = await supabase.rpc(
       "nextway_consume_api_rate_limit",
-      { p_scope: "ai_setter" },
+      { p_scope: "ai_setter", p_units: 1 },
     );
     const rateLimit = Array.isArray(limitRows) ? limitRows[0] : null;
     if (limitError || !rateLimit) {
