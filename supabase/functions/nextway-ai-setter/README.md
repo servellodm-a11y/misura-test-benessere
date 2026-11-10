@@ -49,6 +49,22 @@ Comportamento previsto:
 
 L'idempotenza protegge la creazione delle bozze persistite. Non garantisce che OpenAI venga addebitato una sola volta in ogni possibile interruzione: se OpenAI ha risposto ma la funzione non è riuscita a completare la transazione, un tentativo successivo dopo la scadenza della lease può richiedere una nuova generazione.
 
+## Recupero dell'output AI dopo un errore di salvataggio
+
+La migrazione `20261110000500_nextway_setter_output_recovery.sql` aggiunge la colonna `generated_output` e due RPC riservate all'utente autenticato proprietario della richiesta:
+
+- `nextway_store_setter_generation_output(uuid, jsonb)`: salva l'output strutturato dopo averne verificato i campi e prima di creare il messaggio definitivo.
+- `nextway_get_staged_setter_output(uuid)`: recupera l'output della prenotazione pending ancora valida.
+
+Flusso:
+1. NEXTWAY acquisisce la prenotazione idempotente.
+2. Prima di chiamare OpenAI controlla se esiste già un output temporaneo.
+3. Se non esiste, chiama OpenAI e salva subito l'output temporaneo.
+4. Solo dopo tenta la transazione che crea la bozza e completa la chiave idempotente.
+5. Se il commit finale fallisce dopo lo staging, il retry con la stessa chiave recupera l'output e ritenta il salvataggio senza una seconda chiamata OpenAI.
+
+La protezione riduce il rischio di addebiti duplicati quando lo staging è riuscito ma il commit finale è fallito. Non può garantire il recupero se la risposta OpenAI arriva ma non è possibile salvarla nel database; in quel caso un nuovo tentativo dopo la scadenza della lease può ancora richiedere una nuova generazione.
+
 ## Modello autorizzativo
 
 L'Edge Function legge conversazione e lead tramite il JWT dell'utente e quindi rispetta le policy RLS delle tabelle. Le RPC di idempotenza verificano esplicitamente che l'utente sia proprietario della conversazione oppure abbia il ruolo `platform_admin`.
@@ -111,7 +127,7 @@ La risposta contiene `success`, `draft_id`, `message`, `strategy`, `objective`, 
 
 ## Verifiche ancora necessarie
 
-1. Applicare in ambiente di test nell'ordine: `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`.
+1. Applicare in ambiente di test nell'ordine: `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`, `20261110000500_nextway_setter_output_recovery.sql`.
 2. Verificare che le colonne e le foreign key delle tabelle conversazioni e messaggi corrispondano alla migrazione.
 3. Testare utente proprietario, utente non proprietario e platform admin.
 4. Testare richieste concorrenti con la stessa chiave, replay dopo completamento e riutilizzo della chiave su un'altra conversazione.
@@ -119,7 +135,9 @@ La risposta contiene `success`, `draft_id`, `message`, `strategy`, `objective`, 
 6. Verificare rate limit, timeout OpenAI, output incompleto e indisponibilità delle RPC.
 7. Confermare che il record salvato abbia `ai_generated=true`, `approved_by=null` e `sent_at=null`.
 8. Verificare la retention: un utente non admin non può eseguire la pulizia; platform_admin può eseguirla e riceve i conteggi; i record completati entro 30 giorni e i pending scaduti da meno di 24 ore restano presenti.
-9. Confrontare il sorgente con la versione distribuita e verificare endpoint e secrets.
+9. Simulare errore del commit finale dopo lo staging: il retry con la stessa chiave deve recuperare l'output e non richiamare OpenAI.
+10. Verificare che l'output temporaneo non sia leggibile da un altro partner e non sia disponibile dopo la scadenza della lease.
+11. Confrontare il sorgente con la versione distribuita e verificare endpoint e secrets.
 
 ## Deploy
 
