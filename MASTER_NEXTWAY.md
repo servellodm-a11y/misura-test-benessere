@@ -507,3 +507,29 @@ Rilievi da risolvere/verificare:
 - Questi controlli non sono test runtime: le migrazioni 008-010 restano da applicare e collaudare su Supabase con profili distinti.
 
 - Validazione statica sezione 31: GitHub Actions run 42803134517 = SUCCESS (commit 4355756). Non equivale a test RLS o SQL runtime.
+
+
+## 32. Matrice autorizzazioni Lead per ruolo (10 novembre 2026)
+
+### Regole effettivamente presenti nel sorgente SQL
+
+| Ruolo | Visualizza Lead | Crea Lead | Modifica Lead | Archivia / ripristina | Eliminazione fisica | Cronologia audit |
+|---|---|---|---|---|---|---|
+| platform_admin | Tutti | Tutti | Tutti | Tutti | Tutti | Tutta l'organizzazione |
+| director | Solo propri | Solo propri | Solo propri | Solo propri | Solo propri | Solo eventi dei propri Lead |
+| team_leader | Solo propri | Solo propri | Solo propri | Solo propri | Solo propri | Solo eventi dei propri Lead |
+| sponsor | Solo propri | Solo propri | Solo propri | Solo propri | Solo propri | Solo eventi dei propri Lead |
+| partner | Solo propri | Solo propri | Solo propri | Solo propri | Solo propri | Solo eventi dei propri Lead |
+
+### Interpretazione e limiti
+
+- Le policy RLS presenti in `supabase/nextway_leads.sql` autorizzano SELECT, INSERT, UPDATE e DELETE se `owner_profile_id = auth.uid()`, oppure se il profilo autenticato ha ruolo `platform_admin`.
+- Nelle policy Lead non esistono eccezioni per `director`, `team_leader` o `sponsor`: il loro ruolo organizzativo non amplia la visibilità sui Lead di altri profili.
+- Archiviazione e ripristino sono UPDATE del record e quindi seguono la stessa regola di proprietà, oltre al controllo di concorrenza `updated_at`.
+- L'audit è leggibile dal proprietario storico del Lead o da `platform_admin`; non sono previste scritture dirette da parte del client.
+- La cancellazione fisica è consentita dalla policy al proprietario e all'amministratore, ma il flusso ordinario deve preferire l'archiviazione logica.
+- Questa matrice descrive le policy nel repository. Non certifica che ogni migrazione sia applicata sul progetto Supabase live né che i test multiutente siano stati eseguiti.
+- I permessi delle tabelle conversazioni e messaggi non vengono dedotti da questa matrice: il loro schema/policy effettivo richiede un audit separato.
+- Nessun accesso gerarchico di director/team_leader/sponsor va aggiunto prima di una decisione funzionale esplicita e di policy RLS dedicate.
+
+Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assenza di privilegi speciali impliciti per i ruoli organizzativi non amministrativi.
