@@ -204,3 +204,37 @@ Stato aggiornato:
 - Collegamento frontend al generatore di bozze: **DA COMPLETARE**.
 - Secrets: **RIFERITI DALL'UTENTE, NON VERIFICATI LIVE**.
 - Prossimo intervento tecnico: recuperare dal pannello Supabase il codice attualmente pubblicato e l'URL effettivo, quindi salvarli nel repository in `supabase/functions/nextway-ai-setter/index.ts` e documentare il deploy. Non ricostruire il codice da supposizioni e non cambiare endpoint senza prima verificare quello reale.
+
+
+## 15. Audit codice frontend/cloud e Edge Function ricerca (10 novembre 2026)
+
+### `nextway-search` nel repository
+- File `supabase/functions/nextway-search/index.ts` presente e letto integralmente.
+- Endpoint documentato: `POST /functions/v1/nextway-search`.
+- Verifica origine tramite `NEXTWAY_ALLOWED_ORIGINS`; gestione preflight OPTIONS; accetta solo POST.
+- Richiede Bearer token, valida l'utente con `supabase.auth.getUser(token)).
+- Richiede `SUPABASE_URL`, una publishable/anon key e `TAVILY_API_KEY`; supporta anche `SUPABASE_PUBLISHABLE_KEYS`.
+- Limita a 1–5 query, 400 caratteri per query e 1–10 risultati; chiama Tavily basic e restituisce risultati senza inserire lead.
+- Nessuna service-role key usata nel codice letto.
+- README funzione specifica test obbligatori: utente autenticato, query singola/multipla, token scaduto e origine non autorizzata.
+- La presenza del codice nel repository non dimostra che la funzione sia distribuita o configurata live.
+
+### Coerenza sincronizzazione Lead
+- Confrontati i campi del payload di `nextway-cloud.js` con la definizione in `supabase/nextway_leads.sql`.
+- Tutti i campi del payload esaminati risultano dichiarati nello schema SQL: `owner_profile_id`, `display_name`, `profession`, `company_brand`, `location`, `category`, `partner_type`, `discovery_mode`, `public_signal`, `source_name`, `source_url`, `public_evidence`, `verified_at`, `identity_check`, `qualification`, i cinque punteggi, `status`, `notes`.
+- Questo è un controllo statico repository-to-repository, non un test di inserimento sul database live.
+- Le pagine `nextway-ai.html`, `nextway-ricerca.html` e `nextway-motore-ricerca.html` includono lo script Supabase JS e `/nextway-cloud.js`.
+- Nota UI da rivedere: `nextway-ai.html` contiene ancora un avviso che descrive l'archivio come solo locale e non sincronizzato tra dispositivi, mentre il modulo cloud offre configurazione, login, sincronizzazione e lettura cloud. La sincronizzazione resta manuale e non completa per aggiornamenti/cancellazioni. Non modificato in questo passaggio.
+
+### Blocco recupero codice AI Setter
+- Gli strumenti collegati disponibili in questa sessione consentono lettura/scrittura GitHub, ma non espongono un connettore Supabase per leggere il codice pubblicato, i secrets o l'URL reale della Edge Function.
+- Il repository non contiene `supabase/functions/nextway-ai-setter/index.ts`; non è stato possibile recuperare il codice live da Supabase attraverso le connessioni disponibili.
+- Non creare un duplicato o una versione ricostruita da ricordi: potrebbe divergere dalla funzione attualmente pubblicata.
+- Azione minima richiesta all'utente per sbloccare il passo: in Supabase aprire Edge Functions, selezionare `nextway-ai-setter` e copiare qui il contenuto completo di `index.ts` (non copiare né condividere secrets o valori delle chiavi). Se il pannello mostra solo l'endpoint, riportare anche il nome/URL visualizzato, oscurando eventuali token.
+- Una volta ricevuto il codice, confrontarlo con la logica attesa, versionarlo nel repository e aggiornare la documentazione. Nessuna modifica alla funzione live prima della revisione.
+
+Stato di questo audit:
+- Lettura statica del codice `nextway-search`: **COMPLETATO E VERIFICATO**.
+- Coerenza dei campi sync con SQL nel repository: **COMPLETATO E VERIFICATO** (solo statica).
+- Test end-to-end Supabase/Netlify: **DA COMPLETARE**.
+- Recupero sorgente live `nextway-ai-setter`: **BLOCCATO** dall'assenza di accesso Supabase nella sessione.
