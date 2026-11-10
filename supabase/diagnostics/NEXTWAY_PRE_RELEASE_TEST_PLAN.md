@@ -73,6 +73,9 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Riutilizzare la stessa chiave per una conversazione diversa: richiesta rifiutata.
 - [ ] Usare una nuova chiave per una rigenerazione intenzionale: viene creata una nuova bozza.
 - [ ] Simulare interruzione dopo la prenotazione: la stessa chiave resta occupata per la lease e può essere riacquisita dopo 2 minuti.
+- [ ] Simulare errore del commit finale dopo lo staging dell'output OpenAI: il retry con la stessa chiave recupera l'output e non richiama OpenAI.
+- [ ] Simulare output temporaneo assente: il retry può generare nuovamente solo dopo aver riacquisito una prenotazione valida.
+- [ ] Verificare che un altro partner non possa leggere o sovrascrivere l'output temporaneo.
 - [ ] Verificare che inserimento messaggio e memorizzazione della risposta siano atomici: nessun messaggio duplicato in caso di ripetizione.
 - [ ] Verificare isolamento: chiave di Partner A non leggibile né riutilizzabile da Partner B.
 - [ ] La tabella ha vincolo univoco su `(user_id, idempotency_key)` e indice univoco parziale su `conversation_id` per le richieste pending; non è direttamente accessibile ai ruoli applicativi.
@@ -87,6 +90,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Record completati più vecchi di 30 giorni: eliminati.
 - [ ] Prenotazioni pending con lease scaduta da meno di 24 ore: conservate.
 - [ ] Prenotazioni pending con lease scaduta da oltre 24 ore: eliminate.
+- [ ] La pulizia retention elimina anche il campo output temporaneo solo insieme al record idempotente scaduto.
 - [ ] Verificare che nessun cron o job automatico sia stato creato: la pulizia è manuale.
 - [ ] Documentare che una chiave completata oltre la retention non garantisce più il replay idempotente.
 
@@ -102,7 +106,7 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
 ### 8. Costi e abuso
-- [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`.
+- [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`, `20261110000500_nextway_setter_output_recovery.sql`.
 - [ ] AI Setter: 5 generazioni nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
 - [ ] Ricerca Tavily: 10 query complessive nella stessa finestra per utente ammesse; l'unità che supera 10 restituisce HTTP 429.
 - [ ] Una richiesta di ricerca con 5 query consuma 5 unità, non una sola; due richieste da 5 query consumano il limite completo.
