@@ -486,3 +486,6 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Verificare il comportamento platform_admin sui Lead visibili in base alle policy esistenti.
 - [ ] Verificare il limite UI di 100 eventi e l'ordinamento per data decrescente con ID come criterio stabile.
 - Stato codice: migrazione 012, API cloud e UI implementate su GitHub; test statico dedicato aggiunto. Migrazione non applicata e test runtime Supabase/browser non eseguiti.
+
+- Verificare anche che le attività già registrate restino consultabili sui Lead archiviati e che la registrazione di nuove attività sia disabilitata.
+- Ultimi commit UI/validatore: f14736c1912f68f524e19eee8340d6056236fe72 e a12df0dc2edc5c613500e1bcaea23386a7ec77a2. Il run CI non risulta disponibile nel recupero GitHub effettuato; esito non certificato.
