@@ -241,10 +241,12 @@ async function getLeadForConflict(cloudId){
  }
  async function reviewLeadConversionRequest(requestId,status,notes=''){
   if(!requestId||!['ready_for_activation','rejected'].includes(status))throw new Error('Esito di revisione non valido.');
+  const reviewNotes=String(notes||'').trim().slice(0,1000);
+  if(status==='rejected'&&!reviewNotes)throw new Error('Per respingere una richiesta devi indicare il motivo.');
   const {c,s}=await active();
   if(!(await isPlatformAdmin()))throw new Error('Operazione riservata a platform_admin.');
   const {data,error}=await c.from('nextway_lead_conversion_requests').update({
-   status,review_notes:String(notes||'').trim().slice(0,1000)||null,reviewed_by:s.user.id,reviewed_at:new Date().toISOString()
+   status,review_notes:reviewNotes||null,reviewed_by:s.user.id,reviewed_at:new Date().toISOString()
   }).eq('id',requestId).eq('status','pending')
    .select('id,status,review_notes,reviewed_at').maybeSingle();
   if(error)throw error;
