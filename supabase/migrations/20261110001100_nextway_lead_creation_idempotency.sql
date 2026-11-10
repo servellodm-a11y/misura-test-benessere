@@ -133,13 +133,10 @@ begin
     or coalesce((v_response->>'success')::boolean, false) is not true
     or nullif(v_response->>'lead_id', '') is null
     or nullif(v_response->>'conversation_id', '') is null then
-    delete from public.nextway_lead_creation_requests
-    where owner_profile_id = v_user_id
-      and request_id = p_request_id;
-    return coalesce(v_response, jsonb_build_object(
-      'success', false,
-      'error', 'La creazione non è stata confermata dalla procedura sottostante.'
-    ));
+    -- L'eccezione annulla l'intera transazione, inclusa la chiave appena inserita.
+    raise exception 'Creazione Lead non confermata dalla procedura sottostante: %',
+      coalesce(v_response->>'error', 'risposta incompleta')
+      using errcode = 'P0001';
   end if;
 
   update public.nextway_lead_creation_requests
