@@ -103,7 +103,7 @@
       const { c } = await cloud.active();
       const { data, error } = await c.from('nextway_setter_conversations')
         .select('id,lead_id,status,objective,channel')
-        .order('id', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
       const select = $('nwst-conversation');
