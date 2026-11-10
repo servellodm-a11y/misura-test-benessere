@@ -79,7 +79,18 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Le RPC sono eseguibili da authenticated ma non da anon; le funzioni SECURITY DEFINER verificano proprietario conversazione o platform_admin e non espongono la tabella direttamente ai ruoli applicativi.
 - [ ] Verificare che il frontend riutilizzi la stessa chiave in caso di ritentativo nella stessa sessione e la cancelli solo dopo una risposta positiva.
 
-### 6. Ricerca web
+### 6. Retention e manutenzione idempotenza
+- [ ] Applicare `20261110000400_nextway_idempotency_retention.sql` solo dopo le migrazioni precedenti.
+- [ ] Utente partner autenticato: esecuzione di `nextway_prune_setter_generation_requests()` negata.
+- [ ] Platform admin: esecuzione consentita e restituisce conteggi separati.
+- [ ] Record completati aggiornati negli ultimi 30 giorni: conservati.
+- [ ] Record completati più vecchi di 30 giorni: eliminati.
+- [ ] Prenotazioni pending con lease scaduta da meno di 24 ore: conservate.
+- [ ] Prenotazioni pending con lease scaduta da oltre 24 ore: eliminate.
+- [ ] Verificare che nessun cron o job automatico sia stato creato: la pulizia è manuale.
+- [ ] Documentare che una chiave completata oltre la retention non garantisce più il replay idempotente.
+
+### 7. Ricerca web
 - [ ] Corpo richiesta oltre 16 KB restituisce HTTP 413 prima di contattare Tavily.
 - [ ] JSON malformato, array o valori non-oggetto restituiscono HTTP 400.
 - [ ] Da 1 a 5 query, ciascuna entro 400 caratteri.
@@ -90,9 +101,8 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Risposte upstream malformate non interrompono la funzione con errore non gestito.
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
-### 7. Costi e abuso
-- [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`.
-- [ ] AI Setter: 5 richieste nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
+### 8. Costi e abuso
+- [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`.
 - [ ] AI Setter: 5 generazioni nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
 - [ ] Ricerca Tavily: 10 query complessive nella stessa finestra per utente ammesse; l'unità che supera 10 restituisce HTTP 429.
 - [ ] Una richiesta di ricerca con 5 query consuma 5 unità, non una sola; due richieste da 5 query consumano il limite completo.
