@@ -31,7 +31,7 @@ function init(){
   const limit=Math.min(100,Math.max(1,Number(filters.limit)||100));
   const offset=Math.max(0,Number(filters.offset)||0);
   let q=c.from('nextway_lead_audit_logs')
-   .select('id,lead_id,lead_owner_profile_id,actor_profile_id,action,changed_fields,created_at,lead_name:after_data->>display_name')
+   .select('id,lead_id,lead_owner_profile_id,actor_profile_id,action,changed_fields,created_at,lead_name:after_data->>display_name,lead_name_before:before_data->>display_name')
    .order('created_at',{ascending:false}).range(offset,offset+limit-1);
   if(filters.from)q=q.gte('created_at',filters.from);
   if(filters.to)q=q.lte('created_at',filters.to);
@@ -54,10 +54,10 @@ function init(){
    const item=document.createElement('div');item.className='nwresult';
    const title=document.createElement('strong');
    const verb=ev.action==='INSERT'?'Creato':ev.action==='DELETE'?'Eliminato':'Modificato';
-   title.textContent=verb+' · '+(ev.lead_name||'Lead non più disponibile')+' · '+new Date(ev.created_at).toLocaleString('it-IT');
+   title.textContent=verb+' · '+(ev.lead_name||ev.lead_name_before||'Lead non più disponibile')+' · '+new Date(ev.created_at).toLocaleString('it-IT');
    const meta=document.createElement('p');meta.className='nwmuted';
    meta.textContent='Proprietario: '+(ev.lead_owner_profile_id||'n/d')+' · Operatore: '+(ev.actor_profile_id||'identità non disponibile');
-   const fields=document.createElement('p');fields.textContent='Campi: '+((ev.changed_fields||[]).join(', ')||'nessun dettaglio');
+   const fieldNames={display_name:'Nome',profession:'Professione',company_brand:'Azienda / brand',location:'Località',category:'Categoria',partner_type:'Profilo partner',discovery_mode:'Modalità',public_signal:'Segnale pubblico',source_name:'Fonte',source_url:'URL',public_evidence:'Evidenza',verified_at:'Data verifica',identity_check:'Verifica identità',qualification:'Qualificazione',score_fit:'Coerenza target',score_activity:'Attività',score_presence:'Presenza',score_interest:'Interesse',score_approach:'Pertinenza',status:'Stato',notes:'Note',archived_at:'Archiviazione',archived_by:'Archiviato da',archive_reason:'Motivo archiviazione'};\n   const fields=document.createElement('p');fields.textContent='Campi: '+((ev.changed_fields||[]).map(k=>fieldNames[k]||k).join(', ')||'nessun dettaglio');
    const id=document.createElement('p');id.className='nwmuted';id.textContent='Lead ID: '+ev.lead_id;
    item.append(title,meta,fields,id);target.append(item);
   });
