@@ -106,6 +106,8 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
 ### 7. Ricerca Tavily parziale e resilienza provider
+- [ ] Inviare 6 query: richiesta rifiutata HTTP 400, nessun troncamento silenzioso.
+- [ ] Inviare una query vuota o oltre 400 caratteri: richiesta rifiutata HTTP 400.
 - [ ] Con 3 query, simulare successo della prima, timeout della seconda e successo della terza: la risposta contiene i risultati 1 e 3 e segnala una query fallita.
 - [ ] Verificare `queries_requested`, `queries_completed`, `queries_failed` e `partial`.
 - [ ] Se tutte le query falliscono, la funzione restituisce un errore HTTP controllato e non una risposta di successo vuota.
