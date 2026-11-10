@@ -458,3 +458,13 @@ Rilievi da risolvere/verificare:
 - Commit validatore: `3c7f9027bcb6c17d5a2a5bb177eb68fe71a67c4d`.
 - GitHub Actions run `42801908730`: **SUCCESS**, job `validate` e step `Validate NEXTWAY audit` superati.
 - Test live PostgREST/RLS e browser ancora da eseguire dopo disponibilità del deploy; nessuna migrazione o pubblicazione eseguita.
+
+
+## 28. Controlli automatici API archiviazione logica Lead (10 novembre 2026)
+
+- Esteso `scripts/validate-nextway-audit.mjs` per verificare l'API frontend `archiveLead`/`restoreLead`, il timestamp di archiviazione, la cancellazione dei metadati al ripristino, il limite di 500 caratteri per il motivo e i campi restituiti.
+- Aggiunti al piano di collaudo i test live per archiviazione, ripristino, audit UPDATE, autorizzazioni owner/admin e assenza di DELETE fisico.
+- Commit validatore: `f5a93644d5ac97e5e14787fe3414fd2a7c41f737`.
+- Commit piano di test: `886cff668f51f136a8149a1d22b38b51822b27ab`.
+- Workflow GitHub Actions run `42802356565`: avviato; esito da verificare.
+- Nessuna migrazione applicata e nessun deploy eseguito. I test live restano subordinati a un ambiente Supabase di test e all'applicazione autorizzata delle migrazioni.
