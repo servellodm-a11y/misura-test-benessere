@@ -5,6 +5,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const cloud = read("../nextway-cloud.js");
 const html = read("../nextway-ai.html");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
+const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
 
 new Function(cloud);
@@ -27,6 +28,18 @@ assert.match(audit, /enable row level security/i);
 assert.match(audit, /for select to authenticated/i);
 assert.match(audit, /revoke all on table public\.nextway_lead_audit_logs from public, anon, authenticated/i);
 assert.match(audit, /after insert or update or delete on public\.nextway_leads/i);
+assert.match(audit, /lead_owner_profile_id = auth\.uid\(\)/i);
+assert.match(audit, /p\.id = auth\.uid\(\) and p\.role = 'platform_admin'/i);
+assert.match(audit, /grant select on table public\.nextway_lead_audit_logs to authenticated/i);
+assert.doesNotMatch(audit, /create policy[\s\S]*?for (insert|update|delete) to authenticated/i);
+assert.match(archiveSchema, /add column if not exists archived_at timestamptz/i);
+assert.match(archiveSchema, /add column if not exists archived_by uuid/i);
+assert.match(archiveSchema, /add column if not exists archive_reason text/i);
+assert.match(archiveSchema, /if auth\.uid\(\) is null[\s\S]*?raise exception/i);
+assert.match(archiveSchema, /new\.archived_by := auth\.uid\(\)/i);
+assert.match(archiveSchema, /new\.archived_by := null/i);
+assert.match(archiveSchema, /new\.archive_reason := null/i);
+assert.match(archiveSchema, /revoke all on function public\.nextway_set_lead_archive_metadata\(\) from public, anon, authenticated/i);
 
 assert.match(cloud, /if\(!\(await isPlatformAdmin\(\)\)\)throw new Error\('Accesso riservato a platform_admin\.'/);
 assert.match(cloud, /\.range\(offset,offset\+limit-1\)/);
