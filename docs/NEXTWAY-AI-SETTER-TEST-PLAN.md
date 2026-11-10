@@ -289,4 +289,4 @@ Limiti: codice salvato su GitHub ma non pubblicato su Netlify; migrazioni audit 
 - Se il record è cambiato o la versione cloud manca, l'operazione si interrompe e chiede di ricaricare l'archivio.
 - Test statici verificano parametro, filtro updated_at, gestione del conflitto e passaggio del timestamp dalla UI.
 
-Limite: il comportamento va confermato con test runtime Supabase quando le migrazioni saranno applicate; nessuna migrazione o deploy eseguiti in questo passaggio.
+Validazione statica GitHub Actions: PASS nel run 42803042485 sul commit daae610. Il comportamento va comunque confermato con test runtime Supabase quando le migrazioni saranno applicate; nessuna migrazione o deploy eseguiti in questo passaggio.
