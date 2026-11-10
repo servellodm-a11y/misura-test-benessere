@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "nextway-cloud.js"
+      - "nextway-setter.js"
       - "nextway-ai.html"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
