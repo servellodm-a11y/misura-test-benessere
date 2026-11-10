@@ -561,3 +561,14 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Non modificare automaticamente il frontend verso `rapid-function` e non dichiarare funzionante l'integrazione: il nome visualizzato e l'URL invocabile devono essere confrontati con il valore esatto mostrato da Supabase nella scheda della funzione.
 - Stato: **BLOCCATO DA CONFERMA ENDPOINT LIVE**. Il test GitHub statico non verifica la raggiungibilità dell'Edge Function.
 - Nessun deploy Supabase eseguito.
+
+## 36. AI Setter — recupero della conversazione dopo reload (10 novembre 2026)
+
+- Il contesto del prospect appena creato non resta più soltanto in una variabile JavaScript: `nextway-setter.js` salva in `sessionStorage` l'ID della conversazione e l'obiettivo della bozza.
+- Al ricaricamento della pagina il sistema ripristina ID e obiettivo, preseleziona la conversazione e propone il retry senza richiamare la RPC di creazione.
+- La chiave di sessione viene rimossa soltanto dopo la generazione completata; se il tentativo fallisce, il contesto resta disponibile per riprovare.
+- Il valore recuperato viene validato come UUID e l'obiettivo viene accettato solo se appartiene alla lista prevista.
+- Commit frontend: `6cc702d6078eed6ba198b75c28f463023607eeee`.
+- Commit validatore: `a4b0ba4ec6c41709a325023890f6d07e09bbf232`.
+- Validazione GitHub da eseguire sul nuovo commit. Il controllo statico non sostituisce il test runtime di refresh/sessionStorage e la verifica Supabase live.
+- Limite residuo: la protezione copre il caso in cui il browser abbia ricevuto l'ID dalla RPC; non rende idempotente la RPC di creazione in caso di timeout ambiguo prima che il client riceva la risposta. Non aggiungere idempotenza DB senza migrazione approvata.
