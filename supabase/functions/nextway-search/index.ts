@@ -130,23 +130,36 @@ Deno.serve(async (req: Request) => {
       }, status, responseOrigin);
     }
 
-    let payload: { results?: unknown };
+    let payload: { results?: unknown } | null;
     try {
       payload = await upstream.json();
     } catch {
       return json({ error: "Il servizio di ricerca ha restituito una risposta non valida." }, 502, responseOrigin);
     }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return json({ error: "Formato della risposta di ricerca non valido." }, 502, responseOrigin);
+    }
     const items = Array.isArray(payload.results) ? payload.results : [];
-    results.push({
-      query,
-      results: items.map((item: Record<string, unknown>) => ({
-        title: String(item.title ?? ""),
-        url: String(item.url ?? ""),
-        snippet: String(item.content ?? "").slice(0, 1200),
-        score: Number(item.score ?? 0),
-        published_date: item.published_date ? String(item.published_date) : null,
-      })),
+    const safeItems = items.flatMap((item: unknown) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+      const record = item as Record<string, unknown>;
+      let sourceUrl: URL;
+      try {
+        sourceUrl = new URL(String(record.url ?? ""));
+      } catch {
+        return [];
+      }
+      if (sourceUrl.protocol !== "https:" && sourceUrl.protocol !== "http:") return [];
+      const rawScore = Number(record.score ?? 0);
+      return [{
+        title: String(record.title ?? "").slice(0, 300),
+        url: sourceUrl.toString(),
+        snippet: String(record.content ?? "").slice(0, 1200),
+        score: Number.isFinite(rawScore) ? rawScore : 0,
+        published_date: record.published_date ? String(record.published_date).slice(0, 40) : null,
+      }];
     });
+    results.push({ query, results: safeItems });
   }
 
   return json({
