@@ -65,8 +65,14 @@ assert.match(cloud, /async function setLeadArchived\(cloudId, archived, reason='
 assert.match(cloud, /archive_reason:String\(reason\|\|'Archiviazione manuale'\)\.slice\(0,500\)/);
 assert.match(cloud, /archived\?\{archived_at:new Date\(\)\.toISOString\(\),archive_reason:/);
 assert.match(cloud, /:\{archived_at:null,archive_reason:null\}/);
-assert.match(cloud, /archiveLead:\(id,reason\)=>setLeadArchived\(id,true,reason\)/);
-assert.match(cloud, /restoreLead:id=>setLeadArchived\(id,false\)/);
+assert.match(cloud, /archiveLead:\(id,reason,updatedAt\)=>setLeadArchived\(id,true,reason,updatedAt\)/);
+assert.match(cloud, /restoreLead:\(id,updatedAt\)=>setLeadArchived\(id,false,'',updatedAt\)/);
+assert.match(cloud, /async function setLeadArchived\(cloudId, archived, reason='', expectedUpdatedAt=''/);
+assert.match(cloud, /\.eq\('updated_at',expectedUpdatedAt\)/);
+assert.match(cloud, /Versione cloud non disponibile/);
+assert.match(cloud, /Il Lead è cambiato sul cloud/);
+assert.match(html, /cloud\.restoreLead\(x\.cloud_id,x\.cloud_updated_at\)/);
+assert.match(html, /cloud\.archiveLead\(x\.cloud_id,reason,x\.cloud_updated_at\)/);
 assert.match(cloud, /select\('id,archived_at,archived_by,archive_reason,updated_at'\)/);
 assert.match(cloud, /select\('id,full_name'\)\.in\('id',actorIds\)/);
 assert.match(cloud, /select\('profile_id,first_name,last_name'\)\.in\('profile_id',actorIds\)/);
