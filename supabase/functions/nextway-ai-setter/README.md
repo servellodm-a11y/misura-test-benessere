@@ -73,13 +73,13 @@ Obiettivi ammessi: `first_contact`, `follow_up`, `reply`, `presentation`, `appoi
 - CORS usa `NEXTWAY_ALLOWED_ORIGINS` (default: dominio Netlify noto); l'assenza dell'header Origin è ammessa per chiamate non-browser autenticate.
 - Non è ancora presente un rate limit server-side distribuito; i blocchi frontend non proteggono da richieste dirette o multi-dispositivo.
 - Il body è limitato a 16 KB e la generazione a 1.200 token; i campi del contesto sono troncati nel codice.
-- Non viene controllato lo stato della conversazione prima di generare una bozza.
+- Le conversazioni con stato `closed` o `archived` vengono rifiutate; gli altri stati dipendono dal valore effettivo presente nel database.
 - Il comportamento delle policy RLS sulle due tabelle non è deducibile dal solo codice della funzione e non è ancora stato verificato in questo repository.
 - Il codice gestisce `status === "incomplete"` e l'assenza di testo; gli altri errori del provider sono ricondotti a un errore generico 500.
 
 ## Integrazione frontend (10 novembre 2026)
 
-Il frontend NEXTWAY AI include ora `nextway-setter.js`, caricato da `nextway-ai.html`. Riutilizza la sessione Supabase esistente esposta da `nextway-cloud.js`, crea prospect e conversazione tramite RPC `nextway_create_lead_with_conversation`, poi invoca il generatore e mostra la bozza. Il frontend usa il percorso `/functions/v1/rapid-function`, indicato in precedenza come endpoint effettivo; la corrispondenza con la funzione live resta da testare. Nessun invio viene eseguito.
+Il frontend NEXTWAY AI include `nextway-setter.js`, caricato da `nextway-ai.html`. Riutilizza la sessione Supabase esistente esposta da `nextway-cloud.js`, crea prospect e conversazione tramite RPC `nextway_create_lead_with_conversation`, poi invoca il generatore e mostra la bozza. Il percorso configurato nel frontend versionato è `/functions/v1/nextway-ai-setter`; la corrispondenza con la funzione effettivamente distribuita su Supabase resta da verificare. Nessun invio viene eseguito.
 
 ## Deploy
 
