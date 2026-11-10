@@ -722,3 +722,13 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Test runtime non eseguiti; migrazione 012 non applicata e deploy Netlify non effettuato.
 
 - Rifinitura coda follow-up: riepilogo conteggi per attività scadute, in scadenza oggi ed entro 7 giorni; tipi di contatto tradotti in italiano. Commit UI: 153bc556e9a681b97a792b44168bf3a540da75da; validatore: 28c0850a4b5b5e0c5092db29b79a20a8fac16eb6.
+
+
+## 49. Ciclo di vita commerciale dei Lead (10 novembre 2026)
+
+- Esteso lo stato CRM da quattro a nove fasi: Da verificare, Verificato, Contattato, In follow-up, In valutazione, Convertito cliente, Convertito partner, Non interessato, Escluso.
+- Nuova migrazione `20261110001300_nextway_lead_lifecycle.sql`: aggiorna il vincolo CHECK sul campo `status`, mantenendo validi tutti i valori precedenti. Non cambia i record esistenti e non crea automaticamente righe in `clients` o `profiles`.
+- UI: filtro per tutte le fasi; selettore stato per ogni Lead; riepilogo dei Lead contattati, in follow-up, in valutazione e convertiti.
+- Sync e import: whitelist estesa alle nove fasi, così gli stati non vengono degradati a "Da verificare" durante sincronizzazione/importazione.
+- Commit migrazione: d38d7ce53fd7259b331ec057b5de60dfc1eb958d; UI: 89c2e9dc338b3b8f6a42a1e73a7eb7bf8b91cbaa; sync: edded501faf1e852b8992232c4d336b1b409154e; validatore: a09a1f9a3f722fcca126f54f5730788dc5a4bf56.
+- Migrazione non applicata live; test runtime non eseguiti; deploy Netlify non effettuato.
