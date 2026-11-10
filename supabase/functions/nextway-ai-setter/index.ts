@@ -442,8 +442,17 @@ Non inviarla: deve rimanere una bozza.
       },
     );
 
-    if (completeError || !completedResponse) {
+    if (completeError) {
+      const completionMessage = String(completeError.message ?? "");
+      if (/chiusa o archiviata/i.test(completionMessage)) {
+        return respond({
+          error: "La conversazione è stata chiusa o archiviata durante la generazione. La bozza non è stata salvata.",
+        }, 409, responseOrigin);
+      }
       console.error("Idempotent completion failed:", completeError);
+      throw new Error("Salvataggio bozza non riuscito");
+    }
+    if (!completedResponse) {
       throw new Error("Salvataggio bozza non riuscito");
     }
 
