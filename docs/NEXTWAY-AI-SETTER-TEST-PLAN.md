@@ -471,4 +471,5 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Con più di 1.000 Lead autorizzati, verificare che il pull recuperi tutte le pagine e non soltanto i primi 1.000.
 - [ ] Verificare che i record locali con local_dirty=true restino invariati e che i conflitti vengano segnalati.
 - [ ] Verificare il pull con RLS attiva per due account: ogni account deve ricevere esclusivamente i Lead autorizzati dal database.
-- Stato codice: commit cloud 5f1b05ddd61105f4992be4743b8b291c1391af62; test statico aggiunto in c098b17de97d5722dfd26b5d31d1172c96a1e649. Test runtime Supabase ancora da eseguire.
+- Verificare anche che l'ordinamento secondario per ID mantenga pagine deterministiche quando più record condividono created_at.
+- Stato codice: commit cloud 5f1b05ddd61105f4992be4743b8b291c1391af62; stabilizzazione ordine deac2d1883db9b2fbcfd6cf7a80523344389e8e3; validatore paginazione c098b17de97d5722dfd26b5d31d1172c96a1e649 e ordine stabile d1f91719811459325be2f46e1a5c72fb031c4b70. Test runtime Supabase ancora da eseguire.
