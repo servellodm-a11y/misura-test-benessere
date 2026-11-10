@@ -479,3 +479,13 @@ Rilievi da risolvere/verificare:
 - Stato: modifiche committate su GitHub; test statici automatici da verificare dopo il push. Nessuna migrazione Supabase, nessun deploy e nessun test runtime eseguiti.
 
 - Rifinita la scheda Lead: quando il record è archiviato, mostra chiaramente data/ora e motivo dell’archiviazione; se il motivo è assente usa un fallback neutro. Il controllo è incluso nel validatore statico.
+
+
+## 29. Gestione Lead — protezione sincronizzazione e archivio leggibile (10 novembre 2026)
+
+- La scheda Lead archiviata mostra data e motivo dell'archiviazione.
+- Archiviazione/ripristino impediti quando esistono modifiche locali non sincronizzate o un conflitto aperto; evita di marcare come sincronizzati dati non salvati sul cloud.
+- Il motivo è limitato a 500 caratteri anche nell'interfaccia; l'utente può annullare la richiesta senza eseguire l'archiviazione.
+- Rimossa l'assegnazione impropria local_dirty=false dopo la modifica di archiviazione: la funzione non deve nascondere modifiche locali pendenti.
+- La cronologia per Lead mostra già il nome dell'operatore dai campi profiles e partner_details; aggiunto controllo statico per questa risoluzione.
+- Stato: codice e documentazione salvati su GitHub; validazione GitHub Actions da eseguire. Nessun deploy Netlify e nessuna migrazione Supabase.
