@@ -583,6 +583,6 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - Commit Edge Function: `91f09c0cd8dcb95e5b6964fa7c33442c1cc2409c`.
 - Commit validatore: `2bc2f15890d81f3fb2ccdb29ac0b566dc73fe4cf`.
 - Commit workflow: `9b94928aa2e306b928d356e9dd648bf3bf95b6ef`.
-- GitHub Actions run `42804794248`: **SUCCESS**, job `validate`, step `Validate NEXTWAY audit`.
+- GitHub Actions run `42805023373`, commit `e87081095b48939099abcb43d681c3eaa8c1a4f1`: **SUCCESS**; job `validate`, step `Validate NEXTWAY audit` e nuovo step `Type-check AI Setter Edge Function` superati con Deno 2.
 - La validazione è statica: non è un test Deno runtime né una verifica della chiamata effettiva a OpenAI. La modifica Edge Function è salvata su GitHub ma non è stata distribuita su Supabase.
 - Nota di conformità: la sanitizzazione riduce l'invio accidentale di recapiti evidenti, ma non garantisce anonimizzazione completa né sostituisce informativa, base giuridica e valutazione GDPR del trattamento.
