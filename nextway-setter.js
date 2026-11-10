@@ -105,6 +105,85 @@
     const PENDING_CREATE_KEY = 'nextway_setter_pending_create_v1';
     let pendingCreatedConversationId = '';
     let pendingCreatedGoal = 'first_contact';
+    const PENDING_LEAD_CREATE_KEY = 'nextway_setter_pending_lead_create_v1';
+    let pendingLeadCreateRequest = null;
+
+    function isValidLeadCreatePayload(payload) {
+      return payload && typeof payload === 'object'
+        && typeof payload.display_name === 'string'
+        && typeof payload.category === 'string'
+        && typeof payload.source_name === 'string'
+        && typeof payload.source_url === 'string'
+        && typeof payload.public_evidence === 'string'
+        && typeof payload.objective === 'string'
+        && typeof payload.channel === 'string';
+    }
+
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(PENDING_LEAD_CREATE_KEY) || 'null');
+      if (saved && typeof saved.request_id === 'string'
+        && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.request_id)
+        && typeof saved.request_hash === 'string'
+        && /^[a-f0-9]{64}$/.test(saved.request_hash)
+        && typeof saved.payload_json === 'string') {
+        const savedPayload = JSON.parse(saved.payload_json);
+        if (isValidLeadCreatePayload(savedPayload)) {
+          pendingLeadCreateRequest = {
+            request_id: saved.request_id,
+            request_hash: saved.request_hash,
+            payload_json: saved.payload_json,
+            payload: savedPayload
+          };
+          Object.entries(savedPayload).forEach(([name, value]) => {
+            const field = $('nwst-create').elements.namedItem(name);
+            if (field) field.value = value;
+          });
+        }
+      }
+    } catch (_) {
+      pendingLeadCreateRequest = null;
+    }
+
+    async function sha256Hex(value) {
+      if (!window.crypto || !crypto.subtle || !window.TextEncoder) {
+        throw new Error('Impossibile creare una chiave sicura per la richiesta. Usa un browser aggiornato e riprova.');
+      }
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function prepareLeadCreateRequest(payload) {
+      // Se una richiesta precedente non ha ricevuto risposta, si ripete
+      // ESATTAMENTE il payload originale con la stessa chiave.
+      if (pendingLeadCreateRequest) {
+        Object.entries(pendingLeadCreateRequest.payload).forEach(([name, value]) => {
+          const field = $('nwst-create').elements.namedItem(name);
+          if (field) field.value = value;
+        });
+        return pendingLeadCreateRequest;
+      }
+
+      const payloadJson = JSON.stringify(payload);
+      const request = {
+        request_id: crypto.randomUUID(),
+        request_hash: await sha256Hex(payloadJson),
+        payload_json: payloadJson,
+        payload: payload
+      };
+      // Persistenza obbligatoria prima della chiamata di rete.
+      sessionStorage.setItem(PENDING_LEAD_CREATE_KEY, JSON.stringify({
+        request_id: request.request_id,
+        request_hash: request.request_hash,
+        payload_json: request.payload_json
+      }));
+      pendingLeadCreateRequest = request;
+      return request;
+    }
+
+    function clearPendingLeadCreateRequest() {
+      pendingLeadCreateRequest = null;
+      try { sessionStorage.removeItem(PENDING_LEAD_CREATE_KEY); } catch (_) {}
+    }
 
     // Ripristina il contesto dopo un reload: l'ID e l'obiettivo vengono
     // conservati nella sessione del browser, non nei dati cloud condivisi.
@@ -254,7 +333,18 @@
           return;
         }
 
-        const values = Object.fromEntries(new FormData(form).entries());
+        const formValues = Object.fromEntries(new FormData(form).entries());
+        const values = pendingLeadCreateRequest
+          ? pendingLeadCreateRequest.payload
+          : {
+              display_name: formValues.display_name.trim(),
+              category: formValues.category,
+              source_name: formValues.source_name.trim(),
+              source_url: formValues.source_url.trim(),
+              public_evidence: formValues.public_evidence.trim(),
+              objective: formValues.objective.trim() || 'Valutare il prospect e preparare il primo contatto',
+              channel: formValues.channel
+            };
         if (!/^https?:\/\//i.test(values.source_url)) {
           say('Inserisci un URL pubblico http o https valido.');
           return;
@@ -262,14 +352,20 @@
 
         const { c } = await cloud.active();
         $('nwst-create-button').disabled = true;
+        say(pendingLeadCreateRequest
+          ? 'Ripresa della stessa richiesta di creazione…'
+          : 'Preparazione della richiesta sicura…');
+        const createRequest = await prepareLeadCreateRequest(values);
         say('Creazione prospect e conversazione…');
-        const { data, error } = await c.rpc('nextway_create_lead_with_conversation', {
-          p_display_name: values.display_name.trim(),
+        const { data, error } = await c.rpc('nextway_create_lead_with_conversation_idempotent', {
+          p_request_id: createRequest.request_id,
+          p_request_hash: createRequest.request_hash,
+          p_display_name: values.display_name,
           p_category: values.category,
-          p_source_name: values.source_name.trim(),
-          p_source_url: values.source_url.trim(),
-          p_public_evidence: values.public_evidence.trim(),
-          p_objective: values.objective.trim() || 'Valutare il prospect e preparare il primo contatto',
+          p_source_name: values.source_name,
+          p_source_url: values.source_url,
+          p_public_evidence: values.public_evidence,
+          p_objective: values.objective,
           p_channel: values.channel
         });
         if (error) throw error;
@@ -281,6 +377,7 @@
         pendingCreatedConversationId = result.conversation_id;
         pendingCreatedGoal = $('nwst-goal').value;
         persistPendingCreate();
+        clearPendingLeadCreateRequest();
         form.reset();
         updateCreateButtonLabel();
         say('Prospect e conversazione creati. Preparazione della bozza…');
@@ -313,6 +410,8 @@
         $('nwst-conversation').value = pendingCreatedConversationId;
         $('nwst-goal').value = pendingCreatedGoal;
         say('È presente una conversazione creata in precedenza senza bozza completata. Premi “Riprova generazione” per riprendere la stessa conversazione, senza crearne un’altra.');
+      } else if (pendingLeadCreateRequest) {
+        say('È presente una richiesta di creazione senza risposta confermata. Il modulo è stato ripristinato: premi di nuovo “Crea conversazione e genera bozza” per ripetere la stessa richiesta senza duplicare il Lead.');
       }
     }).catch(() => {
       say(pendingCreatedConversationId
