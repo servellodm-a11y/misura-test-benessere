@@ -105,6 +105,13 @@ Il modello attualmente documentato garantisce al proprietario e a `platform_admi
 - [ ] Risposte upstream malformate non interrompono la funzione con errore non gestito.
 - [ ] I risultati restano candidati da verificare: non diventano Lead automaticamente.
 
+### 7. Ricerca Tavily parziale e resilienza provider
+- [ ] Con 3 query, simulare successo della prima, timeout della seconda e successo della terza: la risposta contiene i risultati 1 e 3 e segnala una query fallita.
+- [ ] Verificare `queries_requested`, `queries_completed`, `queries_failed` e `partial`.
+- [ ] Se tutte le query falliscono, la funzione restituisce un errore HTTP controllato e non una risposta di successo vuota.
+- [ ] Verificare che i dettagli di errore non espongano API key, header Authorization o contenuti interni del provider.
+- [ ] Verificare che il consumo rate limit conteggi tutte le query tentate anche quando una o più chiamate Tavily falliscono.
+
 ### 8. Costi e abuso
 - [ ] Applicare in ambiente di test nell'ordine `20261110000100_nextway_distributed_rate_limit.sql`, `20261110000200_nextway_setter_idempotency.sql`, `20261110000300_nextway_rate_limit_units.sql`, `20261110000400_nextway_idempotency_retention.sql`, `20261110000500_nextway_setter_output_recovery.sql`.
 - [ ] AI Setter: 5 generazioni nella stessa finestra per utente ammesse; la sesta restituisce HTTP 429.
