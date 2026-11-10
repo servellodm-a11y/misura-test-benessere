@@ -129,10 +129,17 @@ console.log("Lead permissions matrix: owner-scoped roles and platform_admin cros
 
 // AI Setter: prevent duplicate Lead/conversation creation after a generation failure.
 assert.match(setter, /let pendingCreatedConversationId = ''/);
+assert.match(setter, /const PENDING_CREATE_KEY = 'nextway_setter_pending_create_v1'/);
+assert.match(setter, /sessionStorage\.getItem\(PENDING_CREATE_KEY\)/);
+assert.match(setter, /sessionStorage\.setItem\(PENDING_CREATE_KEY/);
+assert.match(setter, /sessionStorage\.removeItem\(PENDING_CREATE_KEY\)/);
+assert.match(setter, /pendingCreatedGoal = savedPending\.goal/);
+assert.match(setter, /await generateDraft\(pendingCreatedConversationId, pendingCreatedGoal\)/);
+assert.match(setter, /È presente una conversazione creata in precedenza senza bozza completata/);
 assert.match(setter, /if \(pendingCreatedConversationId\) \{/);
 assert.match(setter, /await generateDraft\(pendingCreatedConversationId, \$\('nwst-goal'\)\.value\)/);
 assert.match(setter, /pendingCreatedConversationId = result\.conversation_id/);
 assert.match(setter, /form\.reset\(\)/);
 assert.match(setter, /Riprova generazione sulla conversazione creata/);
 assert.match(setter, /\['closed', 'archived'\]\.includes\(String\(row\.status \|\| ''\)\.toLowerCase\(\)\)/);
-console.log("AI Setter retry safety: existing conversation reused after generation failure; closed conversations excluded: PASS");
+console.log("AI Setter retry safety: pending conversation and goal restored across reload; duplicate creation avoided; closed conversations excluded: PASS");
