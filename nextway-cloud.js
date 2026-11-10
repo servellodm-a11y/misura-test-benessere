@@ -98,12 +98,15 @@ function init(){
  $('nw-act-load').addEventListener('click',()=>{orgActivityOffset=0;loadOrganizationActivity(false);});
  $('nw-act-more').addEventListener('click',()=>loadOrganizationActivity(true));
 
- async function setLeadArchived(cloudId, archived, reason=''){
+ async function setLeadArchived(cloudId, archived, reason='', expectedUpdatedAt=''){
   if(!cloudId)throw new Error('Questo Lead non è ancora sincronizzato. Sincronizza prima l’archivio.');
+  if(!expectedUpdatedAt)throw new Error('Versione cloud non disponibile. Ricarica l’archivio prima di procedere.');
   const {c}=await active();
   const patch=archived?{archived_at:new Date().toISOString(),archive_reason:String(reason||'Archiviazione manuale').slice(0,500)}:{archived_at:null,archive_reason:null};
-  const {data,error}=await c.from('nextway_leads').update(patch).eq('id',cloudId).select('id,archived_at,archived_by,archive_reason,updated_at').maybeSingle();
-  if(error)throw error;if(!data)throw new Error('Lead non trovato o non autorizzato.');return data;
+  const {data,error}=await c.from('nextway_leads').update(patch).eq('id',cloudId).eq('updated_at',expectedUpdatedAt).select('id,archived_at,archived_by,archive_reason,updated_at').maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('Il Lead è cambiato sul cloud o non è più accessibile. Ricarica l’archivio e ripeti l’operazione.');
+  return data;
 }
 async function getLeadForConflict(cloudId){
   if(!cloudId)throw new Error('Lead non collegato al cloud.');
@@ -142,7 +145,7 @@ async function getLeadForConflict(cloudId){
   if(!data)throw new Error('Il cloud è cambiato ancora durante la risoluzione. Nessuna modifica applicata: ricarica il confronto.');
   return {record:fromCloud(data),updated_at:data.updated_at};
  }
- window.NEXTWAY_CLOUD={active,getConfig,archiveLead:(id,reason)=>setLeadArchived(id,true,reason),restoreLead:id=>setLeadArchived(id,false),getLeadForConflict,getLeadHistory,resolveLeadConflict};
+ window.NEXTWAY_CLOUD={active,getConfig,archiveLead:(id,reason,updatedAt)=>setLeadArchived(id,true,reason,updatedAt),restoreLead:(id,updatedAt)=>setLeadArchived(id,false,'',updatedAt),getLeadForConflict,getLeadHistory,resolveLeadConflict};
  function fromCloud(r){return {id:r.id,cloud_id:r.id,name:r.display_name,profession:r.profession||'',company_brand:r.company_brand||'',location:r.location||'',category:r.category,partner_type:r.partner_type||'',mode:r.discovery_mode||'',signal_type:r.public_signal||'',source:r.source_name,url:r.source_url,evidence:r.public_evidence,verified_at:r.verified_at||'',identity_check:r.identity_check,qualification:r.qualification,fit:r.score_fit,activity:r.score_activity,presence:r.score_presence,interest:r.score_interest,approach:r.score_approach,status:r.status,notes:r.notes||'',created:r.created_at,archived_at:r.archived_at||null,archive_reason:r.archive_reason||'',cloud_updated_at:r.updated_at,local_dirty:false};}
  async function syncLocal(){const {c,s}=await active();let rows=[];try{rows=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){throw new Error('Archivio locale non leggibile.');}let added=0,updated=0,skipped=0,failed=0,conflicts=0;
  for(const x of rows){if(x.is_test){skipped++;continue;}if(!x.name||!x.url||!x.source||!x.evidence){failed++;continue;}
