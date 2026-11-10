@@ -413,3 +413,12 @@ Rilievi da risolvere/verificare:
 - **Importante:** la migrazione non modifica gli eventi storici già registrati. Gli snapshot precedenti alla migrazione 010 possono ancora contenere quei valori. La loro eventuale redazione richiede una decisione separata e una migrazione esplicitamente approvata.
 - Ordine migrazioni: prima `20261110000900_nextway_lead_audit_trail.sql`, poi `20261110001000_nextway_audit_data_minimization.sql`.
 - Stato: codice e documentazione nel repository; migrazione non applicata su Supabase; test SQL non eseguiti.
+
+
+## 24. Controlli statici automatici (10 novembre 2026)
+
+- Aggiunto `scripts/validate-nextway-audit.mjs`, senza dipendenze esterne: controlla parsing JavaScript di `nextway-cloud.js` e degli script inline di `nextway-ai.html`, struttura essenziale della migrazione audit, accesso amministrativo, paginazione e minimizzazione dei nuovi snapshot.
+- Aggiunto workflow `.github/workflows/nextway-static-validation.yml`, attivato da modifiche rilevanti su `main` e pull request.
+- Il workflow usa Node.js 22 e permessi GitHub in sola lettura (`contents: read`).
+- Stato: script e workflow committati; esecuzione GitHub Actions non ancora osservata. I controlli statici eseguiti in questa sessione sono separati dall'esito futuro del workflow.
+- Questi controlli non sostituiscono test SQL/Postgres, RLS, Supabase Auth, PostgREST o test browser.
