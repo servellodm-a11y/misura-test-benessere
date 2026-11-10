@@ -331,3 +331,18 @@ La matrice seguente è ricavata dalle policy presenti in `supabase/nextway_leads
 - La matrice non certifica permessi di conversazioni e messaggi: vanno verificati separatamente.
 - I test statici verificano il testo delle policy versionate, non l'effettiva configurazione RLS live.
 - L'accesso gerarchico a Lead del proprio ramo è una decisione di prodotto ancora da specificare; non viene attivato implicitamente dal ruolo.
+
+
+## 33. Diagnostica read-only permessi AI Setter
+
+File: `supabase/diagnostics/nextway_setter_permissions_readonly.sql`.
+
+La query raccoglie soltanto metadati delle tabelle conversazioni e messaggi: colonne, RLS/FORCE RLS, policy, grants e foreign key. Non legge righe applicative e non modifica il database.
+
+- [ ] Verificare che entrambe le tabelle esistano e che le colonne di ownership siano coerenti.
+- [ ] Verificare SELECT/INSERT/UPDATE/DELETE per ciascuna policy e il relativo USING/WITH CHECK.
+- [ ] Verificare che i messaggi non possano essere associati a una conversazione appartenente a un altro profilo.
+- [ ] Verificare che le autorizzazioni admin siano esplicite e non più ampie del necessario.
+- [ ] Solo dopo l'analisi dell'output, definire la matrice definitiva dei permessi AI Setter per i cinque ruoli.
+
+Stato: query preparata su GitHub; non ancora eseguita sul progetto Supabase live.
