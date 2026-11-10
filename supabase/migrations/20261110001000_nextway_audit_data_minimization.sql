@@ -23,7 +23,7 @@ begin
     v_after_snapshot := v_after_full - 'notes' - 'public_evidence';
     v_owner := new.owner_profile_id;
     select coalesce(array_agg(key order by key), '{}'::text[])
-      into v_fields from jsonb_object_keys(v_after_snapshot) as keys(key);
+      into v_fields from jsonb_object_keys(v_after_full) as keys(key);
     insert into public.nextway_lead_audit_logs
       (lead_id, lead_owner_profile_id, actor_profile_id, action,
        changed_fields, before_data, after_data)
@@ -55,7 +55,7 @@ begin
     v_before_snapshot := v_before_full - 'notes' - 'public_evidence';
     v_owner := old.owner_profile_id;
     select coalesce(array_agg(key order by key), '{}'::text[])
-      into v_fields from jsonb_object_keys(v_before_snapshot) as keys(key);
+      into v_fields from jsonb_object_keys(v_before_full) as keys(key);
     insert into public.nextway_lead_audit_logs
       (lead_id, lead_owner_profile_id, actor_profile_id, action,
        changed_fields, before_data, after_data)
