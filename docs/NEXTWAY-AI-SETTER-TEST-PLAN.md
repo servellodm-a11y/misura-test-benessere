@@ -346,3 +346,15 @@ La query raccoglie soltanto metadati delle tabelle conversazioni e messaggi: col
 - [ ] Solo dopo l'analisi dell'output, definire la matrice definitiva dei permessi AI Setter per i cinque ruoli.
 
 Stato: query preparata su GitHub; non ancora eseguita sul progetto Supabase live.
+
+## 34. Retry frontend dopo creazione Lead/conversazione
+
+- [ ] Creare un prospect e verificare che la RPC restituisca una conversazione.
+- [ ] Simulare un errore di caricamento conversazioni dopo la RPC: il retry deve riutilizzare l'ID già ottenuto e non richiamare la RPC di creazione.
+- [ ] Simulare un errore/timeout della generazione AI: il pulsante deve proporre il retry sulla conversazione già creata.
+- [ ] Verificare che il modulo venga azzerato dopo la creazione confermata e che il retry non produca un secondo Lead.
+- [ ] Verificare che il retry riutilizzi la stessa chiave idempotente per la generazione fallita.
+- [ ] Verificare che conversazioni `closed` e `archived` non compaiano nel selettore delle conversazioni utilizzabili.
+- [ ] Verificare il comportamento quando la conversazione viene chiusa tra caricamento e generazione: il backend deve rifiutare la richiesta senza salvare la bozza.
+
+Controllo statico: GitHub Actions run `42803941984` — SUCCESS. Il controllo include parsing JavaScript di `nextway-setter.js` e verifiche strutturali sul retry. I test browser/RPC/Edge Function restano da eseguire in ambiente live.
