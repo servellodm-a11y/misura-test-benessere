@@ -42,7 +42,7 @@ assert.match(html, /\[valore non registrato per riservatezza\]/);
 // Identità leggibili nel registro: verifica i campi reali dello schema Supabase.
 assert.match(cloud, /select\('id,full_name'\)\.in\('id',profileIds\)/);
 assert.match(cloud, /select\('profile_id,first_name,last_name'\)\.in\('profile_id',profileIds\)/);
-assert.match(cloud, /profileNames\[p\.id\]=p\.full_name/);
+assert.match(cloud, /const name=String\(p\.full_name\|\|''\)\.trim\(\);if\(name\)profileNames\[p\.id\]=name/);
 assert.match(cloud, /profileNames\[p\.profile_id\]=name/);
 assert.match(cloud, /ev\.lead_owner_name=ev\.lead_owner_profile_id\?/);
 assert.match(cloud, /ev\.actor_name=ev\.actor_profile_id\?/);
@@ -50,6 +50,8 @@ assert.match(cloud, /Proprietario: '\+\(ev\.lead_owner_name/);
 assert.match(cloud, /Operatore: '\+\(ev\.actor_name/);
 assert.match(cloud, /'Nome non disponibile'/);
 assert.match(cloud, /'identità non disponibile'/);
+assert.match(cloud, /if\(!profilesError\)/);
+assert.match(cloud, /if\(!partnersError\)/);
 assert.match(cloud, /if\(!\(await isPlatformAdmin\(\)\)\)throw new Error\('Accesso riservato a platform_admin\.'/);
 assert.doesNotMatch(cloud, /select\('id,email,full_name/);
 assert.doesNotMatch(cloud, /select\('profile_id,first_name,last_name,phone/);
