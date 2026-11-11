@@ -1182,3 +1182,13 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Commit migrazione rettificata: `b2306e515d36f0b401c8961483432105e9cd29ad`.
 - Commit test rettificato: `f8ec2b3f5e75d17365ff04eebc5c8cb3ce6979e4`.
 - La CI per questi ultimi commit deve ancora essere verificata. La migrazione non è da applicare finché non viene confermato il nuovo esito.
+
+
+### Esito CI della rettifica trigger-safe — 11 novembre 2026
+
+- La versione definitiva della migrazione evita UPDATE retroattivi sulle richieste già attivate; la funzione di finalizzazione azzera i due campi claim per le nuove attivazioni.
+- Test statico corretto per verificare la pulizia nella funzione e impedire una riscrittura diretta dei record storici.
+- Commit test definitivo: `4dcac78c65e7559ee263fbfa9225540046eeb5eb`.
+- GitHub Actions run #139: **SUCCESS**, job `validate` completato; controlli audit, sicurezza provisioning e type-check Deno superati.
+- Link CI: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030744978.
+- Migrazione definitiva presente su `main`, non ancora applicata a Supabase. Netlify resta fuori dal flusso fino al 4 dicembre.
