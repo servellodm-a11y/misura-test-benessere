@@ -1,3 +1,31 @@
+## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:25 (Europe/Rome)
+
+### Repository e fonti controllate
+- Recuperato il presente MASTER da GitHub main prima della modifica; blob SHA di partenza: 50b7cd82bf780b7fdbe982a0d26312efbf3144bd.
+- Esaminati i commit recenti. HEAD più recente osservato: 1b0169ad468e4d20b495b4d0b1b4fdde185fdb08 (modifica documentale che chiarisce che il commit 34ff512f3fb6868db37b0a0d5e8e5c7ddf029eeb era l'HEAD osservato prima del precedente aggiornamento MASTER). Il commit immediatamente precedente ce50ed3248251c61e666ce060ae31dc899bb08a4 registra il precedente aggiornamento CRM del MASTER.
+- Recuperato nuovamente da GitHub il file supabase/diagnostics/nextway_crm_prerequisites_readonly.sql: presente nel branch main, blob SHA 832d328fd84b0694f7e324866a2db4927ab83dd2; commit di creazione b0034232809b124a1afcbfe352777ba34b0ac6e1.
+- Il contenuto della diagnostica prerequisiti è stato verificato come query SELECT/metadata in sola lettura. Non risulta, nelle informazioni disponibili a questo controllo, un nuovo risultato di esecuzione Supabase successivo a quello della diagnostica CRM live già riportato nella sezione precedente.
+
+### Stato tecnico e limiti di questo controllo
+- Resta valido l'ultimo risultato live fornito dall'utente: public.nextway_leads presente con RLS attivo e quattro policy owner/platform_admin; public.nextway_lead_activities e public.nextway_lead_conversion_requests assenti al momento della query. Non è stata ripetuta la query sul database.
+- La diagnostica prerequisiti deve ancora restituire il JSON su colonne archived_*, vincoli di stato, tabella idempotenza e firme RPC. Fino a quel risultato non si può stabilire l'ordine sicuro delle migrazioni.
+- La migrazione 20261110001100_nextway_lead_creation_idempotency.sql resta da correggere prima dell'applicazione: nel repository il blocco della funzione di pulizia presenta delimitatori PL/pgSQL non validi (as $ e $;). Va anche verificata la compatibilità della RPC sottostante prima di considerare applicabile la migrazione.
+- Nessun connettore Supabase o Netlify è disponibile in questo controllo; nessuna interrogazione diretta del database, deploy o nuova verifica CI è stata eseguita. L'ultimo esito CI già documentato resta run #229 SUCCESS, limitato a test statici e type-check, non a runtime PostgreSQL.
+- Questa esecuzione ha modificato esclusivamente il documento MASTER. Nessun codice applicativo, database, dato, impostazione, segreto o configurazione è stato modificato.
+
+### Stato componenti e prossimo passo
+- Repository e continuità documentale: COMPLETATO E VERIFICATO per i file e i commit effettivamente recuperati.
+- Diagnostica prerequisiti CRM: COMPLETATO E VERIFICATO quanto a presenza e contenuto nel repository; DA COMPLETARE quanto all'esecuzione in Supabase e alla lettura del risultato.
+- Schema live delle colonne archive, vincoli status, tabella idempotenza e RPC: DA COMPLETARE.
+- Tabelle attività e conversioni: DA COMPLETARE (assenti nell'ultima verifica live disponibile).
+- Applicazione migrazioni CRM: BLOCCATO fino al risultato della diagnostica, alla correzione della migrazione 011 e alla validazione delle dipendenze.
+- Prossimo passo operativo preciso: eseguire supabase/diagnostics/nextway_crm_prerequisites_readonly.sql in Supabase SQL Editor e acquisire il JSON completo; quindi definire e verificare la sequenza di migrazioni, senza applicazioni in blocco.
+
+### Registro cronologico del MASTER
+- 11-11-2026, 19:25 Europe/Rome — aggiunto il controllo di continuità del repository, l'HEAD GitHub osservato, la verifica di presenza/SHA della diagnostica prerequisiti e lo stato operativo aggiornato. Modifica esclusivamente documentale.
+
+---
+
 ## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (diagnostica CRM live e prerequisiti migrazioni)
 
 ### Fonti e perimetro della verifica
