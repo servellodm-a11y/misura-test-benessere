@@ -1254,3 +1254,22 @@ Limiti residui:
 
 ### Passo operativo successivo
 Applicare una sola volta su Supabase SQL Editor la migrazione `20261111160000_nextway_trigger_function_privileges.sql`; quindi eseguire un'unica query aggregata di verifica ACL e stato trigger. Non ripetere i controlli già completati.
+
+
+## CHIUSURA AUDIT AUTORIZZAZIONI RPC E TRIGGER — 11 NOVEMBRE 2026
+
+Verifica aggregata finale eseguita dopo l'applicazione della migrazione `20261111160000_nextway_trigger_function_privileges.sql`.
+
+Esito per tutte le quattro funzioni trigger-only:
+- `nextway_apply_lead_qualification_v1()`: ACL `{postgres=X/postgres,service_role=X/postgres}`; trigger attivo.
+- `nextway_set_lead_updated_at()`: ACL `{postgres=X/postgres,service_role=X/postgres}`; trigger attivo.
+- `nextway_setter_touch()`: ACL `{postgres=X/postgres,service_role=X/postgres}`; trigger attivo.
+- `nextway_validate_setter_owner()`: ACL `{postgres=X/postgres,service_role=X/postgres}`; trigger attivo.
+
+La verifica conferma che `anon`, `authenticated` e `PUBLIC` non dispongono di EXECUTE diretto su queste funzioni; i trigger restano abilitati e operativi. Migrazione applicata manualmente in Supabase SQL Editor con esito `Success. No rows returned`.
+
+Validazione GitHub Actions #142: SUCCESS. Nessun'altra verifica SQL è richiesta per la chiusura di questo audit.
+
+Le due overload di `nextway_save_ai_analysis` restano entrambe presenti e invariate, in attesa di accertare eventuali consumer esterni prima di un'eventuale unificazione. Le differenze semantiche sono documentate nella sezione precedente.
+
+Vincolo operativo invariato: nessun intervento su Netlify fino al 4 dicembre 2026.
