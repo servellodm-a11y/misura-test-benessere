@@ -21,7 +21,7 @@ for (const signature of [
   "nextway_complete_setter_generation(uuid,text,text,text,text,text)",
 ]) assert.match(sql, new RegExp(signature.replace(/[()]/g, "\\$&")));
 
-assert.match(sql, /workspace_id association columns are missing/i);
+assert.match(sql, /workspace association columns are missing/i);
 assert.match(sql, /nextway_has_workspace_access\(/i);
 assert.match(sql, /array\['workspace_owner','workspace_admin','workspace_manager','workspace_member'\]/i);
 assert.match(sql, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
