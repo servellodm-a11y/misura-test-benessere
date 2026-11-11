@@ -1546,3 +1546,11 @@ Dopo la validazione statica e type-check, completare il modello di isolamento wo
 - Commit correzione Edge Function: `177654c9d97325440bb61e3092d0ce610ee3a049`.
 - Commit workflow PR paths: `817260aaaef8ac87242b1b518625b00353b56556`.
 - Il connettore GitHub disponibile non ha restituito il run push della CI; esito test e `deno check` resta **NON VERIFICATO**. Nessuna dichiarazione di superamento.
+
+
+### Estensione API amministrativa — lettura versioni
+- Aggiunte le azioni `list_prompts` e `list_criteria` per consultare lo storico delle versioni e i relativi stati/approvazioni.
+- Test statico aggiornato per includere entrambe le azioni.
+- Commit Edge Function: `4ac0cc62e76be216e7716f8484c4a8c5b91c83d1`.
+- Commit test: `2f094f5917c9c239a716bde0bbb2fa50686faf42`.
+- La CI deve rieseguire il workflow sul push; il risultato non è stato recuperato e resta non verificato.
