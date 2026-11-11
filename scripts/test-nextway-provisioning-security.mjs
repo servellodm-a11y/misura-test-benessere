@@ -35,6 +35,7 @@ assert.doesNotMatch(cloud, /NEXTWAY_SERVICE_ROLE_KEY|SUPABASE_SERVICE_ROLE_KEY|i
 
 const cleanupMigration = read("../supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql");
 assert.match(cleanupMigration, /activation_claim_token\s*=\s*null\s*,\s*activation_claimed_at\s*=\s*null/);
+assert.ok(cleanupMigration.indexOf("where status = 'activated'") < cleanupMigration.indexOf("add constraint nextway_conversion_activation_state_check"), "Legacy activated rows must be normalized before enforcing the new state constraint");
 assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activation_claimed_at\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
 
 console.log("NEXTWAY provisioning security contract: PASS");
