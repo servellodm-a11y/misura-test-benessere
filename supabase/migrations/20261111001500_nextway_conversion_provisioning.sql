@@ -14,6 +14,31 @@ alter table public.nextway_lead_conversion_requests
   add column if not exists activation_user_id uuid references auth.users(id) on delete set null,
   add column if not exists activated_at timestamptz;
 
+alter table public.nextway_lead_conversion_requests
+  drop constraint if exists nextway_conversion_activation_state_check;
+alter table public.nextway_lead_conversion_requests
+  add constraint nextway_conversion_activation_state_check check (
+    (
+      status = 'provisioning'
+      and activation_claim_token is not null
+      and activation_claimed_at is not null
+      and activated_at is null
+      and activation_user_id is null
+    )
+    or (
+      status = 'activated'
+      and activation_claim_token is null
+      and activated_at is not null
+    )
+    or (
+      status not in ('provisioning','activated')
+      and activation_claim_token is null
+      and activation_claimed_at is null
+      and activation_user_id is null
+      and activated_at is null
+    )
+  );
+
 alter table public.partner_details
   add column if not exists nextway_conversion_request_id uuid
     references public.nextway_lead_conversion_requests(id) on delete restrict;
