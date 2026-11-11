@@ -16,6 +16,7 @@ declare
   v_workspace_id uuid;
   v_prompt_key text;
   v_status text;
+  v_workspace_status text;
 begin
   if p_admin_user_id is null or not exists (
     select 1 from public.profiles p
@@ -37,7 +38,14 @@ begin
     raise exception 'Solo una bozza puo essere attivata' using errcode = '22023';
   end if;
 
-  perform 1 from public.nextway_workspaces where id = v_workspace_id for update;
+  select status into v_workspace_status
+    from public.nextway_workspaces
+    where id = v_workspace_id
+    for update;
+  if not found or v_workspace_status <> 'active' then
+    raise exception 'Il workspace deve essere attivo per attivare un prompt' using errcode = '22023';
+  end if;
+
   update public.nextway_workspace_prompts
     set status = 'archived', updated_at = now()
   where workspace_id = v_workspace_id
@@ -68,6 +76,7 @@ declare
   v_workspace_id uuid;
   v_criteria_key text;
   v_status text;
+  v_workspace_status text;
 begin
   if p_admin_user_id is null or not exists (
     select 1 from public.profiles p
@@ -89,7 +98,14 @@ begin
     raise exception 'Solo una bozza puo essere attivata' using errcode = '22023';
   end if;
 
-  perform 1 from public.nextway_workspaces where id = v_workspace_id for update;
+  select status into v_workspace_status
+    from public.nextway_workspaces
+    where id = v_workspace_id
+    for update;
+  if not found or v_workspace_status <> 'active' then
+    raise exception 'Il workspace deve essere attivo per attivare i criteri' using errcode = '22023';
+  end if;
+
   update public.nextway_workspace_prospect_criteria
     set status = 'archived', updated_at = now()
   where workspace_id = v_workspace_id
