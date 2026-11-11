@@ -9,7 +9,7 @@ Attiva una richiesta `ready_for_activation` della coda CRM. L'endpoint è esclus
 
 ## Sicurezza
 - Verifica il Bearer token e controlla che `profiles.role = 'platform_admin'`.
-- La chiave `SUPABASE_SERVICE_ROLE_KEY` è usata solo nell'Edge Function.
+- La chiave `NEXTWAY_SERVICE_ROLE_KEY` è usata solo nell'Edge Function.
 - Il browser invia esclusivamente `request_id`; email, nome, sponsor e tipo vengono letti dalla richiesta approvata nel database.
 - Le RPC di claim/finalizzazione/rilascio sono eseguibili solo da `service_role`.
 - Lease di 10 minuti per impedire attivazioni concorrenti; retry dopo scadenza.
@@ -18,7 +18,7 @@ Attiva una richiesta `ready_for_activation` della coda CRM. L'endpoint è esclus
 
 ## Prerequisiti
 1. Applicare `supabase/migrations/20261111001500_nextway_conversion_provisioning.sql` nel SQL Editor.
-2. Configurare il secret Supabase Edge Functions `SUPABASE_SERVICE_ROLE_KEY` con la service-role key del progetto. Non inserirla in GitHub, HTML, JavaScript client o documentazione pubblica.
+2. Configurare il secret Supabase Edge Functions `NEXTWAY_SERVICE_ROLE_KEY` con la service-role key del progetto. Non inserirla in GitHub, HTML, JavaScript client o documentazione pubblica.
 3. Verificare `SUPABASE_URL` e una chiave pubblicabile/anon disponibili nell'ambiente Edge Functions.
 4. Pubblicare `nextway-conversion-provisioning`.
 5. Il frontend richiama la funzione dalla coda amministrativa delle richieste pronte.
