@@ -1495,3 +1495,46 @@ Avviata l'implementazione della struttura multi-azienda, senza alterare le tabel
 - La console amministrativa non è ancora implementata; questo blocco fornisce il modello dati.
 - Prossimo sviluppo: API amministrative controllate per creare/aggiornare workspace e gestire versioni/approvazioni di prompt e criteri, poi associazione progressiva dei moduli esistenti.
 - Netlify resta escluso dagli interventi fino al 4 dicembre 2026.
+
+
+## API AMMINISTRATIVE WORKSPACE — V1 (11 NOVEMBRE 2026)
+
+Sviluppato il primo servizio backend per gestire workspace, prompt e criteri senza accesso diretto dal browser alle credenziali privilegiate.
+
+### Componenti aggiunti
+- Edge Function `supabase/functions/nextway-workspace-admin/index.ts`.
+- Migrazione candidata `supabase/migrations/20261111200000_nextway_workspace_activation_rpc.sql`.
+- Test statico `scripts/test-nextway-workspace-admin-security.mjs`.
+- Workflow CI aggiornato per test statico e `deno check` della nuova Edge Function.
+
+### API disponibili
+- `list_workspaces`: elenco amministrativo dei workspace.
+- `create_workspace`: crea un workspace in stato draft, senza seed automatici.
+- `update_workspace`: aggiorna metadati, impostazioni e stato del workspace.
+- `save_prompt_draft` / `save_criteria_draft`: registra nuove versioni in stato draft.
+- `activate_prompt` / `activate_criteria`: attiva una bozza e archivia la versione attiva precedente nella stessa transazione PostgreSQL.
+- `archive_prompt` / `archive_criteria`: archivia versioni non attive; una versione attiva non può essere archiviata senza sostituzione.
+
+### Sicurezza e limiti
+- Ogni richiesta richiede JWT valido e ruolo `platform_admin`; il service-role resta server-side.
+- Body limitato a 100 KB, allowlist CORS, validazione UUID, chiavi e campi, errori senza dettagli interni.
+- Le RPC di attivazione sono SECURITY DEFINER con search_path fisso, verificano il ruolo amministrativo indicato e sono eseguibili solo da service_role.
+- La funzione non crea account, partner, lead o clienti e non invia messaggi.
+- Il servizio non è deployato e dipende dalle due migrazioni workspace candidate già versionate.
+
+### Commit
+- Edge Function: `1d5577c41c09065e79bb77a74fc8fb5d63720b2c`.
+- RPC transazionali: `7146abeb639c0e8e59f69bb15d4747ff05d4f45c`.
+- Test sicurezza: `4492b0e5333240151378a6e336fbe8d85258d9df`.
+- Workflow: `3c4d1164fa49b6ebdb98277da7f89529e27dda78`.
+
+### Stato
+- Codice presente su GitHub main.
+- Migrazioni workspace e RPC: **CANDIDATE, NON APPLICATE**.
+- Edge Function: **NON DEPLOYATA**.
+- CI/type-check: da verificare sul run generato dal push; nessun esito va presunto.
+- Nessun workspace, prompt, criterio o dato operativo è stato creato su Supabase.
+- Nessun intervento Netlify fino al 4 dicembre 2026.
+
+### Prossimo passo
+Dopo la validazione statica e type-check, completare il modello di isolamento workspace per documenti, lead e conversazioni, poi pianificare l'applicazione coordinata delle migrazioni e il deploy. L'associazione dei dati esistenti non va eseguita automaticamente: richiederà una strategia esplicita di migrazione e verifica.
