@@ -1897,3 +1897,5 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Netlify resta **NON MODIFICATO**; rispettare il blocco fino al 4 dicembre 2026.
 - Nessun workspace, membership, Lead, conversazione, documento o dato di prova è stato creato.
 - Prima dell'applicazione serve un unico preflight read-only aggregato sullo schema live, con particolare attenzione alle tabelle operative richieste dalla migrazione RLS e alla presenza di RLS attiva. Dopo il preflight si potrà preparare un piano di applicazione ordinato; non applicare automaticamente.
+- Test statico aggiornato: commit `5138c776d85363e4643807d0e155e6dbb4d96d64`; controlla anche l'ordine delle migrazioni e i prerequisiti cross-file. La nuova esecuzione CI successiva a questo commit non è ancora stata verificata.
+- Preparata la diagnostica aggregata read-only `supabase/diagnostics/nextway_workspace_migration_preflight_readonly.sql`: restituisce una sola riga JSON con tabelle, colonne, RLS, funzioni, trigger, policy e prerequisiti Storage; non modifica schema o dati e non legge record applicativi, salvo la presenza del ruolo platform_admin.
