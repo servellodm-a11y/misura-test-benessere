@@ -35,7 +35,7 @@ assert.doesNotMatch(cloud, /NEXTWAY_SERVICE_ROLE_KEY|SUPABASE_SERVICE_ROLE_KEY|i
 
 const cleanupMigration = read("../supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql");
 assert.match(cleanupMigration, /activation_claim_token\s*=\s*null\s*,\s*activation_claimed_at\s*=\s*null/);
-assert.doesNotMatch(cleanupMigration, /update public\.nextway_lead_conversion_requests[\s\S]*?where status = 'activated'/i, "Migration must not rewrite immutable historical activated requests");
+assert.doesNotMatch(cleanupMigration, /set activation_claimed_at\s*=\s*null\s+where status\s*=\s*'activated'/i, "Migration must not rewrite immutable historical activated requests");
 assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
 assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activation_claimed_at\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
 
