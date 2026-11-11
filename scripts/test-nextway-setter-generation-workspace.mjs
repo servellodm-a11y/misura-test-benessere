@@ -33,7 +33,7 @@ assert.match(sql, /if coalesce\(v_inserted,false\) then[\s\S]*?select true,false
 assert.match(sql, /generated_output jsonb/i);
 assert.match(sql, /cached_response jsonb/i);
 assert.match(sql, /status='completed'/i);
-assert.match(sql, /direction,owner_profile_id[\s\S]*?ai_generated/i);
+assert.match(sql, /conversation_id,owner_profile_id,direction,content,message_type,ai_generated/i);
 assert.match(sql, /'outgoing',[\s\S]*?'text',true/i);
 assert.match(sql, /last_message_at=clock_timestamp\(\)/i);
 assert.match(sql, /new\.workspace_id is distinct from v_workspace_id/i);
