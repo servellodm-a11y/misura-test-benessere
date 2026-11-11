@@ -1940,7 +1940,7 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 
 ### CI e stato operativo
 - CI run #228 (`43059995637`) fallito sul test AI Setter generation workspace: il test vietava la policy `nextway_setter_messages_workspace_manage`, ancora presente nella migrazione. Rimossa la policy ridondante; commit correttivo `82d22a8d429eb67f33255931034d010a053a9c5d`.
-- CI run #229 sul commit correttivo era in coda al momento dell'aggiornamento; esito da verificare prima di considerare conclusa la validazione statica.
-- Diagnostica workspace/storage ancora da eseguire dall'utente. Il precedente preflight ha confermato la presenza delle tabelle metadata Storage, non lo stato specifico del bucket `nextway-knowledge`.
+- CI run #229 (`43060090578`) sul commit correttivo `82d22a8d429eb67f33255931034d010a053a9c5d`: **SUCCESS**. Tutti i test statici, controlli di sintassi JS e cinque `deno check` sono passati.
+- Diagnostica workspace/storage ancora da eseguire dall'utente: `supabase/diagnostics/nextway_workspace_storage_preflight_readonly.sql`. Il precedente preflight ha confermato la presenza delle tabelle metadata Storage, non lo stato specifico del bucket `nextway-knowledge` né l'eventuale presenza di workspace già creati.
 - Tutte le migrazioni restano candidate/non applicate. Nessun dato Supabase è stato modificato; nessuna Edge Function deployata; Netlify non modificato.
 - Non autorizzare ancora l'applicazione sequenziale: attendere esito CI #229 e diagnostica bucket/workspace. Anche dopo CI verde, la validazione resta statica e non equivale a test PostgreSQL runtime.
