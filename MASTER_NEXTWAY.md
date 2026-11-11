@@ -1687,3 +1687,10 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Nessun backfill o aggiornamento di righe applicative.
 - Commit preflight migrazione: `d0afd2291892185d421f866cc02c6a237401ac3e`.
 - Commit test preflight: `d1d57cfbf9bc4c626ec335c3c20231da0c485373`.
+
+
+### Esito CI dopo rafforzamento preflight — 11 novembre 2026
+- Run `43041014639`: **SUCCESS** sul commit test `d1d57cfbf9bc4c626ec335c3c20231da0c485373`.
+- Run `43041004903`: **SUCCESS** sul commit migrazione `d0afd2291892185d421f866cc02c6a237401ac3e`.
+- La CI ha eseguito anche il test workspace-scoped RLS e i cinque `deno check`; tutti superati.
+- Il preflight verifica l'esistenza delle tabelle target, RLS attiva, colonne `workspace_id` necessarie e firma esatta dell'helper. L'esito di tali controlli sul database sarà noto solo quando la migrazione verrà applicata, che resta vietato in questa fase.
