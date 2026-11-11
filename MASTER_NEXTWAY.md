@@ -975,7 +975,7 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Il test copre: creazione Lead e conversazione tramite RPC idempotente; replay della stessa richiesta senza duplicazione; creazione attività e completamento follow-up; archiviazione e ripristino; creazione e revisione amministrativa della richiesta conversione; presenza dell'audit con esclusione di `notes` e `public_evidence` dagli snapshot.
 - La procedura è racchiusa in `BEGIN ... ROLLBACK`: i record temporanei e gli eventi audit generati vengono annullati al termine. Usa soltanto dati fittizi e un indirizzo `example.invalid`; non attiva account o clienti.
 - File salvato e recuperato nuovamente da GitHub. Commit: `008c7424fae3a0993e8e5c30953705e360db0b5d`.
-- Il test **non è ancora stato eseguito su Supabase**. Il connettore Supabase non è disponibile in questa sessione: l'utente deve incollare il file nel SQL Editor e inviarne l'esito. In caso di errore, interrompere e analizzare il messaggio senza eseguire ulteriori operazioni.
+- Nota storica: al momento della predisposizione dell'appendice il test non era ancora stato eseguito. L'esito effettivo, ricevuto successivamente dall'utente (6/6 superati con rollback OK), è registrato nella sezione “Esito test funzionale CRM — 11 novembre 2026” qui sotto.
 
 
 ### Esito test funzionale CRM — 11 novembre 2026
