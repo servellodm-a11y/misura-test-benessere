@@ -1845,4 +1845,4 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Migrazione candidata NON applicata a Supabase.
 - Edge Functions non deployate; Netlify non modificato.
 - Nessun Lead, conversazione, membership o workspace di prova creato.
-- CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: in corso al momento dell'aggiornamento; attendere esito prima di dichiarare la fase validata.
+- CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: **SUCCESS**. Test workspace-aware Lead creation, test AI Setter generation workspace e tutti i cinque `deno check` superati.
