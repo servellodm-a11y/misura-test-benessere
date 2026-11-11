@@ -1774,3 +1774,41 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Edge Functions: **NESSUN DEPLOY** in conseguenza di questa diagnostica.
 - Netlify: nessun intervento; resta valido il blocco fino al 4 dicembre 2026.
 - Non ripetere la diagnostica aggregata: ha già fornito il risultato completo necessario per definire le discrepanze.
+
+
+## AI SETTER — PERSISTENZA GENERAZIONI E ISOLAMENTO WORKSPACE (11 NOVEMBRE 2026)
+
+### Migrazione candidata aggiunta
+- File: `supabase/migrations/20261111240000_nextway_setter_generation_workspace.sql`.
+- Test statico: `scripts/test-nextway-setter-generation-workspace.mjs`.
+- Workflow aggiornato: `.github/workflows/nextway-static-validation.yml`, con esecuzione del nuovo test.
+- Commit migrazione e successive correzioni: `51c6aaa43e0ad98473c01f9eb2d062bc6d5699b8`, `f1e94a73425c218178e9aef801c8f9a696c70886`, `e21d1ef11087ed1f797c066bd2d8617a8238453d`, `c4a4b7b3f091f2887b4bcbfb19452c2f3dc68491`, `e47ac4ad43e6e1efa35193b30c08268987108af0`.
+- Commit test e correzioni: `80cde8fdfb84c783ada5add06c3badbf7249e1b6`, `6a02b11931c017e90daccf8a4dc14c734fddafb4`, `7f2545075bbf4e7640f758167454937fd3e62500`, `7440bb806c6e863b3a9943578843f2df0fb12efd`.
+- Commit workflow: `aeaf9dc856b38d9c3d3bdcdeb55df56a3197d041`.
+
+### Contenuto tecnico
+- Crea `nextway_setter_generation_requests` con chiave idempotente univoca per attore, conversazione, stato generating/completed, output JSON temporaneo e risposta cached.
+- Tabella protetta da RLS senza accesso diretto a `authenticated`; accesso solo tramite RPC SECURITY DEFINER e service_role.
+- Versiona le quattro RPC mancanti invocate dall'Edge Function AI Setter:
+  - `nextway_begin_setter_generation(uuid,uuid)`
+  - `nextway_store_setter_generation_output(uuid,jsonb)`
+  - `nextway_get_staged_setter_output(uuid)`
+  - `nextway_complete_setter_generation(uuid,text,text,text,text,text)`
+- Claim idempotente con lock transazionale e recupero dopo due minuti; output OpenAI viene salvato prima della creazione della bozza, così i retry possono evitare una seconda chiamata a pagamento.
+- La finalizzazione inserisce un messaggio outgoing `ai_generated=true`, aggiorna `last_message_at` e memorizza la risposta cached nella stessa transazione. Il messaggio resta una bozza: non viene inviato.
+- Autorizzazione: conversazioni workspace-bound accessibili a owner/admin/manager/member; viewer in sola lettura. I record legacy con workspace NULL restano accessibili soltanto al proprietario e a platform_admin.
+- I messaggi ereditano il workspace dalla conversazione: nessuna colonna workspace_id duplicata.
+- Aggiunte policy RLS permissive/restrictive per lettura e gestione condivisa di conversazioni e messaggi; delete riservato ai ruoli workspace non viewer.
+- Il trigger `nextway_validate_setter_owner()` verifica sia la corrispondenza del proprietario sia quella del workspace Lead/conversazione, e si attiva anche su variazione di workspace_id.
+- Le RPC usano un ordine coerente di lock: conversazione e poi richiesta; la finalizzazione e la persistenza staged seguono lo stesso ordine per ridurre deadlock.
+
+### Dipendenze e limiti
+- Preflight richiede prima la migrazione di associazione workspace (colonne `workspace_id` su Leads e conversazioni) e la fondazione membership/helper.
+- La migrazione è candidata: NON applicata a Supabase.
+- Nessuna Edge Function deployata e nessuna modifica a Netlify.
+- La migrazione non aggiorna ancora le RPC di creazione Lead/conversazione per ricevere un workspace esplicito. Questa è la fase successiva: le due RPC dovranno accettare e validare il workspace, e la funzione idempotente dovrà inoltrarlo senza consentire record workspace-bound creati con workspace NULL.
+- Non è ancora eseguito un test SQL runtime su Supabase. La CI è un controllo statico del contratto; non certifica che PostgreSQL abbia compilato la migrazione o che le policy funzionino runtime.
+
+### CI
+- Il workflow aggiornato ha avviato il run #194 sul commit `7440bb806c6e863b3a9943578843f2df0fb12efd`; esito da verificare prima di dichiarare il test superato.
+- I run #191, #192 e #193 sono falliti esclusivamente sul nuovo test statico per una stringa di preflight attesa non allineata; test corretto nel commit #194. Non considerarli validazione positiva.
