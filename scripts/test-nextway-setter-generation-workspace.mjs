@@ -22,6 +22,7 @@ for (const signature of [
 ]) assert.match(sql, new RegExp(signature.replace(/[()]/g, "\\$&")));
 
 assert.match(sql, /workspace association columns are missing/i);
+assert.equal((sql.match(/\$\$/g) || []).length % 2, 0, "SQL dollar-quoted blocks must be balanced");
 assert.match(sql, /nextway_has_workspace_access\(/i);
 assert.match(sql, /array\['workspace_owner','workspace_admin','workspace_manager','workspace_member'\]/i);
 assert.match(sql, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
