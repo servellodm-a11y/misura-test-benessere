@@ -1321,3 +1321,32 @@ Copertura automatica aggiunta:
 - GitHub Actions #144: **SUCCESS**; test audit NEXTWAY, provisioning, Edge Functions, SQL rate limit/idempotenza e type-check Deno superati. https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43036197153.
 
 **Limite dell'esito:** audit statico dei file repository; non equivale a interrogazione dello schema live né a test runtime di concorrenza con utenti distinti. Nessuna migrazione applicata durante questa fase e nessun dato di test creato.
+
+
+## PRIORITÀ FUNZIONALE SUCCESSIVA — KNOWLEDGE BASE NEXTWAY AI ASSISTANT
+
+Decisione operativa ricavata dal confronto tra architettura e sorgenti presenti su main (11 novembre 2026).
+
+### Funzionalità mancante
+Realizzare il motore di conoscenza documentale dell'assistente NEXTWAY AI. Il CRM, la ricerca Lead e l'AI Setter assistito sono componenti distinti e non sostituiscono un assistente capace di rispondere usando fonti aziendali approvate. L'architettura iniziale descrive i knowledge modules e la tracciabilità delle fonti, ma nei sorgenti consultati non risulta ancora implementato il ciclo completo di caricamento, approvazione, recupero documentale e risposta fondata sulle fonti.
+
+### Perimetro della prima versione
+1. Console amministrativa per registrare e gestire fonti/documenti, lingua, settore, versione, validità e stato di approvazione.
+2. Pipeline server-side per estrazione e indicizzazione dei contenuti approvati; nessuna chiave segreta nel browser.
+3. Recupero delle sole fonti approvate e pertinenti al modulo/settore selezionato.
+4. Risposte con riferimenti alle fonti utilizzate; se non esistono evidenze adeguate, dichiarazione esplicita del limite e passaggio a un operatore.
+5. Separazione rigorosa dei moduli di conoscenza e delle finalità; nessun riutilizzo automatico di dati personali o sanitari per finalità commerciali.
+6. Primo corpus: documentazione Zinzino verificata. Architettura predisposta per moduli settoriali futuri senza duplicare il motore.
+
+### Sequenza di realizzazione
+- Prima: ricognizione mirata dei componenti già presenti e definizione del contratto dati/API, senza ripetere audit generici già conclusi.
+- Poi: progettazione e implementazione incrementale del servizio di ingestione e retrieval, con gestione delle fonti e approvazione amministrativa.
+- Successivamente: interfaccia conversazionale web e collaudo controllato.
+- WhatsApp Business Platform resta una fase successiva, subordinata al completamento del motore e alla configurazione autorizzata del canale.
+
+### Stato e vincoli
+- Questa è una priorità di sviluppo funzionale, non un nuovo audit di sicurezza.
+- La migrazione draft `20261105000100_nextway_ai_assistant_foundation.sql` non va applicata automaticamente: prima occorre confrontarla con lo schema live e definire il modello definitivo.
+- Nessun dato di prova, account, partner o cliente deve essere creato per questa fase senza necessità e autorizzazione.
+- Nessun intervento su Netlify fino al 4 dicembre 2026.
+- Nessuna implementazione di retrieval o collegamento a provider è dichiarata completata con questa registrazione: è una decisione di roadmap.
