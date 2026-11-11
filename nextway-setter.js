@@ -47,6 +47,12 @@
         <hr style="border:0;border-top:1px solid #e5eaf1;margin:16px 0">
         <h3>Nuovo prospect e prima bozza</h3>
         <form id="nwst-create">
+          <label>Workspace operativo
+            <select name="workspace_id" id="nwst-workspace">
+              <option value="">Nessun workspace — percorso centrale riservato a platform_admin</option>
+            </select>
+          </label>
+          <p class="nwst-muted">Per creare prospect condivisi, seleziona un workspace attivo al quale hai accesso. Senza selezione, il database consente la creazione soltanto a platform_admin.</p>
           <div class="nwst-grid">
             <label>Nome / identificativo pubblico *
               <input name="display_name" maxlength="120" required>
@@ -117,7 +123,10 @@
         && typeof payload.source_url === 'string'
         && typeof payload.public_evidence === 'string'
         && typeof payload.objective === 'string'
-        && typeof payload.channel === 'string';
+        && typeof payload.channel === 'string'
+        && (payload.workspace_id === undefined || payload.workspace_id === null
+          || (typeof payload.workspace_id === 'string'
+            && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.workspace_id)));
     }
 
     try {
@@ -257,6 +266,32 @@
       if (pendingRequestScope === scope) pendingRequestId = '';
     }
 
+    async function loadWorkspaces() {
+      const { c } = await cloud.active();
+      const select = $('nwst-workspace');
+      const selected = select.value;
+      const { data, error } = await c.from('nextway_workspaces')
+        .select('id,name,workspace_key,status')
+        .eq('status','active')
+        .order('name', { ascending: true });
+      if (error) throw error;
+
+      select.replaceChildren(new Option(
+        'Nessun workspace — solo platform_admin',
+        ''
+      ));
+      (data || []).forEach(workspace => {
+        const label = workspace.name + ' · ' + workspace.workspace_key;
+        select.add(new Option(label, workspace.id));
+      });
+      if (selected && (data || []).some(workspace => workspace.id === selected)) {
+        select.value = selected;
+      }
+      if (!(data || []).length) {
+        say('Nessun workspace attivo accessibile. Solo platform_admin può creare record centrali non assegnati.');
+      }
+    }
+
     async function loadConversations() {
       const { c } = await cloud.active();
       const { data, error } = await c.from('nextway_setter_conversations')
@@ -364,7 +399,8 @@
               source_url: formValues.source_url.trim(),
               public_evidence: formValues.public_evidence.trim(),
               objective: formValues.objective.trim() || 'Valutare il prospect e preparare il primo contatto',
-              channel: formValues.channel
+              channel: formValues.channel,
+              workspace_id: formValues.workspace_id || null
             };
         if (!/^https?:\/\//i.test(values.source_url)) {
           say('Inserisci un URL pubblico http o https valido.');
@@ -378,7 +414,11 @@
           : 'Preparazione della richiesta sicura…');
         const createRequest = await prepareLeadCreateRequest(values, s.user.id);
         say('Creazione prospect e conversazione…');
-        const { data, error } = await c.rpc('nextway_create_lead_with_conversation_idempotent', {
+        const workspaceId = values.workspace_id || null;
+        const rpcName = workspaceId
+          ? 'nextway_create_lead_with_conversation_idempotent_v2'
+          : 'nextway_create_lead_with_conversation_idempotent';
+        const rpcArgs = {
           p_request_id: createRequest.request_id,
           p_request_hash: createRequest.request_hash,
           p_display_name: values.display_name,
@@ -388,7 +428,9 @@
           p_public_evidence: values.public_evidence,
           p_objective: values.objective,
           p_channel: values.channel
-        });
+        };
+        if (workspaceId) rpcArgs.p_workspace_id = workspaceId;
+        const { data, error } = await c.rpc(rpcName, rpcArgs);
         if (error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
         if (!result || !result.success || !result.conversation_id) throw new Error((result && result.error) || 'La RPC non ha restituito un ID conversazione.');
@@ -427,6 +469,8 @@
 
     updateCreateButtonLabel();
     cloud.active().then(async ({ s }) => {
+      try { await loadWorkspaces(); }
+      catch (error) { say('Impossibile caricare i workspace: ' + error.message); }
       await loadConversations();
       if ((pendingLeadCreateRequest && pendingLeadCreateRequest.owner_profile_id !== s.user.id)
         || (pendingCreatedConversationId && pendingCreatedOwnerProfileId !== s.user.id)) {
