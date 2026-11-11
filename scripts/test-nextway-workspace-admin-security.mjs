@@ -9,7 +9,7 @@ assert.match(edge, /auth\.getUser\(token\)/);
 assert.match(edge, /profile\?\.role !== "platform_admin"/);
 assert.match(edge, /NEXTWAY_SERVICE_ROLE_KEY/);
 assert.match(edge, /MAX_BODY_BYTES = 100_000/);
-for (const action of ["list_workspaces", "create_workspace", "update_workspace", "save_prompt_draft", "save_criteria_draft", "activate_prompt", "activate_criteria", "archive_prompt", "archive_criteria"]) {
+for (const action of ["list_workspaces", "list_prompts", "list_criteria", "create_workspace", "update_workspace", "save_prompt_draft", "save_criteria_draft", "activate_prompt", "activate_criteria", "archive_prompt", "archive_criteria"]) {
   assert.ok(edge.includes(action), "Missing action " + action);
 }
 assert.match(edge, /nextway_activate_workspace_prompt/);
