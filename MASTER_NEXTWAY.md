@@ -1554,3 +1554,38 @@ Dopo la validazione statica e type-check, completare il modello di isolamento wo
 - Commit Edge Function: `4ac0cc62e76be216e7716f8484c4a8c5b91c83d1`.
 - Commit test: `2f094f5917c9c239a716bde0bbb2fa50686faf42`.
 - La CI deve rieseguire il workflow sul push; il risultato non è stato recuperato e resta non verificato.
+
+
+## ASSOCIAZIONE DATI OPERATIVI AI WORKSPACE — BASE ADDITIVA (11 NOVEMBRE 2026)
+
+### Analisi delle relazioni nel repository
+- Prospect: `nextway_leads`, con proprietario `owner_profile_id`.
+- Attività CRM: `nextway_lead_activities`, collegate al Lead tramite `lead_id`; il workspace viene ereditato dal Lead, senza duplicare un campo che potrebbe diventare incoerente.
+- Richieste di conversione: `nextway_lead_conversion_requests`, collegate al Lead tramite `lead_id`; anche qui il workspace viene ereditato dal Lead.
+- Knowledge Base: `nextway_knowledge_documents` e `nextway_knowledge_chunks`; il workspace viene assegnato al documento, mentre i chunk lo ereditano tramite `document_id`.
+- AI Setter: le tabelle `nextway_setter_conversations` e `nextway_setter_messages` sono richiamate dal codice e dalle diagnostiche. La definizione completa delle tabelle conversazioni/messaggi non è versionata nelle migrazioni consultate. La nuova migrazione tratta `nextway_setter_conversations` come tabella opzionale e associa i messaggi indirettamente tramite la conversazione. Le richieste idempotenti di generazione ereditano a loro volta il workspace tramite `conversation_id`.
+- `clients`, `partner_details` e `profiles` restano entità anagrafiche condivise: non vengono forzate in un singolo workspace, perché una persona può avere relazioni/opportunità in più settori.
+
+### Componenti aggiunti
+- Migrazione candidata `supabase/migrations/20261111210000_nextway_workspace_data_association.sql`.
+- Test statico `scripts/test-nextway-workspace-data-association.mjs`.
+- Workflow CI aggiornato per eseguire il nuovo test su push e pull request.
+
+### Comportamento della migrazione
+- Aggiunge `workspace_id uuid` nullable a `nextway_leads` e `nextway_knowledge_documents`; aggiunge la stessa colonna a `nextway_setter_conversations` solo se la tabella esiste.
+- Aggiunge foreign key verso `nextway_workspaces(id)` con `ON DELETE RESTRICT` e indici parziali per i record assegnati.
+- Non assegna automaticamente i dati esistenti a un workspace.
+- Non aggiunge `workspace_id` alle attività, richieste di conversione, messaggi e richieste idempotenti: questi record ereditano il workspace tramite le relazioni già presenti.
+- Non modifica policy RLS, grants, RPC, trigger, dati, account o configurazioni.
+
+### Limite di sicurezza fondamentale
+Questa è **solo una base di associazione dati**, non l'isolamento effettivo tra workspace. Le policy attuali, in particolare la lettura dei documenti approvati, non sono state ristrette per workspace. Non assegnare documenti o Lead a workspace operativi finché non saranno definite e implementate membership, autorizzazioni workspace-scoped e ricerca KB filtrata per workspace. La migrazione resta candidata e NON è stata applicata a Supabase.
+
+### Commit
+- Migrazione: `ae53c9f5170d8c7ae07161f3b6039bf2d9d18d67`.
+- Test statico: `a0d50f177a706648506896a34ec75617d616e21d`, con correzione delle asserzioni successiva.
+- Workflow CI aggiornato: commit registrato nel repository dopo l'aggiunta del test ai filtri push/pull request.
+- Esito CI e `deno check`: non verificati in questa sessione.
+
+### Prossimo blocco
+Progettare la tabella di membership workspace e il modello dei permessi (utente ↔ workspace ↔ ruolo), quindi introdurre policy RLS e RPC di ricerca con filtro obbligatorio workspace. Solo dopo potrà essere attivato l'isolamento reale e pianificato il backfill controllato. Nessuna applicazione live, nessun deploy Edge Function e nessun intervento Netlify fino al 4 dicembre 2026.
