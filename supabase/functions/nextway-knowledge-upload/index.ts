@@ -63,7 +63,7 @@ async function extractPdf(bytes: Uint8Array) {
   }
 }
 
-async function extractText(file: File, bytes: Uint8Array, extension: string) {
+async function extractText(bytes: Uint8Array, extension: string) {
   if (extension === ".pdf") {
     if (new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") {
       throw new Error("Firma PDF non valida");
@@ -123,6 +123,10 @@ Deno.serve(async (req) => {
 
   let uploadedPath: string | null = null;
   try {
+    const declaredLength = Number(req.headers.get("content-length") ?? 0);
+    if (declaredLength > MAX_FILE_BYTES + 256_000) {
+      return respond({ error: "Richiesta oltre il limite consentito" }, 413, origin);
+    }
     const { data: authData, error: authError } = await caller.auth.getUser(token);
     if (authError || !authData.user) return respond({ error: "Sessione non valida" }, 401, origin);
     const { data: profile, error: profileError } = await admin
@@ -148,7 +152,7 @@ Deno.serve(async (req) => {
       return respond({ error: "Sono ammessi esclusivamente PDF, DOCX e TXT" }, 415, origin);
     }
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const extracted = await extractText(file, bytes, extension);
+    const extracted = await extractText(bytes, extension);
     if (!extracted || extracted.length < 20) {
       return respond({ error: "Non è stato possibile estrarre testo sufficiente. I PDF scansiti richiedono OCR, non ancora disponibile." }, 422, origin);
     }
