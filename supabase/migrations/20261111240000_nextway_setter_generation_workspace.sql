@@ -440,14 +440,14 @@ begin
 end;
 $$;
 
-revoke all on function public.nextway_begin_setter_generation(uuid,uuid) from public,anon;
-revoke all on function public.nextway_store_setter_generation_output(uuid,jsonb) from public,anon;
-revoke all on function public.nextway_get_staged_setter_output(uuid) from public,anon;
+revoke all on function public.nextway_begin_setter_generation(uuid,uuid) from public,anon,service_role;
+revoke all on function public.nextway_store_setter_generation_output(uuid,jsonb) from public,anon,service_role;
+revoke all on function public.nextway_get_staged_setter_output(uuid) from public,anon,service_role;
 revoke all on function public.nextway_complete_setter_generation(uuid,text,text,text,text,text) from public,anon,service_role;
 grant execute on function public.nextway_begin_setter_generation(uuid,uuid) to authenticated;
-grant execute on function public.nextway_store_setter_generation_output(uuid,jsonb) to authenticated,service_role;
-grant execute on function public.nextway_get_staged_setter_output(uuid) to authenticated,service_role;
-grant execute on function public.nextway_complete_setter_generation(uuid,text,text,text,text,text) to authenticated,service_role;
+grant execute on function public.nextway_store_setter_generation_output(uuid,jsonb) to authenticated;
+grant execute on function public.nextway_get_staged_setter_output(uuid) to authenticated;
+grant execute on function public.nextway_complete_setter_generation(uuid,text,text,text,text,text) to authenticated;
 
 revoke all on function public.nextway_validate_setter_owner() from public,anon,authenticated,service_role;
 
