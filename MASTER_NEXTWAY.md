@@ -1204,3 +1204,27 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Distinzione importante: la verifica riguarda la funzione SQL e il vincolo nel database; non costituisce un test runtime di provisioning partner/cliente o dell'invio email.
 - Vincolo invariato: Netlify non va toccato né deployato fino al 4 dicembre 2026.
 - Prossimo lavoro: proseguire l'audit statico di idempotenza, gestione degli errori e coerenza tra provisioning Edge Function e funzioni SQL; mantenere nessuna creazione di dati reali durante i test.
+
+## AUDIT STATICO SUCCESSIVO — 11 NOVEMBRE 2026 (idempotenza, claim, retry e compensazione)
+
+Esaminati su `main`:
+- `supabase/migrations/20261111001500_nextway_conversion_provisioning.sql`
+- `supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql`
+- `supabase/functions/nextway-conversion-provisioning/index.ts`
+- `scripts/test-nextway-provisioning-security.mjs`
+
+Esiti:
+- **Claim concorrente:** la RPC blocca la riga con `FOR UPDATE`; un claim attivo entro 10 minuti non può essere duplicato. Il recupero di un claim scaduto è consentito solo al servizio e la transizione è verificata dal trigger.
+- **Release:** il servizio può rilasciare soltanto il claim che possiede; la richiesta torna a `ready_for_activation` e i due campi claim vengono azzerati.
+- **Finalizzazione:** inserimento partner/cliente, passaggio della richiesta ad `activated` e aggiornamento del Lead avvengono nella stessa transazione SQL. La ripetizione su una richiesta già attivata restituisce `already_activated` senza ripetere gli inserimenti.
+- **Cliente:** l'indice univoco parziale su `clients.nextway_conversion_request_id` e l'upsert rendono idempotente l'inserimento per richiesta.
+- **Partner:** l'invito recuperato dopo un timeout è cercato tramite email e metadato `nextway_conversion_request_id`; non viene collegato un account Auth estraneo che condivide soltanto l'indirizzo email. L'indice univoco sulla richiesta in `partner_details` impedisce associazioni duplicate.
+- **Compensazione:** se la finalizzazione restituisce errore, la Edge Function controlla prima se la richiesta sia comunque stata attivata; se non lo è, tenta la cancellazione dell'utente invitato e rilascia il claim. Se la cancellazione fallisce, l'errore viene registrato e il retry può recuperare l'invito tramite il metadato della richiesta.
+- **Autorizzazione:** JWT verificato prima del lookup del profilo; il ruolo `platform_admin` è verificato prima di claim, invito o finalizzazione. La chiave service role resta lato server.
+- **Trigger e immutabilità:** i dati originari della richiesta e i dati di revisione approvati sono protetti; le transizioni di stato sono limitate ai percorsi previsti.
+
+Limiti residui:
+- L'audit è statico e basato sul codice; non sostituisce test runtime di concorrenza, invito email, account non-admin o provisioning end-to-end.
+- La ricerca di inviti preesistenti scorre al massimo 10 pagine da 1.000 utenti ciascuna; oltre tale volume massimo il recupero automatico non è garantito e andrà rivisto prima di una scala molto elevata.
+- Nessun dato reale è stato creato o modificato durante l'audit. Nessun deploy Netlify effettuato; il blocco fino al 4 dicembre 2026 resta valido.
+- **Esito statico:** non emerge un difetto bloccante nei percorsi esaminati; nessuna modifica al codice ritenuta necessaria in questa fase.
