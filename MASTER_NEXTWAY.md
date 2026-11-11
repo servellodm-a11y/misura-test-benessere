@@ -1868,3 +1868,13 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 ### Stato di verifica
 - La CI conferma test statici e sintassi JavaScript/TypeScript; non esegue PostgreSQL contro un database e non certifica il runtime delle migrazioni o delle policy RLS.
 - Tutte le migrazioni workspace restano candidate/non applicate. Nessuna Edge Function deployata e nessuna modifica Netlify.
+
+
+### Ulteriore hardening messaggi AI Setter — 11 novembre 2026
+- La tabella `nextway_setter_messages` è ora in lettura diretta per authenticated; INSERT/UPDATE/DELETE e altri privilegi diretti sono revocati.
+- La creazione delle bozze passa esclusivamente dalla RPC SECURITY DEFINER `nextway_complete_setter_generation`, che verifica actor, membership, stato conversazione e output staged prima di inserire il messaggio.
+- Rimossa la policy permissiva di gestione diretta workspace dei messaggi; le policy workspace SELECT e restrictive scope restano attive.
+- Motivazione: impedire a un membro di falsificare direttamente `ai_generated`, `approved_by` o `sent_at` tramite PostgREST.
+- Commit migrazione: `d03f448880edb06301b7bdbef0d874c58414081f`.
+- Commit test: `1b6b0f0b53dfe94b300d3aa53dd05ce14956cee7`.
+- CI run #214: **SUCCESS** sul commit migrazione. Test SQL Setter workspace, grant RPC, test Lead creation, test UI, sintassi JS e cinque `deno check` superati.
