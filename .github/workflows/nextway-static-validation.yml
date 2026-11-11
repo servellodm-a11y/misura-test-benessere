@@ -24,6 +24,7 @@ on:
       - "scripts/test-nextway-workspace-admin-security.mjs"
       - "scripts/test-nextway-workspace-data-association.mjs"
       - "scripts/test-nextway-workspace-memberships.mjs"
+      - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -47,6 +48,8 @@ on:
       - "scripts/test-nextway-multi-workspace-sql.mjs"
       - "scripts/test-nextway-workspace-admin-security.mjs"
       - "scripts/test-nextway-workspace-data-association.mjs"
+      - "scripts/test-nextway-workspace-memberships.mjs"
+      - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -84,6 +87,8 @@ jobs:
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
         run: node scripts/test-nextway-workspace-memberships.mjs
+      - name: Validate NEXTWAY workspace-scoped RLS contract
+        run: node scripts/test-nextway-workspace-scoped-rls.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
