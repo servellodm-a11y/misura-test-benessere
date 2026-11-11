@@ -1625,3 +1625,10 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Migrazione membership: `56abf0e38f68c55bf706113c42852ec8b4138a88`.
 - Test membership: `1188f3492a440a3d3ea585240b40a536502e668e`.
 - Workflow CI: commit generato dall'integrazione del test; esito da verificare.
+
+
+### Esito CI membership — 11 novembre 2026
+- GitHub Actions run `43039976490`: **SUCCESS** sul commit workflow `f75299d7a1b94ed02158a7cb82787197f29260fd`.
+- Superati tutti i test statici, incluso `test-nextway-workspace-memberships.mjs`.
+- Superati tutti i cinque `deno check` del workflow.
+- Il risultato dimostra la coerenza statica del codice e delle migrazioni candidate; non dimostra l'applicazione live né il comportamento RLS runtime.
