@@ -17,8 +17,8 @@ assert.match(sql, /nextway_workspaces\(id\)/i, "workspace FK target missing");
 assert.match(sql, /add column if not exists workspace_id uuid/i, "workspace_id must be additive and nullable");
 assert.match(sql, /on delete restrict/i, "workspace deletion must not cascade into operational data");
 assert.match(sql, /create index if not exists/i, "workspace lookup index missing");
-assert.match(sql, /nextway_lead_activities inherit workspace through nextway_leads/i);
-assert.match(sql, /nextway_setter_messages.*inherit workspace through their conversation/i);
+assert.match(sql, /activities\/conversion requests inherit workspace through nextway_leads/i);
+assert.match(sql, /setter messages\/generation requests inherit workspace through their conversation/i);
 assert.match(sql, /workspace authorization is not enabled by this migration/i);
 assert.match(sql, /nullable groundwork/i);
 assert.doesNotMatch(sql, /update\s+public\.(nextway_leads|nextway_knowledge_documents|nextway_setter_conversations)/i,
