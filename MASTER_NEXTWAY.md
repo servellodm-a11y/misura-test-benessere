@@ -922,3 +922,48 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - 11-11-2026: recuperati i file correnti e i rispettivi SHA prima delle modifiche.
 - 11-11-2026: correzioni e bundle salvati su GitHub e verificati con nuovo recupero dei file.
 - 11-11-2026: nessuna modifica eseguita su Supabase live e nessun deploy Netlify.
+
+
+## 53. Applicazione migrazioni CRM live e verifica grants (11 novembre 2026)
+
+### Backup pre-migrazione
+- Creato sul Mac dell'utente il dump PostgreSQL custom `NEXTWAY_PRE_MIGRAZIONI_20261111.dump` nella cartella privata `~/Desktop/NEXTWAY_BACKUP`.
+- `pg_dump` terminato con codice 0; `pg_restore --list` ha letto correttamente l'archivio e l'utente ha confermato `VERIFICA BACKUP: SUPERATA`.
+- Il dump include dati e schemi PostgreSQL, compresi auth, storage e vault accessibili al ruolo usato. È sensibile e va conservato privatamente. Non è stato eseguito un restore di prova e il dump non sostituisce il backup delle configurazioni/secrets esterni al database.
+
+### Applicazione Supabase
+- L'utente ha eseguito nel SQL Editor il bundle `supabase/deploy/nextway_crm_apply.sql`, contenente le migrazioni 008–014 in una transazione.
+- Risposta Supabase: `Success. No rows returned`; nessun errore riportato.
+- Diagnostica read-only `nextway_crm_live_status_readonly.sql`: `nextway_leads` presente, RLS attivo, quattro policy owner/admin presenti; tabelle `nextway_lead_activities` e `nextway_lead_conversion_requests` presenti.
+- Diagnostica read-only `nextway_crm_prerequisites_readonly.sql`: presenti le tre tabelle correlate (attività, richieste creazione idempotente, richieste conversione); vincolo CHECK con tutti i nove stati Lead; colonne `archived_at`, `archived_by`, `archive_reason` e `owner_profile_id` presenti; RPC ordinaria e wrapper idempotente presenti.
+- La tabella di tracking migrazioni non è disponibile nel progetto/ruolo interrogato; la verifica è stata condotta sullo stato effettivo di tabelle, colonne, vincoli, policy e funzioni.
+
+### Verifica e correzione grants
+- Diagnostica sicurezza: RLS attivo sulle tre tabelle correlate. I permessi UPDATE a livello colonna per attività e conversioni risultano presenti; i controlli table-level UPDATE false sono coerenti con i grants limitati alle sole colonne autorizzate.
+- Individuati due grants eccessivi: DELETE su `nextway_lead_creation_requests` per `authenticated` e EXECUTE anonimo sulla vecchia RPC `nextway_create_lead_with_conversation`. La RPC vecchia richiede comunque `auth.uid()`, ma il grant anonimo era superfluo.
+- L'utente ha eseguito i REVOKE e il GRANT mirati nel SQL Editor; risposta: `Success. No rows returned`.
+- Verifica read-only successiva: `creation_requests_authenticated_delete=false`, `creation_requests_anon_delete=false`, `old_function_anon_execute=false`, `old_function_authenticated_execute=true`, `idempotent_function_anon_execute=false`, `idempotent_function_authenticated_execute=true`. Tutti i valori coincidono con quelli attesi.
+- Non sono stati cancellati Lead o dati applicativi durante queste verifiche.
+
+### Stato aggiornato
+| Componente | Stato |
+|---|---|
+| Backup pre-migrazione | COMPLETATO E VERIFICATO come archivio leggibile; restore non provato |
+| Migrazioni CRM 008–014 su Supabase live | ESEGUITE con esito SQL positivo e strutture verificate |
+| Tabelle, colonne archivio, nove stati e RPC | COMPLETATO E VERIFICATO tramite diagnostiche read-only |
+| RLS e policy owner/admin su Lead | COMPLETATO E VERIFICATO tramite diagnostica read-only |
+| Grants DELETE/EXECUTE anonimi corretti | COMPLETATO E VERIFICATO tramite query read-only |
+| Test funzionali end-to-end CRM | DA COMPLETARE |
+| Isolamento multiutente partner/admin | DA COMPLETARE |
+| Deploy Netlify e verifica UI live | DA COMPLETARE; nessun deploy dichiarato |
+| Operatività CRM in produzione | NON ANCORA CERTIFICATA: mancano test funzionali e verifica UI |
+
+### Prossimo passo
+- Passare ai test funzionali controllati con un utente autenticato e record di test esplicitamente identificabili: creazione Lead e conversazione, sincronizzazione, attività/follow-up, archiviazione e ripristino, richiesta di conversione e revisione amministrativa. Evitare cancellazioni fisiche e non usare Lead reali.
+- Prima di creare record di test nel progetto live, ottenere conferma esplicita dell'utente sul fatto che possiamo creare record temporanei di test. Dopo i test, valutare deploy Netlify e prova UI; non dichiarare il CRM operativo prima di questi riscontri.
+
+### Registro
+- 11-11-2026: bundle CRM 008–014 eseguito dall'utente su Supabase; esito positivo.
+- 11-11-2026: diagnostiche strutturali e sicurezza eseguite e risultati ricevuti.
+- 11-11-2026: grants eccessivi revocati; verifica successiva superata.
+- 11-11-2026: aggiornamento documentale; nessun deploy Netlify e nessun test funzionale eseguiti.
