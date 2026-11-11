@@ -1228,3 +1228,29 @@ Limiti residui:
 - La ricerca di inviti preesistenti scorre al massimo 10 pagine da 1.000 utenti ciascuna; oltre tale volume massimo il recupero automatico non è garantito e andrà rivisto prima di una scala molto elevata.
 - Nessun dato reale è stato creato o modificato durante l'audit. Nessun deploy Netlify effettuato; il blocco fino al 4 dicembre 2026 resta valido.
 - **Esito statico:** non emerge un difetto bloccante nei percorsi esaminati; nessuna modifica al codice ritenuta necessaria in questa fase.
+
+
+## AUDIT AUTORIZZAZIONI RPC E TRIGGER — 11 NOVEMBRE 2026
+
+### Verifiche completate
+- Le RPC di provisioning `nextway_claim_conversion_activation`, `nextway_finalize_conversion_activation` e `nextway_release_conversion_activation` mantengono EXECUTE esclusivamente a `service_role` (oltre al proprietario postgres); anon e authenticated non sono autorizzati.
+- Le due firme di `nextway_save_ai_analysis` hanno ACL coerenti: EXECUTE a `authenticated` e `service_role`, non a `anon` o PUBLIC. Entrambe verificano autenticazione e proprietà del Lead, con eccezione per `platform_admin`.
+- La prima firma (argomenti `uuid,text,jsonb,smallint...`) blocca la riga Lead con `FOR UPDATE`, valida modello/analisi e aggiorna anche la qualifica.
+- La seconda firma (argomenti `uuid,integer...`) usa `IS DISTINCT FROM` nel controllo proprietario, ma non blocca la riga e non aggiorna la qualifica; inserisce inoltre `analyzer_version='v1'`. Le due implementazioni non sono semanticamente identiche. Non vengono unificate in questa fase per evitare regressioni: nei file frontend/Edge Function esaminati non è stata trovata una chiamata esplicita a queste RPC, ma ciò non dimostra l'assenza di eventuali consumatori esterni.
+- `nextway_prune_lead_creation_requests` verifica internamente `auth.uid()` e il ruolo `platform_admin` prima di eliminare esclusivamente richieste più vecchie di 30 giorni. Il grant authenticated viene mantenuto perché la funzione applica il controllo amministrativo internamente.
+- `nextway_is_platform_admin` controlla il ruolo del profilo dell'utente autenticato ed è mantenuta per l'uso nelle policy.
+- Le funzioni trigger `nextway_validate_setter_owner`, `nextway_apply_lead_qualification_v1`, `nextway_set_lead_updated_at` e `nextway_setter_touch` sono state esaminate; la logica è coerente con i rispettivi trigger.
+
+### Correzione dei privilegi trigger-only
+- Creata la migrazione `supabase/migrations/20261111160000_nextway_trigger_function_privileges.sql`.
+- La migrazione revoca EXECUTE da `PUBLIC`, `anon` e `authenticated` sulle quattro funzioni esclusivamente trigger sopra elencate. Non revoca il privilegio del proprietario postgres né modifica gli altri grant.
+- La migrazione non elimina, disabilita o ricrea trigger e non modifica dati.
+- Il test statico in `scripts/validate-nextway-audit.mjs` verifica le quattro revoche e impedisce modifiche accidentali ai trigger o alle RPC non interessate.
+- Commit migrazione: `5623fd00236b916c21fd6b5dc05f00efb3b06f7d`.
+- Commit validatore corretto: `d9710f4e58e69d5471f4c1b131c38922b814a281`.
+- GitHub Actions run #142: **SUCCESS**; validatore NEXTWAY, contratto sicurezza provisioning e type-check Deno superati. https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43035069712
+- **Stato database:** la migrazione dei privilegi è presente su GitHub ma NON ancora applicata a Supabase. L'audit dei privilegi letti dal database descrive lo stato precedente alla migrazione.
+- Nessun utente, cliente, partner, invito o conversione di prova è stato creato. Nessun intervento Netlify; il blocco fino al 4 dicembre 2026 resta valido.
+
+### Passo operativo successivo
+Applicare una sola volta su Supabase SQL Editor la migrazione `20261111160000_nextway_trigger_function_privileges.sql`; quindi eseguire un'unica query aggregata di verifica ACL e stato trigger. Non ripetere i controlli già completati.
