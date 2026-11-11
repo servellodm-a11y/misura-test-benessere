@@ -15,6 +15,7 @@ assert.match(sql, /alter table public\.nextway_lead_creation_requests\s+add colu
 assert.equal((sql.match(/\$\$/g) || []).length % 2, 0, "SQL dollar-quoted blocks must be balanced");
 assert.match(sql, /nextway_lead_creation_requests_workspace_id_fkey/i);
 assert.match(sql, /v_existing_workspace_id is distinct from p_workspace_id/i);
+assert.match(sql, /or v_existing_workspace_id is not null/i);
 assert.match(sql, /nextway_is_platform_admin\(\)/i);
 assert.match(sql, /workspace_id is obligatory|workspace è obbligatorio/i);
 assert.match(sql, /from public\.nextway_workspaces w\s+where w\.id=p_workspace_id/i);
