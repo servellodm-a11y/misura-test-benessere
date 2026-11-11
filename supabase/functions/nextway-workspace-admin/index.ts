@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
           return respond({ error: "Dati prompt non validi" }, 400, origin);
         }
         const { data, error } = await admin.from("nextway_workspace_prompts").insert({
-          workspace_id: body.workspace_id, prompt_key: body.prompt_key, version: body.version,
+          workspace_id: body.workspace_id, prompt_key: body.prompt_key, version: Number(body.version),
           purpose: body.purpose.trim(), prompt_body: body.prompt_body.trim(),
           status: "draft", created_by: authData.user.id,
         }).select("id,workspace_id,prompt_key,version,status,created_at").single();
@@ -178,8 +178,8 @@ Deno.serve(async (req) => {
           (body.description != null && !validText(body.description, 1, 2000)) ||
           !validObject(body.config ?? {})) return respond({ error: "Dati criteri non validi" }, 400, origin);
       const { data, error } = await admin.from("nextway_workspace_prospect_criteria").insert({
-        workspace_id: body.workspace_id, criteria_key: body.criteria_key, version: body.version,
-        name: body.name.trim(), description: body.description?.trim() ?? null,
+        workspace_id: body.workspace_id, criteria_key: body.criteria_key, version: Number(body.version),
+        name: body.name.trim(), description: typeof body.description === "string" ? body.description.trim() : null,
         config: body.config ?? {}, status: "draft", created_by: authData.user.id,
       }).select("id,workspace_id,criteria_key,version,status,created_at").single();
       if (error?.code === "23505") return respond({ error: "Versione criteri gia esistente" }, 409, origin);
