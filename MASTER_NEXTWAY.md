@@ -1123,3 +1123,15 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 2. Dopo il controllo autorizzativo, verificare il deploy frontend Netlify e i pulsanti amministrativi, mantenendo disabilitata qualsiasi attivazione reale fino a quando il test non è stato progettato e autorizzato.
 3. Non considerare il provisioning completo finché non sono stati verificati i percorsi cliente e partner, l'idempotenza e la gestione degli errori senza creare duplicati.
 
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (hardening test autorizzazione provisioning)
+
+- Vincolo operativo aggiornato: fino al 4 dicembre 2026 non è disponibile il token Netlify. Nessun deploy, accesso operativo o tentativo di pubblicazione Netlify va richiesto prima di tale data. Lo sviluppo continua su GitHub e Supabase senza dipendere dal frontend pubblicato.
+- Aggiunto `scripts/test-nextway-provisioning-security.mjs`, test statico del contratto di sicurezza della Edge Function.
+- Il test controlla che la verifica JWT preceda la lettura del ruolo; che il controllo `platform_admin` preceda claim, invito Auth e finalizzazione; che la service-role key sia letta solo lato server; che il browser non contenga credenziali privilegiate e invii soltanto il `request_id`; che l'endpoint non abiliti CORS wildcard.
+- Aggiornato `.github/workflows/nextway-static-validation.yml` per eseguire il nuovo test a ogni modifica rilevante.
+- Commit test: `cba63a35785f3c8b70ae5b2465c0d52df333137d`.
+- Commit workflow: `ede84dae7eda0eb1442e1ad2e57ccdea7d52cadb`.
+- Blob SHA verificati al momento della modifica: test aggiunto; workflow aggiornato.
+- Stato CI sul commit workflow: **IN ATTESA DI RISCONTRO**; non dichiarare superato finché GitHub Actions non mostra esito SUCCESS.
+- Nessuna modifica a Supabase live, nessuna conversione, nessun invito email, nessuna creazione account e nessuna operazione Netlify sono state eseguite in questa attività.
+- Prossimo passo: verificare l'esito GitHub Actions; se il nuovo controllo passa, proseguire con hardening e test isolati del backend senza introdurre record reali. Il test statico non sostituisce un test runtime con un account non-admin.
