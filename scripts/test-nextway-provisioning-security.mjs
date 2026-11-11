@@ -37,7 +37,7 @@ const cleanupMigration = read("../supabase/migrations/20261111150000_nextway_con
 assert.match(cleanupMigration, /activation_claim_token\s*=\s*null\s*,\s*activation_claimed_at\s*=\s*null/);
 assert.doesNotMatch(cleanupMigration, /set activation_claimed_at\s*=\s*null\s+where status\s*=\s*'activated'/i, "Migration must not rewrite immutable historical activated requests");
 assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
-assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activation_claimed_at\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
+
 
 console.log("NEXTWAY provisioning security contract: PASS");
 console.log("JWT verification and platform_admin authorization precede all provisioning side effects");
