@@ -5,6 +5,10 @@ const sql = readFileSync(
   "supabase/migrations/20261112000000_nextway_lead_creation_workspace.sql",
   "utf8",
 );
+const legacyGuard = readFileSync(
+  "supabase/migrations/20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql",
+  "utf8",
+);
 
 for (const fn of [
   "nextway_create_lead_with_conversation_v2",
@@ -13,9 +17,16 @@ for (const fn of [
 
 assert.match(sql, /alter table public\.nextway_lead_creation_requests\s+add column if not exists workspace_id uuid/i);
 assert.equal((sql.match(/\$\$/g) || []).length % 2, 0, "SQL dollar-quoted blocks must be balanced");
+assert.doesNotMatch(sql, /^\s*\$;\s*$/m, "SQL must not contain malformed dollar terminators");
+assert.equal((sql.match(/create or replace function public\.nextway_create_lead_with_conversation_v2\(/gi) || []).length, 1,
+  "workspace-aware base function must be defined exactly once");
 assert.match(sql, /nextway_lead_creation_requests_workspace_id_fkey/i);
-assert.match(sql, /v_existing_workspace_id is distinct from p_workspace_id/i);
-assert.match(sql, /or v_existing_workspace_id is not null/i);
+assert.match(legacyGuard, /v_existing_workspace_id is not null/i);
+assert.match(legacyGuard, /v_existing_hash is distinct from p_request_hash/i);
+assert.match(legacyGuard, /if not public\.nextway_is_platform_admin\(\) then/i);
+assert.match(legacyGuard, /create or replace function public\.nextway_create_lead_with_conversation_idempotent/i);
+assert.equal((legacyGuard.match(/\$\$/g) || []).length % 2, 0, "legacy idempotency SQL dollar-quoted blocks must be balanced");
+assert.doesNotMatch(legacyGuard, /^\s*\$;\s*$/m, "legacy idempotency SQL must not contain malformed dollar terminators");
 assert.match(sql, /nextway_is_platform_admin\(\)/i);
 assert.match(sql, /workspace_id is obligatory|workspace è obbligatorio/i);
 assert.match(sql, /from public\.nextway_workspaces w\s+where w\.id=p_workspace_id/i);
