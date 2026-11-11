@@ -377,7 +377,12 @@ assert.match(leadConversion, /before update on public\.nextway_lead_conversion_r
 assert.match(leadConversion, /grant update \(status, review_notes, reviewed_by, reviewed_at\)/i);
 assert.doesNotMatch(leadConversion, /insert into public\.(clients|profiles|partner_details)/i);
 assert.match(cloud, /async function createLeadConversionRequest\(cloudId,request\)/);
-assert.match(cloud, /async function getLeadConversionQueue\(\)/);
+assert.match(cloud, /async function getLeadConversionQueue\(status='pending'\)/);
+assert.match(cloud, /\['pending','ready_for_activation'\]\.includes\(status\)/);
+assert.match(cloud, /\.eq\('status',status\)\.order\('created_at'/);
+assert.match(cloud, /id="nw-conv-ready-load"/);
+assert.match(cloud, /loadLeadConversionQueue\('ready_for_activation'\)/);
+assert.match(cloud, /pronta per il provisioning, che resta un passaggio separato/);
 assert.match(cloud, /async function reviewLeadConversionRequest\(requestId,status,notes=''/);
 assert.match(cloud, /status==='rejected'&&!reviewNotes/);
 assert.match(cloud, /getLeadConversionQueue,reviewLeadConversionRequest/);
