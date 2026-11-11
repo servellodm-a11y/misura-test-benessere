@@ -1913,3 +1913,34 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - La query è stata corretta per non fare riferimenti statici alle tabelle applicative potenzialmente assenti; usa metadata di catalogo e resta eseguibile anche se le tabelle KB non esistono ancora.
 - Commit diagnostica iniziale: `3c7203ab67d2321691ebf12f523c87dd2f7141f5`; hardening assenza tabelle: `5a5787778a4944b086f7463a2f2c8752e7e07754`.
 - Stato operativo: migrazione KB NON APPLICATA; attendere il risultato della diagnostica prima di autorizzare l'esecuzione. Nessun dato o schema Supabase modificato.
+
+
+## Revisione di sicurezza coordinata delle migrazioni workspace — aggiornamento 11 novembre 2026
+
+### Esito Knowledge Base iniziale
+- Diagnostica live eseguita dall'utente per `20261111170000_nextway_knowledge_base.sql`: entrambe le tabelle `nextway_knowledge_documents` e `nextway_knowledge_chunks` assenti; nessuna policy, indice o funzione di ricerca preesistente; nessun conflitto di nomi rilevato.
+- La migrazione iniziale non contiene `DROP TABLE`, `TRUNCATE`, `DELETE` o aggiornamenti di righe applicative. Contiene quattro `DROP POLICY IF EXISTS`, RLS enable, grant/revoke e creazione della funzione di ricerca. La verifica live ha confermato che gli oggetti omonimi da sostituire non esistono.
+- Diagnostica dedicata: `supabase/diagnostics/nextway_knowledge_base_migration_review_readonly.sql`, commit `5a5787778a4944b086f7463a2f2c8752e7e07754`.
+
+### Revisione delle altre migrazioni
+- Sequenza esaminata: Knowledge Base, Storage, workspace foundation, activation RPC, data association, memberships, workspace-scoped RLS, Setter generation, Lead creation.
+- Nessuna delle migrazioni esegue `DROP TABLE`, `TRUNCATE` o `DELETE` espliciti di record applicativi.
+- Storage: la migrazione `20261111180000` usa `INSERT ... ON CONFLICT DO UPDATE` sul bucket `nextway-knowledge`, quindi se il bucket esiste ne forza la configurazione privata e aggiorna limite dimensione/MIME; non elimina file. È necessario conoscere configurazione attuale e numero di oggetti prima di applicarla. Diagnostica read-only dedicata creata: `supabase/diagnostics/nextway_workspace_storage_preflight_readonly.sql`, commit `60699870992d4d689ff84cf833d6b81db2dcf2a1`. Da eseguire e restituire prima di autorizzare la migrazione Storage.
+- Workspace foundation: le FK dei prompt e dei criteri versionati sono state rese `ON DELETE RESTRICT` invece di CASCADE, per evitare cancellazione automatica della cronologia se un workspace fosse eliminato. Commit `3d375468072ad09d6aa36b442b10338730408214`.
+- Activation RPC: ora richiede che il workspace sia effettivamente `active` prima di attivare prompt o criteri; impedisce l'attivazione su workspace draft/archived. Commit `fc8dd18340675ccfc5b2a1880ba5716d29c43f74`.
+- Data association: aggiunge colonne workspace nullable e FK `ON DELETE RESTRICT`, senza backfill o aggiornamento di record.
+- Membership: nessuna membership seedata; RLS e helper di accesso sono definiti nella migrazione candidata.
+- Workspace-scoped RLS: sostituisce policy e trigger selezionati; rimuove il vecchio indice globale hash KB. Correzione: ora crea un indice univoco separato per i documenti senza workspace e uno per quelli assegnati a workspace, mantenendo l'unicità globale legacy e permettendo duplicati tra workspace differenti. Commit `4d0b88af13673977ee3dfc165a7e9dc836ec4030`.
+- AI Setter generation: crea una tabella privata per idempotenza/output staged; revoca i privilegi DML diretti authenticated su messaggi e lascia SELECT, con inserimento messaggi via RPC protetta. Rimossa la policy permissiva ridondante `nextway_setter_messages_workspace_manage`, non necessaria e contraddittoria con il modello RPC-only. Commit `82d22a8d429eb67f33255931034d010a053a9c5`.
+- Lead creation: individuata una corruzione SQL introdotta da un precedente aggiornamento: funzione legacy interrotta, delimitatore `$;` e duplicazione di codice dopo il COMMIT. Ripristinata la versione strutturalmente valida della migrazione `20261112000000_nextway_lead_creation_workspace.sql` dal commit valido `1a53dd4469d754c9a41c3e72f280180d50b7670c`; commit di ripristino `d372a789cf902fb2696f63dc215029f17558065c`.
+- Per mantenere l'hardening idempotente legacy senza reintrodurre codice corrotto, aggiunta migrazione separata `20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql`: solo platform_admin sul percorso legacy, blocco del replay di richieste con workspace_id non nullo, lock della riga esistente e grants espliciti. Commit `80645204fc6f27c2dbfa01f8e044cb998965e49e`.
+- Test Lead creation aggiornato per controllare delimitatori SQL, unicità della definizione V2 e nuova migrazione legacy: commit `641dc783556411584403caa879763ef318f9d2c0`.
+- Test dependency order aggiornato per includere la migrazione legacy guard: commit `2afba2ea8aeebde357752351fbf15fcb1eb4b85a`.
+- Test RLS e multi-workspace aggiornati per verificare gli indici hash global/workspace, FK RESTRICT e attivazione solo in workspace attivo: commit `a5741c7658363101fb9e4787f96028728e6d7474`, `b94538368656a06d7fe77e4d6d942b5b76eac9d1`.
+
+### CI e stato operativo
+- CI run #228 (`43059995637`) fallito sul test AI Setter generation workspace: il test vietava la policy `nextway_setter_messages_workspace_manage`, ancora presente nella migrazione. Rimossa la policy ridondante; commit correttivo `82d22a8d429eb67f33255931034d010a053a9c5d`.
+- CI run #229 sul commit correttivo era in coda al momento dell'aggiornamento; esito da verificare prima di considerare conclusa la validazione statica.
+- Diagnostica workspace/storage ancora da eseguire dall'utente. Il precedente preflight ha confermato la presenza delle tabelle metadata Storage, non lo stato specifico del bucket `nextway-knowledge`.
+- Tutte le migrazioni restano candidate/non applicate. Nessun dato Supabase è stato modificato; nessuna Edge Function deployata; Netlify non modificato.
+- Non autorizzare ancora l'applicazione sequenziale: attendere esito CI #229 e diagnostica bucket/workspace. Anche dopo CI verde, la validazione resta statica e non equivale a test PostgreSQL runtime.
