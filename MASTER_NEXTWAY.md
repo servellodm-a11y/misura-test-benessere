@@ -247,8 +247,7 @@ Stato aggiornato:
 - Confrontati i campi del payload di `nextway-cloud.js` con la definizione in `supabase/nextway_leads.sql`.
 - Tutti i campi del payload esaminati risultano dichiarati nello schema SQL: `owner_profile_id`, `display_name`, `profession`, `company_brand`, `location`, `category`, `partner_type`, `discovery_mode`, `public_signal`, `source_name`, `source_url`, `public_evidence`, `verified_at`, `identity_check`, `qualification`, i cinque punteggi, `status`, `notes`.
 - Questo è un controllo statico repository-to-repository, non un test di inserimento sul database live.
-- Le pagine `nextway-ai.html`, `nextway-ricerca.html` e `nextway-motore-ricerca.html` includono lo script Supabase JS e `/nextway-cloud.js`.
-- Nota UI da rivedere: `nextway-ai.html` contiene ancora un avviso che descrive l'archivio come solo locale e non sincronizzato tra dispositivi, mentre il modulo cloud offre configurazione, login, sincronizzazione e lettura cloud. La sincronizzazione resta manuale e non completa per aggiornamenti/cancellazioni. Non modificato in questo passaggio.
+- Le pagine `nextway-ai.html`, `nextway-ricerca.html` e `nextway-motore-ricerca.html` includono lo script Supabase JS e `/nextway-cloud.js`.- Nota UI da rivedere: `nextway-ai.html` contiene ancora un avviso che descrive l'archivio come solo locale e non sincronizzato tra dispositivi, mentre il modulo cloud offre configurazione, login, sincronizzazione e lettura cloud. La sincronizzazione resta manuale e non completa per aggiornamenti/cancellazioni. Non modificato in questo passaggio.
 
 ### Blocco recupero codice AI Setter
 - Gli strumenti collegati disponibili in questa sessione consentono lettura/scrittura GitHub, ma non espongono un connettore Supabase per leggere il codice pubblicato, i secrets o l'URL reale della Edge Function.
@@ -497,8 +496,7 @@ Rilievi da risolvere/verificare:
 
 - La scheda Lead archiviata mostra data e motivo dell'archiviazione.
 - Archiviazione/ripristino impediti quando esistono modifiche locali non sincronizzate o un conflitto aperto; evita di marcare come sincronizzati dati non salvati sul cloud.
-- Il motivo è limitato a 500 caratteri anche nell'interfaccia; l'utente può annullare la richiesta senza eseguire l'archiviazione.
-- Rimossa l'assegnazione impropria local_dirty=false dopo la modifica di archiviazione: la funzione non deve nascondere modifiche locali pendenti.
+- Il motivo è limitato a 500 caratteri anche nell'interfaccia; l'utente può annullare la richiesta senza eseguire l'archiviazione.- Rimossa l'assegnazione impropria local_dirty=false dopo la modifica di archiviazione: la funzione non deve nascondere modifiche locali pendenti.
 - La cronologia per Lead mostra già il nome dell'operatore dai campi profiles e partner_details; aggiunto controllo statico per questa risoluzione.
 - Stato: codice e documentazione salvati su GitHub; validazione GitHub Actions da eseguire. Nessun deploy Netlify e nessuna migrazione Supabase.
 
@@ -747,7 +745,6 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 
 
 ## 50. NEXTWAY CRM — conversione assistita Lead → cliente/partner e stato CI (10 novembre 2026)
-
 ### Modifiche effettivamente presenti nel repository
 
 - Migrazione: `supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql`.
@@ -997,7 +994,6 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Stato: script preparato, NON ancora eseguito su Supabase. Nessun test di isolamento multiutente è dichiarato superato.
 - Per il test funzionale effettivo serviranno due identità partner distinte e l'identità platform_admin, con verifica di lettura, modifica e accesso ai dati correlati sotto sessioni separate. Nessun record reale sarà modificato.
 
-
 ## Test isolamento multiutente partner / amministratore predisposto — 11 novembre 2026
 
 - Analizzato il risultato live dell'audit RLS read-only eseguito dall'utente. Le sette tabelle esaminate hanno RLS attiva; i privilegi SELECT anonimi risultano assenti. Le policy Lead consentono l'accesso al proprietario e a platform_admin; le policy attività applicano lo stesso vincolo tramite il Lead collegato.
@@ -1093,3 +1089,37 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Aggiornati: `supabase/functions/nextway-conversion-provisioning/index.ts`, README della funzione, `NEXTWAY-CLOUD-SETUP.md` e validatore statico. Commit: `49b26b23024300d7efb41ca3fc98093d681009f3`, `c9ad2d219815dc422d50ef869cbd3878b0797b5e`, `9280048a530717d2747fae5a15a47d39809b5ead`, `473c4d3a5b3200d4767f1855a1c90466c812a8e3`.
 - Il secret è stato salvato dall'utente; non è stata ancora pubblicata la Edge Function aggiornata. Occorre attendere/verificare GitHub Actions, poi pubblicare la funzione. Migrazione SQL provisioning riferita dall'utente come eseguita con esito positivo; il testo esatto dell'esito è stato confermato nella conversazione.
 - Nessuna attivazione partner/cliente è stata eseguita e nessun account reale è stato creato.
+
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (deploy provisioning e test autenticazione)
+
+### Pubblicazione Supabase
+- La CLI Supabase è stata autenticata correttamente sull'account dell'utente.
+- Pubblicata con successo la sola Edge Function `nextway-conversion-provisioning` sul progetto `obqwbtlltxjfeirstsya`, usando il codice presente nel repository locale aggiornato da `origin/main`.
+- Output CLI: `Deployed Functions on project obqwbtlltxjfeirstsya: nextway-conversion-provisioning`.
+- L'utente ha verificato nella Dashboard Supabase che la funzione è presente e che il deploy risulta recente.
+- Le funzioni `hyper-api` e `nextway-ai-setter` non sono state selezionate né ridistribuite.
+
+### Test runtime iniziale
+- Dalla scheda **Test** della funzione è stata inviata una richiesta POST senza Request Body, senza Headers e senza Query Parameters.
+- Risposta JSON osservata: `{"error":"Autenticazione richiesta"}`.
+- Esito: la funzione rifiuta una richiesta priva di autenticazione. Questo conferma il raggiungimento dell'handler e il blocco della richiesta anonima; non certifica ancora il controllo del ruolo `platform_admin`, il provisioning partner/cliente o l'invio email.
+- Il test non conteneva `request_id`; non è stata richiesta né eseguita alcuna conversione e non sono stati creati account, profili, partner o clienti.
+- Non è stato ancora eseguito un test autenticato. Il test del controllo ruolo amministratore resta da fare con una procedura sicura che non attivi conversioni reali.
+
+### Stato aggiornato
+| Componente | Stato |
+|---|---|
+| Migrazione SQL provisioning su Supabase | **ESEGUITA** secondo conferma dell'utente; esito SQL positivo |
+| Secret `NEXTWAY_SERVICE_ROLE_KEY` | **CONFIGURATO** dall'utente; valore non condiviso né salvato nel repository |
+| Edge Function `nextway-conversion-provisioning` | **PUBBLICATA E VISIBILE** nella Dashboard Supabase |
+| Richiesta anonima POST senza body/header | **TESTATA**; risposta `Autenticazione richiesta` |
+| Verifica controllo ruolo `platform_admin` | **DA COMPLETARE** |
+| Test provisioning cliente/partner e invito email | **DA COMPLETARE**; nessuna attivazione reale eseguita |
+| Deploy frontend Netlify con i pulsanti provisioning | **DA COMPLETARE**; non dichiarato pubblicato |
+| Test end-to-end dalla UI | **DA COMPLETARE** |
+
+### Prossimo passo operativo
+1. Verificare il controllo del ruolo senza inviare un `request_id` valido e senza creare dati: predisporre una richiesta autenticata controllata che possa solo dimostrare il rifiuto di un ruolo non amministratore, oppure verificare il ramo di autorizzazione con un test isolato.
+2. Dopo il controllo autorizzativo, verificare il deploy frontend Netlify e i pulsanti amministrativi, mantenendo disabilitata qualsiasi attivazione reale fino a quando il test non è stato progettato e autorizzato.
+3. Non considerare il provisioning completo finché non sono stati verificati i percorsi cliente e partner, l'idempotenza e la gestione degli errori senza creare duplicati.
+
