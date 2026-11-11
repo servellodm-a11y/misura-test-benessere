@@ -32,6 +32,11 @@ assert.doesNotMatch(fn, /Access-Control-Allow-Origin["']?\s*:\s*["']\*["']/i);
 assert.match(cloud, /functions\.invoke\('nextway-conversion-provisioning',\{body:\{request_id:req\.id\}\}\)/);
 assert.doesNotMatch(cloud, /NEXTWAY_SERVICE_ROLE_KEY|SUPABASE_SERVICE_ROLE_KEY|inviteUserByEmail|auth\.admin\./);
 
+
+const cleanupMigration = read("../supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql");
+assert.match(cleanupMigration, /activation_claim_token\s*=\s*null\s*,\s*activation_claimed_at\s*=\s*null/);
+assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activation_claimed_at\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
+
 console.log("NEXTWAY provisioning security contract: PASS");
 console.log("JWT verification and platform_admin authorization precede all provisioning side effects");
 console.log("Service-role key remains server-side; browser sends only the conversion request ID");
