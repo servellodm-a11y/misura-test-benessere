@@ -107,26 +107,6 @@ begin
     raise exception 'Identificativi generazione mancanti' using errcode='22023';
   end if;
 
-  insert into public.nextway_setter_generation_requests
-    (owner_profile_id,conversation_id,idempotency_key,status,claimed_at)
-  values (v_actor,p_conversation_id,p_idempotency_key,'generating',v_now)
-  on conflict (owner_profile_id,idempotency_key) do nothing
-  returning true into v_inserted;
-
-  select r.* into v_request
-  from public.nextway_setter_generation_requests r
-  where r.owner_profile_id=v_actor
-    and r.idempotency_key=p_idempotency_key
-  for update;
-
-  if not found then
-    raise exception 'Claim generazione non recuperabile' using errcode='40001';
-  end if;
-  if v_request.conversation_id is distinct from p_conversation_id then
-    raise exception 'Chiave idempotenza già associata a un’altra conversazione' using errcode='22023';
-  end if;
-
-  -- Consistent lock order across all generation RPCs: request first, then conversation.
   select c.* into v_conversation
   from public.nextway_setter_conversations c
   where c.id=p_conversation_id
@@ -147,6 +127,25 @@ begin
   end if;
   if v_conversation.status in ('closed','archived') then
     raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
+  end if;
+
+  insert into public.nextway_setter_generation_requests
+    (owner_profile_id,conversation_id,idempotency_key,status,claimed_at)
+  values (v_actor,p_conversation_id,p_idempotency_key,'generating',v_now)
+  on conflict (owner_profile_id,idempotency_key) do nothing
+  returning true into v_inserted;
+
+  select r.* into v_request
+  from public.nextway_setter_generation_requests r
+  where r.owner_profile_id=v_actor
+    and r.idempotency_key=p_idempotency_key
+  for update;
+
+  if not found then
+    raise exception 'Claim generazione non recuperabile' using errcode='40001';
+  end if;
+  if v_request.conversation_id is distinct from p_conversation_id then
+    raise exception 'Chiave idempotenza già associata a un’altra conversazione' using errcode='22023';
   end if;
 
   if v_request.status='completed' then
@@ -187,6 +186,7 @@ as $$
 declare
   v_actor uuid := auth.uid();
   v_request public.nextway_setter_generation_requests%rowtype;
+  v_conversation_id uuid;
   v_conversation public.nextway_setter_conversations%rowtype;
 begin
   if v_actor is null then
@@ -196,17 +196,16 @@ begin
     raise exception 'Output generato non valido' using errcode='22023';
   end if;
 
-  select r.* into v_request
+  select r.conversation_id into v_conversation_id
   from public.nextway_setter_generation_requests r
-  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key
-  for update;
-  if not found or v_request.status<>'generating' then
-    raise exception 'Claim generazione non valido o scaduto' using errcode='55000';
+  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key;
+  if not found then
+    raise exception 'Claim generazione non trovato' using errcode='55000';
   end if;
 
   select c.* into v_conversation
   from public.nextway_setter_conversations c
-  where c.id=v_request.conversation_id
+  where c.id=v_conversation_id
   for update;
   if not found then
     raise exception 'Conversazione non autorizzata' using errcode='42501';
@@ -224,6 +223,15 @@ begin
   end if;
   if v_conversation.status in ('closed','archived') then
     raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
+  end if;
+
+  select r.* into v_request
+  from public.nextway_setter_generation_requests r
+  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key
+  for update;
+  if not found or v_request.status<>'generating'
+     or v_request.conversation_id is distinct from v_conversation_id then
+    raise exception 'Claim generazione non valido o scaduto' using errcode='55000';
   end if;
 
   if v_request.generated_output is not null then
@@ -306,6 +314,7 @@ as $$
 declare
   v_actor uuid := auth.uid();
   v_request public.nextway_setter_generation_requests%rowtype;
+  v_conversation_id uuid;
   v_conversation public.nextway_setter_conversations%rowtype;
   v_message_id uuid;
   v_response jsonb;
@@ -321,28 +330,16 @@ begin
     raise exception 'Dati bozza non validi' using errcode='22023';
   end if;
 
-  select r.* into v_request
+  select r.conversation_id into v_conversation_id
   from public.nextway_setter_generation_requests r
-  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key
-  for update;
+  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key;
   if not found then
     raise exception 'Richiesta generazione non trovata' using errcode='P0002';
-  end if;
-  if v_request.status='completed' then
-    return v_request.cached_response;
-  end if;
-  if v_request.generated_output is null
-     or v_request.generated_output->>'message' is distinct from p_message
-     or v_request.generated_output->>'strategy' is distinct from p_strategy
-     or v_request.generated_output->>'objective' is distinct from p_objective
-     or v_request.generated_output->>'tone' is distinct from p_tone
-     or v_request.generated_output->>'next_step' is distinct from p_next_step then
-    raise exception 'La bozza non corrisponde all’output temporaneo registrato' using errcode='22023';
   end if;
 
   select c.* into v_conversation
   from public.nextway_setter_conversations c
-  where c.id=v_request.conversation_id
+  where c.id=v_conversation_id
   for update;
   if not found then
     raise exception 'Conversazione non autorizzata' using errcode='42501';
@@ -358,8 +355,27 @@ begin
   ) then
     raise exception 'Membership workspace attiva richiesta' using errcode='42501';
   end if;
+
+  select r.* into v_request
+  from public.nextway_setter_generation_requests r
+  where r.owner_profile_id=v_actor and r.idempotency_key=p_idempotency_key
+  for update;
+  if not found or v_request.conversation_id is distinct from v_conversation_id then
+    raise exception 'Richiesta generazione non trovata' using errcode='P0002';
+  end if;
+  if v_request.status='completed' then
+    return v_request.cached_response;
+  end if;
   if v_conversation.status in ('closed','archived') then
     raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
+  end if;
+  if v_request.generated_output is null
+     or v_request.generated_output->>'message' is distinct from p_message
+     or v_request.generated_output->>'strategy' is distinct from p_strategy
+     or v_request.generated_output->>'objective' is distinct from p_objective
+     or v_request.generated_output->>'tone' is distinct from p_tone
+     or v_request.generated_output->>'next_step' is distinct from p_next_step then
+    raise exception 'La bozza non corrisponde all’output temporaneo registrato' using errcode='22023';
   end if;
 
   insert into public.nextway_setter_messages
