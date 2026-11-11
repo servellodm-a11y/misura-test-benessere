@@ -1156,3 +1156,14 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 
 - Run #132: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030253715 (SUCCESS).
 - Run #133: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030268058 (SUCCESS).
+
+
+### Integrazione audit — compatibilità con richieste già attivate (11 novembre 2026)
+
+- Durante il controllo pre-applicazione è stata aggiunta una salvaguardia alla migrazione `20261111150000_nextway_conversion_claim_cleanup.sql`.
+- Prima di sostituire il vincolo, la migrazione normalizza le righe storiche con `status='activated'`, token già nullo e timestamp claim ancora valorizzato, impostando `activation_claimed_at = null`.
+- L'operazione è limitata alle sole righe già attivate e non crea inviti, utenti o conversioni.
+- Il test automatico ora verifica che la normalizzazione delle righe storiche preceda l'aggiunta del nuovo vincolo.
+- Commit migrazione aggiornata: `683a411ff92ef68566261af02a78e679a7573e98`.
+- Commit test aggiornato: `b8aeab779b280d4caa53f0d15576aabc8a4e6fef`.
+- La nuova esecuzione CI è in attesa di completamento; non applicare ancora la migrazione a Supabase fino alla conferma del controllo.
