@@ -29,16 +29,10 @@ select jsonb_build_object(
     'nextway_lead_conversion_requests', to_regclass('public.nextway_lead_conversion_requests') is not null
   ),
 
-  'MIGRATIONS_008_TO_014',
-  (select coalesce(jsonb_agg(version order by version), '[]'::jsonb)
-   from supabase_migrations.schema_migrations
-   where version in (
-     '20261110000800',
-     '20261110000900',
-     '20261110001000',
-     '20261110001100',
-     '20261110001200',
-     '20261110001300',
-     '20261110001400'
-   ))
+  'MIGRATION_HISTORY',
+  jsonb_build_object(
+    'tracking_table_exists', to_regclass('supabase_migrations.schema_migrations') is not null,
+    'versions', null,
+    'note', 'La tabella di storico migrazioni non è disponibile in questo progetto/ruolo SQL; verificare le migrazioni tramite lo stato effettivo di tabelle, colonne, vincoli e policy.'
+  )
 ) as nextway_crm_live_status;
