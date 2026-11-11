@@ -1,7 +1,7 @@
 ## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (diagnostica CRM live e prerequisiti migrazioni)
 
 ### Fonti e perimetro della verifica
-- Branch GitHub `main` letto direttamente; HEAD verificato: `34ff512f3fb6868db37b0a0d5e8e5c7ddf029eeb` (commit “Record successful workspace and storage live preflight”).
+- Branch GitHub `main` letto direttamente prima di questo aggiornamento documentale; HEAD osservato: `34ff512f3fb6868db37b0a0d5e8e5c7ddf029eeb` (commit “Record successful workspace and storage live preflight”). Il successivo commit di aggiornamento del presente MASTER è riportato nel resoconto della sessione.
 - I file diagnostici CRM `supabase/diagnostics/nextway_crm_live_status_readonly.sql` e `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` risultano presenti nel branch `main`; contenuto recuperato da GitHub.
 - Non è disponibile nella sessione un connettore Supabase né Netlify. I risultati live qui sotto sono quelli restituiti dall'utente dopo l'esecuzione in Supabase SQL Editor; non sono un accesso diretto dell'assistente al progetto.
 - Questa attività ha modificato soltanto questo documento. Nessun codice applicativo, database, deploy, impostazione o segreto è stato modificato.
