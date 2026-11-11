@@ -52,7 +52,7 @@
               <option value="">Nessun workspace — percorso centrale riservato a platform_admin</option>
             </select>
           </label>
-          <p class="nwst-muted">Per creare prospect condivisi, seleziona un workspace attivo al quale hai accesso. Senza selezione, il database consente la creazione soltanto a platform_admin.</p>
+          <p class="nwst-muted">Per creare prospect condivisi, seleziona un workspace attivo. La creazione e la generazione richiedono ruolo workspace_owner, workspace_admin, workspace_manager o workspace_member; workspace_viewer è in sola lettura. Senza selezione, soltanto platform_admin può creare record centrali non assegnati.</p>
           <div class="nwst-grid">
             <label>Nome / identificativo pubblico *
               <input name="display_name" maxlength="120" required>
