@@ -1589,3 +1589,14 @@ Questa è **solo una base di associazione dati**, non l'isolamento effettivo tra
 
 ### Prossimo blocco
 Progettare la tabella di membership workspace e il modello dei permessi (utente ↔ workspace ↔ ruolo), quindi introdurre policy RLS e RPC di ricerca con filtro obbligatorio workspace. Solo dopo potrà essere attivato l'isolamento reale e pianificato il backfill controllato. Nessuna applicazione live, nessun deploy Edge Function e nessun intervento Netlify fino al 4 dicembre 2026.
+
+
+### Esito validazione successivo — 11 novembre 2026
+- GitHub Actions run `43039758551`: **SUCCESS** sul commit `b561e807b0385da3e910ebfd7dc775a2a0454989`.
+- Superati tutti i test statici inclusi nel workflow, compreso `test-nextway-workspace-data-association.mjs`.
+- Superati tutti i cinque `deno check`: AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin.
+- Durante il primo run, la CI aveva evidenziato un'asserzione obsoleta nel test Knowledge Base: il test richiedeva che `valid_from` non fosse nullo, mentre il vincolo SQL ammette correttamente `valid_from IS NULL`. Allineato il test alla regola effettiva; il run successivo è passato.
+- Commit test workspace corretto: `3a4c00101da848a00243b9862f6a812ccb70413a`.
+- Commit workflow con path push e pull request: `90330a885e09d82469a0cd85ceee911f167e36f4`.
+- Commit allineamento test Knowledge Base: `b561e807b0385da3e910ebfd7dc775a2a0454989`.
+- La CI valida sorgenti e contratti statici: non prova l'applicazione delle migrazioni a Supabase né l'isolamento runtime workspace.
