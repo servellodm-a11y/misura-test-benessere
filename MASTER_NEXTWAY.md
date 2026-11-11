@@ -1,3 +1,64 @@
+## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:28 (Europe/Rome)
+
+### Repository, branch e fonti verificate
+- Recuperato MASTER_NEXTWAY.md da GitHub main prima della modifica: blob SHA di partenza 1395b5d0eda3dddad29af821bfa67b6b1c6d638e; 2.041 righe.
+- HEAD main osservato: 320539aedbed030134bb873a1b613dc9b225a0a6 (11-11-2026 18:26:07 UTC / 19:26:07 Europe/Rome), commit documentale "Clarify latest GitHub Actions status in MASTER NEXTWAY".
+- Commit recenti esaminati: 320539a (chiarimento CI), babccac (aggiornamento MASTER precedente), 1b0169a (chiarimento HEAD osservato), ce50ed3 (diagnostica CRM e prerequisiti), 34ff512 (risultato preflight workspace/Storage), 6e57c60 (validazione migrazioni workspace), 589aca6 (revisione sicurezza workspace) e 82d22a8 (rimozione policy di scrittura diretta ridondante sui messaggi Setter).
+- Albero Git ricorsivo del branch main recuperato senza troncamento. Sono presenti i file applicativi HTML/JS, gli script di test, le migrazioni SQL, le diagnostiche read-only e le sei Edge Functions: nextway-ai-setter, nextway-conversion-provisioning, nextway-knowledge-ingest, nextway-knowledge-upload, nextway-search e nextway-workspace-admin.
+- File bundle CRM effettivamente presente: supabase/deploy/nextway_crm_apply.sql, 839 righe, blob SHA d66771eba180fc7174618ab25a285b8489130a62. Contiene la sequenza delle migrazioni 008–014. La versione caricata dall'utente nella conversazione è stata esaminata separatamente; non è stata dichiarata una comparazione binaria tra i due file.
+- File della migrazione idempotenza 011 recuperato direttamente da main: supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql, blob SHA db17834699909be71c084aad56f64885c5656867. La funzione nextway_prune_lead_creation_requests usa delimitatori PL/pgSQL bilanciati as $$ ... $$.
+- Correzione di accuratezza rispetto alla nota precedente delle 19:25: l'affermazione che la migrazione 011 nel branch corrente abbia delimitatori non validi non è confermata dalla versione ora recuperata; il sorgente attuale è sintatticamente delimitato con $$ ... $$. La precedente segnalazione va considerata superata per questo blob. Non è stata eseguita una compilazione PostgreSQL runtime.
+- Workflow .github/workflows/nextway-static-validation.yml recuperato; il workflow copre i test statici di sicurezza, SQL, workspace e UI e i controlli Deno elencati più sotto.
+
+### CI — ultimo risultato disponibile
+- Elenco GitHub Actions del branch main: ultima run disponibile #229, ID 43060090578, SUCCESS sul commit 82d22a8d429eb67f33255931034d010a053a9c5d. La run ha un job validate completato con successo.
+- Step verificati nella run #229: validazione audit; contratto sicurezza conversion provisioning; contratti Edge Functions; SQL rate-limit/idempotenza; Knowledge Base; Knowledge Ingest e Upload; multi-workspace; workspace admin; associazione dati; membership; RLS workspace-scoped; Setter generation workspace; Lead creation workspace-aware; selettore workspace UI; node --check di nextway-setter.js; cinque deno check per AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin.
+- Run #228 (ID 43059995637) FAILURE; la correzione successiva della policy è inclusa nel commit 82d22a8 e la run #229 è SUCCESS. Le run #227–#220 risultano fallite nella cronologia esaminata.
+- I commit successivi alla run #229 sono documentali; non risulta una run CI più recente nell'elenco controllato. La CI non applica migrazioni e non certifica il comportamento runtime del database Supabase.
+
+### Revisione statica del bundle CRM e decisione di sicurezza
+- Il bundle supabase/deploy/nextway_crm_apply.sql è transazionale (BEGIN/COMMIT) e include controlli iniziali di dipendenza. Contiene DROP CONSTRAINT, DROP TRIGGER e DROP POLICY seguiti dalla ricreazione degli oggetti, oltre a CREATE OR REPLACE FUNCTION e modifiche GRANT/REVOKE. Sono modifiche strutturali che spiegano l'avviso generico di Supabase.
+- Nel bundle non sono presenti comandi DROP TABLE o TRUNCATE né DELETE diretti sulle righe delle tabelle Lead, clients o partner_details.
+- È presente un DELETE dentro la funzione nextway_prune_lead_creation_requests(): elimina soltanto chiavi idempotenti più vecchie di 30 giorni, è una funzione manuale e verifica il ruolo platform_admin. La definizione della funzione durante l'applicazione non esegue quel DELETE.
+- La tabella attività prevista dalla migrazione 012 usa una FK verso nextway_leads con ON DELETE CASCADE: una futura cancellazione fisica di un Lead eliminerebbe anche le attività collegate. Il trigger audit è progettato per registrare l'evento DELETE; ciò non equivale a un divieto di cancellazione fisica.
+- La revisione statica non dimostra che tutte le dipendenze live siano soddisfatte né sostituisce backup, preflight e test PostgreSQL. Non autorizza da sola l'applicazione del bundle.
+
+### Supabase, Edge Functions e integrazioni — stato e limiti
+- Ultimo preflight workspace/Storage riportato dall'utente e già registrato nel MASTER: read_only=true; quattro tabelle workspace assenti; bucket nextway-knowledge assente con zero oggetti; tabelle metadata storage.buckets e storage.objects presenti; nessuna policy Storage con i nomi previsti. È uno snapshot fornito dall'utente, non una nuova lettura live di questo controllo.
+- Restano valide le evidenze CRM precedenti registrate nel MASTER: nextway_leads presente con RLS attiva e policy owner/platform_admin; le tabelle attività e conversion requests risultavano assenti nella verifica live allora eseguita. Non è stato interrogato nuovamente il database.
+- Le migrazioni Knowledge Base, Storage, workspace, membership, RLS, Setter generation, Lead creation e conversion provisioning sono presenti nel repository, ma restano candidate/non applicate secondo gli ultimi risultati operativi documentati. Nessun deploy di Edge Function è stato verificato in questa sessione.
+- nextway-conversion-provisioning/index.ts è presente nel repository. Il sorgente prevede verifica del token e del ruolo platform_admin, uso server-side di service-role, claim/finalize/release delle richieste e invito Auth idempotente per i partner. La migrazione 20261111001500_nextway_conversion_provisioning.sql versiona le RPC di provisioning. La presenza dei file e il passaggio del test statico non provano che funzione, secrets o RPC siano deployati e configurati nel progetto live.
+- Frontend Netlify e progetto Supabase restano integrazioni architetturali documentate; nessun accesso diretto Supabase/Netlify è disponibile in questo controllo. Nessun deploy o modifica live è stato eseguito.
+
+### Procedura backup richiesta prima dell'applicazione CRM — aggiornamento conversazione
+- L'utente ha caricato e chiesto di valutare il bundle SQL 008–014 dopo l'avviso "destructive operations" di Supabase; dopo la revisione ha autorizzato a procedere con la preparazione in sicurezza. Non ha autorizzato una cancellazione o una modifica non revisionata dei dati.
+- È stato concordato di produrre prima un backup/esportazione verificabile del database. In questa sessione non è stato creato né verificato alcun backup e il bundle SQL non è stato eseguito.
+- Sul Mac dell'utente: supabase --version ha restituito command not found; brew --version ha restituito command not found; il tentativo dello script Homebrew ha risposto "Homebrew on macOS is only supported on Apple Silicon processors!"; uname -m ha restituito x86_64, quindi l'ambiente è Intel. I risultati sono stati forniti dall'utente.
+- La verifica di node -v e npm -v è ancora in attesa. Non presumere che Node.js/npm siano installati. Il percorso di installazione CLI/backup resta BLOCCATO finché non è disponibile un metodo compatibile con Mac Intel e non viene verificato un file di esportazione recuperabile.
+- Non è stato eseguito alcun comando SQL sul database in conseguenza di questa procedura; nessun dato, schema, account, Edge Function, deploy Netlify o configurazione è stato modificato.
+
+### Matrice di stato aggiornata
+- Repository main, MASTER e file sorgente esaminati: COMPLETATO E VERIFICATO.
+- CI statica run #229: COMPLETATO E VERIFICATO per gli step elencati; non è un test runtime Supabase.
+- Preflight workspace/Storage: COMPLETATO E VERIFICATO per lo snapshot read-only fornito dall'utente; non ricontrollato in questo run.
+- Schema CRM live, prerequisiti 008–014 e firme RPC: DA COMPLETARE con il risultato della diagnostica prerequisiti già versionata; non dedurre lo stato dalla sola presenza delle migrazioni.
+- Bundle CRM 008–014: ESEGUITO MA NON VERIFICATO quanto alla revisione statica del testo; NON ESEGUITO su Supabase.
+- Installazione CLI e backup database: BLOCCATO sul Mac Intel fino alla verifica Node/npm e alla disponibilità di un percorso di esportazione funzionante.
+- Applicazione migrazioni CRM e workspace: BLOCCATO fino a backup verificato, preflight live aggiornato e sequenza di applicazione controllata.
+- Edge Functions: COMPLETATO E VERIFICATO quanto alla presenza dei sorgenti nel repository e ai type-check CI per cinque funzioni; deploy live DA COMPLETARE/da verificare.
+- Netlify: DA COMPLETARE per la verifica del deploy; resta valido il blocco operativo fino al 4 dicembre 2026 già registrato nel MASTER.
+
+### Prossimi passi
+1. Ottenere dall'utente l'esito di node -v e npm -v sul Mac Intel; scegliere un metodo CLI/pg_dump compatibile senza esporre credenziali.
+2. Produrre un'esportazione locale e verificare che il file esista e sia leggibile prima di qualsiasi migrazione.
+3. Riesaminare i prerequisiti live CRM con la diagnostica read-only già presente; non ripetere controlli workspace/Storage già completati salvo cambiamenti.
+4. Applicare solo le migrazioni autorizzate, una per volta, verificando ogni risultato; poi eseguire le diagnostiche post-deploy e i test runtime previsti. Non eseguire il bundle 008–014 in blocco sulla base della sola revisione statica.
+
+### Registro cronologico del MASTER
+- 11-11-2026, 19:28 Europe/Rome — aggiornati HEAD/blob SHA, cronologia commit, inventario dei sorgenti, CI #229 e stato della procedura di backup; corretta la nota non più valida sul delimitatore della migrazione 011. Modificato esclusivamente MASTER_NEXTWAY.md.
+
+---
+
 ## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:25 (Europe/Rome)
 
 ### Repository e fonti controllate
