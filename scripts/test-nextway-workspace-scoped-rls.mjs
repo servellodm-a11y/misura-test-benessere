@@ -18,6 +18,9 @@ for (const table of [
 }
 assert.match(sql, /as restrictive\s+for all to authenticated/i);
 assert.match(sql, /as permissive\s+for select to authenticated/i);
+assert.match(sql, /to_regprocedure\('public\.nextway_has_workspace_access\(uuid,text\[\]\)'\)/i);
+assert.match(sql, /c\.relrowsecurity/i);
+assert.match(sql, /workspace_id association columns are missing/i);
 assert.match(sql, /nextway_has_workspace_access\(workspace_id\)/i);
 assert.match(sql, /nextway_is_platform_admin\(\)/i);
 assert.match(sql, /nextway_guard_lead_workspace_assignment/i);
