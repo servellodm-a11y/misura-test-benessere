@@ -985,3 +985,14 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Il risultato conferma il superamento dei sei test funzionali inclusi nello smoke test. Non certifica ancora isolamento multiutente, interfaccia web, deploy Netlify o operatività complessiva in produzione.
 - La precedente indicazione “test funzionali end-to-end da completare” è superata limitatamente ai sei casi sopra elencati. Restano da verificare isolamento multiutente partner/admin e flusso UI live.
 - Nessun dato di test è rimasto nel database: il rollback è stato confermato dall'output.
+
+
+### Preparazione isolamento partner / amministratore — 11 novembre 2026
+- Esaminato il piano pre-rilascio e le policy CRM documentate: il modello atteso è accesso del partner ai soli record con owner_profile_id = auth.uid(); accesso trasversale riservato a platform_admin solo dove esplicitamente previsto dalle policy RLS.
+- Non viene attribuita visibilità automatica a sponsor, team leader o director. Le relative regole gerarchiche restano da definire e verificare separatamente.
+- Creato supabase/diagnostics/nextway_crm_isolation_audit_readonly.sql: audit in sola lettura di RLS, policy e privilegi sulle tabelle Lead, attività, richieste, audit, profili e dettagli partner.
+- Lo script legge esclusivamente metadati PostgreSQL: non legge record CRM e non modifica dati, schema, policy, ruoli o grants.
+- File recuperato nuovamente da GitHub e contenuto verificato. Blob SHA: ab3b832ab4ca990fa58ec1fb027acac737d390f7.
+- Commit di creazione file: e01f97db09a761486710e28f2fa64572b0095474.
+- Stato: script preparato, NON ancora eseguito su Supabase. Nessun test di isolamento multiutente è dichiarato superato.
+- Per il test funzionale effettivo serviranno due identità partner distinte e l'identità platform_admin, con verifica di lettura, modifica e accesso ai dati correlati sotto sessioni separate. Nessun record reale sarà modificato.
