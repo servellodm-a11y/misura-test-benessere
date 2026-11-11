@@ -115,8 +115,8 @@ begin
 end;
 $$;
 
--- Keep the legacy idempotency route bound to unassigned records only.
--- It cannot replay a request previously created in an explicit workspace.
+-- Legacy idempotency route is restricted to unassigned records only.
+-- A request created by the workspace-aware V2 route cannot be replayed here.
 create or replace function public.nextway_create_lead_with_conversation_idempotent(
   p_request_id uuid,
   p_request_hash text,
@@ -350,7 +350,8 @@ commit;
     select r.request_hash,r.response,r.workspace_id
       into v_existing_hash,v_existing_response,v_existing_workspace_id
     from public.nextway_lead_creation_requests r
-    where r.owner_profile_id=v_user_id and r.request_id=p_request_id;
+    where r.owner_profile_id=v_user_id and r.request_id=p_request_id
+    for update;
 
     if not found then
       raise exception 'Richiesta concorrente non recuperabile; riprovare' using errcode='40001';
