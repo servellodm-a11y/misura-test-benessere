@@ -24,11 +24,15 @@ on:
       - "nextway-setter.js"
       - "nextway-ai.html"
       - "supabase/functions/nextway-ai-setter/**"
+      - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
+      - "scripts/test-nextway-edge-functions-security.mjs"
+      - "scripts/test-nextway-idempotency-sql-security.mjs"
       - "scripts/test-nextway-knowledge-base-sql.mjs"
+      - "scripts/test-nextway-knowledge-ingest-security.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
