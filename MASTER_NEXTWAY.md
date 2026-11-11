@@ -996,3 +996,16 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Commit di creazione file: e01f97db09a761486710e28f2fa64572b0095474.
 - Stato: script preparato, NON ancora eseguito su Supabase. Nessun test di isolamento multiutente è dichiarato superato.
 - Per il test funzionale effettivo serviranno due identità partner distinte e l'identità platform_admin, con verifica di lettura, modifica e accesso ai dati correlati sotto sessioni separate. Nessun record reale sarà modificato.
+
+
+## Test isolamento multiutente partner / amministratore predisposto — 11 novembre 2026
+
+- Analizzato il risultato live dell'audit RLS read-only eseguito dall'utente. Le sette tabelle esaminate hanno RLS attiva; i privilegi SELECT anonimi risultano assenti. Le policy Lead consentono l'accesso al proprietario e a platform_admin; le policy attività applicano lo stesso vincolo tramite il Lead collegato.
+- Il controllo live conferma inoltre che le richieste idempotenti di creazione hanno policy SELECT owner-only: non viene quindi presunta una visibilità amministrativa su questa tabella.
+- Preparato `supabase/diagnostics/nextway_crm_partner_isolation_transactional_test.sql`, test transazionale con due profili `role='partner'` collegati a `partner_details` e il profilo `platform_admin` già verificato.
+- Il test crea due Lead fittizi tramite la RPC idempotente e due attività fittizie sotto identità partner distinte; verifica lettura del proprio Lead, invisibilità del Lead e delle attività dell'altro partner, blocco di UPDATE e DELETE cross-owner, isolamento delle richieste idempotenti e lettura trasversale admin di Lead e attività.
+- Tutte le creazioni e le operazioni avvengono nella stessa transazione, terminata da `ROLLBACK`. Non vengono modificati profili, partner o Lead preesistenti. I valori di test usano il dominio riservato `example.invalid`.
+- Il test è stato salvato su GitHub e recuperato nuovamente per verifica. Commit di creazione: `9745ceea5b83b40d316b485b9e26b2189aa40345`; commit di allineamento alla policy owner-only delle richieste idempotenti: `0af4b73d74238cf524f189bcb2af50c6ca36cabc`.
+- Stato: **PREPARATO, NON ANCORA ESEGUITO** su Supabase. Non dichiarare superato l'isolamento multiutente finché l'utente non restituisce il risultato della query.
+- Il test si interrompe senza scrivere dati se non trova due profili partner collegati a `partner_details` o se il profilo amministratore atteso non è presente.
+- Limite: il test copre le policy RLS del CRM su Lead, attività e richieste idempotenti; non certifica accesso gerarchico sponsor/team leader/director, UI, API browser o deploy Netlify. La tabella richieste idempotenti resta intenzionalmente owner-only secondo la policy live rilevata.
