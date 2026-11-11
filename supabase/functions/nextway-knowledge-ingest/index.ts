@@ -12,7 +12,7 @@ const modulePattern = /^[a-z0-9][a-z0-9_-]{1,63}$/;
 const allowedSourceTypes = new Set([
   "official_document", "scientific_publication", "training_material", "faq", "policy", "other",
 ]);
-const MAX_BODY_BYTES = 600_000;
+const MAX_BODY_BYTES = 4_000_000;
 const MAX_CONTENT_CHARS = 500_000;
 const CHUNK_SIZE = 9_000;
 const CHUNK_OVERLAP = 500;
