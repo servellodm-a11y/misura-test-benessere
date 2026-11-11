@@ -314,7 +314,7 @@ assert.match(leadUiScript, /if\(x\.archived_at\)\{save\.disabled=true;feedback\.
 console.log("NEXTWAY CRM archived Lead: activity history remains readable while new activity entry is disabled: PASS");
 
 assert.match(cloud, /async function getOpenLeadActivities\(limit=100\)/);
-assert.match(cloud, /next_action_status'\)\.not\('next_action_at','is',null\)/);
+assert.match(cloud, /\.eq\('next_action_status','open'\)\.not\('next_action_at','is',null\)/);
 assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity/);
 assert.match(leadUiScript, /id="loadFollowups"/);
 assert.match(leadUiScript, /getOpenLeadActivities\(100\)/);
