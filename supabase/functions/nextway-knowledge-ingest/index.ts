@@ -124,8 +124,8 @@ Deno.serve(async (req) => {
   if (typeof sourceType !== "string" || !allowedSourceTypes.has(sourceType)) {
     return respond({ error: "source_type non valido" }, 400, origin);
   }
-  if (typeof languageCode !== "string" || !/^[a-z]{2}(-[A-Z]{2})?$/.test(languageCode)) {
-    return respond({ error: "language_code non valido" }, 400, origin);
+  if (languageCode !== "it") {
+    return respond({ error: "La prima versione della Knowledge Base supporta documenti in italiano (it)" }, 400, origin);
   }
   if (typeof content !== "string" || !content.trim() || content.length > MAX_CONTENT_CHARS) {
     return respond({ error: "Contenuto vuoto o oltre il limite di 500.000 caratteri" }, 400, origin);
@@ -191,6 +191,22 @@ Deno.serve(async (req) => {
       })
       .select("id")
       .single();
+    if (insertError?.code === "23505") {
+      const { data: raced, error: raceReadError } = await admin
+        .from("nextway_knowledge_documents")
+        .select("id, title, approval_status")
+        .eq("module_key", moduleKey)
+        .eq("content_sha256", hash)
+        .maybeSingle();
+      if (raceReadError) throw raceReadError;
+      if (raced) {
+        return respond({
+          success: true, duplicate: true, document_id: raced.id,
+          title: raced.title, approval_status: raced.approval_status,
+          message: "Contenuto gia registrato: nessun duplicato creato",
+        }, 200, origin);
+      }
+    }
     if (insertError || !document) throw insertError ?? new Error("Documento non creato");
 
     const chunkRows = parts.map((part, index) => ({
