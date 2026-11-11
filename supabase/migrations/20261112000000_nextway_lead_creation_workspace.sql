@@ -25,7 +25,24 @@ begin
     raise exception 'Workspace association columns are missing.';
   end if;
 end;
-$$;
+$;
+
+alter table public.nextway_lead_creation_requests
+  add column if not exists workspace_id uuid;
+
+do $
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid='public.nextway_lead_creation_requests'::regclass
+      and conname='nextway_lead_creation_requests_workspace_id_fkey'
+  ) then
+    alter table public.nextway_lead_creation_requests
+      add constraint nextway_lead_creation_requests_workspace_id_fkey
+      foreign key (workspace_id) references public.nextway_workspaces(id) on delete restrict;
+  end if;
+end;
+$;
 
 -- Legacy seven-argument entry point remains central-admin-only. This prevents
 -- non-admin callers from silently creating unassigned records outside a workspace.
@@ -195,6 +212,7 @@ declare
   v_inserted boolean := false;
   v_existing_hash text;
   v_existing_response jsonb;
+  v_existing_workspace_id uuid;
   v_response jsonb;
 begin
   if v_actor is null then
@@ -205,14 +223,14 @@ begin
     raise exception 'Chiave idempotenza non valida' using errcode='22023';
   end if;
 
-  insert into public.nextway_lead_creation_requests(owner_profile_id,request_id,request_hash)
-  values (v_actor,p_request_id,p_request_hash)
+  insert into public.nextway_lead_creation_requests(owner_profile_id,request_id,request_hash,workspace_id)
+  values (v_actor,p_request_id,p_request_hash,p_workspace_id)
   on conflict (owner_profile_id,request_id) do nothing
   returning true into v_inserted;
 
   if not coalesce(v_inserted,false) then
-    select r.request_hash,r.response
-      into v_existing_hash,v_existing_response
+    select r.request_hash,r.response,r.workspace_id
+      into v_existing_hash,v_existing_response,v_existing_workspace_id
     from public.nextway_lead_creation_requests r
     where r.owner_profile_id=v_actor and r.request_id=p_request_id
     for update;
@@ -220,7 +238,8 @@ begin
     if not found then
       raise exception 'Richiesta concorrente non recuperabile; riprovare' using errcode='40001';
     end if;
-    if v_existing_hash is distinct from p_request_hash then
+    if v_existing_hash is distinct from p_request_hash
+       or v_existing_workspace_id is distinct from p_workspace_id then
       return jsonb_build_object(
         'success',false,
         'error','La chiave di richiesta esiste già con dati differenti. Avvia una nuova richiesta.'
