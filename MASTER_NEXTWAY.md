@@ -1350,3 +1350,29 @@ Realizzare il motore di conoscenza documentale dell'assistente NEXTWAY AI. Il CR
 - Nessun dato di prova, account, partner o cliente deve essere creato per questa fase senza necessità e autorizzazione.
 - Nessun intervento su Netlify fino al 4 dicembre 2026.
 - Nessuna implementazione di retrieval o collegamento a provider è dichiarata completata con questa registrazione: è una decisione di roadmap.
+
+
+## SVILUPPO KNOWLEDGE BASE — PRIMA MIGRAZIONE CANDIDATA (11 NOVEMBRE 2026)
+
+Avviata la prima implementazione funzionale del motore documentale NEXTWAY AI, senza riaprire audit già conclusi.
+
+### Componenti aggiunti su GitHub
+- Migrazione candidata `supabase/migrations/20261111170000_nextway_knowledge_base.sql`: registro documenti, metadati di settore/lingua/versione/validità, stato di approvazione, hash SHA-256, archivio dei chunk testuali e ricerca full-text italiana PostgreSQL.
+- Le fonti sono ricercabili solo quando approvate e nel periodo di validità; i risultati sono filtrati per modulo e lingua.
+- RLS attiva su entrambe le tabelle; modifiche amministrative riservate a `platform_admin`; lettura dei soli documenti approvati per utenti autenticati.
+- RPC `nextway_search_knowledge(text,text,text,integer)` in SECURITY INVOKER, con limite massimo di 10 risultati e EXECUTE per authenticated/service_role; nessun accesso anonimo.
+- Nessuna estensione vettoriale, servizio di embedding, chiamata a provider AI o chiave segreta richiesta in questa prima componente.
+- Test statico `scripts/test-nextway-knowledge-base-sql.mjs` aggiunto alla workflow `.github/workflows/nextway-static-validation.yml`.
+
+### Commit
+- Migrazione: `f047f759ada7e6292999162d120108479dc21624`.
+- Test statico: `6624c7db5e6e78acb2e7c5da36a57949fafb278d`.
+- Workflow CI: `92122a4b5d99c54a9d8d76463e4d192bc0f43c59`.
+
+### Stato effettivo e prossimi passaggi
+- Codice e migrazione sono presenti su GitHub `main`; la migrazione è **CANDIDATA, NON APPLICATA** a Supabase.
+- Il test statico è stato collegato alla CI; esito del run relativo al commit workflow ancora da acquisire.
+- Nessuna tabella, policy o funzione live è stata creata o modificata; nessun documento o dato di prova è stato inserito.
+- Prima di applicare la migrazione: revisione mirata della compatibilità con lo schema live e delle dipendenze (in particolare `nextway_is_platform_admin()` e disponibilità della configurazione PostgreSQL `italian`), quindi applicazione controllata.
+- Il caricamento file/estrazione testo e la console amministrativa non sono ancora implementati. Questa migrazione fornisce registro, chunk e retrieval testuale, non una pipeline di ingestione completa.
+- Nessun intervento su Netlify fino al 4 dicembre 2026.
