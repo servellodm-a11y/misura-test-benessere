@@ -1739,3 +1739,38 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Run `43041360377`: **SUCCESS** sul commit test ingest `e8fa002ff650aba58959f48cdab771d7ab4e63ef`.
 - Entrambi i run hanno superato i test statici KB/RLS/membership e i cinque `deno check`, inclusi Knowledge Ingest e Knowledge Upload.
 - Diagnostica Setter prerequisiti: commit `4c8aad21e6374af303eee76eacd29429c55075d3`.
+
+
+
+## DIAGNOSTICA DEFINITIVA AI SETTER — PREREQUISITI WORKSPACE (11 NOVEMBRE 2026)
+
+### Esito della diagnostica Supabase
+Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_workspace_scope_single_result_readonly.sql`. Il risultato completo è stato ricevuto e analizzato.
+
+- RLS attiva su `nextway_leads`, `nextway_setter_conversations`, `nextway_setter_messages` e `nextway_lead_creation_requests`; RLS non è FORCED.
+- `nextway_setter_generation_requests` **NON ESISTE** nel database rilevato.
+- Le tabelle conversazioni e messaggi hanno policy `nextway_setter_access` basate su `owner_profile_id = auth.uid()` oppure `nextway_is_platform_admin()`; non esiste ancora isolamento per workspace.
+- `nextway_setter_messages` ha FK composta `(conversation_id, owner_profile_id)` verso `nextway_setter_conversations(id, owner_profile_id)`, da preservare.
+- `nextway_setter_conversations` non presenta `workspace_id` nel database rilevato. La colonna è prevista soltanto nella migrazione candidata di associazione dati `20261111210000_nextway_workspace_data_association.sql`, non ancora applicata.
+- Anche `nextway_leads` non presenta `workspace_id` nel database rilevato; la stessa migrazione candidata lo aggiunge.
+- La RPC `nextway_create_lead_with_conversation(text,text,text,text,text,text,text)` esiste ed è SECURITY INVOKER; non riceve workspace_id.
+- La RPC `nextway_create_lead_with_conversation_idempotent(uuid,text,text,text,text,text,text,text,text)` esiste ed è SECURITY INVOKER; richiama la RPC precedente e non riceve workspace_id.
+- La funzione trigger `nextway_validate_setter_owner()` è SECURITY DEFINER, verifica la corrispondenza tra proprietario della conversazione e proprietario del Lead, ma non verifica il workspace.
+- Le funzioni `nextway_begin_setter_generation`, `nextway_complete_setter_generation`, `nextway_store_setter_generation_output` e `nextway_get_staged_setter_output` **non compaiono nel catalogo public** restituito dalla diagnostica.
+- Le quattro RPC sono però invocate da `supabase/functions/nextway-ai-setter/index.ts`. Il relativo endpoint, se eseguito contro questo schema, non può completare il flusso di generazione finché le RPC non vengono create o non viene chiarita la loro collocazione effettiva.
+- Le funzioni di generazione non sono versionate nelle migrazioni SQL consultate e la tabella di idempotenza prevista non esiste.
+
+### Conseguenze e decisioni
+1. Non scrivere ancora la migrazione RLS Setter come se esistessero tabella e RPC di generazione.
+2. Prima realizzare una migrazione candidata che definisca in modo esplicito tabella idempotenza/generazione e le quattro RPC, rispettando il contratto effettivamente usato dall'Edge Function. La progettazione dovrà coprire claim atomico, recupero output staged, completamento idempotente, ownership, stato conversazione e autorizzazione workspace.
+3. Aggiornare le due RPC di creazione Lead per accettare e validare un workspace esplicito; revocare l'uso della vecchia firma compatibile senza workspace quando sarà attivato il flusso workspace.
+4. Adeguare `nextway_validate_setter_owner()` per verificare anche la coerenza del workspace Lead/conversazione.
+5. Solo dopo la base dati e le RPC, aggiungere RLS workspace-scoped a conversazioni e messaggi. I messaggi ereditano il workspace dalla conversazione; non duplicare workspace_id sui messaggi.
+6. La migrazione di associazione dati, membership, RLS workspace e le Edge Functions restano candidate/non applicate/non deployate. Nessun dato applicativo è stato creato o modificato.
+
+### Stato operativo
+- Diagnostica completata: **ESITO RICEVUTO E ANALIZZATO**.
+- Migrazioni Supabase: **NESSUNA APPLICATA** in conseguenza di questa diagnostica.
+- Edge Functions: **NESSUN DEPLOY** in conseguenza di questa diagnostica.
+- Netlify: nessun intervento; resta valido il blocco fino al 4 dicembre 2026.
+- Non ripetere la diagnostica aggregata: ha già fornito il risultato completo necessario per definire le discrepanze.
