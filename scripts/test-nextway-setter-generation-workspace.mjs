@@ -14,6 +14,13 @@ for (const name of [
   "nextway_complete_setter_generation",
 ]) assert.match(sql, new RegExp(name), `missing AI Setter generation component: ${name}`);
 
+for (const signature of [
+  "nextway_begin_setter_generation(uuid,uuid)",
+  "nextway_store_setter_generation_output(uuid,jsonb)",
+  "nextway_get_staged_setter_output(uuid)",
+  "nextway_complete_setter_generation(uuid,text,text,text,text,text)",
+]) assert.match(sql, new RegExp(signature.replace(/[()]/g, "\\$&")));
+
 assert.match(sql, /workspace_id association columns are missing/i);
 assert.match(sql, /nextway_has_workspace_access\(/i);
 assert.match(sql, /array\['workspace_owner','workspace_admin','workspace_manager','workspace_member'\]/i);
@@ -21,16 +28,27 @@ assert.match(sql, /security definer[\s\S]*?set search_path = pg_catalog, public/
 assert.match(sql, /unique \(owner_profile_id,idempotency_key\)/i);
 assert.match(sql, /for update/i);
 assert.match(sql, /interval '2 minutes'/i);
+assert.match(sql, /returning true into v_inserted/i);
+assert.match(sql, /if coalesce\(v_inserted,false\) then[\s\S]*?select true,false,null::jsonb,0/i);
 assert.match(sql, /generated_output jsonb/i);
 assert.match(sql, /cached_response jsonb/i);
 assert.match(sql, /status='completed'/i);
-assert.match(sql, /direction,content,message_type,ai_generated/i);
-assert.match(sql, /'outgoing'.*'text'.*true/is);
+assert.match(sql, /direction,owner_profile_id[\s\S]*?ai_generated/i);
+assert.match(sql, /'outgoing',[\s\S]*?'text',true/i);
 assert.match(sql, /last_message_at=clock_timestamp\(\)/i);
 assert.match(sql, /new\.workspace_id is distinct from v_workspace_id/i);
+assert.match(sql, /nextway_setter_conversations_workspace_select/i);
+assert.match(sql, /nextway_setter_conversations_workspace_manage/i);
+assert.match(sql, /nextway_setter_conversations_workspace_scope/i);
+assert.match(sql, /nextway_setter_messages_workspace_select/i);
+assert.match(sql, /nextway_setter_messages_workspace_manage/i);
+assert.match(sql, /nextway_setter_messages_workspace_scope/i);
+assert.match(sql, /before insert or update of lead_id, owner_profile_id, workspace_id/i);
 assert.match(sql, /revoke all on public\.nextway_setter_generation_requests from public, anon, authenticated/i);
-assert.doesNotMatch(sql, /insert into public\.nextway_(leads|setter_conversations|setter_messages)\s*\(/i,
-  "migration must not create application records during installation");
+assert.doesNotMatch(sql, /alter table public\.nextway_setter_messages\s+add column\s+workspace_id/i,
+  "messages must inherit workspace through conversation; do not duplicate workspace_id");
+assert.doesNotMatch(sql, /insert into public\.nextway_(leads|setter_conversations)\s*\(/i,
+  "migration must not create Lead or conversation records");
 assert.doesNotMatch(sql, /update public\.nextway_(leads|setter_messages)\s/i,
   "migration must not backfill or rewrite application records");
 
