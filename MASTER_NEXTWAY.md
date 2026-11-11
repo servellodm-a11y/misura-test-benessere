@@ -1538,3 +1538,11 @@ Sviluppato il primo servizio backend per gestire workspace, prompt e criteri sen
 
 ### Prossimo passo
 Dopo la validazione statica e type-check, completare il modello di isolamento workspace per documenti, lead e conversazioni, poi pianificare l'applicazione coordinata delle migrazioni e il deploy. L'associazione dei dati esistenti non va eseguita automaticamente: richiederà una strategia esplicita di migrazione e verifica.
+
+
+### Integrazione di validazione — aggiornamento
+- Corretto il tipo numerico delle versioni nella Edge Function workspace admin.
+- Workflow aggiornato anche nei filtri `pull_request` per includere funzione e test amministrativi.
+- Commit correzione Edge Function: `177654c9d97325440bb61e3092d0ce610ee3a049`.
+- Commit workflow PR paths: `817260aaaef8ac87242b1b518625b00353b56556`.
+- Il connettore GitHub disponibile non ha restituito il run push della CI; esito test e `deno check` resta **NON VERIFICATO**. Nessuna dichiarazione di superamento.
