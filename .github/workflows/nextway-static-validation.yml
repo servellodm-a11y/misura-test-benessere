@@ -12,6 +12,7 @@ on:
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
+      - "scripts/test-nextway-edge-functions-security.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -42,6 +43,8 @@ jobs:
         run: node scripts/validate-nextway-audit.mjs
       - name: Validate conversion provisioning security contract
         run: node scripts/test-nextway-provisioning-security.mjs
+      - name: Validate Edge Functions security contracts
+        run: node scripts/test-nextway-edge-functions-security.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
