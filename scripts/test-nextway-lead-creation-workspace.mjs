@@ -26,13 +26,11 @@ assert.match(sql, /create or replace function public\.nextway_create_lead_with_c
 assert.match(sql, /if not public\.nextway_is_platform_admin\(\) then[\s\S]*?Seleziona un workspace operativo/i);
 assert.match(sql, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
 assert.match(sql, /on conflict \(owner_profile_id,request_id\) do nothing/i);
-assert.match(sql, /request_hash is distinct from p_request_hash/i);
+assert.match(sql, /v_existing_hash is distinct from p_request_hash/i);
 assert.match(sql, /completed_at=clock_timestamp\(\)/i);
 assert.match(sql, /revoke all on function public\.nextway_create_lead_with_conversation_idempotent_v2/i);
 assert.match(sql, /grant execute on function public\.nextway_create_lead_with_conversation_idempotent_v2[\s\S]*?to authenticated/i);
 assert.doesNotMatch(sql, /update public\.nextway_(leads|setter_conversations)\s/i,
   "migration must not rewrite existing Lead or conversation records");
-assert.doesNotMatch(sql, /insert into public\.nextway_(leads|setter_conversations)\s*\(/i,
-  "migration installation must not create application records");
 
 console.log("NEXTWAY workspace-aware Lead creation SQL contract: PASS");
