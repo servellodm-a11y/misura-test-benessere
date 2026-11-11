@@ -42,8 +42,11 @@ assert.match(sql, /nextway_setter_conversations_workspace_select/i);
 assert.match(sql, /nextway_setter_conversations_workspace_manage/i);
 assert.match(sql, /nextway_setter_conversations_workspace_scope/i);
 assert.match(sql, /nextway_setter_messages_workspace_select/i);
-assert.match(sql, /nextway_setter_messages_workspace_manage/i);
 assert.match(sql, /nextway_setter_messages_workspace_scope/i);
+assert.match(sql, /revoke all on table public\.nextway_setter_messages from authenticated/i);
+assert.match(sql, /grant select on table public\.nextway_setter_messages to authenticated/i);
+assert.doesNotMatch(sql, /create policy nextway_setter_messages_workspace_manage/i,
+  "workspace members must use secured RPCs to write Setter messages");
 assert.match(sql, /before insert or update of lead_id, owner_profile_id, workspace_id/i);
 assert.match(sql, /revoke all on public\.nextway_setter_generation_requests from public, anon, authenticated/i);
 assert.match(sql, /revoke all on function public\.nextway_begin_setter_generation\(uuid,uuid\) from public,anon,service_role/i);
