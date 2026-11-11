@@ -85,9 +85,11 @@ as $$
         and exists (
         select 1
         from public.nextway_workspace_memberships m
+        join public.nextway_workspaces w on w.id = m.workspace_id
         where m.workspace_id = p_workspace_id
           and m.user_id = auth.uid()
           and m.membership_status = 'active'
+          and w.status = 'active'
           and m.workspace_role = any(coalesce(p_allowed_roles, array[]::text[]))
         )
       )
