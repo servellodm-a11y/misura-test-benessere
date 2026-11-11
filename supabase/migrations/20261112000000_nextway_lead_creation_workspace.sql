@@ -290,15 +290,13 @@ revoke all on function public.nextway_create_lead_with_conversation(text,text,te
 revoke all on function public.nextway_create_lead_with_conversation_idempotent(uuid,text,text,text,text,text,text,text,text)
   from public,anon;
 revoke all on function public.nextway_create_lead_with_conversation_v2(uuid,text,text,text,text,text,text,text)
-  from public,anon;
+  from public,anon,authenticated,service_role;
 revoke all on function public.nextway_create_lead_with_conversation_idempotent_v2(uuid,text,uuid,text,text,text,text,text,text,text)
   from public,anon;
 
 grant execute on function public.nextway_create_lead_with_conversation(text,text,text,text,text,text,text)
   to authenticated;
 grant execute on function public.nextway_create_lead_with_conversation_idempotent(uuid,text,text,text,text,text,text,text,text)
-  to authenticated;
-grant execute on function public.nextway_create_lead_with_conversation_v2(uuid,text,text,text,text,text,text,text)
   to authenticated;
 grant execute on function public.nextway_create_lead_with_conversation_idempotent_v2(uuid,text,uuid,text,text,text,text,text,text,text)
   to authenticated;
