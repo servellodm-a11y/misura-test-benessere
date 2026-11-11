@@ -107,29 +107,6 @@ begin
     raise exception 'Identificativi generazione mancanti' using errcode='22023';
   end if;
 
-  select c.* into v_conversation
-  from public.nextway_setter_conversations c
-  where c.id=p_conversation_id
-  for update;
-
-  if not found then
-    raise exception 'Conversazione non trovata' using errcode='P0002';
-  end if;
-  if v_conversation.workspace_id is null then
-    if v_conversation.owner_profile_id is distinct from v_actor
-       and not public.nextway_is_platform_admin() then
-      raise exception 'Conversazione legacy non autorizzata' using errcode='42501';
-    end if;
-  elsif not public.nextway_has_workspace_access(
-    v_conversation.workspace_id,
-    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-  ) then
-    raise exception 'Membership workspace attiva richiesta' using errcode='42501';
-  end if;
-  if v_conversation.status in ('closed','archived') then
-    raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
-  end if;
-
   insert into public.nextway_setter_generation_requests
     (owner_profile_id,conversation_id,idempotency_key,status,claimed_at)
   values (v_actor,p_conversation_id,p_idempotency_key,'generating',v_now)
@@ -147,6 +124,29 @@ begin
   end if;
   if v_request.conversation_id is distinct from p_conversation_id then
     raise exception 'Chiave idempotenza già associata a un’altra conversazione' using errcode='22023';
+  end if;
+
+  -- Consistent lock order across all generation RPCs: request first, then conversation.
+  select c.* into v_conversation
+  from public.nextway_setter_conversations c
+  where c.id=p_conversation_id
+  for update;
+  if not found then
+    raise exception 'Conversazione non trovata' using errcode='P0002';
+  end if;
+  if v_conversation.workspace_id is null then
+    if v_conversation.owner_profile_id is distinct from v_actor
+       and not public.nextway_is_platform_admin() then
+      raise exception 'Conversazione legacy non autorizzata' using errcode='42501';
+    end if;
+  elsif not public.nextway_has_workspace_access(
+    v_conversation.workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership workspace attiva richiesta' using errcode='42501';
+  end if;
+  if v_conversation.status in ('closed','archived') then
+    raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
   end if;
 
   if v_request.status='completed' then
