@@ -1135,3 +1135,21 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Stato CI sul commit workflow: **IN ATTESA DI RISCONTRO**; non dichiarare superato finché GitHub Actions non mostra esito SUCCESS.
 - Nessuna modifica a Supabase live, nessuna conversione, nessun invito email, nessuna creazione account e nessuna operazione Netlify sono state eseguite in questa attività.
 - Prossimo passo: verificare l'esito GitHub Actions; se il nuovo controllo passa, proseguire con hardening e test isolati del backend senza introdurre record reali. Il test statico non sostituisce un test runtime con un account non-admin.
+
+
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (audit e correzione coerenza claim)
+
+- Audit statico della migrazione provisioning e della Edge Function completato sui file presenti in `main`.
+- Rilevata un'incoerenza: la finalizzazione impostava `activation_claim_token = null` ma lasciava valorizzato `activation_claimed_at`. Il record risultava `activated` conservando un timestamp del claim non più attivo.
+- Correzione predisposta con nuova migrazione additiva `supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql`:
+  - la constraint dello stato `activated` richiede ora anche `activation_claimed_at IS NULL`;
+  - la funzione `nextway_finalize_conversion_activation` azzera entrambi i campi del claim;
+  - nessuna conversione o account viene creato dalla migrazione.
+- Aggiunto al test statico `scripts/test-nextway-provisioning-security.mjs` un controllo che impedisce regressioni su questa invariante.
+- Commit migrazione: `d4c7ba429470717ede0b64989d7105d71db7bc40`.
+- Commit test statico: `7b06de90faf7f8cbcf8167f7d90d5542c90f20dc`.
+- La workflow esistente include già tutte le migrazioni SQL e lo script di test nei trigger; non è stato necessario modificarla.
+- **Stato installazione:** la nuova migrazione è soltanto su GitHub e NON è ancora applicata a Supabase. La vecchia migrazione già eseguita non viene modificata retroattivamente.
+- **Stato verifica:** audit statico eseguito; nuova CI da attendere. Nessun test runtime di conversione, nessun invito, nessun account creato, nessun deploy Netlify.
+- Vincolo invariato: nessuna operazione Netlify fino al 4 dicembre 2026.
+- Prossimo passo: verificare il nuovo run GitHub Actions; solo dopo esito positivo preparare l'applicazione controllata della nuova migrazione SQL su Supabase.
