@@ -7,6 +7,7 @@ on:
       - "nextway-cloud.js"
       - "nextway-setter.js"
       - "supabase/functions/nextway-ai-setter/**"
+      - "supabase/functions/nextway-conversion-provisioning/**"
       - "nextway-ai.html"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
@@ -42,3 +43,5 @@ jobs:
           deno-version: v2.x
       - name: Type-check AI Setter Edge Function
         run: deno check supabase/functions/nextway-ai-setter/index.ts
+      - name: Type-check conversion provisioning Edge Function
+        run: deno check supabase/functions/nextway-conversion-provisioning/index.ts
