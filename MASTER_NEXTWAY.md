@@ -1169,3 +1169,16 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - La nuova esecuzione CI è in attesa di completamento; non applicare ancora la migrazione a Supabase fino alla conferma del controllo.
 
 - CI aggiornata: GitHub Actions run #135 completato con **SUCCESS** sul commit `b8aeab779b280d4caa53f0d15576aabc8a4e6fef`; job `validate` e tutti gli step superati, incluso il contratto di sicurezza provisioning e i type-check Deno. Link: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030467392.
+
+
+### Rettifica tecnica — migrazione claim compatibile con trigger immutabilità (11 novembre 2026)
+
+- L'ulteriore verifica ha mostrato che la tabella conversioni protegge anche le righe già in stato `activated`: un UPDATE storico diretto potrebbe essere respinto dal trigger di transizione.
+- Per evitare qualsiasi bypass o disattivazione dei trigger, è stata rimossa dalla migrazione la normalizzazione UPDATE delle righe storiche.
+- La constraint mantiene per lo stato `activated` i requisiti già compatibili con i record esistenti (`activation_claim_token IS NULL`, `activated_at IS NOT NULL`), senza imporre retroattivamente `activation_claimed_at IS NULL`.
+- La funzione di finalizzazione aggiornata azzera comunque sia `activation_claim_token` sia `activation_claimed_at` per tutte le nuove attivazioni.
+- Il test statico ora controlla che la migrazione non tenti di riscrivere righe storiche attivate e che la funzione finale pulisca entrambi i campi.
+- Questa rettifica sostituisce la nota precedente sulla normalizzazione dei record storici: nessun aggiornamento storico viene eseguito.
+- Commit migrazione rettificata: `b2306e515d36f0b401c8961483432105e9cd29ad`.
+- Commit test rettificato: `f8ec2b3f5e75d17365ff04eebc5c8cb3ce6979e4`.
+- La CI per questi ultimi commit deve ancora essere verificata. La migrazione non è da applicare finché non viene confermato il nuovo esito.
