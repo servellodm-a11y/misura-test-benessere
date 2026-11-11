@@ -1,3 +1,59 @@
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (diagnostica CRM live e prerequisiti migrazioni)
+
+### Fonti e perimetro della verifica
+- Branch GitHub `main` letto direttamente; HEAD verificato: `34ff512f3fb6868db37b0a0d5e8e5c7ddf029eeb` (commit “Record successful workspace and storage live preflight”).
+- I file diagnostici CRM `supabase/diagnostics/nextway_crm_live_status_readonly.sql` e `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` risultano presenti nel branch `main`; contenuto recuperato da GitHub.
+- Non è disponibile nella sessione un connettore Supabase né Netlify. I risultati live qui sotto sono quelli restituiti dall'utente dopo l'esecuzione in Supabase SQL Editor; non sono un accesso diretto dell'assistente al progetto.
+- Questa attività ha modificato soltanto questo documento. Nessun codice applicativo, database, deploy, impostazione o segreto è stato modificato.
+
+### Diagnostica CRM live — risultato fornito dall'utente
+La query `nextway_crm_live_status_readonly.sql` è stata corretta dopo l'errore PostgreSQL `42P01`: il primo script interrogava `supabase_migrations.schema_migrations`, relazione non disponibile nel contesto SQL. La versione corretta non interroga più lo storico; verifica la disponibilità tramite `to_regclass` e restituisce lo stato delle tabelle/policy.
+
+Risultato JSON ricevuto:
+- `public.nextway_leads`: **presente**; RLS **attivo**; FORCE RLS **non attivo**.
+- Policy per ruolo `authenticated`: SELECT, INSERT, UPDATE e DELETE presenti. Le espressioni consentono il proprietario (`owner_profile_id = auth.uid()`) oppure un profilo con ruolo `platform_admin`. Per INSERT il controllo è in `WITH CHECK`; per UPDATE sono presenti sia `USING` sia `WITH CHECK`.
+- `public.nextway_lead_activities`: **assente** al momento della query.
+- `public.nextway_lead_conversion_requests`: **assente** al momento della query.
+- `supabase_migrations.schema_migrations`: non disponibile nel contesto verificato. Non è quindi possibile dedurre da questa diagnostica quali versioni di migrazione risultino registrate; l'assenza di tale tabella non dimostra da sola che una specifica migrazione sia stata o non sia stata applicata.
+- Il risultato è stato fornito dall'utente l'11 novembre 2026; non sono stati letti o modificati record applicativi.
+
+### File diagnostici e migrazioni correlate
+- Diagnostica live corretta: `supabase/diagnostics/nextway_crm_live_status_readonly.sql` — https://github.com/servellodm-a11y/misura-test-benessere/blob/main/supabase/diagnostics/nextway_crm_live_status_readonly.sql
+- Nuova diagnostica prerequisiti: `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` — https://github.com/servellodm-a11y/misura-test-benessere/blob/main/supabase/diagnostics/nextway_crm_prerequisites_readonly.sql. Restituisce un unico JSON su colonne di archiviazione, vincoli di stato, tabelle correlate (attività, conversioni, idempotenza) e firme delle RPC. **Non risulta ancora eseguita dall'utente** in questa sessione.
+- Revisione statica dei file SQL presenti nel repository:
+  - `20261110000800_nextway_leads_soft_archive.sql`: aggiunge `archived_at`, `archived_by`, `archive_reason`, vincolo, indici e trigger.
+  - `20261110001200_nextway_lead_activities.sql`: crea la tabella delle attività e le policy owner/admin.
+  - `20261110001300_nextway_lead_lifecycle.sql`: estende il vincolo degli stati Lead, incluso `In valutazione`.
+  - `20261110001400_nextway_lead_conversion_requests.sql`: crea le richieste di conversione; dipende dai campi di archiviazione e dallo stato `In valutazione`.
+  - `20261110001100_nextway_lead_creation_idempotency.sql`: crea la tabella e la RPC idempotente. Nella copia attualmente esaminata, il corpo della funzione `nextway_prune_lead_creation_requests()` usa il delimitatore singolo `as $` / `$;` anziché una coppia di delimitatori PostgreSQL validi `$$`; correggere e sottoporre a validazione statica prima di proporre l'applicazione.
+- Le assenze live delle tabelle attività e conversioni sono evidenze dirette; non provano da sole lo stato delle migrazioni 008, 011 o 013. Per questi prerequisiti occorre il risultato della nuova diagnostica.
+
+### Stato aggiornato
+- Lead core e policy owner/admin: **COMPLETATO E VERIFICATO** limitatamente a esistenza tabella, RLS e quattro policy restituite dalla query dell'utente.
+- FORCE RLS su `nextway_leads`: **NON ATTIVO**; non è stato classificato come difetto senza una specifica necessità architetturale.
+- Tabella attività Lead: **DA COMPLETARE** (assente nella verifica live).
+- Tabella richieste conversione: **DA COMPLETARE** (assente nella verifica live).
+- Colonne archive e vincolo degli stati live: **DA VERIFICARE** con la diagnostica prerequisiti.
+- Tabella idempotenza Lead e firma RPC sottostante: **DA VERIFICARE** con la diagnostica prerequisiti.
+- Migrazioni 008–014: **NON AUTORIZZATE ALL'APPLICAZIONE** finché non siano verificati prerequisiti, corretto il delimitatore della migrazione 011 e preparato un ordine controllato.
+- Deploy Netlify, deploy Edge Functions e test runtime PostgreSQL: **NON VERIFICATI**; nessuna attività di deploy eseguita.
+
+### CI e cronologia recente
+- La run GitHub Actions #229 (`43060090578`) è stata riletta: **SUCCESS**. Sono passati i controlli statici NEXTWAY, contratti di sicurezza delle Edge Functions e delle RPC, Knowledge Base, workspace/membership/RLS, Lead creation workspace-aware, AI Setter workspace selector, `node --check nextway-setter.js` e cinque `deno check` delle Edge Functions.
+- La run #222 (`43059792643`) era fallita perché un test statico richiedeva la policy `nextway_setter_messages_workspace_manage`, successivamente rimossa per mantenere la scrittura dei messaggi tramite RPC protetta. La correzione è stata verificata dalla run #229.
+- La CI resta una validazione statica e di type-check: non applica le migrazioni e non prova RLS o funzioni contro il database live. Il dettaglio della revisione workspace/storage e del preflight già eseguito resta nel registro cronologico più sotto.
+
+### Registro cronologico del MASTER
+- 11-11-2026 — aggiunti risultato della diagnostica CRM live fornito dall'utente, correzione dell'errore `42P01`, riferimenti ai due file diagnostici, dipendenze delle migrazioni 008–014, anomalia statica del delimitatore nella migrazione 011, stato dei componenti e prossimo passo. Aggiornamento esclusivamente documentale.
+
+### Prossimo passo operativo preciso
+1. Eseguire in Supabase SQL Editor `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e conservare il JSON completo.
+2. Sulla base del risultato, verificare campi `archived_*`, vincolo status, tabella `nextway_lead_creation_requests` e firma di `nextway_create_lead_with_conversation`.
+3. Correggere in un intervento separato la migrazione 011 e far passare la CI prima di qualsiasi applicazione.
+4. Solo dopo il preflight, preparare una sequenza di migrazioni dipendente dallo schema effettivo. Non applicare in blocco né presumere che la migrazione history sia disponibile.
+
+---
+
 # MASTER NEXTWAY
 
 ## AGGIORNAMENTO OPERATIVO — 10 NOVEMBRE 2026 (CRM conversioni assistite e stato validazione)
@@ -19,7 +75,7 @@
 - Prossimo passo: verificare deploy Netlify, login, RPC, endpoint AI Setter e salvataggio della bozza con una conversazione di test controllata. Non ripetere verifiche generiche di RLS già effettuate.
 
 
-Ultimo aggiornamento: 10 novembre 2026
+Ultimo aggiornamento: 11 novembre 2026
 Repository: https://github.com/servellodm-a11y/misura-test-benessere
 Branch di riferimento: main
 Scopo: punto unico di continuità del progetto. Questo documento distingue sempre ciò che è stato letto nel repository, ciò che è stato riferito nelle conversazioni e ciò che resta da verificare nell'ambiente operativo.
