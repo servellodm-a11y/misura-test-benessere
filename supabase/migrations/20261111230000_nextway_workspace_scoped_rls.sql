@@ -79,6 +79,13 @@ create index if not exists nextway_lead_audit_logs_workspace_created_idx
   on public.nextway_lead_audit_logs(workspace_id, created_at desc)
   where workspace_id is not null;
 
+-- Content deduplication must be workspace-local: identical source material
+-- may legitimately exist in two independent business workspaces.
+drop index if exists public.nextway_knowledge_documents_module_hash_uidx;
+create unique index if not exists nextway_knowledge_documents_workspace_module_hash_uidx
+  on public.nextway_knowledge_documents(workspace_id, module_key, content_sha256)
+  where workspace_id is not null and content_sha256 is not null;
+
 -- Keep audit data minimization: notes and public_evidence never enter snapshots.
 -- For a workspace transfer, the event remains attached to the previous workspace
 -- so the new workspace cannot inspect the previous workspace's before-state.
