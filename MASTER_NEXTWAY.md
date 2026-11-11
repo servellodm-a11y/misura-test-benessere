@@ -1414,3 +1414,54 @@ Sviluppo successivo della Knowledge Base (11 novembre 2026).
 3. Deploy della Edge Function e test autenticazione anonima senza creare record.
 4. Implementare approvazione amministrativa e gestione documenti.
 5. Successivamente upload Storage e parser PDF/DOCX.
+
+
+## UPLOAD DOCUMENTALE PDF / DOCX / TXT — V1 (11 NOVEMBRE 2026)
+
+### Componenti aggiunti
+- Edge Function `supabase/functions/nextway-knowledge-upload/index.ts`.
+- Migrazione candidata `supabase/migrations/20261111180000_nextway_knowledge_storage.sql`.
+- Test statico `scripts/test-nextway-knowledge-upload-security.mjs`.
+- Workflow CI aggiornato per test e type-check della nuova funzione.
+
+### Funzionamento previsto
+1. Solo `platform_admin` può invocare l'upload.
+2. Accetta PDF, DOCX e TXT fino a 12 MB.
+3. Estrae testo da PDF con `pdfjs-dist`, da DOCX con `mammoth`, da TXT con decoder UTF-8 rigoroso.
+4. Rifiuta file non riconosciuti, estrazioni vuote o contenuti oltre 500.000 caratteri.
+5. Carica il file originale in bucket privato `nextway-knowledge`, percorso `source-files/<module_key>/...`.
+6. Passa il testo al servizio di ingestione già implementato, che calcola SHA-256, deduplica e crea chunk in stato `pending`.
+7. Collega il percorso Storage al documento; in caso di errore tenta la pulizia compensativa.
+8. File duplicati non vengono caricati come nuove fonti permanenti.
+
+### Limiti espliciti V1
+- Solo lingua italiana.
+- PDF scansiti/immagini non sono elaborati: OCR non implementato.
+- Nessuna elaborazione di DOC, XLS/XLSX o PPT/PPTX.
+- Nessun frontend di amministrazione o pulsante di upload ancora realizzato.
+- L'upload originale è privato e leggibile solo da platform_admin tramite policy Storage; il service-role è usato solo server-side.
+- Migrazione Storage e migrazione base Knowledge Base restano candidate: non applicate a Supabase.
+- Edge Functions upload e ingest non deployate.
+- Nessun documento o file di test caricato; nessuna modifica a dati live.
+- CI aggiornata, ma esito dei nuovi test e del type-check Deno da verificare prima del deploy.
+
+### Commit principali
+- Upload Edge Function: `78cd94396d85ff51e2e509c85bdeb6eb328dde41`.
+- Storage migration: `6f09e85733db006422a91a01cf86cb695f3bffe8`.
+- Upload security test: `0040f722730c002c4364d4c10f1c07a4a652ae33`.
+- Workflow upload CI: `2676111788c03393f38328d17935d4a2b6ad022a`.
+- Ingest body-size alignment: `d2168e1acb4e3ad1854a64691f1a89ac3488224d`.
+- Ingest test alignment: `1fa93066fb9817354588663e286aa2dc388f49ae`.
+
+### Architettura multi-azienda — requisito permanente
+NEXTWAY resta indipendente dal partner aziendale. Il valore `module_key` separa la Knowledge Base e i contenuti di ciascun progetto. Prossimo sviluppo architetturale: registro `company/workspace profiles` configurabile, con identità aziendale, settore, mercati, prodotti/servizi, parametri di ricerca prospect, criteri di qualificazione, prompt e strategie AI versionati. I dati prospect, documenti, prompt e conversazioni dovranno essere sempre associati al workspace; nessuna commistione tra aziende. Il cambio di azienda dovrà essere una riconfigurazione amministrativa, senza modificare il core né cancellare lo storico. La multi-azienda non è ancora implementata: è requisito di progettazione da sviluppare.
+
+### Prossimi passaggi
+1. Ottenere esito CI e correggere eventuali errori di type-check o dipendenze.
+2. Revisione congiunta delle due migrazioni Knowledge Base/Storage e compatibilità con schema live.
+3. Solo dopo approvazione e backup, applicare le migrazioni e deployare le Edge Functions.
+4. Test di sicurezza senza creare documenti persistenti, poi upload di un documento reale solo con autorizzazione.
+5. Sviluppare console admin per upload, revisione, approvazione, rifiuto, sostituzione e scadenza documenti.
+6. Sviluppare configurazione multi-azienda/workspace e gestione versioni dei prompt e dei criteri prospect.
+
+Netlify resta escluso dagli interventi fino al 4 dicembre 2026.
