@@ -19,6 +19,8 @@ assert.match(sql, /nextway_workspace_memberships_self_read[\s\S]*?user_id = auth
 assert.match(sql, /create or replace function public\.nextway_has_workspace_access/i);
 assert.match(sql, /auth\.uid\(\) is not null[\s\S]*?public\.nextway_is_platform_admin\(\)[\s\S]*?p_workspace_id is not null/i,
   "platform admin must retain access even when workspace_id is null");
+assert.match(sql, /join public\.nextway_workspaces w on w\.id = m\.workspace_id/i);
+assert.match(sql, /w\.status = 'active'/i);
 assert.match(sql, /membership_status = 'active'/i);
 assert.match(sql, /workspace_role = any/i);
 assert.match(sql, /create or replace function public\.nextway_can_manage_workspace/i);
