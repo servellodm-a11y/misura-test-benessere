@@ -1273,3 +1273,20 @@ Validazione GitHub Actions #142: SUCCESS. Nessun'altra verifica SQL è richiesta
 Le due overload di `nextway_save_ai_analysis` restano entrambe presenti e invariate, in attesa di accertare eventuali consumer esterni prima di un'eventuale unificazione. Le differenze semantiche sono documentate nella sezione precedente.
 
 Vincolo operativo invariato: nessun intervento su Netlify fino al 4 dicembre 2026.
+
+
+## FASE BACKEND SUCCESSIVA — CONTRATTI STATICI EDGE FUNCTIONS (11 NOVEMBRE 2026)
+
+Dopo la chiusura dell'audit RPC/trigger, avviata la copertura automatica dei contratti di sicurezza delle Edge Functions AI Setter e Ricerca NEXTWAY.
+
+- Aggiunto `scripts/test-nextway-edge-functions-security.mjs`: verifica in CI l'ordine dei controlli di autenticazione e accesso, allowlist CORS, limiti del body, validazione UUID/obiettivi, rate limit fail-closed, letture tramite RLS, claim idempotente, staging e completamento, minimizzazione dei dati inviati ai provider, assenza di chiavi service-role nel codice e contratto bozza/non-invio.
+- Lo stesso test copre la Edge Function di ricerca: autenticazione, limite 1–5 query, lunghezza massima, rate limit per unità, timeout provider e gestione risultati parziali.
+- Workflow `.github/workflows/nextway-static-validation.yml` aggiornato per eseguire il nuovo test e attivarsi anche quando cambia il relativo script.
+- Commit test: `9381d3e0cc2dc79ed153cb429d35e6ef3c2a4e24`.
+- Commit workflow: `e3525ff976cb4f3def58ea0cbaff82c4af87276b`.
+- GitHub Actions #143: **IN CORSO** al momento dell'aggiornamento; non dichiarare superato finché il run non termina con SUCCESS.
+- Questa attività aggiunge test statici di regressione: non modifica le Edge Functions deployate, non applica migrazioni e non esegue chiamate reali a OpenAI/Tavily.
+- Nessun utente, cliente, partner, invito o conversione di prova creato. Nessuna modifica a Supabase live.
+- Vincolo Netlify invariato: nessun intervento fino al 4 dicembre 2026.
+
+**Chiarimento stato:** il test statico non sostituisce il collaudo runtime autenticato con due partner e un platform_admin, né il test frontend live. Questi restano subordinati alla disponibilità degli account reali e al ripristino autorizzato del deploy Netlify.
