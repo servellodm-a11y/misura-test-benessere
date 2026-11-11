@@ -81,6 +81,10 @@ create index if not exists nextway_lead_audit_logs_workspace_created_idx
 
 -- Content deduplication must be workspace-local: identical source material
 -- may legitimately exist in two independent business workspaces.
+create unique index if not exists nextway_knowledge_documents_global_module_hash_uidx
+  on public.nextway_knowledge_documents(module_key, content_sha256)
+  where workspace_id is null and content_sha256 is not null;
+
 drop index if exists public.nextway_knowledge_documents_module_hash_uidx;
 create unique index if not exists nextway_knowledge_documents_workspace_module_hash_uidx
   on public.nextway_knowledge_documents(workspace_id, module_key, content_sha256)
