@@ -26,6 +26,7 @@ on:
       - "scripts/test-nextway-workspace-memberships.mjs"
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
+      - "scripts/test-nextway-lead-creation-workspace.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -52,6 +53,7 @@ on:
       - "scripts/test-nextway-workspace-memberships.mjs"
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
+      - "scripts/test-nextway-lead-creation-workspace.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -93,6 +95,8 @@ jobs:
         run: node scripts/test-nextway-workspace-scoped-rls.mjs
       - name: Validate NEXTWAY AI Setter generation workspace contract
         run: node scripts/test-nextway-setter-generation-workspace.mjs
+      - name: Validate NEXTWAY workspace-aware Lead creation contract
+        run: node scripts/test-nextway-lead-creation-workspace.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
