@@ -51,6 +51,11 @@ begin
     if not v_service or new.activation_claim_token is null or new.activation_claimed_at is null then
       raise exception 'Claim provisioning non autorizzato.';
     end if;
+  elsif old.status = 'provisioning' and new.status = 'provisioning' then
+    if not v_service or old.activation_claimed_at > now() - interval '10 minutes'
+       or new.activation_claim_token is null then
+      raise exception 'Rinnovo claim provisioning non autorizzato.';
+    end if;
   elsif old.status = 'provisioning' and new.status = 'ready_for_activation' then
     if not v_service then raise exception 'Rilascio provisioning non autorizzato.'; end if;
   elsif old.status = 'provisioning' and new.status = 'activated' then
