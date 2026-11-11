@@ -1084,3 +1084,12 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Edge Function con recupero degli inviti creati dalla stessa richiesta: commit `2c7bc627fd0781c817eede12a5bcb50b906dd24d`.
 - CI conferma la validità statica e il type-check; non equivale a esecuzione SQL su Supabase, deploy della Edge Function o test runtime di invito.
 - Stato attuale: codice pronto per la fase di installazione controllata. Prima azione richiesta all'utente: applicare la migrazione `20261111001500_nextway_conversion_provisioning.sql` nel SQL Editor Supabase. Non creare ancora account reali.
+
+
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (secret Edge Function provisioning)
+
+- L'utente ha creato con successo in Supabase Edge Functions → Secrets il secret personalizzato `NEXTWAY_SERVICE_ROLE_KEY`, contenente il valore della chiave service_role del progetto. Il valore non è stato condiviso in chat né inserito nel repository.
+- Supabase ha rifiutato il prefisso riservato `SUPABASE_`; il codice è stato adeguato a leggere `NEXTWAY_SERVICE_ROLE_KEY` lato server.
+- Aggiornati: `supabase/functions/nextway-conversion-provisioning/index.ts`, README della funzione, `NEXTWAY-CLOUD-SETUP.md` e validatore statico. Commit: `49b26b23024300d7efb41ca3fc98093d681009f3`, `c9ad2d219815dc422d50ef869cbd3878b0797b5e`, `9280048a530717d2747fae5a15a47d39809b5ead`, `473c4d3a5b3200d4767f1855a1c90466c812a8e3`.
+- Il secret è stato salvato dall'utente; non è stata ancora pubblicata la Edge Function aggiornata. Occorre attendere/verificare GitHub Actions, poi pubblicare la funzione. Migrazione SQL provisioning riferita dall'utente come eseguita con esito positivo; il testo esatto dell'esito è stato confermato nella conversazione.
+- Nessuna attivazione partner/cliente è stata eseguita e nessun account reale è stato creato.
