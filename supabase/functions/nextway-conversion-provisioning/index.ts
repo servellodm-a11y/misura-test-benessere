@@ -20,7 +20,7 @@ function safeMessage(error: unknown) {
   return error instanceof Error ? error.message.slice(0, 300) : "Errore provisioning";
 }
 
-async function findExistingInvite(admin: ReturnType<typeof createClient>, email: string, requestId: string) {
+async function findExistingInvite(admin: any, email: string, requestId: string) {
   for (let page = 1; page <= 10; page++) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
     if (error) throw error;
