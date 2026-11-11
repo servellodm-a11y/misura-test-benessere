@@ -1878,3 +1878,22 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Commit migrazione: `d03f448880edb06301b7bdbef0d874c58414081f`.
 - Commit test: `1b6b0f0b53dfe94b300d3aa53dd05ce14956cee7`.
 - CI run #214: **SUCCESS** sul commit migrazione. Test SQL Setter workspace, grant RPC, test Lead creation, test UI, sintassi JS e cinque `deno check` superati.
+
+## REVISIONE COORDINATA MIGRAZIONI WORKSPACE — 11 NOVEMBRE 2026
+
+### Esito della revisione dei prerequisiti
+- Riesaminati direttamente su GitHub i file SQL della sequenza Knowledge Base, workspace, associazione dati, membership, RLS, AI Setter e creazione Lead.
+- Correzione documentale: la migrazione di associazione dati **esiste già** in `supabase/migrations/20261111210000_nextway_workspace_data_association.sql`; non va ricreata. Il controllo iniziale aveva semplicemente escluso quel file dalla prima estrazione.
+- La migrazione associa in modo nullable `workspace_id` a `nextway_leads`, `nextway_knowledge_documents` e, se presente, `nextway_setter_conversations`; usa FK `ON DELETE RESTRICT`, indici e commenti. Non effettua backfill, non modifica RLS e non crea record.
+- Attività e richieste di conversione ereditano il workspace dal Lead; messaggi e richieste di generazione Setter lo ereditano dalla conversazione. Non si duplica `workspace_id` su tali tabelle figlie.
+- La sequenza versionata è: Knowledge Base (`1700`), Storage (`1800`), workspace foundation (`1900`), activation RPC (`2000`), associazione dati (`2100`), membership (`2200`), RLS workspace (`2300`), Setter generation (`2400`), Lead creation (`120000`).
+- I preflight delle migrazioni RLS, Setter e Lead verificano le colonne/helper necessari e interrompono la transazione se mancano.
+- Il test statico `scripts/test-nextway-workspace-data-association.mjs` è stato esteso per controllare anche l'ordine e i prerequisiti tra le migrazioni; il workflow già esegue questo test.
+- La verifica è statica sul repository. Non equivale a un'applicazione PostgreSQL né a un controllo dello schema live.
+
+### Stato e decisione operativa
+- Tutte le migrazioni di questa sequenza restano **CANDIDATE / NON APPLICATE**.
+- Le Edge Functions workspace/Knowledge Base restano **NON DEPLOYATE**.
+- Netlify resta **NON MODIFICATO**; rispettare il blocco fino al 4 dicembre 2026.
+- Nessun workspace, membership, Lead, conversazione, documento o dato di prova è stato creato.
+- Prima dell'applicazione serve un unico preflight read-only aggregato sullo schema live, con particolare attenzione alle tabelle operative richieste dalla migrazione RLS e alla presenza di RLS attiva. Dopo il preflight si potrà preparare un piano di applicazione ordinato; non applicare automaticamente.
