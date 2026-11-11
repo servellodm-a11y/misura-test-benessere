@@ -90,6 +90,20 @@ Deno.serve(async (req) => {
       return respond({ success: true, workspaces: data ?? [] }, 200, origin);
     }
 
+    if (action === "list_prompts" || action === "list_criteria") {
+      if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
+        return respond({ error: "workspace_id non valido" }, 400, origin);
+      }
+      const table = action === "list_prompts" ? "nextway_workspace_prompts" : "nextway_workspace_prospect_criteria";
+      const columns = action === "list_prompts"
+        ? "id,workspace_id,prompt_key,version,purpose,prompt_body,status,approved_by,approved_at,created_at,updated_at"
+        : "id,workspace_id,criteria_key,version,name,description,config,status,approved_by,approved_at,created_at,updated_at";
+      const { data, error } = await admin.from(table).select(columns)
+        .eq("workspace_id", body.workspace_id).order("created_at", { ascending: false }).limit(500);
+      if (error) throw error;
+      return respond({ success: true, items: data ?? [] }, 200, origin);
+    }
+
     if (action === "create_workspace") {
       const key = body.workspace_key;
       if (typeof key !== "string" || !keyPattern.test(key) ||
