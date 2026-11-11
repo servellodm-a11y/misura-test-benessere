@@ -32,6 +32,8 @@ assert.match(sql, /v_after_full - 'notes' - 'public_evidence'/i);
 assert.match(sql, /v_before_full - 'notes' - 'public_evidence'/i);
 assert.match(sql, /nextway_search_knowledge\(text, text, text, integer\)[\s\S]*?from public, anon, authenticated, service_role/i);
 assert.match(sql, /nextway_search_knowledge\(uuid, text, text, text, integer\)/i);
+assert.match(sql, /drop index if exists public\.nextway_knowledge_documents_module_hash_uidx/i);
+assert.match(sql, /nextway_knowledge_documents_workspace_module_hash_uidx/i);
 assert.match(sql, /d\.workspace_id = p_workspace_id/i);
 assert.match(sql, /public\.nextway_has_workspace_access\(p_workspace_id\)/i);
 assert.doesNotMatch(sql, /update\s+public\.(nextway_leads|nextway_knowledge_documents|nextway_lead_audit_logs)/i,
