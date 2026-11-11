@@ -22,7 +22,7 @@ assert.match(source, /mammoth\.extractRawText/);
 assert.match(source, /new TextDecoder\("utf-8", \{ fatal: true \}\)/);
 assert.match(source, /nextway-knowledge/);
 assert.match(source, /functions\/v1\/nextway-knowledge-ingest/);
-assert.match(source, /approval_status/);
+assert.match(source, /ingestResult\.success/);
 assert.match(source, /storage_path: objectName/);
 assert.match(source, /ocr_required: false/);
 assert.match(source, /source-files\//);
