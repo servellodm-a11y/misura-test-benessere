@@ -546,32 +546,6 @@ create policy nextway_setter_messages_workspace_select
 
 drop policy if exists nextway_setter_messages_workspace_manage
   on public.nextway_setter_messages;
-create policy nextway_setter_messages_workspace_manage
-  on public.nextway_setter_messages
-  as permissive for all to authenticated
-  using (
-    exists (
-      select 1 from public.nextway_setter_conversations c
-      where c.id=nextway_setter_messages.conversation_id
-        and c.workspace_id is not null
-        and public.nextway_has_workspace_access(
-          c.workspace_id,
-          array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-        )
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.nextway_setter_conversations c
-      where c.id=nextway_setter_messages.conversation_id
-        and c.workspace_id is not null
-        and public.nextway_has_workspace_access(
-          c.workspace_id,
-          array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-        )
-    )
-  );
-
 drop policy if exists nextway_setter_messages_workspace_scope
   on public.nextway_setter_messages;
 create policy nextway_setter_messages_workspace_scope
