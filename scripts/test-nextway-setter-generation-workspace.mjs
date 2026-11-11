@@ -50,7 +50,7 @@ assert.match(sql, /revoke all on function public\.nextway_begin_setter_generatio
 assert.match(sql, /grant execute on function public\.nextway_begin_setter_generation\(uuid,uuid\) to authenticated/i);
 const setterRpcGrantLines = sql.split("\n").filter(line =>
   line.startsWith("grant execute on function public.nextway_")
-  && line.includes("_setter_generation")
+  && (line.includes("_setter_generation") || line.includes("get_staged_setter_output"))
 );
 assert.equal(setterRpcGrantLines.length, 4);
 assert.ok(setterRpcGrantLines.every(line => /to authenticated;$/.test(line)),
