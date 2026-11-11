@@ -14,6 +14,7 @@ on:
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
       - "scripts/test-nextway-idempotency-sql-security.mjs"
+      - "scripts/test-nextway-knowledge-base-sql.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -25,6 +26,7 @@ on:
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
+      - "scripts/test-nextway-knowledge-base-sql.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -48,6 +50,8 @@ jobs:
         run: node scripts/test-nextway-edge-functions-security.mjs
       - name: Validate rate limit and idempotency SQL security contracts
         run: node scripts/test-nextway-idempotency-sql-security.mjs
+      - name: Validate NEXTWAY Knowledge Base SQL contract
+        run: node scripts/test-nextway-knowledge-base-sql.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
