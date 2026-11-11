@@ -110,7 +110,7 @@ create or replace function public.nextway_guard_conversion_request_review()
 returns trigger
 language plpgsql
 set search_path = pg_catalog
-as $
+as $$
 begin
   if old.status <> 'pending' then
     raise exception 'La richiesta conversione è già stata revisionata.';
@@ -120,6 +120,9 @@ begin
   end if;
   if new.status not in ('ready_for_activation','rejected') or new.reviewed_at is null then
     raise exception 'Esito di revisione non valido.';
+  end if;
+  if new.status = 'rejected' and nullif(btrim(new.review_notes), '') is null then
+    raise exception 'La motivazione del rifiuto è obbligatoria.';
   end if;
   if new.id is distinct from old.id
     or new.lead_id is distinct from old.lead_id
@@ -135,7 +138,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists nextway_conversion_review_guard
   on public.nextway_lead_conversion_requests;
