@@ -5,6 +5,10 @@ const sql = readFileSync(
   new URL("../supabase/migrations/20261111190000_nextway_multi_workspace_foundation.sql", import.meta.url),
   "utf8",
 );
+const activation = readFileSync(
+  new URL("../supabase/migrations/20261111200000_nextway_workspace_activation_rpc.sql", import.meta.url),
+  "utf8",
+);
 
 for (const table of [
   "nextway_workspaces",
@@ -21,6 +25,10 @@ assert.match(sql, /settings jsonb not null default '\{\}'::jsonb/i);
 assert.match(sql, /unique \(workspace_id, prompt_key, version\)/i);
 assert.match(sql, /unique \(workspace_id, criteria_key, version\)/i);
 assert.match(sql, /where status = 'active'/i);
+assert.match(sql, /references public\.nextway_workspaces\(id\) on delete restrict/i);
+assert.doesNotMatch(sql, /references public\.nextway_workspaces\(id\) on delete cascade/i);
+assert.equal((activation.match(/v_workspace_status <> 'active'/g) || []).length, 2,
+  "prompt and criteria activation must require an active workspace");
 assert.match(sql, /approved_by is not null and approved_at is not null/i);
 assert.match(sql, /config jsonb not null default '\{\}'::jsonb/i);
 assert.match(sql, /grant select, insert, update, delete on public\.nextway_workspaces to authenticated, service_role/i);
