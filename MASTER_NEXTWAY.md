@@ -1028,7 +1028,7 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Aggiornato `scripts/validate-nextway-audit.mjs` con controlli statici per filtro stato, accesso alla nuova coda e distinzione tra approvazione e provisioning.
 - Commit frontend: `f9610df5de3a58ed2626d8354b94238f81e26303`.
 - Commit validatore: `0131284d52100fc6ecba10ead98f8da9307561bc`.
-- GitHub Actions run #114 e #115 avviati al momento dell'aggiornamento; esito da acquisire. Il run #113 precedente era **SUCCESS**.
+- GitHub Actions run #114: **FAILURE** nel validatore statico, perché il primo commit frontend ha cambiato la firma della funzione prima dell'aggiornamento delle asserzioni. Run #115, sul commit del validatore aggiornato: **SUCCESS**; la pipeline completa è passata, incluso il type-check Deno dell'AI Setter. Il run #113 precedente era **SUCCESS**.
 - Nessuna modifica a Supabase live, nessun deploy Netlify e nessuna creazione account eseguiti.
 
 ### Prossimo sviluppo
