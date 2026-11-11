@@ -78,16 +78,18 @@ set search_path = pg_catalog, public
 as $$
   select
     auth.uid() is not null
-    and p_workspace_id is not null
     and (
       public.nextway_is_platform_admin()
-      or exists (
+      or (
+        p_workspace_id is not null
+        and exists (
         select 1
         from public.nextway_workspace_memberships m
         where m.workspace_id = p_workspace_id
           and m.user_id = auth.uid()
           and m.membership_status = 'active'
           and m.workspace_role = any(coalesce(p_allowed_roles, array[]::text[]))
+        )
       )
     );
 $$;
