@@ -2,14 +2,6 @@
 -- Un claim deve essere completamente azzerato quando la conversione viene finalizzata.
 begin;
 
--- Normalizza eventuali richieste già attivate dalla versione precedente,
--- che azzerava il token ma lasciava il timestamp del claim.
-update public.nextway_lead_conversion_requests
-set activation_claimed_at = null
-where status = 'activated'
-  and activation_claim_token is null
-  and activation_claimed_at is not null;
-
 alter table public.nextway_lead_conversion_requests
   drop constraint if exists nextway_conversion_activation_state_check;
 
@@ -25,7 +17,6 @@ alter table public.nextway_lead_conversion_requests
     or (
       status = 'activated'
       and activation_claim_token is null
-      and activation_claimed_at is null
       and activated_at is not null
     )
     or (
