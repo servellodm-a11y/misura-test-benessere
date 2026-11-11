@@ -1902,3 +1902,14 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Verifica incrociata diretta dei sette file SQL: **13 controlli di dipendenza/prerequisito superati**. È una verifica testuale sul repository, non un test PostgreSQL.
 - Diagnostica read-only aggiunta con commit `391b97ddb28c10a7bc47d8a6c73fe8fa8c806af3`; alias SQL resi non ambigui nel commit `4c545160ea8c1931d84eafffcde0d4cf3c439bf8`.
 - Correzione diagnostica preflight: la prima esecuzione ha rilevato un riferimento non correlato ai CTE `checks` / `column_checks` / `function_checks` / `trigger_checks` nella SELECT finale (errore PostgreSQL 42P01). Sostituito con subquery scalari esplicite nel commit `e65948e9137da1447c669398293fc2e45ed9257f`. La query resta read-only; l'esecuzione precedente è fallita prima di produrre risultati e non ha modificato dati o schema.
+
+
+## Revisione pre-applicazione Knowledge Base — 11 novembre 2026
+- A seguito dell'avviso destructive operations di Supabase, la migrazione candidata `20261111170000_nextway_knowledge_base.sql` è stata riesaminata integralmente su GitHub.
+- La migrazione non contiene `DROP TABLE`, `TRUNCATE`, `DELETE` o `UPDATE` di record applicativi.
+- Contiene però `DROP POLICY IF EXISTS` per quattro nomi di policy specifici, `CREATE OR REPLACE FUNCTION public.nextway_search_knowledge(text,text,text,integer)`, modifiche a RLS e privilegi tramite `REVOKE`/`GRANT`. Questi elementi richiedono verifica sullo schema live prima dell'esecuzione.
+- Preparata diagnostica read-only aggregata: `supabase/diagnostics/nextway_knowledge_base_migration_review_readonly.sql`.
+- La diagnostica restituisce una singola cella JSONB: presenza/RLS delle due tabelle KB, colonne, policy e relative espressioni, definizioni/ACL della funzione di ricerca, indici e stima PostgreSQL delle righe (reltuples; stima, non conteggio esatto). Non legge contenuti documentali o chunk e non modifica schema, dati o privilegi.
+- La query è stata corretta per non fare riferimenti statici alle tabelle applicative potenzialmente assenti; usa metadata di catalogo e resta eseguibile anche se le tabelle KB non esistono ancora.
+- Commit diagnostica iniziale: `3c7203ab67d2321691ebf12f523c87dd2f7141f5`; hardening assenza tabelle: `5a5787778a4944b086f7463a2f2c8752e7e07754`.
+- Stato operativo: migrazione KB NON APPLICATA; attendere il risultato della diagnostica prima di autorizzare l'esecuzione. Nessun dato o schema Supabase modificato.
