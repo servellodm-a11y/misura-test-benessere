@@ -19,23 +19,15 @@ table_state as (
     on c.oid = to_regclass(format('public.%I', t.table_name))
 ),
 row_counts as (
-  select jsonb_object_agg(table_name, row_count) as counts
-  from (
-    select
-      t.table_name,
-      case
-        when to_regclass(format('public.%I', t.table_name)) is null then null
-        else (
-          case t.table_name
-            when 'nextway_knowledge_documents' then
-              (select count(*) from public.nextway_knowledge_documents)
-            when 'nextway_knowledge_chunks' then
-              (select count(*) from public.nextway_knowledge_chunks)
-          end
-        )
-      end as row_count
-    from target_tables t
-  ) s
+  -- reltuples is PostgreSQL's planner estimate, not an exact COUNT(*).
+  -- This avoids touching application rows and works when a target table is absent.
+  select coalesce(jsonb_object_agg(
+    t.table_name,
+    case when s.oid is null then null else greatest(s.reltuples, 0)::bigint end
+  ), '{}'::jsonb) as counts
+  from target_tables t
+  left join pg_class s
+    on s.oid = to_regclass(format('public.%I', t.table_name))
 ),
 relevant_policies as (
   select coalesce(jsonb_agg(jsonb_build_object(
