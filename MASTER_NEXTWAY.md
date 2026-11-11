@@ -1835,14 +1835,18 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - URL pubblico e campi obbligatori validati lato database; categorie e canali controllati.
 - Le nuove RPC sono SECURITY DEFINER con search_path fisso e EXECUTE concesso a authenticated; nessun accesso anonimo.
 
-### Integrazione frontend ancora da completare
-- `nextway-setter.js` attualmente chiama la vecchia RPC e non presenta un selettore workspace.
-- Il vecchio percorso resta utilizzabile soltanto da platform_admin per record legacy non assegnati.
-- Prima di abilitare i membri workspace, occorre aggiungere il selettore workspace nel Setter, mostrare solo workspace attivi accessibili all'utente e chiamare la RPC idempotente V2 includendo `workspace_id` nel payload/hash.
-- La creazione di workspace e l'amministrazione restano su API candidate non deployate.
+### Integrazione frontend aggiunta nel repository
+- `nextway-setter.js` ora presenta il selettore Workspace operativo e carica soltanto workspace con stato active visibili tramite RLS.
+- Se viene selezionato un workspace, il Setter invoca `nextway_create_lead_with_conversation_idempotent_v2` e inoltra `p_workspace_id`.
+- `workspace_id` è incluso nel payload persistito in sessionStorage e quindi nel calcolo SHA-256 della richiesta idempotente; i retry riprendono lo stesso workspace.
+- Se non viene selezionato un workspace, il Setter usa la vecchia RPC admin-only: il database rifiuta automaticamente questa modalità per gli utenti non platform_admin.
+- Aggiunta policy `nextway_workspaces_member_read`: ogni membro attivo può leggere soltanto workspace attivi a cui appartiene; la lista è filtrata ulteriormente dalle membership e dalla RLS.
+- Aggiunto test UI statico `scripts/test-nextway-setter-workspace-ui.mjs` e controllo sintassi `node --check nextway-setter.js` nel workflow.
+- La UI segnala che la creazione senza workspace è riservata a platform_admin. I ruoli viewer possono vedere i workspace ma non creare Lead né generare bozze: il database applica il divieto.
 
 ### Stato
-- Migrazione candidata NON applicata a Supabase.
-- Edge Functions non deployate; Netlify non modificato.
+- Migrazioni candidate NON applicate a Supabase.
+- Edge Functions non deployate; Netlify non modificato. La nuova UI è soltanto su GitHub e non è visibile sul sito live.
 - Nessun Lead, conversazione, membership o workspace di prova creato.
-- CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: **SUCCESS**. Test workspace-aware Lead creation, test AI Setter generation workspace e tutti i cinque `deno check` superati.
+- CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: **SUCCESS**. Test workspace-aware Lead creation, test AI Setter generation workspace e cinque `deno check` superati.
+- CI run #201 sul commit workflow `c82c012a412182517e1dc69a6c57393a13292cdb`: **SUCCESS**. Test UI workspace selector, test RPC workspace-aware, test AI Setter generation workspace, `node --check nextway-setter.js` e cinque `deno check` superati.
