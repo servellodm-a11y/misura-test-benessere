@@ -8,6 +8,7 @@ const membership = read("supabase/migrations/20261111220000_nextway_workspace_me
 const scopedRls = read("supabase/migrations/20261111230000_nextway_workspace_scoped_rls.sql");
 const setter = read("supabase/migrations/20261111240000_nextway_setter_generation_workspace.sql");
 const leadCreation = read("supabase/migrations/20261112000000_nextway_lead_creation_workspace.sql");
+const legacyIdempotency = read("supabase/migrations/20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql");
 const knowledge = read("supabase/migrations/20261111170000_nextway_knowledge_base.sql");
 
 for (const table of [
@@ -44,6 +45,7 @@ const ordered = [
   "20261111230000_nextway_workspace_scoped_rls.sql",
   "20261111240000_nextway_setter_generation_workspace.sql",
   "20261112000000_nextway_lead_creation_workspace.sql",
+  "20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql",
 ];
 assert.deepEqual(ordered, [...ordered].sort(), "workspace migrations must remain in dependency order");
 
@@ -56,5 +58,9 @@ assert.match(setter, /workspace association columns are missing/i);
 assert.match(setter, /nextway_has_workspace_access\(uuid,text\[\]\)/i);
 assert.match(leadCreation, /column_name='workspace_id'[\s\S]*?\)\s*then/i);
 assert.match(leadCreation, /nextway_has_workspace_access\(uuid,text\[\]\)/i);
+assert.match(legacyIdempotency, /v_existing_workspace_id is not null/i);
+assert.match(legacyIdempotency, /if not public\.nextway_is_platform_admin\(\) then/i);
+assert.equal((legacyIdempotency.match(/\$\$/g) || []).length % 2, 0,
+  "legacy idempotency migration dollar-quoted blocks must be balanced");
 
 console.log("NEXTWAY workspace data association and migration dependency contract: PASS");
