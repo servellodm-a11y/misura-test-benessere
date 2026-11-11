@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (!token || token === authorization) return response({ error: "Autenticazione richiesta" }, 401, origin);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceKey = Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY");
   const publicKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ??
     Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY");
   if (!supabaseUrl || !serviceKey || !publicKey) {
