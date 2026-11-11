@@ -23,15 +23,31 @@ begin
     if to_regclass(format('public.%I', v_table)) is null then
       raise exception 'Required NEXTWAY table public.% is missing; do not apply this migration.', v_table;
     end if;
+
+    if not exists (
+      select 1 from pg_class c
+      where c.oid = to_regclass(format('public.%I', v_table))
+        and c.relrowsecurity
+    ) then
+      raise exception 'RLS is not enabled on public.%; stop before applying workspace policies.', v_table;
+    end if;
   end loop;
 
   if not exists (
-    select 1 from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public'
-      and p.proname = 'nextway_has_workspace_access'
-      and pg_get_function_identity_arguments(p.oid) = 'p_workspace_id uuid, p_allowed_roles text[]'
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'nextway_leads'
+      and column_name = 'workspace_id'
+  ) or not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'nextway_knowledge_documents'
+      and column_name = 'workspace_id'
   ) then
+    raise exception 'workspace_id association columns are missing; apply the data association migration first.';
+  end if;
+
+  if to_regprocedure('public.nextway_has_workspace_access(uuid,text[])') is null then
     raise exception 'Workspace access helper is missing; apply the membership foundation first.';
   end if;
 end;
