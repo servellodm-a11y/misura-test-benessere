@@ -29,3 +29,23 @@ La password non viene salvata. URL e publishable key vengono salvati nel localSt
 
 ## Verifica di rilascio
 Il codice è stato salvato nel repository GitHub e la sintassi JavaScript delle tre pagine e del modulo condiviso è stata verificata. Questo non dimostra che Netlify abbia già pubblicato i file, né che la migrazione SQL o la Edge Function siano state eseguite su Supabase.
+
+## Provisioning conversioni Lead (partner / cliente)
+
+Il repository contiene ora il flusso server-side per attivare le richieste approvate:
+- migrazione additiva `supabase/migrations/20261111001500_nextway_conversion_provisioning.sql`;
+- Edge Function `supabase/functions/nextway-conversion-provisioning`;
+- pulsante amministrativo nella coda `ready_for_activation` di `nextway-cloud.js`.
+
+La funzione è riservata a `platform_admin`. Per un partner invia l'invito Supabase Auth e completa `profiles` + `partner_details`; per un cliente crea `clients` senza generare un account Auth. Entrambi i flussi aggiornano lo stato del Lead e marcano la richiesta come `activated`.
+
+### Attivazione tecnica ancora da eseguire
+1. Applicare nel SQL Editor la migrazione `20261111001500_nextway_conversion_provisioning.sql` dal repository.
+2. Configurare `SUPABASE_SERVICE_ROLE_KEY` nei secrets Edge Functions del progetto Supabase. Non inserirla nel browser, nel repository o in file condivisi.
+3. Pubblicare la Edge Function `nextway-conversion-provisioning`.
+4. Pubblicare il frontend tramite il normale deploy Netlify.
+5. Eseguire un test controllato con una richiesta cliente di prova e, separatamente, un invito partner autorizzato.
+
+Il flusso usa un claim temporaneo di 10 minuti, chiavi univoche di richiesta sulle tabelle `clients` e `partner_details`, e recupero degli inviti Auth già creati dalla stessa richiesta. Il campo `team_side` viene lasciato NULL: la scelta A/B resta assegnazione organizzativa successiva.
+
+**Stato al commit del codice:** implementato e sottoposto a validazione CI; non ancora applicato/pubblicato su Supabase o Netlify. Nessun account reale è stato creato.
