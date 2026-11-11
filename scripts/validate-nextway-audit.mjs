@@ -422,10 +422,9 @@ for (const signature of [
   "nextway_setter_touch()",
   "nextway_validate_setter_owner()"
 ]) {
-  const escaped = signature.replace(/[.*+?^${}()|[\]\\]/g, "\\console.log("NEXTWAY CRM conversion workflow: duplicate guard, owner/sponsor binding, admin review queue and no premature provisioning: PASS");");
-  assert.match(triggerPrivileges, new RegExp("revoke all on function public\\." + escaped + "\\s+from public, anon, authenticated", "i"), `Missing least-privilege revoke for ${signature}`);
+  const expected = "revoke all on function public." + signature + "\n  from public, anon, authenticated";
+  assert.ok(triggerPrivileges.toLowerCase().includes(expected.toLowerCase()), `Missing least-privilege revoke for ${signature}`);
 }
 assert.doesNotMatch(triggerPrivileges, /drop trigger|disable trigger|drop function/i);
 assert.doesNotMatch(triggerPrivileges, /nextway_save_ai_analysis|nextway_prune_lead_creation_requests|nextway_is_platform_admin/i);
 console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticated revoked; installed triggers retained: PASS");
-
