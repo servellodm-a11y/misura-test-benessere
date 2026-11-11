@@ -1150,6 +1150,9 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Commit test statico: `7b06de90faf7f8cbcf8167f7d90d5542c90f20dc`.
 - La workflow esistente include già tutte le migrazioni SQL e lo script di test nei trigger; non è stato necessario modificarla.
 - **Stato installazione:** la nuova migrazione è soltanto su GitHub e NON è ancora applicata a Supabase. La vecchia migrazione già eseguita non viene modificata retroattivamente.
-- **Stato verifica:** audit statico eseguito; nuova CI da attendere. Nessun test runtime di conversione, nessun invito, nessun account creato, nessun deploy Netlify.
+- **Stato verifica:** GitHub Actions run #132 sul commit migrazione e run #133 sul commit del test completati entrambi con **SUCCESS**. Il run #133 include validatore NEXTWAY, contratto sicurezza provisioning aggiornato e type-check delle Edge Function. È una verifica statica/di compilazione, non un'esecuzione SQL su Supabase. Nessun test runtime di conversione, nessun invito, nessun account creato, nessun deploy Netlify.
 - Vincolo invariato: nessuna operazione Netlify fino al 4 dicembre 2026.
 - Prossimo passo: verificare il nuovo run GitHub Actions; solo dopo esito positivo preparare l'applicazione controllata della nuova migrazione SQL su Supabase.
+
+- Run #132: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030253715 (SUCCESS).
+- Run #133: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030268058 (SUCCESS).
