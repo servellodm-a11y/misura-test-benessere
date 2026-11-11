@@ -88,8 +88,23 @@ function init(){
      reject.addEventListener('click',async()=>{const notes=prompt('Motivo del rifiuto (obbligatorio):','');if(notes===null)return;if(!notes.trim()){alert('Inserisci il motivo del rifiuto.');return;}if(!confirm('Confermi il rifiuto della richiesta?'))return;reject.disabled=true;try{await reviewLeadConversionRequest(req.id,'rejected',notes);await loadLeadConversionQueue('pending');}catch(err){status.textContent='Revisione non completata: '+err.message;reject.disabled=false;}});
      actions.append(ready,reject);item.append(actions);
     }else{
-     const state=document.createElement('p');state.className='nwmuted';state.textContent='Verificata da amministratore · pronta per il provisioning, che resta un passaggio separato.';item.append(state);
+     const state=document.createElement('p');state.className='nwmuted';state.textContent='Verificata da amministratore · pronta per l’attivazione.';item.append(state);
      if(req.review_notes){const note=document.createElement('p');note.className='nwmuted';note.textContent='Nota amministrativa: '+req.review_notes;item.append(note);}
+     const activate=document.createElement('button');activate.textContent=req.conversion_type==='partner'?'Invita e attiva partner':'Registra cliente';
+     activate.addEventListener('click',async()=>{
+      const action=req.conversion_type==='partner'?'creare l’account e inviare l’invito al partner':'registrare il cliente nell’archivio del proprietario';
+      if(!confirm('Confermi di '+action+'? L’operazione non è reversibile dalla coda conversioni.'))return;
+      activate.disabled=true;status.textContent='Attivazione in corso…';
+      try{
+       const {c}=await active();
+       const {data,error}=await c.functions.invoke('nextway-conversion-provisioning',{body:{request_id:req.id}});
+       if(error)throw error;
+       if(!data?.success)throw new Error(data?.error||'Attivazione non confermata.');
+       status.textContent=data.already_activated?'Richiesta già attivata.':'Attivazione completata.';
+       await loadLeadConversionQueue('ready_for_activation');
+      }catch(err){status.textContent='Attivazione non completata: '+err.message;activate.disabled=false;}
+     });
+     item.append(activate);
     }
     target.append(item);
    });
