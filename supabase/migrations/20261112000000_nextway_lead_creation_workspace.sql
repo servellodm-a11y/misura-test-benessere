@@ -42,7 +42,7 @@ begin
       foreign key (workspace_id) references public.nextway_workspaces(id) on delete restrict;
   end if;
 end;
-$;
+$$;
 
 -- Workspace members can discover only active workspaces they can access.
 drop policy if exists nextway_workspaces_member_read on public.nextway_workspaces;
