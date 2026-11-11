@@ -1731,4 +1731,11 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Restituisce colonne, FK/vincoli, stato RLS e policies, grants, trigger e definizioni effettive delle RPC di creazione Lead/generazione AI Setter.
 - Non legge record applicativi e non modifica schema, dati, policy o permessi.
 - Serve per completare senza supposizioni l'isolamento di conversazioni/messaggi e aggiornare in sicurezza le RPC SECURITY DEFINER.
-- Commit diagnostica: `COMMIT_DIAGNOSTIC_PENDING`.
+- Commit diagnostica: `4c8aad21e6374af303eee76eacd29429c55075d3`.
+
+
+### Esito CI ingestione workspace-bound — 11 novembre 2026
+- Run `43041366166`: **SUCCESS** sul commit test upload `5efd26548c954d65b436ac2dea35aae84888c820`.
+- Run `43041360377`: **SUCCESS** sul commit test ingest `e8fa002ff650aba58959f48cdab771d7ab4e63ef`.
+- Entrambi i run hanno superato i test statici KB/RLS/membership e i cinque `deno check`, inclusi Knowledge Ingest e Knowledge Upload.
+- Diagnostica Setter prerequisiti: commit `4c8aad21e6374af303eee76eacd29429c55075d3`.
