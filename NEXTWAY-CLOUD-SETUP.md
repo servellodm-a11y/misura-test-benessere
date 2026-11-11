@@ -41,7 +41,7 @@ La funzione è riservata a `platform_admin`. Per un partner invia l'invito Supab
 
 ### Attivazione tecnica ancora da eseguire
 1. Applicare nel SQL Editor la migrazione `20261111001500_nextway_conversion_provisioning.sql` dal repository.
-2. Configurare `SUPABASE_SERVICE_ROLE_KEY` nei secrets Edge Functions del progetto Supabase. Non inserirla nel browser, nel repository o in file condivisi.
+2. Configurare `NEXTWAY_SERVICE_ROLE_KEY` nei secrets Edge Functions del progetto Supabase. Non inserirla nel browser, nel repository o in file condivisi.
 3. Pubblicare la Edge Function `nextway-conversion-provisioning`.
 4. Pubblicare il frontend tramite il normale deploy Netlify.
 5. Eseguire un test controllato con una richiesta cliente di prova e, separatamente, un invito partner autorizzato.
