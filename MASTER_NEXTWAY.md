@@ -818,3 +818,61 @@ Il validatore statico controlla ora la presenza dei quattro ambiti RLS e l'assen
 - 10-11-2026: esaminati gli ultimi commit GitHub, i file di migrazione/API/UI/diagnostica/validatore/workflow e il run Actions #100.
 - 10-11-2026: aggiunta questa sezione; nessun codice applicativo, database o configurazione modificati.
 - 10-11-2026: dopo il commit `0ef734b4c55c8699449c11dfeaff4069e4c8f5a4`, il MASTER è stato recuperato nuovamente da GitHub; sezione 50, sezione 12 aggiornata, tabella stati e sezioni storiche 48–49 risultano presenti. Blob SHA verificato: `64150e29368f4397fb62147082b0f43a916a4cc1`.
+
+## 51. Ripristino validazione CI e correzione guardia conversione (11 novembre 2026)
+
+### Modifiche effettivamente eseguite nel repository
+
+- Corretta la funzione trigger public.nextway_guard_conversion_request_review() nella migrazione supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql: il corpo PL/pgSQL ora usa il delimitatore dollar-quoted valido $$ ... $$.
+- Aggiunto un controllo lato database: una richiesta portata allo stato rejected deve avere review_notes non nullo e non vuoto dopo btrim. Il controllo non dipende più soltanto dalla UI/client.
+- Aggiornato scripts/validate-nextway-audit.mjs affinché verifichi il codice effettivo attuale, senza aspettarsi vecchie espressioni o controlli spostati nel markup HTML.
+- Riallineati i controlli relativi a URL sorgente validati, ordinamento alfabetico, filtri qualificazione/profilo, API attività e follow-up, query dei follow-up aperti, markup dei pulsanti e contatori del funnel.
+- Nessuna modifica a nextway-ai.html, nextway-cloud.js, nextway-setter.js o alla Edge Function in questa sessione; sono stati aggiornati soltanto la migrazione 014 e il validatore.
+
+### Commit rilevanti dell'11 novembre
+
+- Migrazione SQL e guardia rifiuto: f498edecbab69359864b893f4f958c974e5f7d1d.
+- Riallineamento iniziale validatore: 7d0e2a90b73cc4856ae6f7b5445e79b251f34279.
+- Correzioni successive delle asserzioni obsolete del validatore: 2ad46d9c08111a4b82ef074431bf919d63df4424, a89e8886e14d96e0a200dd6f1749bf78e64413d8, 816f04092df8ac8e81be33200abba90839620395, 1ccd4d1eed3b84df3b3095e1a81d9d6b707fe3b2, 5b939730c84bbd5e727ad3410a6940784f67ff5d, 9813de3581ca4ebd760254350ffe98f5340c71b7, 38119691227cf411b424a108863faae7d1c17a85.
+- Ultimo commit verificato: 38119691227cf411b424a108863faae7d1c17a85.
+
+### Evidenze di validazione
+
+- GitHub Actions run #109: SUCCESS — https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/42970531105.
+- Step Validate NEXTWAY audit: success.
+- Step Type-check AI Setter Edge Function con Deno: success.
+- I run #101–#108 sono falliti durante il riallineamento, facendo emergere ulteriori asserzioni obsolete nel validatore. Il run #109, sul commit finale indicato sopra, ha superato entrambi gli step.
+- Questo risultato certifica i controlli statici Node e il type-check Deno; non equivale a test runtime del flusso conversione né a verifica della migrazione su Supabase live.
+
+### Stato aggiornato per componente
+
+| Componente | Stato aggiornato |
+|---|---|
+| Migrazione SQL 014: sintassi trigger e motivo obbligatorio del rifiuto | COMPLETATO E VERIFICATO mediante lettura del file aggiornato e validazione statica CI; non applicata su Supabase |
+| Validatore statico NEXTWAY | COMPLETATO E VERIFICATO dal run #109 |
+| Edge Function AI Setter: type-check Deno | COMPLETATO E VERIFICATO dal run #109; nessun test runtime |
+| RLS/policy conversion requests | ESEGUITO MA NON VERIFICATO su Supabase live |
+| UI/API conversione assistita | COMPLETATO E VERIFICATO come presenza e controlli statici nel repository; runtime non testato |
+| Migrazione 014 su progetto Supabase | DA COMPLETARE dopo revisione/applicazione controllata |
+| Test runtime di richiesta, revisione e rifiuto | DA COMPLETARE |
+| Attivazione effettiva cliente/partner | DA COMPLETARE; resta un processo separato e non viene creato automaticamente |
+| Deploy Supabase e Netlify | DA COMPLETARE; nessun deploy eseguito in questa sessione |
+
+### Fonti e limiti
+
+- Fonte primaria esaminata: branch main del repository servellodm-a11y/misura-test-benessere.
+- Esaminati la migrazione 014, il validatore, il workflow e i log del run #109.
+- La sessione non espone un connettore Supabase operativo: non sono stati letti schema, policy, grants, migrazioni applicate o record del progetto live.
+- Non sono stati eseguiti test browser/runtime, migrazioni, deploy o modifiche alle impostazioni.
+- Nessuna credenziale, chiave o token è stato inserito nel MASTER.
+
+### Prossimo passo operativo preciso
+
+Prima di applicare la migrazione 014, verificare con accesso read-only su Supabase lo stato reale delle migrazioni 008–014 e le policy/grants della tabella conversion requests; quindi pianificare l'applicazione controllata e i test con un account proprietario e un account platform_admin. Non procedere con attivazioni cliente/partner finché questa fase non è verificata.
+
+### Registro del MASTER
+
+- 11-11-2026: recuperata la versione corrente del MASTER dal branch main prima della modifica.
+- 11-11-2026: aggiunta la sezione 51 per registrare le correzioni effettive a migrazione/validatore e l'esito positivo del run #109.
+- 11-11-2026: nessun codice applicativo ulteriore, database live, impostazione o configurazione modificati durante l'aggiornamento documentale.
+- 11-11-2026: verifica post-salvataggio da eseguire recuperando nuovamente il file da GitHub.
