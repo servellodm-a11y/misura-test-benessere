@@ -1600,3 +1600,28 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Commit workflow con path push e pull request: `90330a885e09d82469a0cd85ceee911f167e36f4`.
 - Commit allineamento test Knowledge Base: `b561e807b0385da3e910ebfd7dc775a2a0454989`.
 - La CI valida sorgenti e contratti statici: non prova l'applicazione delle migrazioni a Supabase né l'isolamento runtime workspace.
+
+
+## MEMBERSHIP E AUTORIZZAZIONI WORKSPACE — FONDAZIONE V1 (11 NOVEMBRE 2026)
+
+### Componenti aggiunti
+- Migrazione candidata `supabase/migrations/20261111220000_nextway_workspace_memberships.sql`.
+- Tabella `nextway_workspace_memberships`: associa utente Auth e workspace con ruolo e stato.
+- Ruoli workspace previsti: `workspace_owner`, `workspace_admin`, `workspace_manager`, `workspace_member`, `workspace_viewer`.
+- Stati: `invited`, `active`, `suspended`; l'attivazione richiede timestamp.
+- Unicità per coppia workspace/utente e indice per impedire più owner invitati/attivi sullo stesso workspace.
+- RLS: gestione completa riservata a `platform_admin`; ogni utente autenticato può leggere soltanto le proprie righe membership.
+- Helper SQL `nextway_has_workspace_access(uuid,text[])` e `nextway_can_manage_workspace(uuid)`, SECURITY DEFINER con search_path fisso, controllo dell'utente autenticato e membership attiva; `platform_admin` conserva accesso centrale.
+- Test statico `scripts/test-nextway-workspace-memberships.mjs`; workflow CI aggiornato per push e pull request.
+
+### Limiti e sicurezza
+- Nessuna membership viene creata automaticamente.
+- Nessun workspace viene seedato e nessun utente/partner viene creato.
+- La migrazione non modifica ancora le policy operative di Lead, Knowledge Base, conversazioni o attività. Non dichiarare isolamento workspace operativo.
+- L'assegnazione delle membership è attualmente amministrativa; le azioni API dedicate per invitare/attivare/sospendere utenti saranno aggiunte dopo la definizione del flusso di invito Auth.
+- Migrazione candidata, NON applicata a Supabase. Nessun deploy Edge Function e nessun intervento Netlify.
+
+### Commit
+- Migrazione membership: `56abf0e38f68c55bf706113c42852ec8b4138a88`.
+- Test membership: `1188f3492a440a3d3ea585240b40a536502e668e`.
+- Workflow CI: commit generato dall'integrazione del test; esito da verificare.
