@@ -29,7 +29,7 @@ create index if not exists nextway_workspaces_status_idx
 
 create table if not exists public.nextway_workspace_prompts (
   id uuid primary key default gen_random_uuid(),
-  workspace_id uuid not null references public.nextway_workspaces(id) on delete cascade,
+  workspace_id uuid not null references public.nextway_workspaces(id) on delete restrict,
   prompt_key text not null check (prompt_key ~ '^[a-z0-9][a-z0-9_-]{1,79}$'),
   version integer not null check (version > 0),
   purpose text not null check (length(btrim(purpose)) between 2 and 240),
@@ -55,7 +55,7 @@ create index if not exists nextway_workspace_prompts_lookup_idx
 
 create table if not exists public.nextway_workspace_prospect_criteria (
   id uuid primary key default gen_random_uuid(),
-  workspace_id uuid not null references public.nextway_workspaces(id) on delete cascade,
+  workspace_id uuid not null references public.nextway_workspaces(id) on delete restrict,
   criteria_key text not null check (criteria_key ~ '^[a-z0-9][a-z0-9_-]{1,79}$'),
   version integer not null check (version > 0),
   name text not null check (length(btrim(name)) between 2 and 160),
