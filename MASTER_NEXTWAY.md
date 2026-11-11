@@ -1376,3 +1376,41 @@ Avviata la prima implementazione funzionale del motore documentale NEXTWAY AI, s
 - Prima di applicare la migrazione: revisione mirata della compatibilità con lo schema live e delle dipendenze (in particolare `nextway_is_platform_admin()` e disponibilità della configurazione PostgreSQL `italian`), quindi applicazione controllata.
 - Il caricamento file/estrazione testo e la console amministrativa non sono ancora implementati. Questa migrazione fornisce registro, chunk e retrieval testuale, non una pipeline di ingestione completa.
 - Nessun intervento su Netlify fino al 4 dicembre 2026.
+
+
+## INGESTIONE DOCUMENTALE NEXTWAY — EDGE FUNCTION V1
+
+Sviluppo successivo della Knowledge Base (11 novembre 2026).
+
+### Componente realizzata
+- Edge Function `supabase/functions/nextway-knowledge-ingest/index.ts`.
+- Endpoint riservato a `platform_admin`: valida sessione Auth e ruolo sul database prima di usare il client service-role lato server.
+- Riceve testo estratto e metadati in JSON; limite richiesta 600 KB e contenuto 500.000 caratteri.
+- Normalizza il testo, lo suddivide in chunk da circa 9.000 caratteri con sovrapposizione di 500, calcola SHA-256 e salva documento + chunk.
+- Nuovi documenti sempre `pending`; l'endpoint non può approvare o pubblicare contenuti.
+- Deduplicazione per modulo + hash, con indice univoco nel candidato SQL e gestione del conflitto concorrente.
+- In caso di errore nell'inserimento dei chunk, tenta la rimozione compensativa del documento per non lasciare una voce incompleta.
+- Prima versione limitata esplicitamente alla lingua italiana, coerente con la configurazione PostgreSQL `italian` della ricerca full-text.
+- Nessun file viene ancora caricato su Storage e nessun PDF/DOCX viene estratto automaticamente: questa funzione riceve testo già estratto. Parser e upload file restano sviluppo successivo.
+
+### Test e CI
+- `scripts/test-nextway-knowledge-ingest-security.mjs` aggiunto.
+- Workflow `nextway-static-validation.yml` aggiornato: test statico e `deno check` della nuova Edge Function; inclusa anche nei path di pull request.
+- Commit Edge Function: `20b6e907f1ef1a29abbe9a4225fb259ec87026e3`.
+- Commit test: `1b7bedee5f5a977b102fd3ecd9bf4b1b4bed6938`.
+- Commit workflow: `6a74a6d2fba3af470aa31e829ab37c69737097df`.
+- Migrazione Knowledge Base aggiornata con indice univoco modulo/hash e vincolo lingua italiana: `b00b1b69613ca4a0adda7dc55e74895f2e51642b`.
+
+### Stato operativo
+- Codice e workflow sono su GitHub `main`.
+- La migrazione Knowledge Base resta candidata e NON è applicata a Supabase.
+- Edge Function NON deployata: richiede prima schema live disponibile.
+- Esito CI del commit più recente non ancora verificato; non dichiarare type-check superato fino a risultato GitHub Actions.
+- Nessun dato inserito, nessuna funzione live modificata, nessun intervento Netlify (bloccato fino al 4 dicembre 2026).
+
+### Sequenza successiva
+1. Attendere/esaminare CI.
+2. Rivedere e applicare la migrazione candidata in modo controllato.
+3. Deploy della Edge Function e test autenticazione anonima senza creare record.
+4. Implementare approvazione amministrativa e gestione documenti.
+5. Successivamente upload Storage e parser PDF/DOCX.
