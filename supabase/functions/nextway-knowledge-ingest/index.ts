@@ -110,6 +110,10 @@ Deno.serve(async (req) => {
     return respond({ error: "JSON non valido" }, 400, origin);
   }
 
+  const workspaceId = body.workspace_id;
+  if (typeof workspaceId !== "string" || !uuidPattern.test(workspaceId)) {
+    return respond({ error: "workspace_id obbligatorio e non valido" }, 400, origin);
+  }
   const moduleKey = body.module_key;
   const title = body.title;
   const sourceType = body.source_type;
@@ -162,11 +166,22 @@ Deno.serve(async (req) => {
       return respond({ error: "Operazione riservata a platform_admin" }, 403, origin);
     }
 
+    const { data: workspace, error: workspaceError } = await admin
+      .from("nextway_workspaces")
+      .select("id, status")
+      .eq("id", workspaceId)
+      .maybeSingle();
+    if (workspaceError) throw workspaceError;
+    if (!workspace || workspace.status === "archived") {
+      return respond({ error: "Workspace non trovato o archiviato" }, 404, origin);
+    }
+
     const normalizedContent = content.replace(/\r\n?/g, "\n").trim();
     const hash = await sha256(normalizedContent);
     const { data: existing, error: existingError } = await admin
       .from("nextway_knowledge_documents")
       .select("id, title, approval_status")
+      .eq("workspace_id", workspaceId)
       .eq("module_key", moduleKey)
       .eq("content_sha256", hash)
       .maybeSingle();
@@ -184,6 +199,7 @@ Deno.serve(async (req) => {
     const { data: document, error: insertError } = await admin
       .from("nextway_knowledge_documents")
       .insert({
+        workspace_id: workspaceId,
         module_key: moduleKey, title: title.trim(), source_type: sourceType,
         source_reference: sourceReference, language_code: languageCode,
         version_label: versionLabel, valid_from: validFrom, valid_until: validUntil,
