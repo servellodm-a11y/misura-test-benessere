@@ -159,10 +159,10 @@ select jsonb_build_object(
   'diagnostic', 'NEXTWAY workspace migration preflight',
   'read_only', true,
   'base_schema_ready',
-    checks.tables_ready
-    and column_checks.columns_ready
-    and function_checks.functions_ready
-    and trigger_checks.triggers_ready
+    (select tables_ready from checks)
+    and (select columns_ready from column_checks)
+    and (select functions_ready from function_checks)
+    and (select triggers_ready from trigger_checks)
     and exists (
       select 1 from public.profiles p where p.role = 'platform_admin'
     )
