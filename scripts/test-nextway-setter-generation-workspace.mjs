@@ -46,6 +46,10 @@ assert.match(sql, /nextway_setter_messages_workspace_manage/i);
 assert.match(sql, /nextway_setter_messages_workspace_scope/i);
 assert.match(sql, /before insert or update of lead_id, owner_profile_id, workspace_id/i);
 assert.match(sql, /revoke all on public\.nextway_setter_generation_requests from public, anon, authenticated/i);
+assert.match(sql, /revoke all on function public\.nextway_begin_setter_generation\(uuid,uuid\) from public,anon,service_role/i);
+assert.match(sql, /grant execute on function public\.nextway_begin_setter_generation\(uuid,uuid\) to authenticated/i);
+assert.doesNotMatch(sql, /grant execute on function public\.nextway_(begin|store|get|complete)_setter_generation[\s\S]*?service_role/i,
+  "Setter generation RPCs must not be callable with the service role");
 assert.doesNotMatch(sql, /alter table public\.nextway_setter_messages\s+add column\s+workspace_id/i,
   "messages must inherit workspace through conversation; do not duplicate workspace_id");
 assert.doesNotMatch(sql, /insert into public\.nextway_(leads|setter_conversations)\s*\(/i,
