@@ -1679,3 +1679,11 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Superati tutti i cinque `deno check` delle Edge Functions incluse nel workflow.
 - La CI verifica i contratti statici; non esegue la migrazione SQL su Supabase e non costituisce test RLS runtime.
 - Commit aggiornamento MASTER precedente: `3c873682a7d6eea7c4ac1ec39278035802447476`.
+
+
+### Rafforzamento preflight migrazione RLS — 11 novembre 2026
+- La migrazione ora interrompe l'esecuzione se manca una tabella richiesta, se RLS non è attiva su una tabella target, se mancano le colonne workspace necessarie o se la RPC helper non esiste con la firma esatta.
+- Evitato un controllo fragile basato sulla rappresentazione testuale degli argomenti PostgreSQL; il preflight usa `to_regprocedure('public.nextway_has_workspace_access(uuid,text[])')`.
+- Nessun backfill o aggiornamento di righe applicative.
+- Commit preflight migrazione: `d0afd2291892185d421f866cc02c6a237401ac3e`.
+- Commit test preflight: `d1d57cfbf9bc4c626ec335c3c20231da0c485373`.
