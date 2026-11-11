@@ -1192,3 +1192,15 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - GitHub Actions run #139: **SUCCESS**, job `validate` completato; controlli audit, sicurezza provisioning e type-check Deno superati.
 - Link CI: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43030744978.
 - Migrazione definitiva presente su `main`, non ancora applicata a Supabase. Netlify resta fuori dal flusso fino al 4 dicembre.
+
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (migrazione claim cleanup applicata e verificata su Supabase)
+
+- L'utente ha applicato nel SQL Editor del progetto Supabase `nextway-platform` (ref `obqwbtlltxjfeirstsya`) la migrazione `supabase/migrations/20261111150000_nextway_conversion_claim_cleanup.sql`.
+- Esito restituito da Supabase: `Success. No rows returned`.
+- Eseguita successivamente una query read-only che ha restituito la definizione di `public.nextway_finalize_conversion_activation(uuid,uuid,uuid)` e la constraint `nextway_conversion_activation_state_check`.
+- Verificato nel testo live della funzione che la finalizzazione imposta entrambi i campi a NULL: `activation_claim_token=null` e `activation_claimed_at=null`.
+- Verificata la constraint live: per lo stato `activated` richiede `activation_claim_token IS NULL` e `activated_at IS NOT NULL`; non impone `activation_claimed_at IS NULL` sui record storici, per evitare incompatibilità retroattive con righe protette dal trigger. Le nuove finalizzazioni puliscono comunque entrambi i campi.
+- **Esito:** migrazione installata e verifica SQL read-only superata. Nessun record storico è stato riscritto; nessuna conversione, invito, account, profilo partner o cliente è stato creato.
+- Distinzione importante: la verifica riguarda la funzione SQL e il vincolo nel database; non costituisce un test runtime di provisioning partner/cliente o dell'invio email.
+- Vincolo invariato: Netlify non va toccato né deployato fino al 4 dicembre 2026.
+- Prossimo lavoro: proseguire l'audit statico di idempotenza, gestione degli errori e coerenza tra provisioning Edge Function e funzioni SQL; mantenere nessuna creazione di dati reali durante i test.
