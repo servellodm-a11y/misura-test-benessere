@@ -12,7 +12,6 @@ on:
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "nextway-ai.html"
       - "supabase/migrations/**"
-      - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
