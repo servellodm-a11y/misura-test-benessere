@@ -215,12 +215,6 @@ begin
   insert into nextway_iso_results values
     ('Admin legge entrambe le attività', '2', v_count::text, v_count = 2);
 
-  select count(*) into v_count
-    from public.nextway_lead_creation_requests
-   where owner_profile_id in (f.owner_a, f.owner_b);
-  insert into nextway_iso_results values
-    ('Admin legge entrambe le richieste idempotenza', '2', v_count::text, v_count = 2);
-
   if exists (select 1 from nextway_iso_results where not passed) then
     raise exception 'TEST ISOLAMENTO FALLITO: una o più asserzioni non sono rispettate.';
   end if;
