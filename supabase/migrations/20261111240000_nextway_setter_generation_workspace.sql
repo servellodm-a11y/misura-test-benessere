@@ -98,6 +98,7 @@ declare
   v_conversation public.nextway_setter_conversations%rowtype;
   v_request public.nextway_setter_generation_requests%rowtype;
   v_now timestamptz := clock_timestamp();
+  v_inserted boolean := false;
 begin
   if v_actor is null then
     raise exception 'Autenticazione richiesta' using errcode='28000';
@@ -131,7 +132,8 @@ begin
   insert into public.nextway_setter_generation_requests
     (owner_profile_id,conversation_id,idempotency_key,status,claimed_at)
   values (v_actor,p_conversation_id,p_idempotency_key,'generating',v_now)
-  on conflict (owner_profile_id,idempotency_key) do nothing;
+  on conflict (owner_profile_id,idempotency_key) do nothing
+  returning true into v_inserted;
 
   select r.* into v_request
   from public.nextway_setter_generation_requests r
@@ -148,6 +150,11 @@ begin
 
   if v_request.status='completed' then
     return query select false,true,v_request.cached_response,0;
+    return;
+  end if;
+
+  if coalesce(v_inserted,false) then
+    return query select true,false,null::jsonb,0;
     return;
   end if;
 
@@ -184,7 +191,7 @@ begin
   if v_actor is null then
     raise exception 'Autenticazione richiesta' using errcode='28000';
   end if;
-  if p_idempotency_key is null or jsonb_typeof(p_generated_output)<>'object' then
+  if p_idempotency_key is null or jsonb_typeof(p_generated_output) is distinct from 'object' then
     raise exception 'Output generato non valido' using errcode='22023';
   end if;
 
@@ -408,6 +415,99 @@ grant execute on function public.nextway_get_staged_setter_output(uuid) to authe
 grant execute on function public.nextway_complete_setter_generation(uuid,text,text,text,text,text) to authenticated,service_role;
 
 revoke all on function public.nextway_validate_setter_owner() from public,anon,authenticated;
+
+-- The message table inherits workspace access through its parent conversation.
+drop policy if exists nextway_setter_conversations_workspace_select
+  on public.nextway_setter_conversations;
+create policy nextway_setter_conversations_workspace_select
+  on public.nextway_setter_conversations
+  as permissive for select to authenticated
+  using (
+    workspace_id is not null
+    and public.nextway_has_workspace_access(
+      workspace_id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
+    )
+  );
+
+drop policy if exists nextway_setter_conversations_workspace_scope
+  on public.nextway_setter_conversations;
+create policy nextway_setter_conversations_workspace_scope
+  on public.nextway_setter_conversations
+  as restrictive for all to authenticated
+  using (
+    workspace_id is null
+    or public.nextway_has_workspace_access(
+      workspace_id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+    )
+  )
+  with check (
+    workspace_id is null
+    or public.nextway_has_workspace_access(
+      workspace_id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+    )
+  );
+
+drop policy if exists nextway_setter_messages_workspace_select
+  on public.nextway_setter_messages;
+create policy nextway_setter_messages_workspace_select
+  on public.nextway_setter_messages
+  as permissive for select to authenticated
+  using (
+    exists (
+      select 1
+      from public.nextway_setter_conversations c
+      where c.id=nextway_setter_messages.conversation_id
+        and c.workspace_id is not null
+        and public.nextway_has_workspace_access(
+          c.workspace_id,
+          array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
+        )
+    )
+  );
+
+drop policy if exists nextway_setter_messages_workspace_scope
+  on public.nextway_setter_messages;
+create policy nextway_setter_messages_workspace_scope
+  on public.nextway_setter_messages
+  as restrictive for all to authenticated
+  using (
+    exists (
+      select 1
+      from public.nextway_setter_conversations c
+      where c.id=nextway_setter_messages.conversation_id
+        and (
+          c.workspace_id is null
+          or public.nextway_has_workspace_access(
+            c.workspace_id,
+            array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+          )
+        )
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.nextway_setter_conversations c
+      where c.id=nextway_setter_messages.conversation_id
+        and (
+          c.workspace_id is null
+          or public.nextway_has_workspace_access(
+            c.workspace_id,
+            array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+          )
+        )
+    )
+  );
+
+drop trigger if exists nextway_validate_setter_owner_trigger
+  on public.nextway_setter_conversations;
+create trigger nextway_validate_setter_owner_trigger
+  before insert or update of lead_id, owner_profile_id, workspace_id
+  on public.nextway_setter_conversations
+  for each row execute function public.nextway_validate_setter_owner();
 
 comment on function public.nextway_begin_setter_generation(uuid,uuid) is
   'Atomic AI Setter idempotency claim; validates authenticated actor and active workspace membership before generation.';
