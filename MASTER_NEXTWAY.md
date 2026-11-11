@@ -1465,3 +1465,33 @@ NEXTWAY resta indipendente dal partner aziendale. Il valore `module_key` separa 
 6. Sviluppare configurazione multi-azienda/workspace e gestione versioni dei prompt e dei criteri prospect.
 
 Netlify resta escluso dagli interventi fino al 4 dicembre 2026.
+
+
+## FONDAZIONE MULTI-WORKSPACE — REGISTRO AZIENDE E CONFIGURAZIONI (11 NOVEMBRE 2026)
+
+Avviata l'implementazione della struttura multi-azienda, senza alterare le tabelle operative esistenti.
+
+### Componenti aggiunti su GitHub
+- Migrazione candidata `supabase/migrations/20261111190000_nextway_multi_workspace_foundation.sql`.
+- Tabella `nextway_workspaces`: identità aziendale, partner/brand, settore, descrizione, sito, mercato, lingua, stato e impostazioni JSON strutturate.
+- Tabella `nextway_workspace_prompts`: prompt per finalità, versioni immutabili per chiave e stato draft/active/archived.
+- Tabella `nextway_workspace_prospect_criteria`: criteri di ricerca e qualificazione versionati, con configurazione JSON.
+- Per prompt e criteri è consentita una sola versione active per workspace e chiave; l'attivazione richiede approvatore e timestamp.
+- RLS abilitata sulle tre tabelle; CRUD riservato al ruolo `platform_admin`. Nessun accesso anonimo.
+- Nessun workspace viene precaricato. Nessuna tabella lead, CRM o Knowledge Base viene modificata in questa migrazione.
+
+### Validazione
+- Aggiunto `scripts/test-nextway-multi-workspace-sql.mjs` per verificare struttura, versionamento, RLS, privilegi e assenza di seed/modifiche alle tabelle operative.
+- Workflow `.github/workflows/nextway-static-validation.yml` aggiornato per eseguire il test.
+- Commit migrazione: `d1acf53f1070de87e0e38a46615bb4f4f248e3d7`.
+- Commit test: `a5ec741ebae6a83c36c3116a040556ed8cb0b8b8`.
+- Commit workflow: `2b650aca76847bf367009191f29302e4a51262ab`.
+- Esito GitHub Actions relativo a questi commit: non ancora verificato; non dichiarare il test superato finché non è disponibile il risultato.
+
+### Limiti e prossimi passaggi
+- La migrazione è **CANDIDATA, NON APPLICATA** a Supabase.
+- Nessun workspace/azienda è stato creato e nessun dato live è stato modificato.
+- La separazione effettiva di lead, documenti, conversazioni e attività per workspace richiederà migrazioni successive con colonne/FK e policy RLS dedicate. Non è ancora operativa.
+- La console amministrativa non è ancora implementata; questo blocco fornisce il modello dati.
+- Prossimo sviluppo: API amministrative controllate per creare/aggiornare workspace e gestire versioni/approvazioni di prompt e criteri, poi associazione progressiva dei moduli esistenti.
+- Netlify resta escluso dagli interventi fino al 4 dicembre 2026.
