@@ -1724,3 +1724,11 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Run `43041360377`: **SUCCESS** — stesso workflow sul commit del test ingestione; tutti i controlli superati.
 - Nessuna migrazione applicata e nessuna Edge Function deployata. Le modifiche sono solo nel repository.
 - L'ingestione ora richiede workspace esplicito; prima di un futuro deploy, l'interfaccia amministrativa dovrà fornire l'ID del workspace e la RPC di creazione Lead dovrà essere aggiornata per lo stesso requisito.
+
+
+### Diagnostica necessaria per completare AI Setter workspace-scoped
+- Aggiunto `supabase/diagnostics/nextway_workspace_scope_prerequisites_readonly.sql`, sola lettura.
+- Restituisce colonne, FK/vincoli, stato RLS e policies, grants, trigger e definizioni effettive delle RPC di creazione Lead/generazione AI Setter.
+- Non legge record applicativi e non modifica schema, dati, policy o permessi.
+- Serve per completare senza supposizioni l'isolamento di conversazioni/messaggi e aggiornare in sicurezza le RPC SECURITY DEFINER.
+- Commit diagnostica: `COMMIT_DIAGNOSTIC_PENDING`.
