@@ -10,7 +10,7 @@ assert.match(sql, /create table if not exists public\.nextway_knowledge_document
 assert.match(sql, /create table if not exists public\.nextway_knowledge_chunks/i);
 assert.match(sql, /approval_status text not null default 'pending'/i);
 assert.match(sql, /approved_at is not null and approved_by is not null/i);
-assert.match(sql, /valid_until is null or valid_until >= valid_from/i);
+assert.match(sql, /valid_until is null or valid_from is null or valid_until >= valid_from/i);
 assert.match(sql, /content_sha256[\s\S]*?\^\[a-f0-9\]\{64\}\$/i);
 assert.match(sql, /search_vector tsvector generated always as \(to_tsvector\('italian'::regconfig, content\)\) stored/i);
 assert.match(sql, /using gin\(search_vector\)/i);
