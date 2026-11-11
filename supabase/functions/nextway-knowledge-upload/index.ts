@@ -13,6 +13,7 @@ const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
 const BUCKET = "nextway-knowledge";
 const MAX_FILE_BYTES = 12 * 1024 * 1024;
 const MAX_EXTRACTED_CHARS = 500_000;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED_TYPES = new Set(["application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "text/plain"]);
@@ -160,6 +161,10 @@ Deno.serve(async (req) => {
       return respond({ error: "Testo estratto oltre il limite di 500.000 caratteri" }, 413, origin);
     }
 
+    const workspaceId = String(form.get("workspace_id") ?? "").trim();
+    if (!uuidPattern.test(workspaceId)) {
+      return respond({ error: "workspace_id obbligatorio e non valido" }, 400, origin);
+    }
     const moduleKey = String(form.get("module_key") ?? "zinzino").trim();
     const title = String(form.get("title") ?? originalName).trim();
     const sourceType = String(form.get("source_type") ?? "official_document").trim();
@@ -174,7 +179,7 @@ Deno.serve(async (req) => {
       return respond({ error: "Titolo o lingua non validi: la V1 supporta italiano" }, 400, origin);
     }
 
-    const objectName = `source-files/${moduleKey}/${crypto.randomUUID()}-${safeFilename(originalName)}`;
+    const objectName = `source-files/${workspaceId}/${moduleKey}/${crypto.randomUUID()}-${safeFilename(originalName)}`;
     const { error: uploadError } = await admin.storage.from(BUCKET).upload(objectName, bytes, {
       contentType: expectedMime, upsert: false,
     });
@@ -189,6 +194,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        workspace_id: workspaceId,
         module_key: moduleKey,
         title,
         source_type: sourceType,
