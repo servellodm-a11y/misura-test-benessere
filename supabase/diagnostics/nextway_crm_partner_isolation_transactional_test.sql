@@ -8,6 +8,7 @@ begin;
 
 -- Selezione automatica di due partner reali (solo ID) e dell'admin già verificato.
 create temporary table nextway_iso_fixture (
+  singleton boolean primary key default true check (singleton),
   owner_a uuid not null,
   owner_b uuid not null,
   admin_id uuid not null,
@@ -18,13 +19,25 @@ create temporary table nextway_iso_fixture (
 ) on commit drop;
 
 create temporary table nextway_iso_results (
-  test_name text not null,
+  test_name text primary key,
   expected text not null,
   actual text not null,
   passed boolean not null
 ) on commit drop;
 
-grant all on nextway_iso_fixture, nextway_iso_results to authenticated;
+-- Anche le tabelle temporanee del test applicano RLS.
+alter table nextway_iso_fixture enable row level security;
+alter table nextway_iso_results enable row level security;
+
+create policy nextway_iso_fixture_authenticated_test
+  on nextway_iso_fixture for all to authenticated
+  using (true) with check (true);
+create policy nextway_iso_results_authenticated_test
+  on nextway_iso_results for all to authenticated
+  using (true) with check (true);
+
+grant select, insert, update on nextway_iso_fixture to authenticated;
+grant select, insert on nextway_iso_results to authenticated;
 
 do $$
 declare
@@ -53,8 +66,8 @@ begin
     raise exception 'TEST INTERROTTO: il profilo platform_admin atteso non è disponibile.';
   end if;
 
-  insert into nextway_iso_fixture(owner_a, owner_b, admin_id)
-  values (v_partners[1], v_partners[2], v_admin);
+  insert into nextway_iso_fixture(singleton, owner_a, owner_b, admin_id)
+  values (true, v_partners[1], v_partners[2], v_admin);
 end;
 $$;
 
@@ -90,7 +103,7 @@ begin
 
   update nextway_iso_fixture
      set lead_a = (r->>'lead_id')::uuid
-   where true;
+   where singleton = true;
 
   insert into public.nextway_lead_activities
     (lead_id, owner_profile_id, activity_type, subject, details)
@@ -99,7 +112,7 @@ begin
      'NEXTWAY ISOLATION TEST A', 'Attività fittizia rollback')
   returning id into f.activity_a;
 
-  update nextway_iso_fixture set activity_a = f.activity_a;
+  update nextway_iso_fixture set activity_a = f.activity_a where singleton = true;
 
   -- Partner B crea il proprio Lead temporaneo.
   perform set_config('request.jwt.claim.sub', f.owner_b::text, true);
@@ -119,7 +132,7 @@ begin
     raise exception 'Creazione Lead test B fallita: %', r;
   end if;
 
-  update nextway_iso_fixture set lead_b = (r->>'lead_id')::uuid;
+  update nextway_iso_fixture set lead_b = (r->>'lead_id')::uuid where singleton = true;
 
   insert into public.nextway_lead_activities
     (lead_id, owner_profile_id, activity_type, subject, details)
@@ -128,7 +141,7 @@ begin
      'NEXTWAY ISOLATION TEST B', 'Attività fittizia rollback')
   returning id into f.activity_b;
 
-  update nextway_iso_fixture set activity_b = f.activity_b;
+  update nextway_iso_fixture set activity_b = f.activity_b where singleton = true;
 
   select * into f from nextway_iso_fixture;
 
