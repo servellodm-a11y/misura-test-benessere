@@ -1632,3 +1632,42 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Superati tutti i test statici, incluso `test-nextway-workspace-memberships.mjs`.
 - Superati tutti i cinque `deno check` del workflow.
 - Il risultato dimostra la coerenza statica del codice e delle migrazioni candidate; non dimostra l'applicazione live né il comportamento RLS runtime.
+
+
+## RLS WORKSPACE-SCOPED E RICERCA KNOWLEDGE BASE — CANDIDATO V1 (11 NOVEMBRE 2026)
+
+### Correzione preliminare membership helper
+- Corretta la funzione `nextway_has_workspace_access(uuid,text[])`: ora `platform_admin` mantiene accesso anche quando `workspace_id` è NULL; gli altri utenti richiedono workspace non nullo e membership attiva con ruolo ammesso.
+- Aggiornato il test statico per impedire regressioni su questo caso.
+- Commit helper: `5184834715058707c451cb3061a74c0469467e4c`.
+- Commit test helper: `87371a2ce2d614729758b3a0c2337bc13d8c00d3`.
+
+### Migrazione RLS candidata
+- File: `supabase/migrations/20261111230000_nextway_workspace_scoped_rls.sql`.
+- Commit: `5e0cd825a2e34b7e27cb516b56d0fd7f9e455cab`.
+- Test: `scripts/test-nextway-workspace-scoped-rls.mjs`, commit `039b81bd40943aadd0c3448179fcc85db0d505ae`.
+- Workflow CI: commit `239f0d4d99ed3ad4fde2bba2758b4d333804ff97`.
+
+### Regole introdotte
+- Lead assegnati: lettura per membri attivi del workspace; le policy owner/admin già esistenti continuano a governare scritture e record non assegnati.
+- Un Lead assegnato non può essere trasferito o scollegato da un utente non `platform_admin`; l'assegnazione iniziale a un workspace richiede membership attiva (viewer escluso).
+- Attività e richieste di conversione ereditano l'accesso dal Lead collegato.
+- Audit log: nuova colonna `workspace_id`; nuovi eventi registrano il workspace conservando la minimizzazione dei dati (nessuno snapshot di `notes` e `public_evidence`). Gli eventi storici non vengono backfillati; restano soggetti alla policy storica owner/admin.
+- Knowledge Base: documenti e chunk approvati sono leggibili dai membri del workspace assegnato; fonti senza workspace restano accessibili solo a `platform_admin`.
+- La vecchia RPC `nextway_search_knowledge(text,text,text,integer)` viene disabilitata per tutti i ruoli client/server; la nuova firma richiede `p_workspace_id` esplicito e membership attiva, filtrando `d.workspace_id = p_workspace_id`.
+
+### Limiti e dipendenze non ancora chiuse
+- La migrazione è candidata e NON è applicata a Supabase.
+- Le conversazioni/messaggi AI Setter non sono inclusi: le definizioni complete delle tabelle, foreign key e policy non sono versionate nel repository consultato. Non applicare policy speculative; prima serve una diagnostica read-only dello schema effettivo.
+- La RPC attuale di creazione Lead/conversazione non è stata aggiornata per ricevere `workspace_id`. La modalità NULL resta una compatibilità transitoria; prima di onboarding di membri workspace bisogna aggiornare il flusso di creazione affinché richieda workspace esplicito.
+- L'ingestione Knowledge Base attuale non riceve ancora `workspace_id`; finché l'Edge Function non sarà aggiornata, i nuovi documenti resteranno non assegnati e quindi non leggibili dai membri.
+- Lo storage originale dei documenti resta admin-only; non sono state ampliate le policy del bucket.
+- Il test statico non prova il comportamento runtime RLS. Serve in futuro una prova transazionale controllata con utenti/workspace reali, senza creare dati di prova adesso.
+- Nessun dato esistente è stato backfillato o modificato; nessun account, partner, cliente o workspace è stato creato.
+- Nessuna migrazione applicata, nessun deploy Edge Function e nessun intervento Netlify fino al 4 dicembre 2026.
+
+### Prossime attività
+1. Ottenere la definizione reale delle tabelle conversazioni/messaggi e delle RPC di creazione Lead.
+2. Rendere workspace obbligatorio nei flussi di creazione Lead e ingestione documentale, con validazione membership e approvazione admin.
+3. Progettare RLS conversazioni/messaggi e storage path workspace-scoped.
+4. Solo dopo il completamento e revisione complessiva, pianificare l'applicazione coordinata delle migrazioni e test runtime.
