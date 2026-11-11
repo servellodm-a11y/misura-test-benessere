@@ -11,6 +11,7 @@ on:
       - "nextway-ai.html"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
+      - "scripts/test-nextway-provisioning-security.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/migrations/**"
       - "scripts/validate-nextway-audit.mjs"
+      - "scripts/test-nextway-provisioning-security.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -38,6 +40,8 @@ jobs:
           node-version: "22"
       - name: Validate NEXTWAY audit
         run: node scripts/validate-nextway-audit.mjs
+      - name: Validate conversion provisioning security contract
+        run: node scripts/test-nextway-provisioning-security.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
