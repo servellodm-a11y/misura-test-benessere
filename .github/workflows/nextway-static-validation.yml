@@ -23,6 +23,7 @@ on:
       - "scripts/test-nextway-multi-workspace-sql.mjs"
       - "scripts/test-nextway-workspace-admin-security.mjs"
       - "scripts/test-nextway-workspace-data-association.mjs"
+      - "scripts/test-nextway-workspace-memberships.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -81,6 +82,8 @@ jobs:
         run: node scripts/test-nextway-workspace-admin-security.mjs
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
+      - name: Validate NEXTWAY workspace membership contract
+        run: node scripts/test-nextway-workspace-memberships.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
