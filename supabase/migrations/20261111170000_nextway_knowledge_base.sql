@@ -14,7 +14,7 @@ create table if not exists public.nextway_knowledge_documents (
   source_reference text,
   storage_path text,
   language_code text not null default 'it'
-    check (language_code ~ '^[a-z]{2}(-[A-Z]{2})?$'),
+    check (language_code = 'it'),
   version_label text,
   valid_from date,
   valid_until date,
@@ -41,6 +41,10 @@ create index if not exists nextway_knowledge_documents_module_status_idx
   on public.nextway_knowledge_documents(module_key, approval_status, language_code);
 create index if not exists nextway_knowledge_documents_validity_idx
   on public.nextway_knowledge_documents(valid_from, valid_until);
+
+create unique index if not exists nextway_knowledge_documents_module_hash_uidx
+  on public.nextway_knowledge_documents(module_key, content_sha256)
+  where content_sha256 is not null;
 
 create table if not exists public.nextway_knowledge_chunks (
   id uuid primary key default gen_random_uuid(),
