@@ -967,3 +967,12 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - 11-11-2026: diagnostiche strutturali e sicurezza eseguite e risultati ricevuti.
 - 11-11-2026: grants eccessivi revocati; verifica successiva superata.
 - 11-11-2026: aggiornamento documentale; nessun deploy Netlify e nessun test funzionale eseguiti.
+
+
+### Appendice operativa — test funzionale transazionale predisposto (11 novembre 2026)
+
+- Creato `supabase/diagnostics/nextway_crm_functional_smoke_test.sql` per eseguire un test controllato con il ruolo `authenticated` e il profilo `platform_admin` già verificato.
+- Il test copre: creazione Lead e conversazione tramite RPC idempotente; replay della stessa richiesta senza duplicazione; creazione attività e completamento follow-up; archiviazione e ripristino; creazione e revisione amministrativa della richiesta conversione; presenza dell'audit con esclusione di `notes` e `public_evidence` dagli snapshot.
+- La procedura è racchiusa in `BEGIN ... ROLLBACK`: i record temporanei e gli eventi audit generati vengono annullati al termine. Usa soltanto dati fittizi e un indirizzo `example.invalid`; non attiva account o clienti.
+- File salvato e recuperato nuovamente da GitHub. Commit: `008c7424fae3a0993e8e5c30953705e360db0b5d`.
+- Il test **non è ancora stato eseguito su Supabase**. Il connettore Supabase non è disponibile in questa sessione: l'utente deve incollare il file nel SQL Editor e inviarne l'esito. In caso di errore, interrompere e analizzare il messaggio senza eseguire ulteriori operazioni.
