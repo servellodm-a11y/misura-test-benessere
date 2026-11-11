@@ -521,7 +521,12 @@ create policy nextway_setter_conversations_workspace_delete
   );
 
 -- Messages inherit the workspace from the parent conversation; no duplicate
--- workspace_id column is introduced.
+-- workspace_id column is introduced. Client writes are RPC-only so a member
+-- cannot forge ai_generated/approved/sent metadata through direct PostgREST writes.
+drop policy if exists nextway_setter_messages_workspace_manage
+  on public.nextway_setter_messages;
+revoke all on table public.nextway_setter_messages from authenticated;
+grant select on table public.nextway_setter_messages to authenticated;
 drop policy if exists nextway_setter_messages_workspace_select
   on public.nextway_setter_messages;
 create policy nextway_setter_messages_workspace_select
