@@ -1075,3 +1075,12 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 4. Pubblicare il frontend Netlify.
 5. Eseguire prima un test cliente controllato; successivamente un invito partner autorizzato. Non usare contatti reali senza consenso e autorizzazione.
 - Il campo `partner_details.team_side` resta NULL: l'assegnazione A/B è una decisione separata e non viene inventata.
+
+### Esito CI aggiornato — provisioning conversioni
+- GitHub Actions run #127: **SUCCESS** sul commit `2c7bc627fd0781c817eede12a5bcb50b906dd24d`.
+- Passati: validatore NEXTWAY, type-check AI Setter e type-check Edge Function `nextway-conversion-provisioning`.
+- Il run #124 e il run #125 erano falliti per errori di tipo nel helper di recupero inviti; corretti con tipizzazione esplicita e verificati nel run #127.
+- Migrazione provisioning aggiornata con vincolo di coerenza degli stati (`pending`, `ready_for_activation`, `provisioning`, `rejected`, `activated`): commit `45dc8f1840b05b90b4a19cf1ff86322890dbc19f`.
+- Edge Function con recupero degli inviti creati dalla stessa richiesta: commit `2c7bc627fd0781c817eede12a5bcb50b906dd24d`.
+- CI conferma la validità statica e il type-check; non equivale a esecuzione SQL su Supabase, deploy della Edge Function o test runtime di invito.
+- Stato attuale: codice pronto per la fase di installazione controllata. Prima azione richiesta all'utente: applicare la migrazione `20261111001500_nextway_conversion_provisioning.sql` nel SQL Editor Supabase. Non creare ancora account reali.
