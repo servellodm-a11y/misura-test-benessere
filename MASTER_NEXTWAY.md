@@ -1284,7 +1284,7 @@ Dopo la chiusura dell'audit RPC/trigger, avviata la copertura automatica dei con
 - Workflow `.github/workflows/nextway-static-validation.yml` aggiornato per eseguire il nuovo test e attivarsi anche quando cambia il relativo script.
 - Commit test: `9381d3e0cc2dc79ed153cb429d35e6ef3c2a4e24`.
 - Commit workflow: `e3525ff976cb4f3def58ea0cbaff82c4af87276b`.
-- GitHub Actions #143: **IN CORSO** al momento dell'aggiornamento; non dichiarare superato finché il run non termina con SUCCESS.
+- GitHub Actions #143: **SUCCESS**; tutti gli step del workflow completati, incluso il nuovo test dei contratti Edge Functions e i type-check Deno. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43036002822.
 - Questa attività aggiunge test statici di regressione: non modifica le Edge Functions deployate, non applica migrazioni e non esegue chiamate reali a OpenAI/Tavily.
 - Nessun utente, cliente, partner, invito o conversione di prova creato. Nessuna modifica a Supabase live.
 - Vincolo Netlify invariato: nessun intervento fino al 4 dicembre 2026.
