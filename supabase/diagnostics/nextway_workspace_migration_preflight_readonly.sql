@@ -160,9 +160,9 @@ select jsonb_build_object(
   'read_only', true,
   'base_schema_ready',
     (select tables_ready from checks)
-    and (select columns_ready from column_checks)
-    and (select functions_ready from function_checks)
-    and (select triggers_ready from trigger_checks)
+and (select columns_ready from column_checks)
+and (select functions_ready from function_checks)
+and (select triggers_ready from trigger_checks)
     and exists (
       select 1 from public.profiles p where p.role = 'platform_admin'
     )
