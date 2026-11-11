@@ -20,6 +20,20 @@ function safeMessage(error: unknown) {
   return error instanceof Error ? error.message.slice(0, 300) : "Errore provisioning";
 }
 
+async function findExistingInvite(admin: ReturnType<typeof createClient>, email: string, requestId: string) {
+  for (let page = 1; page <= 10; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const match = data.users.find((user) =>
+      String(user.email ?? "").toLowerCase() === email.toLowerCase() &&
+      user.user_metadata?.nextway_conversion_request_id === requestId
+    );
+    if (match) return match;
+    if (data.users.length < 1000) break;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin") ?? "";
   if (req.method === "OPTIONS") return response({}, 200, origin);
@@ -81,13 +95,21 @@ Deno.serve(async (req) => {
     let invitedUserId: string | null = null;
     try {
       if (claim.conversion_type === "partner") {
-        const { data: invite, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
-          String(claim.email),
-          { data: { full_name: String(claim.full_name),
-              nextway_conversion_request_id: requestId } },
-        );
-        if (inviteError || !invite.user) throw inviteError ?? new Error("Invito Auth non creato");
-        invitedUserId = invite.user.id;
+        const email = String(claim.email);
+        // Recover an invite created by a previous timed-out attempt, but never attach
+        // an unrelated Auth account that happens to use the same email address.
+        const existingInvite = await findExistingInvite(admin, email, requestId);
+        if (existingInvite) {
+          invitedUserId = existingInvite.id;
+        } else {
+          const { data: invite, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
+            email,
+            { data: { full_name: String(claim.full_name),
+                nextway_conversion_request_id: requestId } },
+          );
+          if (inviteError || !invite.user) throw inviteError ?? new Error("Invito Auth non creato");
+          invitedUserId = invite.user.id;
+        }
       } else if (claim.conversion_type !== "customer") {
         throw new Error("Tipo conversione non supportato");
       }
