@@ -1944,3 +1944,13 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Diagnostica workspace/storage ancora da eseguire dall'utente: `supabase/diagnostics/nextway_workspace_storage_preflight_readonly.sql`. Il precedente preflight ha confermato la presenza delle tabelle metadata Storage, non lo stato specifico del bucket `nextway-knowledge` né l'eventuale presenza di workspace già creati.
 - Tutte le migrazioni restano candidate/non applicate. Nessun dato Supabase è stato modificato; nessuna Edge Function deployata; Netlify non modificato.
 - Non autorizzare ancora l'applicazione sequenziale: attendere esito CI #229 e diagnostica bucket/workspace. Anche dopo CI verde, la validazione resta statica e non equivale a test PostgreSQL runtime.
+
+
+### Esito diagnostica live workspace e Storage — 11 novembre 2026
+- L'utente ha eseguito `supabase/diagnostics/nextway_workspace_storage_preflight_readonly.sql`; risultato `read_only=true`.
+- Le quattro tabelle workspace (`nextway_workspaces`, `nextway_workspace_prompts`, `nextway_workspace_prospect_criteria`, `nextway_workspace_memberships`) non esistono ancora; nessuna policy workspace preesistente.
+- Bucket `nextway-knowledge` assente; conteggio oggetti del bucket pari a 0; nessuna policy Storage con i nomi previsti dalla migrazione.
+- Tabelle metadata `storage.buckets` e `storage.objects` presenti.
+- Nessun conflitto live rilevato per le migrazioni workspace foundation e Knowledge Base Storage. Non esistono workspace o file preesistenti da preservare in queste strutture.
+- La diagnostica non ha modificato alcun dato o schema.
+- Prossimo passaggio operativo: l'utente può autorizzare l'avvio dell'applicazione controllata delle migrazioni, una per volta e nell'ordine cronologico, iniziando da `20261111170000_nextway_knowledge_base.sql`. Dopo ogni esecuzione occorre verificare l'esito SQL prima di passare alla successiva. Le migrazioni successive non vanno eseguite in blocco o alla cieca.
