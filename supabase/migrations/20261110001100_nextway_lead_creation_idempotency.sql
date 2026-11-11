@@ -170,7 +170,7 @@ returns integer
 language plpgsql
 security definer
 set search_path = pg_catalog, public
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_is_admin boolean := false;
