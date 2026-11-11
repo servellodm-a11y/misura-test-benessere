@@ -1694,3 +1694,33 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 - Run `43041004903`: **SUCCESS** sul commit migrazione `d0afd2291892185d421f866cc02c6a237401ac3e`.
 - La CI ha eseguito anche il test workspace-scoped RLS e i cinque `deno check`; tutti superati.
 - Il preflight verifica l'esistenza delle tabelle target, RLS attiva, colonne `workspace_id` necessarie e firma esatta dell'helper. L'esito di tali controlli sul database sarà noto solo quando la migrazione verrà applicata, che resta vietato in questa fase.
+
+
+## KNOWLEDGE BASE WORKSPACE-BOUND — INGESTIONE E UPLOAD (11 NOVEMBRE 2026)
+
+### Controllo membership
+- `nextway_has_workspace_access` ora richiede che il workspace sia `active` per le membership ordinarie; `platform_admin` conserva accesso centrale anche a workspace draft/archived e record senza workspace.
+- Commit helper: `f2a1bef85ff6b13ffa6c06e4c2a9998fe9fc7c65`.
+- Test: `bc1d5c01fa0c2bd108f3c71a2f33ba13db81ac92`.
+
+### Ingestione e caricamento documenti
+- `nextway-knowledge-ingest` ora richiede `workspace_id` UUID, verifica che il workspace esista e non sia archiviato, inserisce il documento con workspace assegnato e limita la deduplica al workspace.
+- Anche la lettura di recupero dopo conflitto univoco è filtrata per workspace.
+- `nextway-knowledge-upload` ora richiede `workspace_id`, lo inoltra all'ingestione e archivia il file in `source-files/<workspace_id>/<module_key>/...`.
+- I file continuano a essere caricati nel bucket privato con permessi admin-only; nessuna esposizione ai membri è stata aggiunta.
+- Commit ingestione: `89b3f90e1ba71cd09a9753b38a2634e6895799c5`, ulteriore correzione race lookup `210a3846c521fa1c1c1ce17d41465b3c82c624bc`.
+- Commit upload: `a5a417cadc251fcfbb4e74bdf03d2b217958b240`.
+- Test ingest: `e8fa002ff650aba58959f48cdab771d7ab4e63ef`.
+- Test upload: `5efd26548c954d65b436ac2dea35aae84888c820`.
+
+### Deduplicazione Knowledge Base
+- L'indice univoco è ora workspace-local: `(workspace_id, module_key, content_sha256)`, solo per documenti assegnati a un workspace.
+- Il vecchio indice globale `(module_key, content_sha256)` viene rimosso dalla migrazione RLS candidata. Documenti legacy con workspace NULL non vengono backfillati.
+- Commit migrazione aggiornamento indice: `2592ac5c9c2c1abadfb86c854cd7a245e24cc606`.
+- Test aggiornato: `c3ebc131675aaeb15f9384fc3e1474d34e418a61`.
+
+### Esito CI
+- Run `43041366166`: **SUCCESS** — test ingest/upload, RLS workspace, membership e cinque `deno check` superati.
+- Run `43041360377`: **SUCCESS** — stesso workflow sul commit del test ingestione; tutti i controlli superati.
+- Nessuna migrazione applicata e nessuna Edge Function deployata. Le modifiche sono solo nel repository.
+- L'ingestione ora richiede workspace esplicito; prima di un futuro deploy, l'interfaccia amministrativa dovrà fornire l'ID del workspace e la RPC di creazione Lead dovrà essere aggiornata per lo stesso requisito.
