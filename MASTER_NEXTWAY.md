@@ -1009,3 +1009,13 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Stato: **PREPARATO, NON ANCORA ESEGUITO** su Supabase. Non dichiarare superato l'isolamento multiutente finché l'utente non restituisce il risultato della query.
 - Il test si interrompe senza scrivere dati se non trova due profili partner collegati a `partner_details` o se il profilo amministratore atteso non è presente.
 - Limite: il test copre le policy RLS del CRM su Lead, attività e richieste idempotenti; non certifica accesso gerarchico sponsor/team leader/director, UI, API browser o deploy Netlify. La tabella richieste idempotenti resta intenzionalmente owner-only secondo la policy live rilevata.
+
+
+### Revisione preventiva avvisi SQL Editor — test isolamento — 11 novembre 2026
+
+- Dopo l'avviso del SQL Editor, la prima versione del test è stata sospesa prima dell'esecuzione.
+- Revisione effettuata: rimosse tutte le tabelle temporanee del test; rimossi gli UPDATE senza filtro selettivo. Il test aggiornato non crea tabelle né modifica schema, policy, grants o profili.
+- Il test usa variabili locali PL/pgSQL e restituisce il riepilogo tramite NOTICE. Crea esclusivamente due Lead e due attività fittizie con ID generati nella transazione corrente.
+- Restano due istruzioni DELETE intenzionali, una per ciascun tentativo cross-owner. Sono limitate agli ID dei Lead appena creati nella stessa transazione; il risultato atteso è zero righe modificate per effetto della RLS. Il test termina con ROLLBACK.
+- File aggiornato e recuperato da GitHub: `supabase/diagnostics/nextway_crm_partner_isolation_transactional_test.sql`; commit revisione: `aa415e2f43636ac6941fcef89584e65f7930b1c9`; blob SHA verificato: `c0fba4e755b8803d03d5af7ef3bc21e2e183fe47`.
+- Stato: **NON ESEGUIRE la versione precedente**. Usare esclusivamente la versione aggiornata. L'avviso generico di operazioni distruttive può restare perché il test contiene i due DELETE intenzionali; il loro bersaglio sono soltanto i record fittizi appena creati e il rollback annulla l'intera transazione.
