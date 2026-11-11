@@ -198,7 +198,7 @@ begin
   get diagnostics v_deleted = row_count;
   return v_deleted;
 end;
-$;
+$$;
 
 revoke all on function public.nextway_prune_lead_creation_requests() from public, anon;
 grant execute on function public.nextway_prune_lead_creation_requests() to authenticated;
