@@ -211,6 +211,7 @@ Deno.serve(async (req) => {
       const { data: raced, error: raceReadError } = await admin
         .from("nextway_knowledge_documents")
         .select("id, title, approval_status")
+        .eq("workspace_id", workspaceId)
         .eq("module_key", moduleKey)
         .eq("content_sha256", hash)
         .maybeSingle();
