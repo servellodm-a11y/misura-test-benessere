@@ -1019,3 +1019,19 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - Restano due istruzioni DELETE intenzionali, una per ciascun tentativo cross-owner. Sono limitate agli ID dei Lead appena creati nella stessa transazione; il risultato atteso è zero righe modificate per effetto della RLS. Il test termina con ROLLBACK.
 - File aggiornato e recuperato da GitHub: `supabase/diagnostics/nextway_crm_partner_isolation_transactional_test.sql`; commit revisione: `aa415e2f43636ac6941fcef89584e65f7930b1c9`; blob SHA verificato: `c0fba4e755b8803d03d5af7ef3bc21e2e183fe47`.
 - Stato: **NON ESEGUIRE la versione precedente**. Usare esclusivamente la versione aggiornata. L'avviso generico di operazioni distruttive può restare perché il test contiene i due DELETE intenzionali; il loro bersaglio sono soltanto i record fittizi appena creati e il rollback annulla l'intera transazione.
+
+## AGGIORNAMENTO OPERATIVO — 11 NOVEMBRE 2026 (coda conversioni approvate)
+
+- Proseguito lo sviluppo CRM senza ripetere verifiche già concluse.
+- `nextway-cloud.js` ora consente a `platform_admin` di consultare separatamente le richieste `pending` e quelle `ready_for_activation`. Prima dell'intervento, la coda mostrava soltanto le richieste pendenti: dopo l'approvazione una richiesta scompariva dalla vista amministrativa.
+- Aggiunto in `nextway-cloud.js` il pulsante **Mostra pronte per attivazione**. La nuova vista è di sola consultazione: mostra i dati essenziali e la nota amministrativa, senza creare account, profili, clienti o partner.
+- Aggiornato `scripts/validate-nextway-audit.mjs` con controlli statici per filtro stato, accesso alla nuova coda e distinzione tra approvazione e provisioning.
+- Commit frontend: `f9610df5de3a58ed2626d8354b94238f81e26303`.
+- Commit validatore: `0131284d52100fc6ecba10ead98f8da9307561bc`.
+- GitHub Actions run #114 e #115 avviati al momento dell'aggiornamento; esito da acquisire. Il run #113 precedente era **SUCCESS**.
+- Nessuna modifica a Supabase live, nessun deploy Netlify e nessuna creazione account eseguiti.
+
+### Prossimo sviluppo
+1. Realizzare il provisioning server-side idempotente delle richieste `ready_for_activation`, con invito Auth e creazione dei record applicativi in un'unica procedura controllata.
+2. Prima del provisioning, definire il contratto dati esatto per `profiles`, `partner_details` e `clients` e la gestione dei fallimenti parziali; non assumere colonne o creare utenti automaticamente.
+3. Collegare la UI amministrativa all'azione di attivazione solo dopo aver implementato e validato il backend. La chiave service-role deve restare esclusivamente nei secrets server-side.
