@@ -42,7 +42,7 @@
 - CI statica run #229: COMPLETATO E VERIFICATO per gli step elencati; non è un test runtime Supabase.
 - Preflight workspace/Storage: COMPLETATO E VERIFICATO per lo snapshot read-only fornito dall'utente; non ricontrollato in questo run.
 - Schema CRM live, prerequisiti 008–014 e firme RPC: DA COMPLETARE con il risultato della diagnostica prerequisiti già versionata; non dedurre lo stato dalla sola presenza delle migrazioni.
-- Bundle CRM 008–014: ESEGUITO MA NON VERIFICATO quanto alla revisione statica del testo; NON ESEGUITO su Supabase.
+- Revisione statica bundle CRM 008–014: COMPLETATO E VERIFICATO limitatamente al testo recuperato; applicazione su Supabase: BLOCCATO fino a backup e preflight live.
 - Installazione CLI e backup database: BLOCCATO sul Mac Intel fino alla verifica Node/npm e alla disponibilità di un percorso di esportazione funzionante.
 - Applicazione migrazioni CRM e workspace: BLOCCATO fino a backup verificato, preflight live aggiornato e sequenza di applicazione controllata.
 - Edge Functions: COMPLETATO E VERIFICATO quanto alla presenza dei sorgenti nel repository e ai type-check CI per cinque funzioni; deploy live DA COMPLETARE/da verificare.
