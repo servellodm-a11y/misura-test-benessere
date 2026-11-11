@@ -345,10 +345,10 @@ for (const stage of lifecycleStages) {
 assert.match(leadLifecycle, /drop constraint if exists nextway_leads_status_check/i);
 assert.match(leadLifecycle, /add constraint nextway_leads_status_check/i);
 assert.match(leadLifecycle, /non crea automaticamente un record cliente o partner/i);
-assert.match(leadUiScript, /id="stageContacted"/);
-assert.match(leadUiScript, /id="stageFollowup"/);
-assert.match(leadUiScript, /id="stageEvaluation"/);
-assert.match(leadUiScript, /id="stageConverted"/);
+assert.match(html, /id="stageContacted"/);
+assert.match(html, /id="stageFollowup"/);
+assert.match(html, /id="stageEvaluation"/);
+assert.match(html, /id="stageConverted"/);
 assert.match(leadUiScript, /stageConverted.*Convertito cliente.*Convertito partner/);
 console.log("NEXTWAY CRM lifecycle: 9 stages synchronized across SQL, UI, import and cloud sync; funnel counters present: PASS");
 
