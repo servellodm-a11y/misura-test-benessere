@@ -1671,3 +1671,11 @@ Progettare la tabella di membership workspace e il modello dei permessi (utente 
 2. Rendere workspace obbligatorio nei flussi di creazione Lead e ingestione documentale, con validazione membership e approvazione admin.
 3. Progettare RLS conversazioni/messaggi e storage path workspace-scoped.
 4. Solo dopo il completamento e revisione complessiva, pianificare l'applicazione coordinata delle migrazioni e test runtime.
+
+
+### Esito CI RLS workspace — 11 novembre 2026
+- GitHub Actions run `43040791502`: **SUCCESS** sul commit workflow `239f0d4d99ed3ad4fde2bba2758b4d333804ff97`.
+- Superati il nuovo test statico workspace-scoped RLS, i test multi-workspace, workspace admin, associazione dati e membership.
+- Superati tutti i cinque `deno check` delle Edge Functions incluse nel workflow.
+- La CI verifica i contratti statici; non esegue la migrazione SQL su Supabase e non costituisce test RLS runtime.
+- Commit aggiornamento MASTER precedente: `3c873682a7d6eea7c4ac1ec39278035802447476`.
