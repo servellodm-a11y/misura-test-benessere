@@ -115,11 +115,12 @@ begin
   if not found then
     raise exception 'Conversazione non trovata' using errcode='P0002';
   end if;
-  if v_conversation.owner_profile_id is distinct from v_actor
-     and not public.nextway_is_platform_admin() then
-    raise exception 'Conversazione non autorizzata' using errcode='42501';
-  end if;
-  if not public.nextway_has_workspace_access(
+  if v_conversation.workspace_id is null then
+    if v_conversation.owner_profile_id is distinct from v_actor
+       and not public.nextway_is_platform_admin() then
+      raise exception 'Conversazione legacy non autorizzata' using errcode='42501';
+    end if;
+  elsif not public.nextway_has_workspace_access(
     v_conversation.workspace_id,
     array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
   ) then
@@ -207,13 +208,19 @@ begin
   from public.nextway_setter_conversations c
   where c.id=v_request.conversation_id
   for update;
-  if not found
-     or (v_conversation.owner_profile_id is distinct from v_actor and not public.nextway_is_platform_admin())
-     or not public.nextway_has_workspace_access(
-       v_conversation.workspace_id,
-       array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-     ) then
+  if not found then
     raise exception 'Conversazione non autorizzata' using errcode='42501';
+  end if;
+  if v_conversation.workspace_id is null then
+    if v_conversation.owner_profile_id is distinct from v_actor
+       and not public.nextway_is_platform_admin() then
+      raise exception 'Conversazione legacy non autorizzata' using errcode='42501';
+    end if;
+  elsif not public.nextway_has_workspace_access(
+    v_conversation.workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership workspace attiva richiesta' using errcode='42501';
   end if;
   if v_conversation.status in ('closed','archived') then
     raise exception 'La conversazione è chiusa o archiviata' using errcode='55000';
@@ -416,7 +423,8 @@ grant execute on function public.nextway_complete_setter_generation(uuid,text,te
 
 revoke all on function public.nextway_validate_setter_owner() from public,anon,authenticated;
 
--- The message table inherits workspace access through its parent conversation.
+-- Assigned conversations are shared with active workspace members.
+-- Viewer membership is read-only; managers/members may manage Setter records.
 drop policy if exists nextway_setter_conversations_workspace_select
   on public.nextway_setter_conversations;
 create policy nextway_setter_conversations_workspace_select
@@ -430,6 +438,26 @@ create policy nextway_setter_conversations_workspace_select
     )
   );
 
+drop policy if exists nextway_setter_conversations_workspace_manage
+  on public.nextway_setter_conversations;
+create policy nextway_setter_conversations_workspace_manage
+  on public.nextway_setter_conversations
+  as permissive for all to authenticated
+  using (
+    workspace_id is not null
+    and public.nextway_has_workspace_access(
+      workspace_id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+    )
+  )
+  with check (
+    workspace_id is not null
+    and public.nextway_has_workspace_access(
+      workspace_id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+    )
+  );
+
 drop policy if exists nextway_setter_conversations_workspace_scope
   on public.nextway_setter_conversations;
 create policy nextway_setter_conversations_workspace_scope
@@ -439,7 +467,7 @@ create policy nextway_setter_conversations_workspace_scope
     workspace_id is null
     or public.nextway_has_workspace_access(
       workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
     )
   )
   with check (
@@ -450,6 +478,8 @@ create policy nextway_setter_conversations_workspace_scope
     )
   );
 
+-- Messages inherit the workspace from the parent conversation; no duplicate
+-- workspace_id column is introduced.
 drop policy if exists nextway_setter_messages_workspace_select
   on public.nextway_setter_messages;
 create policy nextway_setter_messages_workspace_select
@@ -457,13 +487,40 @@ create policy nextway_setter_messages_workspace_select
   as permissive for select to authenticated
   using (
     exists (
-      select 1
-      from public.nextway_setter_conversations c
+      select 1 from public.nextway_setter_conversations c
       where c.id=nextway_setter_messages.conversation_id
         and c.workspace_id is not null
         and public.nextway_has_workspace_access(
           c.workspace_id,
           array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
+        )
+    )
+  );
+
+drop policy if exists nextway_setter_messages_workspace_manage
+  on public.nextway_setter_messages;
+create policy nextway_setter_messages_workspace_manage
+  on public.nextway_setter_messages
+  as permissive for all to authenticated
+  using (
+    exists (
+      select 1 from public.nextway_setter_conversations c
+      where c.id=nextway_setter_messages.conversation_id
+        and c.workspace_id is not null
+        and public.nextway_has_workspace_access(
+          c.workspace_id,
+          array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+        )
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.nextway_setter_conversations c
+      where c.id=nextway_setter_messages.conversation_id
+        and c.workspace_id is not null
+        and public.nextway_has_workspace_access(
+          c.workspace_id,
+          array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
         )
     )
   );
@@ -475,22 +532,20 @@ create policy nextway_setter_messages_workspace_scope
   as restrictive for all to authenticated
   using (
     exists (
-      select 1
-      from public.nextway_setter_conversations c
+      select 1 from public.nextway_setter_conversations c
       where c.id=nextway_setter_messages.conversation_id
         and (
           c.workspace_id is null
           or public.nextway_has_workspace_access(
             c.workspace_id,
-            array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+            array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
           )
         )
     )
   )
   with check (
     exists (
-      select 1
-      from public.nextway_setter_conversations c
+      select 1 from public.nextway_setter_conversations c
       where c.id=nextway_setter_messages.conversation_id
         and (
           c.workspace_id is null
