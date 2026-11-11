@@ -876,3 +876,49 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - 11-11-2026: aggiunta la sezione 51 per registrare le correzioni effettive a migrazione/validatore e l'esito positivo del run #109.
 - 11-11-2026: nessun codice applicativo ulteriore, database live, impostazione o configurazione modificati durante l'aggiornamento documentale.
 - 11-11-2026: verifica post-salvataggio da eseguire recuperando nuovamente il file da GitHub.
+
+
+## 52. Preparazione operatività NEXTWAY CRM e correzioni sincronizzazione (11 novembre 2026)
+
+### Correzioni effettivamente salvate e verificate su GitHub
+
+- Migrazione `supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql`: corretti entrambi i delimitatori della funzione `nextway_prune_lead_creation_requests()`, che prima presentavano `as $` e `$;`. Il file è stato recuperato nuovamente dal branch `main`; controllo testuale: zero aperture `as $\ndeclare` incomplete, due aperture `as $$\ndeclare` valide e chiusura `$$;` presente.
+- `nextway-cloud.js`: corretta la whitelist di `syncLocal()`. Prima accettava soltanto quattro stati storici e poteva riportare a `Da verificare` un Lead che avesse uno stato del ciclo commerciale avanzato. Ora conserva tutti e nove gli stati: Da verificare, Verificato, Contattato, In follow-up, In valutazione, Convertito cliente, Convertito partner, Non interessato, Escluso.
+- `scripts/validate-nextway-audit.mjs`: aggiunta un'asserzione specifica sulla whitelist di sincronizzazione, per intercettare una regressione anche se gli stati sono presenti altrove nel file cloud.
+- File di distribuzione `supabase/deploy/nextway_crm_apply.sql`: creato bundle transazionale che include le migrazioni 008, 009, 010, 011, 012, 013 e 014 nell'ordine corretto. Include precondizioni sulla tabella Lead, profili e firma della RPC esistente, oltre a controlli strutturali prima del commit. Include la migrazione 009 audit e la 010 minimizzazione dati, non soltanto le tre tabelle CRM mancanti.
+- Il bundle è stato recuperato nuovamente da GitHub e verificato: contiene tutte e sette le migrazioni, `begin;` e `commit;`.
+
+### Commit
+
+- Correzione delimitatori SQL migrazione 011: `7fd8c0243d7815403810b2f909fe9a550737b98c`.
+- Correzione stati nella sincronizzazione cloud: `f7a43daf1c0c3df037e75dad3ef263d4316ded8f`.
+- Guardia di regressione nel validatore: `c4d0923c7bcab9c7cdeb06fc141de5ec03a54fc0`.
+- Bundle SQL transazionale CRM: `7d2f7cfa963e81fc6585c91cf2efe2daf907248e`.
+
+### Stato operativo
+
+| Componente | Stato |
+|---|---|
+| Correzione sintassi migrazione 011 | COMPLETATO E VERIFICATO nel file GitHub |
+| Conservazione dei nove stati durante sync | COMPLETATO E VERIFICATO nel file GitHub |
+| Asserzione anti-regressione | COMPLETATO E VERIFICATO nel file GitHub |
+| Bundle SQL 008–014 | COMPLETATO E VERIFICATO nel repository; non ancora eseguito |
+| Migrazioni 008–014 su Supabase live | DA COMPLETARE: nessuna esecuzione DB effettuata |
+| Test runtime con account partner e platform_admin | DA COMPLETARE |
+| Deploy Netlify | DA COMPLETARE; nessun deploy eseguito |
+| CI per i nuovi commit | NON VERIFICATA: il connettore GitHub non ha restituito status associati ai nuovi commit; non dichiarare successo CI |
+
+### Azione necessaria per rendere operativo il CRM
+
+- Aprire il file `supabase/deploy/nextway_crm_apply.sql` nel repository.
+- Copiare tutto il contenuto nel SQL Editor del progetto Supabase NEXTWAY corretto ed eseguire una sola volta.
+- Il blocco è transazionale: se una precondizione o una migrazione fallisce, la transazione deve essere annullata; non proseguire con deploy frontend finché non è stato verificato il risultato.
+- Dopo l'esecuzione, ripetere la diagnostica read-only `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e `supabase/diagnostics/nextway_crm_live_status_readonly.sql`. Le tabelle attività, creazione idempotente e conversione devono risultare presenti; devono essere presenti le colonne archive e il vincolo dei nove stati; RLS e policy devono essere ricontrollati.
+- Solo dopo la conferma live, passare ai test funzionali: creazione Lead, sincronizzazione, modifica concorrente/conflitto, archiviazione/ripristino, attività e follow-up, richiesta conversione, revisione admin e rifiuto con motivazione.
+- Il flusso di conversione continua a non creare automaticamente utenti Auth, profili, clienti o partner: l'attivazione effettiva resta una fase distinta.
+
+### Registro
+
+- 11-11-2026: recuperati i file correnti e i rispettivi SHA prima delle modifiche.
+- 11-11-2026: correzioni e bundle salvati su GitHub e verificati con nuovo recupero dei file.
+- 11-11-2026: nessuna modifica eseguita su Supabase live e nessun deploy Netlify.
