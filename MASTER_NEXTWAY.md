@@ -1035,3 +1035,43 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 1. Realizzare il provisioning server-side idempotente delle richieste `ready_for_activation`, con invito Auth e creazione dei record applicativi in un'unica procedura controllata.
 2. Prima del provisioning, definire il contratto dati esatto per `profiles`, `partner_details` e `clients` e la gestione dei fallimenti parziali; non assumere colonne o creare utenti automaticamente.
 3. Collegare la UI amministrativa all'azione di attivazione solo dopo aver implementato e validato il backend. La chiave service-role deve restare esclusivamente nei secrets server-side.
+
+## PROVISIONING CONVERSIONI CRM — 11 NOVEMBRE 2026
+
+### Implementazione nel repository
+- Creata la migrazione additiva `supabase/migrations/20261111001500_nextway_conversion_provisioning.sql`.
+- La migrazione estende lo stato richiesta con `provisioning` e `activated`, aggiunge claim token/lease, timestamp e utente Auth di attivazione; aggiunge `nextway_conversion_request_id` univoco su `partner_details` e `clients` per impedire duplicazioni.
+- RPC server-only: `nextway_claim_conversion_activation`, `nextway_finalize_conversion_activation`, `nextway_release_conversion_activation`. Solo `service_role` può eseguirle.
+- Le richieste partner creano un invito Supabase Auth; il trigger esistente `on_auth_user_created` crea il profilo base e la RPC completa `profiles` e `partner_details`, collegando sponsor. `team_side` resta NULL e `language='it'`, `status='active'`.
+- Le richieste cliente non creano account Auth: inseriscono `clients` associato al proprietario/sponsor, con stato `potential`.
+- La finalizzazione aggiorna anche lo stato Lead a `Convertito partner` o `Convertito cliente`.
+- Edge Function `supabase/functions/nextway-conversion-provisioning/index.ts`: verifica JWT e ruolo `platform_admin`, legge i dati esclusivamente dalla richiesta approvata, usa service-role solo lato server, invia l'invito partner, finalizza e applica compensazione/rilascio claim in caso di errore. Recupera gli inviti già creati dalla stessa richiesta per i retry.
+- UI `nextway-cloud.js`: aggiunti i comandi amministrativi **Invita e attiva partner** e **Registra cliente** nella coda `ready_for_activation`.
+- Workflow GitHub Actions aggiornato per eseguire il type-check Deno della nuova Edge Function.
+- Documentazione deployment aggiornata in `NEXTWAY-CLOUD-SETUP.md` e README della funzione.
+
+### Commit principali
+- Migrazione provisioning: `427bca08367f1d06f286623313576f297fac285f` (include retry claim scaduto).
+- Edge Function iniziale: `3601f450208d48a969558906ef7081636fed4369`; recupero inviti idempotenti: `cbdcdfe7986123a76e8da34cdab8e461664db713`.
+- Collegamento UI: `4e1449069382cee0105673de9694db9f9e1ef23f`.
+- Validatore: `4272fcd763e0da39626524e25830f98766035b5f`.
+- Workflow CI: `2deecc6f3b968f79020cfa0cbdac796f73b18e8d`.
+- Documentazione setup: `45b995d2c43f23bdef114eb4dd913479ee4ce7cf`.
+
+### Stato e limiti
+| Componente | Stato |
+|---|---|
+| Codice SQL provisioning | IMPLEMENTATO nel repository; NON applicato su Supabase live |
+| Edge Function provisioning | IMPLEMENTATA nel repository; NON pubblicata su Supabase |
+| UI amministrativa | IMPLEMENTATA nel repository; NON pubblicata su Netlify |
+| Type-check / validazione CI | Run #121 e #123 superati; run #124 in corso al momento dell'aggiornamento |
+| Creazione account Auth reale | NON ESEGUITA |
+| Test end-to-end cliente/partner | DA ESEGUIRE dopo applicazione migrazione, secret e deploy |
+
+### Procedura di rilascio successiva
+1. Eseguire nel SQL Editor Supabase la migrazione `20261111001500_nextway_conversion_provisioning.sql`.
+2. Configurare il secret `SUPABASE_SERVICE_ROLE_KEY` in Edge Functions Secrets, senza inserirlo nel repository o nel browser.
+3. Pubblicare `nextway-conversion-provisioning`.
+4. Pubblicare il frontend Netlify.
+5. Eseguire prima un test cliente controllato; successivamente un invito partner autorizzato. Non usare contatti reali senza consenso e autorizzazione.
+- Il campo `partner_details.team_side` resta NULL: l'assegnazione A/B è una decisione separata e non viene inventata.
