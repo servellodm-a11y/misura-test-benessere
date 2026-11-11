@@ -45,6 +45,7 @@ on:
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
       - "scripts/test-nextway-multi-workspace-sql.mjs"
       - "scripts/test-nextway-workspace-admin-security.mjs"
+      - "scripts/test-nextway-workspace-data-association.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
