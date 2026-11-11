@@ -12,6 +12,7 @@ for (const fn of [
 ]) assert.match(sql, new RegExp(fn), `missing workspace-aware creation RPC: ${fn}`);
 
 assert.match(sql, /alter table public\.nextway_lead_creation_requests\s+add column if not exists workspace_id uuid/i);
+assert.equal((sql.match(/\$\$/g) || []).length % 2, 0, "SQL dollar-quoted blocks must be balanced");
 assert.match(sql, /nextway_lead_creation_requests_workspace_id_fkey/i);
 assert.match(sql, /v_existing_workspace_id is distinct from p_workspace_id/i);
 assert.match(sql, /nextway_is_platform_admin\(\)/i);
