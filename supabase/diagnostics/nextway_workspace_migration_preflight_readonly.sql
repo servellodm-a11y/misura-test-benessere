@@ -15,7 +15,7 @@ with required_tables(table_name) as (
 table_state as (
   select
     r.table_name,
-    to_regclass(format('public.%I', r.table_name)) is not null as exists,
+    to_regclass(format('public.%I', r.table_name)) is not null as is_present,
     coalesce(c.relrowsecurity, false) as rls_enabled,
     coalesce(c.relforcerowsecurity, false) as rls_forced
   from required_tables r
@@ -64,7 +64,7 @@ column_state as (
       where c.table_schema = 'public'
         and c.table_name = r.table_name
         and c.column_name = r.column_name
-    ) as exists
+    ) as is_present
   from required_columns r
 ),
 required_functions(function_signature) as (
@@ -78,7 +78,7 @@ required_functions(function_signature) as (
 function_state as (
   select
     function_signature,
-    to_regprocedure(function_signature) is not null as exists
+    to_regprocedure(function_signature) is not null as is_present
   from required_functions
 ),
 trigger_state as (
@@ -90,7 +90,7 @@ trigger_state as (
       where t.tgrelid = to_regclass('public.nextway_setter_conversations')
         and not t.tgisinternal
         and t.tgfoid = to_regprocedure('public.nextway_validate_setter_owner()')
-    ) as exists
+    ) as is_present
   union all
   select
     'nextway_setter_touch',
@@ -140,19 +140,19 @@ policy_state as (
 ),
 checks as (
   select
-    coalesce(bool_and(exists and rls_enabled), false) as tables_ready
+    coalesce(bool_and(is_present and rls_enabled), false) as tables_ready
   from table_state
 ),
 column_checks as (
-  select coalesce(bool_and(exists), false) as columns_ready
+  select coalesce(bool_and(is_present), false) as columns_ready
   from column_state
 ),
 function_checks as (
-  select coalesce(bool_and(exists), false) as functions_ready
+  select coalesce(bool_and(is_present), false) as functions_ready
   from function_state
 ),
 trigger_checks as (
-  select coalesce(bool_and(exists), false) as triggers_ready
+  select coalesce(bool_and(is_present), false) as triggers_ready
   from trigger_state
 )
 select jsonb_build_object(
