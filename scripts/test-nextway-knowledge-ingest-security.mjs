@@ -11,7 +11,7 @@ assert.match(source, /authorization/);
 assert.match(source, /auth\.getUser\(token\)/);
 assert.match(source, /profile\?\.role !== "platform_admin"/);
 assert.match(source, /NEXTWAY_SERVICE_ROLE_KEY/);
-assert.match(source, /MAX_BODY_BYTES = 600_000/);
+assert.match(source, /MAX_BODY_BYTES = 4_000_000/);
 assert.match(source, /MAX_CONTENT_CHARS = 500_000/);
 assert.match(source, /languageCode !== "it"/);
 assert.match(source, /crypto\.subtle\.digest\("SHA-256"/);
