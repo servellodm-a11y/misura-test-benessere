@@ -1812,3 +1812,37 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 ### CI
 - Il workflow aggiornato ha avviato il run #194 sul commit `7440bb806c6e863b3a9943578843f2df0fb12efd`; esito da verificare prima di dichiarare il test superato.
 - I run #191, #192 e #193 sono falliti esclusivamente sul nuovo test statico per una stringa di preflight attesa non allineata; test corretto nel commit #194. Non considerarli validazione positiva.
+
+
+## RPC CREAZIONE LEAD + CONVERSAZIONE CON WORKSPACE ESPLICITO (12 NOVEMBRE 2026)
+
+### Migrazione candidata
+- File: `supabase/migrations/20261112000000_nextway_lead_creation_workspace.sql`.
+- Test statico: `scripts/test-nextway-lead-creation-workspace.mjs`.
+- Workflow CI aggiornato per includere il test.
+- Commit migrazione e hardening: `cb30c51764b58a53d9cdd961cc6b2f39ea4186d6`, `31dd165fab02174783db705a71f2bb240b65eec1`.
+- Commit test e correzione: `c98a64a4fb0374d71b71433cf5322e45292425db`, `30d3191e72a3e973d5dfe644b8f40f2b83e6ddd2`.
+- Commit workflow: `817b9a415d2f8d85bbebafe7983ce8324578183e`.
+
+### Regole implementate nella migrazione candidata
+- Aggiunge `workspace_id` nullable a `nextway_lead_creation_requests`, con FK verso `nextway_workspaces`; nessun backfill.
+- Nuova RPC `nextway_create_lead_with_conversation_v2`: crea Lead e conversazione con lo stesso workspace nella stessa transazione.
+- Nuova RPC idempotente `nextway_create_lead_with_conversation_idempotent_v2`: registra workspace_id insieme alla chiave e rifiuta il replay se la stessa chiave viene riutilizzata per un workspace differente.
+- Un workspace assegnato deve esistere ed essere `active`; i chiamanti non-admin devono avere membership attiva con ruolo owner/admin/manager/member.
+- Workspace NULL consentito soltanto a `platform_admin`.
+- La vecchia RPC a sette argomenti resta per compatibilità del pannello admin, ma è stata resa esplicitamente platform_admin-only; la vecchia idempotente continua a funzionare solo attraverso tale percorso admin.
+- I dati Lead/conversazione ereditano lo stesso workspace e sono soggetti al trigger di coerenza proprietario/workspace.
+- URL pubblico e campi obbligatori validati lato database; categorie e canali controllati.
+- Le nuove RPC sono SECURITY DEFINER con search_path fisso e EXECUTE concesso a authenticated; nessun accesso anonimo.
+
+### Integrazione frontend ancora da completare
+- `nextway-setter.js` attualmente chiama la vecchia RPC e non presenta un selettore workspace.
+- Il vecchio percorso resta utilizzabile soltanto da platform_admin per record legacy non assegnati.
+- Prima di abilitare i membri workspace, occorre aggiungere il selettore workspace nel Setter, mostrare solo workspace attivi accessibili all'utente e chiamare la RPC idempotente V2 includendo `workspace_id` nel payload/hash.
+- La creazione di workspace e l'amministrazione restano su API candidate non deployate.
+
+### Stato
+- Migrazione candidata NON applicata a Supabase.
+- Edge Functions non deployate; Netlify non modificato.
+- Nessun Lead, conversazione, membership o workspace di prova creato.
+- CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: in corso al momento dell'aggiornamento; attendere esito prima di dichiarare la fase validata.
