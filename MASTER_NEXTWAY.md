@@ -976,3 +976,12 @@ Prima di applicare la migrazione 014, verificare con accesso read-only su Supaba
 - La procedura è racchiusa in `BEGIN ... ROLLBACK`: i record temporanei e gli eventi audit generati vengono annullati al termine. Usa soltanto dati fittizi e un indirizzo `example.invalid`; non attiva account o clienti.
 - File salvato e recuperato nuovamente da GitHub. Commit: `008c7424fae3a0993e8e5c30953705e360db0b5d`.
 - Il test **non è ancora stato eseguito su Supabase**. Il connettore Supabase non è disponibile in questa sessione: l'utente deve incollare il file nel SQL Editor e inviarne l'esito. In caso di errore, interrompere e analizzare il messaggio senza eseguire ulteriori operazioni.
+
+
+### Esito test funzionale CRM — 11 novembre 2026
+- L'utente ha eseguito lo smoke test transazionale aggiornato su Supabase SQL Editor.
+- Risultato restituito: `ESITO=SUPERATO`, `TEST_TOTALI=6`, `TEST_SUPERATI=6`, `ROLLBACK=OK - DATI DI TEST ANNULLATI`.
+- Verifiche superate: idempotenza; attività e follow-up; richiesta di conversione; audit e minimizzazione; revisione amministrativa; archiviazione e ripristino.
+- Il risultato conferma il superamento dei sei test funzionali inclusi nello smoke test. Non certifica ancora isolamento multiutente, interfaccia web, deploy Netlify o operatività complessiva in produzione.
+- La precedente indicazione “test funzionali end-to-end da completare” è superata limitatamente ai sei casi sopra elencati. Restano da verificare isolamento multiutente partner/admin e flusso UI live.
+- Nessun dato di test è rimasto nel database: il rollback è stato confermato dall'output.
