@@ -1290,3 +1290,34 @@ Dopo la chiusura dell'audit RPC/trigger, avviata la copertura automatica dei con
 - Vincolo Netlify invariato: nessun intervento fino al 4 dicembre 2026.
 
 **Chiarimento stato:** il test statico non sostituisce il collaudo runtime autenticato con due partner e un platform_admin, né il test frontend live. Questi restano subordinati alla disponibilità degli account reali e al ripristino autorizzato del deploy Netlify.
+
+
+## AUDIT STATICO SQL — RATE LIMIT, IDEMPOTENZA E RECUPERO OUTPUT (11 NOVEMBRE 2026)
+
+Esaminate le migrazioni versionate:
+- `20261110000100_nextway_distributed_rate_limit.sql`
+- `20261110000200_nextway_setter_idempotency.sql`
+- `20261110000300_nextway_rate_limit_units.sql`
+- `20261110000400_nextway_idempotency_retention.sql`
+- `20261110000500_nextway_setter_output_recovery.sql`
+- `20261110000600_nextway_setter_output_authorization_hardening.sql`
+- `20261110000700_nextway_clear_stale_staged_output.sql`
+
+Esiti dell'ispezione:
+- Tabella rate limit con RLS attiva e accesso diretto revocato a `PUBLIC`, `anon` e `authenticated`; consumo atomico per utente e ambito.
+- La migrazione 003 sostituisce la firma iniziale della RPC e porta il limite ricerca pubblica da 3 a 10 unità/minuto; AI Setter resta a 5 generazioni/minuto. Le unità sono limitate a 1–5 e il consumo della ricerca è proporzionale al numero di query.
+- Tabella idempotenza con RLS e accesso diretto revocato; unicità per utente/chiave e indice univoco parziale che consente una sola prenotazione pending per conversazione.
+- Le RPC di claim e completamento verificano autenticazione, proprietà o ruolo amministrativo, lease e stato conversazione; usano lock di riga. Inserimento bozza e memorizzazione risposta avvengono nella stessa funzione/transazione.
+- Le funzioni di staging e recupero validano la struttura JSON e rivalutano autorizzazione, lease e stato della conversazione; non restituiscono output per conversazioni chiuse/archiviate.
+- Il trigger di riassegnazione azzera l'output temporaneo quando cambia utente, chiave o conversazione; EXECUTE diretto è revocato ai ruoli client.
+- La pulizia retention è manuale, protetta da controllo interno `platform_admin`, conserva completati per 30 giorni e pending scadute per 24 ore; nessun cron automatico viene creato.
+- Le funzioni SECURITY DEFINER esaminate fissano `search_path = pg_catalog, public`; i grant client sono limitati alle RPC applicative necessarie.
+
+Copertura automatica aggiunta:
+- `scripts/test-nextway-idempotency-sql-security.mjs` verifica i contratti SQL sopra descritti.
+- Workflow aggiornato per eseguire anche questo test.
+- Commit test: `ad1b2dd41734a73557b2bd7f013fdf789a840718`.
+- Commit workflow: `456ee76301ffd95c96145fc99919458dff8d587b`.
+- GitHub Actions #144: **SUCCESS**; test audit NEXTWAY, provisioning, Edge Functions, SQL rate limit/idempotenza e type-check Deno superati. https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43036197153.
+
+**Limite dell'esito:** audit statico dei file repository; non equivale a interrogazione dello schema live né a test runtime di concorrenza con utenti distinti. Nessuna migrazione applicata durante questa fase e nessun dato di test creato.
