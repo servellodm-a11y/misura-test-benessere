@@ -54,7 +54,7 @@ assert.match(scopedRls, /workspace_id association columns are missing/i);
 assert.match(scopedRls, /nextway_has_workspace_access\(uuid,text\[\]\)/i);
 assert.match(setter, /workspace association columns are missing/i);
 assert.match(setter, /nextway_has_workspace_access\(uuid,text\[\]\)/i);
-assert.match(leadCreation, /column_name='workspace_id'[\\s\\S]*?\\)\\s*then/i);
+assert.match(leadCreation, /column_name='workspace_id'[\s\S]*?\)\s*then/i);
 assert.match(leadCreation, /nextway_has_workspace_access\(uuid,text\[\]\)/i);
 
 console.log("NEXTWAY workspace data association and migration dependency contract: PASS");
