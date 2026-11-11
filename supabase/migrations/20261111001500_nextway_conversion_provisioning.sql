@@ -55,7 +55,6 @@ begin
     if not v_service then raise exception 'Rilascio provisioning non autorizzato.'; end if;
   elsif old.status = 'provisioning' and new.status = 'activated' then
     if not v_service or new.activation_claim_token is not null
-       or new.activation_user_id is distinct from old.activation_user_id
        or new.activated_at is null then
       raise exception 'Finalizzazione provisioning non autorizzata.';
     end if;
