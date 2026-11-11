@@ -1850,3 +1850,21 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Nessun Lead, conversazione, membership o workspace di prova creato.
 - CI run #197 sul commit workflow `817b9a415d2f8d85bbebafe7983ce8324578183e`: **SUCCESS**. Test workspace-aware Lead creation, test AI Setter generation workspace e cinque `deno check` superati.
 - CI run #201 sul commit workflow `c82c012a412182517e1dc69a6c57393a13292cdb`: **SUCCESS**. Test UI workspace selector, test RPC workspace-aware, test AI Setter generation workspace, `node --check nextway-setter.js` e cinque `deno check` superati.
+
+
+### Hardening successivo — grant, idempotenza legacy e test SQL (11 novembre 2026)
+- Le quattro RPC AI Setter sono ora eseguibili soltanto da `authenticated`; revocato EXECUTE a `service_role` perché il flusso usa JWT utente e `auth.uid()`.
+- La funzione base `nextway_create_lead_with_conversation_v2` è interna: EXECUTE revocato anche ad authenticated/service_role. È invocabile dalla sola RPC idempotente V2 tramite ownership SECURITY DEFINER.
+- La vecchia RPC idempotente è stata aggiornata: confronta anche `workspace_id` e rifiuta il replay di una richiesta già associata a workspace quando viene richiamata dal percorso legacy non assegnato.
+- I test statici controllano anche i grant, il binding workspace delle chiavi idempotenti e il bilanciamento dei delimitatori SQL `$$`.
+- Commit hardening AI Setter: `e915ebb909601e5948ada6cb8e72d05118de5da3`, `11e5b60a546b88f7f2ac44b6c6939323f7cc01ab`.
+- Commit hardening Lead: `1a53dd4469d754c9a41c3e72f280180d50b7670c`, `d7ea84d82d7d97fb93ab89641d324a295a19a4a2`.
+- Commit test grant/idempotenza: `a9181fc42eb507d49a0e4182ec28f6ccc665597b`, `cb53bf33bbbe299c7b140566af621ba2b18d21db`, `76e0ea12de959525c4830d9f97eda59dfff2ef51`, `f885faa66e20cd5295699a040063fdbaffabc878`, `c18fbb9d2ea96e54048eb836368434367947a3af`, `45c1b7d60b6b832d01205dc9dc77d31879bdd9af`, `81cc922fa536ab500e7b125463bd725e4b7d1017`.
+- UI workspace selector: commit `2b65843cef2045f7c71f737a12ebd0ed8ca0b192`; chiarimento ruoli `6b9eb982d3fdebdf428387f2ccedfa8c84ce5d26`; test UI `bc3e9d1bda3a4e09e7ceefea85cb5a6cfd7e3e28`; workflow `c82c012a412182517e1dc69a6c57393a13292cdb`.
+- Correzione delimitatori SQL e policy workspace read: `ee6271ec04742465909e512ab217ed5f50d59fe9`, `9fec355aa5105215ca8f08f6ff27419e6b309999`.
+- CI run #213 sul commit `81cc922fa536ab500e7b125463bd725e4b7d1017`: **SUCCESS**. Test generazione Setter, test creazione Lead, test UI, `node --check nextway-setter.js` e tutti i cinque `deno check` superati.
+- I run #207–#212 sono falliti su asserzioni statiche del test dei grant; le asserzioni sono state corrette e il run #213 è il primo esito positivo dopo tali correzioni.
+
+### Stato di verifica
+- La CI conferma test statici e sintassi JavaScript/TypeScript; non esegue PostgreSQL contro un database e non certifica il runtime delle migrazioni o delle policy RLS.
+- Tutte le migrazioni workspace restano candidate/non applicate. Nessuna Edge Function deployata e nessuna modifica Netlify.
