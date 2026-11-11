@@ -342,6 +342,7 @@ for (const stage of lifecycleStages) {
   assert.ok(cloud.includes("'" + stage + "'"), "Cloud sync whitelist missing stage: " + stage);
   assert.ok(leadUiScript.includes("'" + stage + "'"), "Lead UI/import stage missing stage: " + stage);
 }
+assert.match(cloud, /status:\['Da verificare','Verificato','Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner','Non interessato','Escluso'\]\.includes\(x\.status\)/, "Cloud sync must preserve all lifecycle stages");
 assert.match(leadLifecycle, /drop constraint if exists nextway_leads_status_check/i);
 assert.match(leadLifecycle, /add constraint nextway_leads_status_check/i);
 assert.match(leadLifecycle, /non crea automaticamente un record cliente o partner/i);
