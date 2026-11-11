@@ -16,6 +16,7 @@ const leadLifecycle = read("../supabase/migrations/20261110001300_nextway_lead_l
 const leadConversion = read("../supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql");
 const conversionProvisioning = read("../supabase/migrations/20261111001500_nextway_conversion_provisioning.sql");
 const conversionProvisioningFunction = read("../supabase/functions/nextway-conversion-provisioning/index.ts");
+const triggerPrivileges = read("../supabase/migrations/20261111160000_nextway_trigger_function_privileges.sql");
 
 new Function(cloud);
 new Function(setter);
@@ -413,3 +414,18 @@ assert.match(leadUiScript, /createLeadConversionRequest\(x\.cloud_id/);
 assert.match(leadUiScript, /Richiesta già presente|Ultima richiesta/);
 assert.match(leadUiScript, /Non crea account o profili/);
 console.log("NEXTWAY CRM conversion workflow: duplicate guard, owner/sponsor binding, admin review queue and no premature provisioning: PASS");
+ 
+// Trigger-only functions: remove client/PUBLIC EXECUTE without changing installed triggers.
+for (const signature of [
+  "nextway_apply_lead_qualification_v1()",
+  "nextway_set_lead_updated_at()",
+  "nextway_setter_touch()",
+  "nextway_validate_setter_owner()"
+]) {
+  const escaped = signature.replace(/[.*+?^${}()|[\]\\]/g, "\\console.log("NEXTWAY CRM conversion workflow: duplicate guard, owner/sponsor binding, admin review queue and no premature provisioning: PASS");");
+  assert.match(triggerPrivileges, new RegExp("revoke all on function public\\." + escaped + "\\s+from public, anon, authenticated", "i"), `Missing least-privilege revoke for ${signature}`);
+}
+assert.doesNotMatch(triggerPrivileges, /drop trigger|disable trigger|drop function/i);
+assert.doesNotMatch(triggerPrivileges, /nextway_save_ai_analysis|nextway_prune_lead_creation_requests|nextway_is_platform_admin/i);
+console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticated revoked; installed triggers retained: PASS");
+
