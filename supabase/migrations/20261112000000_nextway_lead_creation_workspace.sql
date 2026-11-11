@@ -25,12 +25,12 @@ begin
     raise exception 'Workspace association columns are missing.';
   end if;
 end;
-$;
+$$;
 
 alter table public.nextway_lead_creation_requests
   add column if not exists workspace_id uuid;
 
-do $
+do $$
 begin
   if not exists (
     select 1 from pg_constraint
@@ -43,6 +43,19 @@ begin
   end if;
 end;
 $;
+
+-- Workspace members can discover only active workspaces they can access.
+drop policy if exists nextway_workspaces_member_read on public.nextway_workspaces;
+create policy nextway_workspaces_member_read
+  on public.nextway_workspaces
+  for select to authenticated
+  using (
+    status='active'
+    and public.nextway_has_workspace_access(
+      id,
+      array['workspace_owner','workspace_admin','workspace_manager','workspace_member','workspace_viewer']::text[]
+    )
+  );
 
 -- Legacy seven-argument entry point remains central-admin-only. This prevents
 -- non-admin callers from silently creating unassigned records outside a workspace.
