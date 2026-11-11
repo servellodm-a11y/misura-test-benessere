@@ -8,9 +8,12 @@ on:
       - "nextway-setter.js"
       - "supabase/functions/nextway-ai-setter/**"
       - "supabase/functions/nextway-knowledge-ingest/**"
+      - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "nextway-ai.html"
       - "supabase/migrations/**"
+      - "supabase/migrations/**"
+      - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
@@ -25,8 +28,11 @@ on:
       - "nextway-ai.html"
       - "supabase/functions/nextway-ai-setter/**"
       - "supabase/functions/nextway-knowledge-ingest/**"
+      - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/migrations/**"
+      - "supabase/migrations/**"
+      - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
@@ -60,6 +66,8 @@ jobs:
         run: node scripts/test-nextway-knowledge-base-sql.mjs
       - name: Validate NEXTWAY Knowledge Ingest security contract
         run: node scripts/test-nextway-knowledge-ingest-security.mjs
+      - name: Validate NEXTWAY Knowledge Upload security contract
+        run: node scripts/test-nextway-knowledge-upload-security.mjs
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
@@ -68,5 +76,7 @@ jobs:
         run: deno check supabase/functions/nextway-ai-setter/index.ts
       - name: Type-check Knowledge Ingest Edge Function
         run: deno check supabase/functions/nextway-knowledge-ingest/index.ts
+      - name: Type-check Knowledge Upload Edge Function
+        run: deno check supabase/functions/nextway-knowledge-upload/index.ts
       - name: Type-check conversion provisioning Edge Function
         run: deno check supabase/functions/nextway-conversion-provisioning/index.ts
