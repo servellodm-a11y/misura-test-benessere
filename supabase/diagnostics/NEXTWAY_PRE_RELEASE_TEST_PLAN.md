@@ -140,3 +140,45 @@ Il rilascio è autorizzabile solo dopo:
 5. conferma che nessuna funzione invii messaggi automaticamente.
 
 Registrare per ogni test data, account/ruolo, risultato atteso, risultato ottenuto e riferimento al commit pubblicato.
+
+
+---
+
+## Addendum operativo — 12 novembre 2026 — workspace e AI Setter isolato
+
+Questo addendum prevale sulle istruzioni precedenti di questo piano che fanno riferimento alla struttura AI Setter prima della migrazione di isolamento.
+
+### Stato schema e migrazioni
+
+- Le migrazioni Knowledge Base / Multi-Workspace fino a `20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql` risultano applicate su Supabase.
+- La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` risulta applicata dall'utente con esito `Success. No rows returned`. **Non riapplicarla.**
+- Le quattro RPC correnti AI Setter usano `public.nextway_setter_workspace_generation_requests`, non la tabella preesistente `public.nextway_setter_generation_requests`.
+- La nuova tabella ha RLS attivo, accesso diretto revocato e colonne `owner_profile_id`, `conversation_id`, `idempotency_key`, `status`, `generated_output`, `cached_response`, `claimed_at`, `completed_at`, `created_at`, `updated_at`.
+- La tabella preesistente `nextway_setter_generation_requests` è stata rilevata vuota, con RLS attivo e nessuna policy. Non aveva la struttura `user_id/response` ipotizzata nelle note precedenti. Non dichiarare preservata una struttura legacy che la diagnostica non ha trovato.
+- La retention della nuova tabella è `nextway_prune_workspace_setter_generation_requests()`: è manuale e protetta da controllo `platform_admin`. Non invocarla durante i test ordinari, perché esegue DELETE.
+- Il controllo ACL read-only del 12 novembre ha verificato tutte e cinque le funzioni (quattro RPC + retention): `authenticated_execute=true`, `anon_execute=false`, `service_role_execute=false`, `security_definer=true`, `search_path_fixed=true` per tutte.
+
+### Gestione membership
+
+Il codice di `nextway-workspace-admin` è stato esteso con le azioni amministrative:
+- `list_memberships`: legge le membership di un workspace;
+- `set_membership`: crea o aggiorna una membership per un utente Auth già esistente.
+
+Entrambe sono riservate a `platform_admin`. I ruoli ammessi sono `workspace_owner`, `workspace_admin`, `workspace_manager`, `workspace_member`, `workspace_viewer`; gli stati sono `invited`, `active`, `suspended`. L'azione non crea account Auth e non invia email/inviti. L'attivazione è rifiutata se il workspace non è attivo. Il vincolo univoco consente un solo owner attivo o invitato per workspace; la sospensione è reversibile.
+
+Questa estensione è codice repository, non ancora deployata. La sua disponibilità operativa richiede il deploy autorizzato della Edge Function e l'interfaccia amministrativa che la richiami.
+
+### Stato runtime noto e prerequisiti
+
+- Nessun workspace creato; nessuna membership creata.
+- Knowledge Base senza documenti o chunk; bucket senza file.
+- Nessun test runtime end-to-end della nuova persistenza AI Setter è stato eseguito.
+- Le verifiche SQL ACL e i test statici non sostituiscono il test runtime.
+- Nessun deploy delle nuove Edge Functions è stato eseguito; Netlify resta congelato fino al 4 dicembre 2026.
+- Non creare workspace, membership, utenti, Lead o conversazioni fittizi. Il primo workspace e le prime membership devono rappresentare l'assetto operativo reale, confermato dall'amministratore.
+- Prima del collaudo AI Setter servono un workspace reale attivo (oppure il percorso centrale riservato a platform_admin), una conversazione reale autorizzata, Edge Function aggiornata pubblicata, secrets server configurati e budget provider approvato.
+- Il test runtime deve verificare generazione, retry idempotente, isolamento tra utenti/workspace, salvataggio bozza non approvata/non inviata e rifiuto degli accessi non autorizzati. Nessun messaggio deve essere spedito.
+
+### Regola di rilascio
+
+Non dichiarare NEXTWAY pronta per i partner finché non sono completati: deploy autorizzati, configurazione secrets, creazione del workspace operativo reale, assegnazione membership reali, interfaccia amministrativa/Knowledge Base, test runtime positivo e negativo e verifica di isolamento con account distinti.
