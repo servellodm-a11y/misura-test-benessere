@@ -2448,6 +2448,7 @@ Commit:
 
 ### Verifiche predisposte
 - Aggiunto `scripts/test-nextway-setter-governance.mjs` per i contratti statici SQL/Edge Function.
+- Aggiornato `docs/NEXTWAY-AI-SETTER-TEST-PLAN.md` con i casi runtime per membership, isolamento tra workspace, ruolo viewer, prompt/criteri draft e fail-closed.
 - Workflow static validation aggiornato per eseguire il nuovo test su push e pull request e includere i nuovi file nei trigger.
 
 ### Stato e limiti
