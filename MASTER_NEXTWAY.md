@@ -2773,3 +2773,11 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`.
 - PR #1 resta draft; non renderla pronta e non effettuare merge.
 - Il vincolo di non intervenire su Netlify produzione prima del 4 dicembre 2026 resta invariato.
+
+
+### Verifica CI della correzione — 12 novembre 2026
+
+- GitHub Actions run #286, commit `5fc1760fc044ec24f0812d398e2851914d0ccaa9`: **SUCCESS**.
+- Superati il contratto di sicurezza provisioning aggiornato, il controllo statico Python locale, il type-check Deno della Edge Function `nextway-conversion-provisioning` e tutti gli altri controlli del workflow.
+- Deploy Preview Netlify associata alla PR: stato check `success`; è un ambiente preview, non un deploy di produzione e non applica la migrazione Supabase.
+- Il commit documentale successivo sul MASTER non modifica codice o test. Nessun test runtime con transazioni concorrenti è stato eseguito.
