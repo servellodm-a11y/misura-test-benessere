@@ -2200,7 +2200,7 @@ La migrazione `20261111240000_nextway_setter_generation_workspace.sql` usava `CR
 - README aggiornato: `b7faebc79767d05c59156289704f6398e0f81f3e`.
 
 ### Stato verifica e operatività
-- GitHub Actions run `43170117140` sul commit `aa62b53608a2f8c7bc9a478778592ad3808b59ad`: in attesa dell'esito al momento dell'aggiornamento.
+- GitHub Actions run `43170117140` sul commit `aa62b53608a2f8c7bc9a478778592ad3808b59ad`: **SUCCESS**; il workflow statico completo, incluso il nuovo test di isolamento, è passato.
 - Le esecuzioni intermedie del nuovo test hanno inizialmente rilevato un errore di escaping regex nel test stesso; il test è stato riscritto usando controlli stringa espliciti. Non è un errore della migrazione SQL.
 - Migrazione correttiva NON ancora applicata a Supabase.
 - Nessun deploy Edge Function e nessun deploy Netlify.
