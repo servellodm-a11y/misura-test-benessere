@@ -1,5 +1,41 @@
 ## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
 
+### Sviluppo locale — correzione CORS estesa e verificata in CI
+- Branch di lavoro: `fix/nextway-password-recovery`. Nessuna modifica a `main`.
+- È stata estesa l'origine di sviluppo `http://localhost:8000` alle sei Edge Functions richiamate dalle interfacce NEXTWAY locali:
+  - `nextway-workspace-admin`
+  - `nextway-ai-setter`
+  - `nextway-search`
+  - `nextway-knowledge-ingest`
+  - `nextway-knowledge-upload`
+  - `nextway-conversion-provisioning`
+- Le origini già configurate con `NEXTWAY_ALLOWED_ORIGINS` vengono mantenute e unite all'origine locale senza duplicati. Nessuna funzione usa wildcard CORS; i controlli di autenticazione, JWT, ruolo e autorizzazione server-side restano invariati.
+- Test di regressione aggiunto: `scripts/test-nextway-local-cors.mjs`. Verifica su tutte e sei le funzioni la presenza dell'origine localhost, il mantenimento delle origini configurate, il controllo esplicito dell'origine, la risposta CORS e la gestione OPTIONS, oltre all'assenza di wildcard.
+- Il test specifico dell'area amministrativa è stato esteso in `scripts/test-nextway-workspace-admin-security.mjs` per impedire la regressione del preflight CORS.
+- Workflow `.github/workflows/nextway-static-validation.yml` aggiornato: il nuovo test viene eseguito in CI su push a main e pull request.
+- Ultimo commit di codice/workflow osservato: `f43a8972bf56de5474a694ca5de22164fa1ac84b`.
+- GitHub Actions run #266, ID `43231793366`, sul commit `f43a897`: **SUCCESS**. Tutti i controlli statici, i test di contratto, i controlli sintattici Node e i cinque type-check Deno sono terminati con successo.
+- La CI dimostra la correttezza statica e il type-check dei sorgenti; non dimostra il comportamento runtime delle funzioni già pubblicate su Supabase.
+
+### Limiti operativi invariati
+- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito.
+- Nessun workspace, membership, account, documento, prompt o criterio è stato creato; nessuna email o invito è stato inviato.
+- Il codice aggiornato su GitHub non modifica automaticamente le Edge Functions pubblicate: il problema CORS nel browser resterà fino al deploy autorizzato delle funzioni aggiornate.
+- Resta valido il blocco di produzione fino al 4 dicembre 2026. Lo sviluppo e la validazione sul branch possono continuare.
+- Le migrazioni CRM/workspace restano sospese fino a backup verificato, preflight read-only aggiornato e applicazione controllata per singola migrazione.
+
+### Prossimi passi
+1. Aggiornare la copia locale del branch quando l'utente è pronto a riprendere i test sul Mac.
+2. Proseguire la revisione statica dei flussi UI e dei contratti delle funzioni; non effettuare chiamate di scrittura ai dati live.
+3. Preparare una sequenza di verifica post-deploy limitata alle funzioni e alle migrazioni effettivamente necessarie, da eseguire solo quando autorizzata.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — esteso CORS locale alle sei Edge Functions, aggiunto test dedicato, integrato nel workflow e verificata la CI #266 con esito SUCCESS. Nessun intervento live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
 ### Stato operativo aggiornato — sviluppo prosegue senza interventi live
 - Branch di lavoro: `fix/nextway-password-recovery`. Il commit ricevuto dall'utente sul Mac prima di questo aggiornamento era `fd1b578f485b848c0f48fd78acf57899cda26bf5`.
 - Correzione CORS della Edge Function `supabase/functions/nextway-workspace-admin/index.ts`: il sorgente sul branch consente esplicitamente `http://localhost:8000`, mantenendo le origini configurate tramite `NEXTWAY_ALLOWED_ORIGINS`. La risposta preflight OPTIONS e la risposta POST includono `Access-Control-Allow-Origin` solo per origini ammesse.
