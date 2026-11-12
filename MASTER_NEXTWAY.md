@@ -2470,3 +2470,87 @@ La console `nextway-admin.html` è stata precompilata con nome e chiave conferma
 
 - 12-11-2026, 19:10 Europe/Rome — verificati HEAD e commit recenti di `main`, inventario ricorsivo dei file, sorgenti console/API, workflow e CI #251; registrati i valori confermati del primo workspace e l'esito dei tentativi CLI/Homebrew su Mac Intel. Distinte le evidenze GitHub correnti dai risultati Supabase precedentemente forniti dall'utente. Modificato esclusivamente `MASTER_NEXTWAY.md`.
 
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 19:34 (Europe/Rome)
+
+### Fonti, repository e limiti di accesso
+
+- Recuperato questo MASTER da GitHub `main` immediatamente prima dell'aggiornamento; blob SHA di partenza: `0cf2f753bec42cc87449e9cde22d3e6929fd83fe`. Il documento conteneva 3 righe.
+- HEAD di `main` verificato: `dbeb9944441576734621c9cecba0ea60bac44c62`, commit `docs(nextway): update MASTER continuity for 12 Nov evening`, 12-11-2026 18:14:36 UTC (19:14:36 Europe/Rome). Il commit ha come parent `a3fbec076221f0f043d60373e2864d7d07db30d7`; il diff del commit HEAD modifica soltanto `MASTER_NEXTWAY.md`.
+- Albero Git ricorsivo di `main` recuperato: 140 voci, `truncated=false`. Sono presenti le diagnostiche CRM `nextway_crm_live_status_readonly.sql` e `nextway_crm_prerequisites_readonly.sql`. Il documento `docs/NEXTWAY-STAGING-SETUP-PLAN.md` non è presente in `main): è presente soltanto nel branch della PR #1.
+- Strumenti disponibili in questa sessione: connettore GitHub per lettura repository, commit, PR, workflow, job e log. Non è disponibile un connettore Supabase o Netlify; non è stata effettuata una lettura diretta dei rispettivi ambienti live. Le conversazioni considerate sono quelle effettivamente presenti nel contesto corrente e i risultati riportati dall'utente; non si presume accesso indiscriminato a tutte le chat storiche.
+
+### Pull request #1 e branch di lavoro
+
+- PR #1: `NEXTWAY: verifica integrazione AI Setter governance`, URL https://github.com/servellodm-a11y/misura-test-benessere/pull/1.
+- Stato verificato al controllo: **OPEN, DRAFT, NOT MERGED**. Base `main` a `a3fbec076221f0f043d60373e2864d7d07db30d7`; head `fix/nextway-password-recovery` a `a7e345fb8d8715901486d0ac316512c9494988ba`. Il confronto GitHub indica 71 commit ahead e 0 behind; 26 file modificati/aggiunti. Queste modifiche non sono ancora in `main`.
+- Contenuti rilevanti della PR, verificati tramite confronto file e sorgenti del branch:
+  - pagina `nextway-reset-password.html` per completare il recupero password Supabase nel browser;
+  - integrazione AI Setter con la nuova RPC `nextway_get_active_setter_governance(uuid)`, SECURITY DEFINER, search_path fissato, accesso limitato a workspace attivo e ruoli operativi; restituisce soltanto prompt e criteri attivi, non bozze o metadati amministrativi;
+  - la Edge Function AI Setter carica la governance approvata prima di richiedere il claim di generazione;
+  - nuova migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`;
+  - nuova migrazione `20261112170000_nextway_conversion_activation_integrity.sql`: finalizzazione transazionale, lock `FOR UPDATE` sul Lead, ricontrollo proprietario/stato `In valutazione`/non archiviato, aggiornamento dello stato Lead prima della creazione del record di destinazione e RPC finale riservata a `service_role`;
+  - aggiornamenti della funzione di provisioning e dei contratti di sicurezza, inclusa la riduzione degli errori a codici diagnostici sicuri;
+  - nuovi piani documentali per test di concorrenza A–F, rilascio controllato e ambiente di staging; modifiche alla console amministrativa per la governance AI.
+- La presenza di questi file nel branch PR e i test statici non dimostrano che le nuove migrazioni o funzioni siano state applicate/deployate. Non è stato creato uno staging e non è stato eseguito alcun test PostgreSQL runtime.
+
+### GitHub Actions — run e log verificati
+
+- Ultima run push disponibile su `main`: **#251**, ID `43175706330`, SUCCESS, commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Il job `validate` è concluso con SUCCESS. HEAD `main` è successivo ma il commit `dbeb994` è documentale; il workflow usa filtri `paths` per file applicativi/test/migrazioni e non avvia una nuova run per il solo aggiornamento del MASTER.
+- Ultima run PR esaminata: **#292**, ID `43247460858`, SUCCESS sul head `a7e345fb8d8715901486d0ac316512c9494988ba`. Job `validate` e tutti gli step elencati risultano completati con successo; inclusi test governance AI Setter, integrità conversione, controlli statici locali, `node --check` dei due script browser e cinque `deno check` delle Edge Functions.
+- Nei log della run #292 è presente il messaggio `NEXTWAY conversion integrity ... PASS`. Sono presenti anche warning non bloccanti relativi alla deprecazione del modulo Node `punycode` e al passaggio delle action GitHub che usano Node 20 a Node 24. Non risultano errori nel job completato.
+- Le run PR #285 e precedenti nella sequenza immediata includevano failure; le run #286–#292 risultano SUCCESS. Il risultato verde più recente è #292. La CI resta una validazione statica/type-check: non applica migrazioni, non verifica secrets live, non prova la concorrenza PostgreSQL e non certifica deploy Supabase/Netlify.
+- Workflow `.github/workflows/nextway-static-validation.yml` verificato sia su `main` sia sul branch PR. Il branch PR aggiunge i controlli AI Setter governance, CORS locale e static checks Python; tali modifiche al workflow non sono ancora in `main`.
+
+### Supabase CRM — risultato live fornito dall'utente
+
+La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è stata aggiornata per non interrogare la relazione non disponibile `supabase_migrations.schema_migrations`, che aveva causato l'errore PostgreSQL `42P01`. Il risultato successivo fornito dall'utente riporta:
+
+- `public.nextway_leads`: presente; RLS attiva; FORCE RLS non attivo.
+- Policy per `authenticated`: SELECT, INSERT, UPDATE e DELETE. Le condizioni `USING`/ `WITH CHECK` consentono il proprietario tramite `owner_profile_id = auth.uid()` oppure un utente con ruolo `platform_admin`.
+- `public.nextway_lead_activities`: assente al momento della query.
+- `public.nextway_lead_conversion_requests`: assente al momento della query.
+- `supabase_migrations.schema_migrations`: `to_regclass` restituisce assenza/non disponibilità nel contesto SQL interrogato. Questo non dimostra che non esista alcun altro sistema di tracciamento delle migrazioni.
+- Il risultato è una lettura fornita dall'utente, non una connessione diretta dell'assistente a Supabase. La diagnostica è read-only; nessuna migrazione è stata applicata in conseguenza dell'errore o del controllo.
+
+### Diagnostica prerequisiti e migrazione 011
+
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente in `main`, blob SHA `832d328fd84b0694f7e324866a2db4927ab83dd2`. Verifica colonne archive, vincoli di stato, tabelle correlate (attività, conversioni, idempotenza) e firme delle RPC. Nel contesto corrente non è disponibile un risultato della sua esecuzione: resta **DA COMPLETARE**.
+- Nuova lettura del file `supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql` da `main`: blob SHA `db17834699909be71c084aad56f64885c5656867`. I due corpi PL/pgSQL presenti nel file usano delimitatori bilanciati `as $$ ... $$;`. **Correzione documentale:** la nota precedente che descriveva la versione corrente su `main` con delimitatori `as $` / `$;` non è confermata da questo blob e va considerata superata. È stata verificata la struttura testuale dei delimitatori, non una compilazione PostgreSQL runtime.
+- La diagnostica prerequisiti deve precedere qualsiasi decisione sulle migrazioni CRM 008–014. L'assenza live delle tabelle attività e conversioni non basta, da sola, a stabilire lo stato di tutte le migrazioni prerequisito.
+
+### Ambiente locale e piano staging — evidenze disponibili
+
+- Il piano `docs/NEXTWAY-STAGING-SETUP-PLAN.md` è presente nel branch PR, non in `main`; blob SHA sul branch: `43650bade42fe6d52bd3e66deebf38aa359fa611`. È un piano preparatorio, non un ambiente creato.
+- Il piano indica che il repository non contiene ancora `supabase/config.toml` né un seed locale completo e che le migrazioni NEXTWAY dipendono da uno schema applicativo preesistente. Prima di un ambiente locale serve una baseline schema-only completa e revisionata, senza dati personali, più fixture sintetiche.
+- Dati terminale riferiti dall'utente: Mac `x86_64` (Intel), memoria `8589934592` byte (8 GiB); in controlli precedenti `supabase --version` e `brew --version` hanno restituito command not found, i comandi `command -v node/nodejs/npm/deno` non hanno individuato percorsi e Python era 3.9.6. Non è stata confermata in questa sessione la disponibilità completa di Docker o la fattibilità di un runtime Supabase locale; l'output disco/Docker più recente non è disponibile integralmente nel testo accessibile.
+- Nessun dump/backup verificato, nessun progetto staging cloud creato, nessuna baseline schema-only completata, nessun test A–F eseguito, nessuna migrazione o deploy eseguito. Il piano preferisce Supabase locale se tecnicamente praticabile; un secondo progetto cloud richiederebbe prima verifica di limiti/costi e autorizzazione esplicita.
+
+### Matrice di stato aggiornata
+
+- Repository `main`, MASTER, albero e commit HEAD: **COMPLETATO E VERIFICATO** per i contenuti GitHub letti.
+- Diagnostica CRM live: **COMPLETATO E VERIFICATO** limitatamente al JSON fornito dall'utente; lettura diretta Supabase non disponibile.
+- Tabella Lead e quattro policy owner/admin: **COMPLETATO E VERIFICATO** per la query ricevuta.
+- Tabelle attività e richieste conversione: **DA COMPLETARE** (assenti nell'ultima query).
+- Diagnostica prerequisiti CRM: **COMPLETATO E VERIFICATO** quanto a presenza/contenuto nel repository; esecuzione e risultato live **DA COMPLETARE**.
+- Migrazione 011: delimitatori PL/pgSQL bilanciati nel blob corrente di `main`, **COMPLETATO E VERIFICATO** a livello di lettura statica; validazione PostgreSQL runtime **DA COMPLETARE**.
+- PR #1, branch `fix/nextway-password-recovery`: controlli statici CI #292 **COMPLETATO E VERIFICATO**; merge e rilascio **DA COMPLETARE** (PR ancora draft/open).
+- Nuove migrazioni governance AI Setter e integrità conversione: presenti e testate staticamente nel branch PR; applicazione su Supabase **DA COMPLETARE** dopo staging, backup e preflight.
+- Ambiente staging locale/cloud, baseline schema-only e test concorrenza A–F: **DA COMPLETARE**; nessun ambiente creato.
+- Backup database: **BLOCCATO** fino a disponibilità di un metodo CLI/esportazione compatibile e verifica del file risultante.
+- Deploy Edge Functions/Supabase e Netlify: **DA COMPLETARE/VERIFICARE**; nessun nuovo deploy accertato in questo controllo. Resta invariata la decisione precedente di non effettuare deploy Netlify di produzione prima del 4 dicembre 2026.
+- Applicazione migrazioni CRM e workspace: **BLOCCATO** fino a backup verificato, risultato della diagnostica prerequisiti e ambiente di collaudo isolato.
+
+### Prossimo passo operativo preciso
+
+1. Eseguire in Supabase SQL Editor `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo.
+2. Confrontare quel risultato con le migrazioni e con la baseline schema-only; non eseguire ancora il bundle CRM 008–014 in produzione.
+3. Completare la fattibilità del test locale su Mac Intel (Docker/runtime, spazio e CLI compatibile); se non praticabile, valutare un progetto cloud isolato solo dopo verifica dei costi e autorizzazione.
+4. Mantenere PR #1 draft finché i gate di staging, backup, test A–F e revisione delle migrazioni non sono soddisfatti.
+
+### Registro cronologico del MASTER
+
+- 12-11-2026, 19:34 Europe/Rome — aggiornati HEAD/commit di `main`, inventario repository, PR #1 (71 commit ahead, draft), workflow e log GitHub Actions #251/#292; registrati i risultati CRM forniti dall'utente, la diagnostica prerequisiti non ancora eseguita, la correzione della precedente nota sulla migrazione 011 e il piano staging presente solo nel branch PR. Modificato esclusivamente `MASTER_NEXTWAY.md`.
