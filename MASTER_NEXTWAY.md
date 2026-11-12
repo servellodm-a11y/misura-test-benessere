@@ -1,3 +1,25 @@
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
+### Stato operativo aggiornato — sviluppo prosegue senza interventi live
+- Branch di lavoro: `fix/nextway-password-recovery`. Il commit ricevuto dall'utente sul Mac prima di questo aggiornamento era `fd1b578f485b848c0f48fd78acf57899cda26bf5`.
+- Correzione CORS della Edge Function `supabase/functions/nextway-workspace-admin/index.ts`: il sorgente sul branch consente esplicitamente `http://localhost:8000`, mantenendo le origini configurate tramite `NEXTWAY_ALLOWED_ORIGINS`. La risposta preflight OPTIONS e la risposta POST includono `Access-Control-Allow-Origin` solo per origini ammesse.
+- È stato aggiunto un controllo di regressione in `scripts/test-nextway-workspace-admin-security.mjs` che verifica: allow-list localhost, conservazione delle origini configurate, risposta OPTIONS 200 e presenza del controllo sull'origine nella risposta.
+- Commit del test: `720bd3f06a15024a555113b845fe4d8f67c6c3bb` — "Add regression test for NEXTWAY admin CORS preflight". Modificato esclusivamente il branch di lavoro.
+- CI: la run #259 (ID 43230634320) risulta SUCCESS sul commit precedente `fd1b578`. Al momento della registrazione non è ancora disponibile una run associata al commit `720bd3f`; il nuovo controllo va considerato in attesa di CI, non ancora superato.
+- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito. Nessun workspace, membership, utente, documento, prompt o criterio è stato creato.
+- Il vincolo operativo di non toccare la produzione prima del 4 dicembre 2026 resta invariato. Lo sviluppo, la revisione statica, i test CI e la preparazione dei materiali possono proseguire sul branch.
+
+### Prossimi passi di sviluppo
+1. Verificare l'esito CI sul commit `720bd3f`; se fallisce, leggere i log e correggere solo il test o il sorgente interessato.
+2. Proseguire con revisione statica e test non distruttivi dell'area amministrativa e dei contratti Edge Function, senza chiamate di scrittura al progetto Supabase.
+3. Mantenere la distinzione tra test statici/CI e test runtime: la correzione CORS nel repository non modifica la funzione già pubblicata, quindi il browser continuerà a vedere il comportamento remoto precedente fino a un deploy autorizzato.
+4. Tenere bloccate migrazioni CRM/workspace finché non siano disponibili backup verificato e diagnostiche live read-only aggiornate; non eseguire bundle SQL in blocco.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — registrati la correzione CORS già presente nel branch, il test di regressione aggiunto e lo stato CI/deploy. Solo codice di test e documentazione nel branch; nessuna modifica live.
+
+---
+
 ## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:28 (Europe/Rome)
 
 ### Repository, branch e fonti verificate
