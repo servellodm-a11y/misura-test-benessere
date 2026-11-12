@@ -2625,3 +2625,26 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Nessun deploy Supabase/Netlify, merge, migrazione o modifica live.
 - I test Node e i type-check Deno restano coperti da GitHub Actions; il nuovo script Python è un ausilio per la verifica statica locale sul Mac, non sostituisce i type-check Deno né un collaudo runtime.
 - Prossimo passo: aggiornare la copia locale con `git pull --ff-only origin fix/nextway-password-recovery`, poi eseguire il comando Python indicato sopra e riportare l'output.
+
+
+---
+
+## Verifica runtime console amministrativa locale — 12 novembre 2026
+
+### Esito osservato nel browser
+- La pagina `http://localhost:8000/nextway-admin.html` si apre e mostra correttamente le sezioni Workspace, Membership, Knowledge Base, registro attività, richieste conversione e governance AI.
+- La sessione personale risulta autenticata come `servello.dm@gmail.com`.
+- La console amministrativa mostra però `Accesso o servizio amministrativo non disponibile: Failed to fetch`.
+- La configurazione è quindi distinta: interfaccia locale caricata e sessione personale riconosciuta, ma chiamata alla Edge Function amministrativa non completata dal browser.
+
+### Diagnosi e causa residua
+- La correzione del bridge archivio locale ha superato il precedente errore `Archivio locale non pronto`.
+- Il problema residuo è coerente con il preflight CORS già osservato: la Edge Function remota risponde a OPTIONS ma non restituisce `Access-Control-Allow-Origin` per `http://localhost:8000`.
+- Il branch contiene già la correzione CORS per localhost e il test statico locale ha superato tutti e tre i gruppi di controlli.
+- La versione remota della Edge Function non è stata aggiornata; finché non verrà distribuita la versione corretta, il browser continuerà a bloccare la richiesta cross-origin.
+
+### Stato, vincoli e prossime attività
+- Nessun workspace, membership, documento, prompt o criterio creato o modificato.
+- Nessuna migrazione applicata, nessun deploy Supabase o Netlify, nessun merge.
+- Restano validi i vincoli: nessun deploy/merge senza autorizzazione esplicita e Netlify produzione congelato fino al 4 dicembre 2026.
+- Proseguire sul branch con revisione statica e preparazione del pacchetto di rilascio; il collaudo runtime amministrativo autenticato resta sospeso fino a quando il deploy della Edge Function sarà autorizzato.
