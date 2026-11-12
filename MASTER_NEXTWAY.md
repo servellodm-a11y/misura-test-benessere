@@ -2694,3 +2694,50 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Il documento è preparatorio e non autorizza alcuna migrazione, deploy o merge.
 - Commit checklist: `bee045a8320bca2f240ba9b74d1204fec911e188`.
 - PR #1 resta aperta draft; `main` non modificato.
+
+
+---
+
+## Revisione statica — ricerca pubblica, AI Setter e provisioning conversioni — 12 novembre 2026
+
+### 1. Ricerca pubblica Tavily — `nextway-search`
+
+- Autenticazione verificata tramite `auth.getUser(token)`; il token viene usato con client Supabase associato alla sessione.
+- Il body viene letto in streaming con limite effettivo di 16 KB; sono ammesse da 1 a 5 query, ciascuna da 1 a 400 caratteri.
+- Il limite di consumo è applicato lato database tramite RPC atomica: 10 unità/minuto per utente, una unità per query inoltrata.
+- Il numero di risultati è limitato tra 1 e 10; le chiamate Tavily hanno timeout di 20 secondi e non richiedono risposta sintetica né contenuto raw.
+- I risultati sono normalizzati e limitati in lunghezza; vengono mantenuti soltanto URL HTTP/HTTPS validi. Gli errori parziali sono distinti dai risultati riusciti.
+- Nessuna creazione automatica di Lead: la risposta avverte che identità, fonte ed evidenza devono essere verificate manualmente.
+- Esito: i controlli statici osservati sono coerenti con autenticazione, minimizzazione della risposta, rate limit e gestione dei risultati non attendibili.
+- Limite: non sono state effettuate chiamate runtime a Tavily né prove di abuso/concorrenza del rate limit.
+
+### 2. AI Setter — `nextway-ai-setter`
+
+- Autenticazione Bearer verificata con Supabase Auth; metodo limitato a POST/OPTIONS e origine controllata da allow-list.
+- Body letto in streaming con limite effettivo di 16 KB; UUID e obiettivo sono validati prima della generazione.
+- Rate limit atomico database: 5 generazioni/minuto per utente.
+- Conversazione e Lead sono recuperati tramite client autenticato e RLS; conversazioni chiuse/archiviate vengono rifiutate.
+- Per conversazioni workspace, istruzioni e criteri vengono recuperati esclusivamente tramite RPC dedicata alla governance attiva; in caso di errore il flusso si interrompe con 503.
+- Il contesto inviato al provider usa un'allow-list di campi, esclude note libere e recapiti/URL, limita lo storico alle ultime 20 comunicazioni e applica limiti di lunghezza e sanitizzazione.
+- Il flusso usa claim idempotente, staging dell'output e completamento tramite RPC; una bozza non conforme non viene salvata.
+- La risposta viene preparata come bozza; nel codice esaminato non è presente un invio automatico a prospect o clienti.
+- Esito: i controlli statici osservati sono coerenti con minimizzazione, autorizzazione, idempotenza e separazione tra generazione e invio.
+- Limite: nessun test runtime OpenAI, RLS, concorrenza, revoca membership o recupero output è stato eseguito in questa revisione.
+
+### 3. Provisioning conversioni — `nextway-conversion-provisioning` e migrazioni 014/015/cleanup
+
+- La Edge Function richiede un Bearer token valido e ruolo `platform_admin`; le operazioni privilegiate usano la chiave service-role esclusivamente lato server.
+- Le RPC di claim, finalizzazione e rilascio sono riservate a `service_role`; il claim è protetto da token e finestra temporale, con recupero degli inviti creati da tentativi precedenti.
+- La migrazione crea vincoli univoci per collegare una richiesta a un solo record `clients` o `partner_details`; la finalizzazione SQL è transazionale e aggiorna lo stato della richiesta.
+- **Rilievo di integrità da correggere prima del rilascio:** la finalizzazione crea/aggiorna il record cliente o partner e poi aggiorna il Lead soltanto se è ancora non archiviato e in stato `In valutazione`. Il codice non verifica che l'UPDATE del Lead abbia modificato una riga. Se il Lead viene archiviato o cambia stato dopo l'approvazione ma prima dell'attivazione, la conversione può comunque risultare `activated` e creare il record cliente/partner, lasciando il Lead in uno stato incoerente. Correzione raccomandata: verificare e bloccare la transizione se il Lead non è ancora convertibile, nella stessa transazione e prima di creare il record di destinazione; predisporre un test concorrente sul cambio stato/archiviazione.
+- **Rilievo di minimizzazione errori:** `safeMessage(error)` restituisce il messaggio originale dell'eccezione, troncato a 300 caratteri; lo stesso testo viene registrato nei log e restituito al client amministrativo. Correzione raccomandata: risposta esterna generica con codice di correlazione e log limitato a codice/status tecnico, senza messaggi SQL o dettagli interni.
+- La funzione restituisce anche identificativi tecnici di attivazione nella risposta amministrativa; verificare che la UI li utilizzi davvero e mantenere soltanto i campi necessari.
+- Limite: nessuna attivazione reale, invito email, prova di retry o test concorrente è stato eseguito durante questa revisione.
+
+### 4. Stato e decisioni
+
+- Revisione esclusivamente statica dei file del branch `fix/nextway-password-recovery`.
+- I due rilievi sul provisioning sono **correzioni raccomandate ancora da implementare**; questa registrazione non modifica il codice.
+- Nessuna migrazione applicata, nessun deploy Supabase/Netlify, nessun merge e nessuna modifica a `main`.
+- Nessuna richiesta di conversione attivata, nessun account creato e nessuna email/invito inviato.
+- Prossimo passo: preparare correzione transazionale e test statici/runtime per il controllo dello stato Lead prima della conversione; rendere privacy-safe la gestione degli errori. Le modifiche restano sul branch e non autorizzano deploy o migrazioni.
