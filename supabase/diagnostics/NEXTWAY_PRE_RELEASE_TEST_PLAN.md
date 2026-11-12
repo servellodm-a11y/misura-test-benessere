@@ -182,3 +182,47 @@ Questa estensione è codice repository, non ancora deployata. La sua disponibili
 ### Regola di rilascio
 
 Non dichiarare NEXTWAY pronta per i partner finché non sono completati: deploy autorizzati, configurazione secrets, creazione del workspace operativo reale, assegnazione membership reali, interfaccia amministrativa/Knowledge Base, test runtime positivo e negativo e verifica di isolamento con account distinti.
+
+
+---
+
+## Addendum — console amministrativa e revisione Knowledge Base — 12 novembre 2026
+
+### Nuova console
+
+La console amministrativa è stata preparata nei file `nextway-admin.html` e `nextway-admin.js`, raggiungibile dal link in `nextway-ai.html`. Include gestione workspace, consultazione profili, membership, caricamento documenti, revisione pending e ricerca full-text.
+
+La console usa la Edge Function `nextway-workspace-admin` per le operazioni amministrative e la RPC workspace-scoped `nextway_search_knowledge(uuid,text,text,text,integer)` per la ricerca. Tutte le azioni amministrative devono essere autorizzate server-side come `platform_admin`; il frontend non è un controllo di accesso.
+
+### API aggiunte
+
+- `list_profiles`: restituisce solo id, nome e ruolo, senza email.
+- `list_memberships` / `set_membership`: elenco e gestione membership per profili Auth già esistenti.
+- `list_documents`: metadati dei documenti del workspace.
+- `approve_document`: approva solo documenti pending.
+- `reject_document`: respinge solo documenti pending e richiede motivazione.
+
+Il caricamento file usa la Edge Function `nextway-knowledge-upload`; l'indicizzazione crea documenti pending. I contenuti non devono essere usati dal motore di risposta prima dell'approvazione.
+
+### Verifiche
+
+- GitHub Actions run `43174338611`: **SUCCESS** sul commit `9dcf333ba89f14a9bde399a92a7abf1fbd858a99`.
+- Test statico console amministrativa superato.
+- Controllo sintattico di `nextway-admin.js` superato.
+- Type-check Deno di `nextway-workspace-admin` superato.
+- Nessun deploy, nessun workspace/membership creato, nessun file caricato.
+- Nessun test runtime è stato eseguito.
+
+### Collaudo runtime da eseguire dopo deploy autorizzato
+
+1. Accedere come platform_admin e verificare che un account non admin riceva HTTP 403 per tutte le azioni amministrative.
+2. Creare il primo workspace reale in draft, verificarne i dati e attivarlo.
+3. Aggiungere una membership owner reale e almeno un membro reale; verificare che viewer non possa generare bozze o modificare dati.
+4. Caricare un documento ufficiale non sensibile in PDF/DOCX/TXT; verificare estrazione, indicizzazione, stato pending e assenza dai risultati di ricerca.
+5. Approvare il documento e verificare che la ricerca restituisca solo chunk del workspace corretto e del documento approvato/valido.
+6. Provare rifiuto con motivazione e verificare che il documento respinto non venga restituito.
+7. Verificare isolamento tra due workspace e tra due utenti con ruoli distinti.
+8. Eseguire il collaudo AI Setter: generazione, retry idempotente, recupero staged output, bozza non approvata/non inviata, nessuna chiamata di invio esterno.
+9. Registrare risultati, ruolo, timestamp e commit. Nessun dato fittizio deve essere lasciato in produzione.
+
+Il test runtime deve usare esclusivamente account e workspace reali autorizzati o un ambiente di staging dedicato. Non creare record artificiali in produzione.
