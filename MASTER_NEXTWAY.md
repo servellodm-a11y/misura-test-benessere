@@ -1498,7 +1498,6 @@ Realizzare il motore di conoscenza documentale dell'assistente NEXTWAY AI. Il CR
 
 
 ## SVILUPPO KNOWLEDGE BASE — PRIMA MIGRAZIONE CANDIDATA (11 NOVEMBRE 2026)
-
 Avviata la prima implementazione funzionale del motore documentale NEXTWAY AI, senza riaprire audit già conclusi.
 
 ### Componenti aggiunti su GitHub
@@ -2099,3 +2098,73 @@ Eseguita la diagnostica read-only aggregata `supabase/diagnostics/nextway_worksp
 - Nessun conflitto live rilevato per le migrazioni workspace foundation e Knowledge Base Storage. Non esistono workspace o file preesistenti da preservare in queste strutture.
 - La diagnostica non ha modificato alcun dato o schema.
 - Prossimo passaggio operativo: l'utente può autorizzare l'avvio dell'applicazione controllata delle migrazioni, una per volta e nell'ordine cronologico, iniziando da `20261111170000_nextway_knowledge_base.sql`. Dopo ogni esecuzione occorre verificare l'esito SQL prima di passare alla successiva. Le migrazioni successive non vanno eseguite in blocco o alla cieca.
+
+---
+
+## AGGIORNAMENTO DI STATO — 12 NOVEMBRE 2026 — WORKSPACE, AI SETTER GENERATION E LEAD CREATION
+
+Questo aggiornamento prevale sulle note precedenti che indicavano come candidate o non applicate le migrazioni qui elencate.
+
+### Migrazioni applicate su Supabase
+
+Sono state applicate con esito `Success. No rows returned` le seguenti dieci migrazioni del blocco Knowledge Base / Multi-Workspace:
+
+1. `20261111170000_nextway_knowledge_base.sql`
+2. `20261111180000_nextway_knowledge_storage.sql`
+3. `20261111190000_nextway_multi_workspace_foundation.sql`
+4. `20261111200000_nextway_workspace_activation_rpc.sql`
+5. `20261111210000_nextway_workspace_data_association.sql`
+6. `20261111220000_nextway_workspace_memberships.sql`
+7. `20261111230000_nextway_workspace_scoped_rls.sql`
+8. `20261111240000_nextway_setter_generation_workspace.sql`
+9. `20261112000000_nextway_lead_creation_workspace.sql`
+10. `20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql`
+
+Le prime sette migrazioni hanno superato i rispettivi controlli postflight già registrati nelle sezioni precedenti. Le ultime tre hanno superato il postflight aggregato finale del 12 novembre 2026.
+
+### Esito postflight finale — ultime tre migrazioni
+
+**AI Setter Generation**
+- Tabella `nextway_setter_generation_requests` presente.
+- RLS attivo.
+- Accesso diretto authenticated a SELECT/INSERT/UPDATE/DELETE revocato.
+- Presenti tutte e quattro le funzioni protette di generazione, memorizzazione, recupero staged output e completamento.
+
+**Lead Creation Workspace**
+- Colonna `workspace_id` presente su `nextway_lead_creation_requests`.
+- Foreign key presente con delete rule RESTRICT.
+- Policy di lettura workspace membri presente.
+- Funzioni V2 base e idempotent presenti.
+- Execute della funzione V2 idempotent concesso ad authenticated.
+- Funzione V2 base non eseguibile direttamente da authenticated.
+
+**Legacy Idempotency Guard**
+- Funzione legacy idempotent presente.
+- Execute authenticated presente.
+- Controllo platform-admin rilevato nella definizione.
+- Protezione contro replay di richieste già associate a un workspace rilevata nella definizione.
+
+**Risultato:** 14 controlli booleani su 14 superati. Il postflight è read-only e verifica metadati, definizioni, policy e privilegi; non costituisce un test runtime end-to-end delle RPC o dell'interfaccia.
+
+### Stato dati e limiti di collaudo
+
+- Non sono stati creati workspace, membership, lead o conversazioni di test per questo postflight.
+- Knowledge Base: nessun documento o chunk caricato; bucket privato senza file.
+- Non sono stati eseguiti test con utenti, partner o clienti reali.
+- Il funzionamento end-to-end di upload, ingestione, ricerca documentale, generazione AI Setter e creazione Lead con workspace resta da collaudare in un ambiente autorizzato, senza introdurre dati fittizi non necessari.
+- Le funzioni RPC e i relativi privilegi sono verificati a livello di catalogo PostgreSQL; ciò non dimostra da solo il comportamento runtime in tutti i casi applicativi.
+- La CI #229 SUCCESS resta precedente a queste ultime migrazioni e copre controlli statici/sintattici, non il runtime PostgreSQL di questo blocco. Non è stata verificata una CI successiva alla #229.
+
+### Deploy e ambienti
+
+- Nessun nuovo deploy di Edge Functions per Knowledge Base o AI Setter Generation è stato eseguito.
+- Nessun deploy Netlify è stato eseguito; l'ambiente Netlify resta congelato fino al 4 dicembre 2026.
+- Il deploy già esistente della Edge Function di conversion provisioning resta distinto da questo blocco e non viene modificato da questo aggiornamento.
+
+### Prossima fase
+
+1. Consolidare nel repository le verifiche postflight e la documentazione tecnica delle dieci migrazioni.
+2. Completare l'audit statico integrato di RPC, grants, trigger e dipendenze applicative, evitando di ripetere i controlli SQL già superati.
+3. Preparare il collaudo runtime controllato per workspace, Knowledge Base, AI Setter Generation e Lead Creation; eseguirlo solo dopo aver definito dati e ambiente di test autorizzati.
+4. Mantenere invariati Netlify e i deploy Edge Functions fino ad autorizzazione esplicita.
+
