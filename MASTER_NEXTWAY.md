@@ -2825,3 +2825,14 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Ambiente locale Supabase: da valutare; nessuna verifica Docker/CLI eseguita.
 - Test runtime concorrenti: non eseguiti.
 - PR #1 resta aperta draft; `main` invariato.
+
+
+## Piano tecnico ambiente di collaudo isolato — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` sul branch di lavoro.
+- La priorità è verificare la fattibilità di Supabase locale prima di valutare un secondo progetto cloud.
+- La ricognizione repository ha rilevato l'assenza di `supabase/config.toml` e di un seed locale completo.
+- Le migrazioni NEXTWAY dipendono da uno schema applicativo preesistente (fra cui `profiles`, `clients`, `partner_details`, `nextway_leads), funzioni RPC, trigger e oggetti Storage. Il solo avvio di Supabase locale non basta: serve una baseline schema-only completa, revisionata e priva di dati personali.
+- La verifica Docker/Supabase CLI sul Mac non è ancora stata eseguita; Node/npm non risultavano disponibili e Python era 3.9.6 nella verifica precedente.
+- Piano: verifica locale non distruttiva; baseline schema-only; seed sintetici; test concorrenza A–F; alternativa cloud soltanto previa verifica di costi/limiti e autorizzazione.
+- Nessun progetto staging creato, nessun comando remoto eseguito, nessuna migrazione applicata, nessun deploy e nessuna spesa.
