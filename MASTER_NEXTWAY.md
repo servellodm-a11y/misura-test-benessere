@@ -2682,3 +2682,15 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 1. Completare la revisione dei flussi di caricamento/indicizzazione e delle autorizzazioni Knowledge Base.
 2. Preparare una checklist di migrazioni in ordine, con precondizioni e rollback documentati.
 3. Pianificare test runtime controllati per due workspace e almeno tre ruoli (platform_admin, workspace_member, workspace_viewer), senza usare dati reali.
+
+
+---
+
+## Checklist di rilascio controllato aggiunta — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-RELEASE-CHECKLIST.md` nel branch di lavoro.
+- La checklist separa la catena AI Setter/Lead, la Knowledge Base e la sequenza multi-workspace, elenca le migrazioni candidate e segnala la migrazione legacy `nw_*` come separata, da non applicare automaticamente.
+- Inseriti gate pre-migrazione, requisiti di backup, controlli RLS/grant, matrice runtime a due workspace e ruoli, criteri di approvazione documenti e ordine di rilascio.
+- Il documento è preparatorio e non autorizza alcuna migrazione, deploy o merge.
+- Commit checklist: `bee045a8320bca2f240ba9b74d1204fec911e188`.
+- PR #1 resta aperta draft; `main` non modificato.
