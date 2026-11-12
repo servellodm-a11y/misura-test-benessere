@@ -388,7 +388,8 @@
     (async () => {
       try {
         await session();
-        await Promise.all([loadWorkspaces(), loadProfiles()]);
+        await loadProfiles();
+        await loadWorkspaces();
         status("Area amministrativa collegata. Le operazioni vengono autorizzate dal server.");
       } catch (error) {
         status("Accesso o servizio amministrativo non disponibile: " + error.message);
