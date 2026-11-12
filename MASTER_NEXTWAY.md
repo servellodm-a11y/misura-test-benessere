@@ -2378,3 +2378,44 @@ Valori confermati per la scheda di creazione:
 La console `nextway-admin.html` è stata precompilata con nome e chiave confermati. Il backend forza comunque `status: "draft"` alla creazione; l'attivazione è un'azione separata e amministrativa.
 
 **La conferma riguarda il nome e i valori iniziali, non costituisce ancora ordine di creazione del record.** Al momento di questo aggiornamento non è stato creato alcun workspace o membership su Supabase e non è stato eseguito alcun deploy. Prima della creazione occorre verificare che la console e la Edge Function aggiornata siano effettivamente pubblicate e autorizzate.
+
+
+---
+
+## Intervento locale — 12 novembre 2026 — recupero password NEXTWAY
+
+### Problema rilevato
+- La configurazione Supabase nel browser è stata salvata correttamente.
+- L'utente Auth esistente è l'unico utente registrato e l'indirizzo email inserito in NEXTWAY coincide con quello presente in Authentication → Users.
+- Il login ha restituito `Invalid login credentials`.
+- Il recupero avviato dalla Dashboard Supabase ha reindirizzato alla homepage Netlify, non a una pagina dedicata al cambio password.
+- È stato aggiunto `http://localhost:8000/**` a Authentication → URL Configuration → Redirect URLs, mantenendo invariati Site URL e redirect Netlify.
+- Ulteriori richieste hanno raggiunto il limite email Supabase (`email rate limit exceeded`). Non ripetere richieste fino al ripristino del limite.
+
+### Modifiche preparate su branch separato
+Branch: `fix/nextway-password-recovery` (non `main`).
+
+- `nextway-cloud.js`: aggiunto pulsante **Password dimenticata?**. La richiesta usa `auth.resetPasswordForEmail(email, { redirectTo })` e indirizza a `window.location.origin + '/nextway-reset-password.html'`.
+- `nextway-reset-password.html`: nuova pagina locale che riutilizza URL e Publishable key già salvati nel browser, riconosce il flusso di recupero Supabase e consente di aggiornare la password con `auth.updateUser({ password })`. Dopo il cambio chiude la sessione locale e rimanda all'accesso.
+- La password non viene salvata in localStorage né trasmessa all'applicazione in chiaro da codice personalizzato.
+
+Commit:
+- `4679488fc5a3d2d065df72870e7d7c5d268107e5` — pulsante e richiesta di recupero con redirect esplicito.
+- `1e3c44ddab68df5248acc13bc879cf702df6b73a` — pagina locale di reimpostazione.
+
+### Verifiche eseguite
+- Parsing JavaScript di `nextway-cloud.js`: superato.
+- Parsing JavaScript inline di `nextway-reset-password.html`: superato.
+- Presenza del pulsante, redirectTo, chiamata resetPasswordForEmail e updateUser: verificata.
+- Nessun reset email runtime inviato; nessun cambio password eseguito.
+- Nessuna modifica al branch `main`; nessun deploy Netlify o Supabase eseguito.
+
+### Passi ancora necessari
+1. Portare il branch sul Mac locale e avviare il server locale.
+2. Verificare che la pagina di recupero si apra correttamente.
+3. Attendere il ripristino del limite email.
+4. Dalla pagina `nextway-ai.html`, inserire l'email e premere **Password dimenticata?**; non usare il reset dalla Dashboard per questo test.
+5. Aprire il nuovo link nello stesso browser e verificare il cambio password.
+6. Accedere a NEXTWAY con la nuova password.
+7. Solo dopo test locale e revisione, valutare separatamente un eventuale merge/deploy, che richiede autorizzazione distinta.
+
