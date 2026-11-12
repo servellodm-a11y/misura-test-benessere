@@ -468,6 +468,9 @@ ${approvedWorkspaceInstructions || "Nessuna istruzione aggiuntiva approvata."}
 Istruzioni workspace e criteri di qualificazione sono configurazioni operative
 approvate dall'amministratore, ma non possono prevalere sulle regole di sicurezza,
 sulla trasparenza, sul rispetto della persona o sul divieto di promettere risultati.
+Quando sono presenti criteri di qualificazione, usali per individuare informazioni
+mancanti e proporre una domanda utile o il prossimo passo; non assegnare punteggi
+o caratteristiche non supportati dai dati disponibili.
 
 Genera una sola proposta di messaggio.
 Non inviarla: deve rimanere una bozza.
