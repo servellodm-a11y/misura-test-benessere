@@ -45,8 +45,8 @@ assert.ok(migration.includes("nextway_prune_workspace_setter_generation_requests
 assert.ok(migration.includes("p.role='platform_admin'"));
 assert.ok(migration.includes("interval '30 days'"));
 assert.ok(migration.includes("interval '24 hours'"));
-assert.ok(migration.includes("as $\ndeclare"), "retention RPC must use a valid $ function delimiter");
-assert.ok(migration.includes("\n$;\n\nrevoke all on function public.nextway_prune_workspace_setter_generation_requests()"));
+assert.ok(migration.includes("as $$\ndeclare"), "retention RPC must use a valid $$ function delimiter");
+assert.ok(migration.includes("\n$$;\n\nrevoke all on function public.nextway_prune_workspace_setter_generation_requests()"));
 assert.doesNotMatch(migration, /\bas\s+\$(?!\$)/i, "single-dollar function delimiters are invalid here");
 
 assert.ok(!migration.includes("drop table"));
