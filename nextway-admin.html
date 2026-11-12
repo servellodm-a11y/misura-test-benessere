@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEXTWAY | Amministrazione piattaforma</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#172033;background:#f4f6fa}
+    *{box-sizing:border-box}body{margin:0}header{background:#111c32;color:#fff;padding:20px max(18px,calc((100% - 1120px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}
+    header a{color:#d7e1ff}.wrap{max-width:1120px;margin:24px auto;padding:0 16px}
+    .panel{background:#fff;border:1px solid #dce3ed;border-radius:12px;padding:16px;margin:14px 0}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    label{display:block;font-size:13px;font-weight:650;margin:8px 0}
+    input,select,textarea{display:block;width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-top:4px}
+    textarea{min-height:72px}.btn{border:0;border-radius:8px;padding:10px 13px;background:#2457d6;color:#fff;font-weight:700;cursor:pointer;margin:5px 5px 5px 0}
+    .btn.alt{background:#edf1f7;color:#24344d}.btn.warn{background:#fff1e8;color:#9a4314}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .muted{color:#657187;font-size:12px}.status{padding:10px;background:#f2f5fa;border-radius:8px;white-space:pre-wrap;margin:10px 0}
+    .item{border-top:1px solid #e5eaf1;padding:12px 0;overflow-wrap:anywhere}.item:first-child{border-top:0}
+    .pill{display:inline-block;background:#edf1f7;border-radius:20px;padding:3px 8px;font-size:12px;margin-left:6px}
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .hidden{display:none!important}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<header><div><strong>NEXTWAY · Amministrazione</strong><div class="muted" style="color:#cbd5e1">Workspace · Membership · Knowledge Base</div></div><a href="/nextway-ai.html">Torna all'area operativa</a></header>
+<main class="wrap">
+  <p class="muted">Area riservata a platform_admin. Le operazioni vengono autorizzate nuovamente dal server. Questa pagina non crea account, non invia inviti e non spedisce messaggi.</p>
+  <div id="admin-status" class="status" role="status" aria-live="polite">Accedi dalla Connessione centrale per iniziare.</div>
+
+  <section class="panel">
+    <h2>1. Workspace</h2>
+    <form id="workspace-create">
+      <div class="grid">
+        <label>Nome workspace *<input name="name" required maxlength="160" placeholder="Es. Zinzino Italia"></label>
+        <label>Chiave univoca *<input name="workspace_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="zinzino-italia"></label>
+        <label>Partner / organizzazione<input name="partner_name" maxlength="160"></label>
+        <label>Settore<input name="sector" maxlength="120"></label>
+        <label>Paese mercato<input name="market_country" maxlength="120" value="Italia"></label>
+        <label>Lingua<select name="language_code"><option value="it">Italiano</option></select></label>
+      </div>
+      <label>Descrizione<textarea name="description" maxlength="2000"></textarea></label>
+      <button class="btn" type="submit">Crea workspace in bozza</button>
+    </form>
+    <div class="row"><h3>Workspace registrati</h3><button class="btn alt" id="workspace-refresh" type="button">Aggiorna elenco</button></div>
+    <div id="workspace-list" class="muted">Nessun elenco caricato.</div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Membri e ruoli</h2>
+    <label>Workspace selezionato<select id="selected-workspace"><option value="">Carica prima i workspace</option></select></label>
+    <div class="grid">
+      <label>Profilo già registrato<select id="member-profile"><option value="">Carica i profili</option></select></label>
+      <label>Cerca profilo<input id="profile-filter" type="search" placeholder="Filtra per nome o UUID"></label>
+      <label>Ruolo<select id="member-role"><option value="workspace_owner">Owner</option><option value="workspace_admin">Admin workspace</option><option value="workspace_manager">Manager</option><option value="workspace_member" selected>Member</option><option value="workspace_viewer">Viewer</option></select></label>
+      <label>Stato<select id="member-status"><option value="invited">Invited (nessuna email inviata)</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label>
+    </div>
+    <button class="btn" id="membership-save" type="button">Salva membership</button>
+    <button class="btn alt" id="profiles-refresh" type="button">Aggiorna profili</button>
+    <div id="membership-list" class="muted">Seleziona un workspace per consultare le membership.</div>
+  </section>
+
+  <section class="panel">
+    <h2>3. Knowledge Base</h2>
+    <p class="muted">Carica PDF, DOCX o TXT. I documenti vengono indicizzati come pending e non sono utilizzabili dall'assistente finché non vengono approvati.</p>
+    <form id="knowledge-upload">
+      <div class="grid">
+        <label>Modulo<input name="module_key" value="zinzino" required maxlength="64"></label>
+        <label>Titolo documento<input name="title" required maxlength="240"></label>
+        <label>Tipo fonte<select name="source_type"><option value="official_document">Documento ufficiale</option><option value="scientific_publication">Pubblicazione scientifica</option><option value="training_material">Materiale formativo</option><option value="faq">FAQ</option><option value="policy">Policy</option><option value="other">Altro</option></select></label>
+        <label>Versione<input name="version_label" maxlength="80" placeholder="Es. 2026-11"></label>
+        <label>Valido dal<input name="valid_from" type="date"></label>
+        <label>Valido fino al<input name="valid_until" type="date"></label>
+      </div>
+      <label>File PDF / DOCX / TXT<input name="file" type="file" accept=".pdf,.docx,.txt" required></label>
+      <button class="btn" type="submit">Carica e indicizza</button>
+    </form>
+    <div class="row"><h3>Documenti del workspace</h3><button class="btn alt" id="documents-refresh" type="button">Aggiorna documenti</button></div>
+    <div id="document-list" class="muted">Seleziona un workspace per consultare i documenti.</div>
+  </section>
+
+  <section class="panel">
+    <h2>4. Verifica ricerca Knowledge Base</h2>
+    <label>Query<input id="knowledge-query" type="search" maxlength="500" placeholder="Scrivi una domanda da cercare nei documenti approvati"></label>
+    <button class="btn" id="knowledge-search" type="button">Cerca nel workspace</button>
+    <div id="knowledge-results" class="muted">La ricerca restituisce soltanto contenuti approvati e validi del workspace selezionato.</div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nextway-cloud.js"></script>
+<script src="/nextway-admin.js"></script>
+</body>
+</html>
