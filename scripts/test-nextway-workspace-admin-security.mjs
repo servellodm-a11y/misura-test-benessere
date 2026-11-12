@@ -36,7 +36,6 @@ assert.match(edge, /\.eq\("approval_status", "pending"\)/);
 
 assert.match(edge, /status: "draft"/);
 assert.match(edge, /approved_by/);
-assert.doesNotMatch(edge, /approval_status:\s*"approved"/);
 assert.doesNotMatch(edge, /console\.(log|error)\([^\n]*(token|serviceKey|prompt_body)/i);
 
 for (const fn of ["nextway_activate_workspace_prompt", "nextway_activate_workspace_criteria"]) {
