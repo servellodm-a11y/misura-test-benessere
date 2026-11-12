@@ -9,11 +9,19 @@ assert.match(edge, /auth\.getUser\(token\)/);
 assert.match(edge, /profile\?\.role !== "platform_admin"/);
 assert.match(edge, /NEXTWAY_SERVICE_ROLE_KEY/);
 assert.match(edge, /MAX_BODY_BYTES = 100_000/);
-for (const action of ["list_workspaces", "list_prompts", "list_criteria", "create_workspace", "update_workspace", "save_prompt_draft", "save_criteria_draft", "activate_prompt", "activate_criteria", "archive_prompt", "archive_criteria"]) {
+for (const action of ["list_workspaces", "list_memberships", "set_membership", "list_prompts", "list_criteria", "create_workspace", "update_workspace", "save_prompt_draft", "save_criteria_draft", "activate_prompt", "activate_criteria", "archive_prompt", "archive_criteria"]) {
   assert.ok(edge.includes(action), "Missing action " + action);
 }
 assert.match(edge, /nextway_activate_workspace_prompt/);
 assert.match(edge, /nextway_activate_workspace_criteria/);
+assert.match(edge, /nextway_workspace_memberships/);
+assert.match(edge, /auth\.admin\.getUserById\(body\.user_id\)/);
+assert.match(edge, /onConflict: "workspace_id,user_id"/);
+assert.match(edge, /membership_status === "active"/);
+assert.match(edge, /workspace\.status !== "active"/);
+assert.match(edge, /workspace_owner[\s\S]*?workspace_admin[\s\S]*?workspace_manager[\s\S]*?workspace_member[\s\S]*?workspace_viewer/);
+assert.match(edge, /invited[\s\S]*?active[\s\S]*?suspended/);
+assert.match(edge, /Esiste già un owner attivo o invitato/);
 assert.match(edge, /status: "draft"/);
 assert.match(edge, /approved_by/);
 assert.doesNotMatch(edge, /approval_status:\s*"approved"/);
