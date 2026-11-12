@@ -2648,3 +2648,37 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Nessuna migrazione applicata, nessun deploy Supabase o Netlify, nessun merge.
 - Restano validi i vincoli: nessun deploy/merge senza autorizzazione esplicita e Netlify produzione congelato fino al 4 dicembre 2026.
 - Proseguire sul branch con revisione statica e preparazione del pacchetto di rilascio; il collaudo runtime amministrativo autenticato resta sospeso fino a quando il deploy della Edge Function sarà autorizzato.
+
+
+---
+
+## Revisione statica sicurezza multi-workspace e Knowledge Base — 12 novembre 2026
+
+### Componenti revisionati nel branch
+- Membership: una sola membership per coppia workspace/utente; indice univoco per un solo owner attivo o invitato; lettura autonoma limitata alla propria membership; gestione riservata a platform_admin.
+- Helper `nextway_has_workspace_access`: richiede sessione autenticata e, per i membri, membership attiva, workspace attivo e ruolo incluso nell'allow-list; platform_admin mantiene l'accesso centrale.
+- Workspace: registry e versioni di istruzioni/criteri con RLS; bozze distinte dagli elementi attivi; indici univoci impediscono più versioni attive per la stessa chiave.
+- AI Setter: conversazione vincolata al proprietario e al workspace del Lead; il controllo di accesso al workspace avviene prima del claim di generazione; viewer escluso dalle RPC di generazione.
+- Messaggi Setter: i client autenticati hanno sola lettura diretta; scrittura tramite RPC protette che verificano utente, conversazione, membership e stato.
+- Knowledge Base: upload e ingestione richiedono autenticazione e ruolo platform_admin; i documenti nascono pending; la ricerca usa workspace esplicito, membership attiva, stato approved e finestra di validità.
+- API amministrativa: verifica token e ruolo platform_admin prima delle operazioni; directory profili senza indirizzi email; membership e documenti validati lato server.
+- Rendering console: dati non attendibili inseriti come testo; nessun uso di innerHTML nel renderer amministrativo; nessuna chiave service-role nel codice browser.
+
+### Esito delle verifiche automatiche GitHub
+- Commit verificato: `5589ec034e1f1f45100cc3921ba7364088fb25d4`.
+- Workflow `NEXTWAY static validation`: job `validate` completato con esito SUCCESS.
+- Tutti i 31 passaggi operativi del job risultano completati con esito SUCCESS, inclusi contratti SQL/RLS, membership, isolamento Setter, governance AI, UI admin, test Python locale, sintassi JavaScript e type-check Deno delle cinque Edge Functions.
+- PR #1 resta aperta in stato draft, head sul branch `fix/nextway-password-recovery`, base `main`; non è stata effettuata alcuna fusione.
+
+### Limiti e decisioni
+- Questa è una revisione statica del codice e dei contratti: non sostituisce test runtime RLS, test multiutente, test di concorrenza o verifica con dati di prova su Supabase.
+- Le migrazioni workspace, membership, RLS, Knowledge Base e governance AI presenti nel branch restano candidate e NON applicate.
+- Le Edge Functions aggiornate nel branch, inclusa la correzione CORS per localhost, non sono state ridistribuite.
+- Nessun workspace, membership, documento, prompt, criterio, Lead o messaggio creato o modificato durante la revisione.
+- Nessun deploy Supabase/Netlify, merge o modifica a `main`.
+- Resta bloccato il collaudo runtime amministrativo locale finché la Edge Function remota non riceverà la correzione CORS e il relativo deploy non sarà autorizzato.
+
+### Prossima fase
+1. Completare la revisione dei flussi di caricamento/indicizzazione e delle autorizzazioni Knowledge Base.
+2. Preparare una checklist di migrazioni in ordine, con precondizioni e rollback documentati.
+3. Pianificare test runtime controllati per due workspace e almeno tre ruoli (platform_admin, workspace_member, workspace_viewer), senza usare dati reali.
