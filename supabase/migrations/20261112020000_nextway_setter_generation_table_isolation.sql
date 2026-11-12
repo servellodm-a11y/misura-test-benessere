@@ -402,7 +402,7 @@ returns table (deleted_completed integer, deleted_abandoned_generating integer)
 language plpgsql
 security definer
 set search_path = pg_catalog, public
-as $
+as $$
 declare
   v_actor uuid := auth.uid();
   v_is_admin boolean := false;
@@ -434,7 +434,7 @@ begin
 
   return query select v_completed,v_generating;
 end;
-$;
+$$;
 
 revoke all on function public.nextway_prune_workspace_setter_generation_requests() from public,anon,service_role;
 grant execute on function public.nextway_prune_workspace_setter_generation_requests() to authenticated;
