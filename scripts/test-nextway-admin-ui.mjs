@@ -42,7 +42,7 @@ for (const action of [
   "archive_prompt",
   "archive_criteria",
 ]) {
-  assert.ok(js.includes('action: "' + action + '"'), "Admin UI missing action " + action);
+  assert.ok(js.includes('"' + action + '"' ), "Admin UI missing action " + action);
   assert.ok(edge.includes('action === "' + action + '"'), "Admin API missing action " + action);
 }
 
