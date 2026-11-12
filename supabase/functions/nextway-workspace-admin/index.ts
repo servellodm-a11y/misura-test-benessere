@@ -90,6 +90,34 @@ Deno.serve(async (req) => {
       return respond({ success: true, workspaces: data ?? [] }, 200, origin);
     }
 
+    if (action === "list_profiles") {
+      const { data: profiles, error: profilesError } = await admin.from("profiles")
+        .select("id,role,full_name")
+        .order("full_name", { ascending: true })
+        .limit(500);
+      if (profilesError) throw profilesError;
+      const ids = (profiles ?? []).map((profile) => profile.id).filter(Boolean);
+      const names = new Map<string, string>();
+      if (ids.length) {
+        const { data: partners, error: partnersError } = await admin.from("partner_details")
+          .select("profile_id,first_name,last_name")
+          .in("profile_id", ids);
+        if (partnersError) throw partnersError;
+        for (const partner of partners ?? []) {
+          const name = [partner.first_name, partner.last_name].filter(Boolean).join(" ").trim();
+          if (name) names.set(partner.profile_id, name);
+        }
+      }
+      return respond({
+        success: true,
+        profiles: (profiles ?? []).map((profile) => ({
+          id: profile.id,
+          role: profile.role,
+          name: String(profile.full_name || names.get(profile.id) || "Profilo senza nome"),
+        })),
+      }, 200, origin);
+    }
+
     if (action === "list_memberships") {
       if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
         return respond({ error: "workspace_id non valido" }, 400, origin);
