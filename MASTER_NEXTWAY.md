@@ -2378,3 +2378,95 @@ Valori confermati per la scheda di creazione:
 La console `nextway-admin.html` è stata precompilata con nome e chiave confermati. Il backend forza comunque `status: "draft"` alla creazione; l'attivazione è un'azione separata e amministrativa.
 
 **La conferma riguarda il nome e i valori iniziali, non costituisce ancora ordine di creazione del record.** Al momento di questo aggiornamento non è stato creato alcun workspace o membership su Supabase e non è stato eseguito alcun deploy. Prima della creazione occorre verificare che la console e la Edge Function aggiornata siano effettivamente pubblicate e autorizzate.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 19:10 (Europe/Rome)
+
+### Fonti e perimetro del controllo
+
+- Recuperato `MASTER_NEXTWAY.md` da `main` prima della modifica; blob SHA di partenza: `b408776be45c43d7bb96e6be6ac4e0494b30074c`.
+- HEAD di `main` verificato tramite Git ref: `a3fbec076221f0f043d60373e2864d7d07db30d7`, commit documentale `docs(nextway): record confirmed first workspace identity` (12-11-2026 07:30:18 UTC).
+- Esaminati i 12 commit più recenti. Tra quelli rilevanti: `a3fbec0` (decisione primo workspace), `b2ce72e` (precompilazione dei dati Zinzino Italia nella console), `cd813d8` (piano pre-release), `c46a789` (console amministrativa e Knowledge Base), `9dcf333` (test UI amministrativa), `18b38e1` (caricamento directory profili prima delle etichette membership).
+- Albero Git ricorsivo di `main` recuperato senza troncamento (`truncated=false`). Confermata la presenza dei file applicativi, script di test, diagnostiche SQL, migrazioni e sei directory Edge Function: `nextway-ai-setter`, `nextway-conversion-provisioning`, `nextway-knowledge-ingest`, `nextway-knowledge-upload`, `nextway-search`, `nextway-workspace-admin`.
+- File sorgente effettivamente recuperati da GitHub:
+  - `nextway-admin.html` — blob `34b27774837c57b899487c7327b3c29a210f5c6e`;
+  - `nextway-admin.js` — blob `3a1bc7a9ff58a9319ff0179d842c363e4d0d4b6b`;
+  - `nextway-ai.html` — blob `1074f2f146ddc6794e98f3109abb6e7d6470d61d`;
+  - `nextway-cloud.js` — blob `7a93cf3ead6ecdd423cdbc074c86f6dbb1c2df64`;
+  - `supabase/functions/nextway-workspace-admin/index.ts` — blob `11bcc7d9c8439dc6061e801384450853a19fc015`;
+  - `supabase/migrations/20261112020000_nextway_setter_generation_table_isolation.sql` — blob `55d902da44f318572c98b6a7f408c5cefe319fac`;
+  - `.github/workflows/nextway-static-validation.yml` — blob `07380290955939d265a739fe6ebb2f9cfb766eae`.
+- La console HTML contiene i valori iniziali `Zinzino Italia`, `zinzino-italia`, paese `Italia`, lingua `it`; il pulsante crea esplicitamente il workspace in stato bozza. Il testo della pagina precisa che l'area è riservata a `platform_admin` e che non crea account, non invia inviti e non spedisce messaggi.
+- Il codice browser usa la Edge Function `nextway-workspace-admin`; le azioni presenti nel client e nel sorgente server comprendono creazione/elenco/aggiornamento workspace, elenco profili, elenco/aggiornamento membership, elenco documenti e approvazione/rifiuto dei documenti. Il controllo statico del file browser non ha rilevato uso di `innerHTML`; i contenuti dinamici sono inseriti con API DOM testuali. Questo è un controllo del sorgente, non un test runtime.
+- `nextway-ai.html` contiene il collegamento all'area amministrativa; `nextway-cloud.js` contiene l'integrazione Supabase JS. La presenza dei file non prova che la versione corrente sia pubblicata su Netlify.
+
+### GitHub Actions — ultimo risultato disponibile
+
+- Run più recente: **#251**, ID `43175706330`, workflow `NEXTWAY static validation`, evento `push`, conclusione **SUCCESS**, commit `b2ce72e4212f41334bbbcb542722c380bad29b08` (precompilazione dei valori del primo workspace).
+- Job `validate`: completato con successo. Sono passati i controlli statici per audit, conversion provisioning, sicurezza Edge Functions, rate limit/idempotenza SQL, Knowledge Base, Knowledge Ingest/Upload, multi-workspace, workspace admin, associazione dati, membership, RLS workspace-scoped, Setter generation, isolamento tabelle legacy/workspace, Lead creation e UI; sono passati anche `node --check` per gli script browser e i cinque `deno check` per AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin.
+- Run #250 (`43174338611`) sul commit `9dcf333` è anch'essa SUCCESS. Le run #246–#249 della sequenza precedente erano FAILURE; la run #251 è il risultato verde più recente osservato.
+- HEAD `a3fbec0` è successivo alla run #251 ed è un commit esclusivamente documentale su `MASTER_NEXTWAY.md`. Il workflow filtra i percorsi applicativi e non include il MASTER nei trigger `paths`; quindi non si dichiara una nuova CI sul commit documentale. La CI #251 valida il commit di codice `b2ce72e`, non il comportamento runtime di Supabase.
+- La CI non applica migrazioni, non verifica i secrets live e non certifica il deploy delle Edge Functions o di Netlify.
+
+### Supabase, schema, RLS e RPC — separazione delle evidenze
+
+**Evidenze live precedentemente fornite dall'utente (non interrogate nuovamente in questo controllo):**
+- Le tabelle workspace `nextway_workspaces`, `nextway_workspace_prompts`, `nextway_workspace_prospect_criteria` e `nextway_workspace_memberships` risultavano create con RLS attiva. Le policy amministrative e le RPC di attivazione erano state verificate nelle sessioni precedenti.
+- `nextway_has_workspace_access(uuid,text[])` risultava con `search_path=pg_catalog, public`, esecuzione consentita ad `authenticated` e `service_role`, negata ad `anon`. La funzione `nextway_is_platform_admin()` risultava con search path fissato.
+- La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` era stata eseguita dall'utente con esito `Success. No rows returned`. Il postflight riportato indicava la nuova tabella `nextway_setter_workspace_generation_requests` presente, RLS attiva, accesso diretto revocato e le quattro RPC correnti collegate alla nuova tabella. La tabella legacy `nextway_setter_generation_requests` è stata preservata e non va confusa con la nuova tabella workspace.
+- Per le quattro RPC di generazione e la funzione di retention (`nextway_begin_setter_generation`, `nextway_store_setter_generation_output`, `nextway_get_staged_setter_output`, `nextway_complete_setter_generation`, `nextway_prune_workspace_setter_generation_requests`) il controllo ACL riportato dall'utente era 5/5: `security_definer=true`, search path fissato, `authenticated_execute=true`, `anon_execute=false`, `service_role_execute=false`. È una verifica dei metadati/privilegi, non un collaudo runtime.
+- La tabella core `nextway_leads` risultava presente con RLS attiva e policy owner/platform_admin nell'ultima diagnostica CRM disponibile. Le tabelle `nextway_lead_activities` e `nextway_lead_conversion_requests` risultavano assenti in quella diagnostica precedente; non è stata eseguita una nuova lettura live oggi.
+- Le migrazioni CRM 008–014 e il bundle `supabase/deploy/nextway_crm_apply.sql` non risultano applicati nella procedura corrente: l'utente ha chiesto prima un backup e la sequenza è stata fermata prima di qualsiasi esecuzione SQL.
+
+**Limiti di questo controllo:**
+- Non è disponibile qui una connessione diretta al progetto Supabase; non sono state interrogate tabelle, policy, RPC, bucket o secrets live il 12 novembre alle 19:10.
+- Le evidenze sopra sono riportate come risultati precedenti forniti dall'utente e non come nuove verifiche di questa esecuzione.
+- Nessun dato, schema, account, membership, workspace o documento Knowledge Base è stato creato o modificato durante questo aggiornamento documentale.
+
+### Edge Functions, integrazioni e pubblicazione
+
+- I sei sorgenti Edge Function sono presenti nel repository. Il workflow #251 esegue type-check Deno su cinque funzioni: AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin. `nextway-search` è presente nell'albero, ma non compare tra i cinque type-check del workflow corrente.
+- Il sorgente corrente di `nextway-workspace-admin` include le azioni workspace, membership e revisione documenti e controlli amministrativi; la console client invia le richieste a tale endpoint. Le nuove azioni aggiunte al repository non sono state collaudate live in questa esecuzione.
+- Un deploy precedente di `nextway-workspace-admin` e di `nextway-conversion-provisioning` era stato riportato dall'utente; non è stata verificata qui la versione attualmente pubblicata. Lo stato del deploy della versione corrente con le azioni membership/Knowledge Base resta quindi **ESEGUITO MA NON VERIFICATO** per le funzioni già dichiarate deployate; per le altre funzioni il deploy resta **DA COMPLETARE/VERIFICARE**.
+- La console amministrativa e il collegamento da `nextway-ai.html` sono verificati nel repository, non su Netlify. Il test runtime di creazione workspace, membership, upload, approvazione e ricerca documentale non è stato eseguito in questa sessione.
+- Restano valide le integrazioni architetturali documentate con Supabase Auth/Database/Storage/Edge Functions, Supabase JS nel browser e OpenAI lato server. Nessuna chiave, credenziale o token è stato inserito nel MASTER.
+- Il blocco operativo Netlify fino al 4 dicembre 2026 è una decisione precedente dell'utente, mantenuta invariata; nessun deploy Netlify è stato effettuato.
+
+### Decisione amministrativa e attività della giornata
+
+- L'utente ha confermato il primo workspace operativo: nome `Zinzino Italia`, chiave `zinzino-italia`, mercato Italia, lingua `it`, stato iniziale `draft`.
+- La conferma riguarda i valori e la precompilazione della console; non equivale a un ordine di creazione del record. Non è documentata una creazione live del workspace o di membership.
+- Attività terminale riferita dall'utente il 12 novembre: `supabase --version` → `command not found`; `brew --version` → `zsh: command not found: brew`; lo script Homebrew standard ha risposto `Homebrew on macOS is only supported on Apple Silicon processors!`; `uname -m` → `x86_64` (Mac Intel).
+- Il controllo richiesto di `node -v` e `npm -v` non ha ancora un risultato fornito in questa conversazione. Non si presume che Node.js o npm siano installati.
+- Non è stato creato né verificato un dump/backup. L'installazione della CLI e l'esportazione restano ferme; il bundle CRM non è stato eseguito. L'avviso di Supabase sulle operazioni potenzialmente distruttive è stato valutato sul testo SQL caricato dall'utente, ma la revisione statica non sostituisce backup e preflight live.
+
+### Matrice di stato
+
+- Repository `main`, inventario file e MASTER letto prima dell'aggiornamento: **COMPLETATO E VERIFICATO**.
+- Console amministrativa e integrazione client/API nel sorgente GitHub: **COMPLETATO E VERIFICATO** limitatamente ai file e ai controlli statici.
+- Decisione e precompilazione del workspace Zinzino Italia: **COMPLETATO E VERIFICATO** nel repository; creazione del record live: **DA COMPLETARE**.
+- CI GitHub Actions #251: **COMPLETATO E VERIFICATO** per il job statico/type-check sul commit `b2ce72e`; runtime Supabase/Netlify: non coperto.
+- Schema workspace, RLS, policy e RPC: **ESEGUITO MA NON VERIFICATO** in questo controllo; sono disponibili precedenti risultati live forniti dall'utente, non riletti oggi.
+- Isolamento tabella AI Setter e ACL delle cinque funzioni: **ESEGUITO MA NON VERIFICATO** in questo controllo; esito positivo riportato dall'utente nelle sessioni precedenti.
+- CRM Lead core e policy: **ESEGUITO MA NON VERIFICATO** in questo controllo; ultima diagnostica live precedente positiva per tabella/RLS/policy.
+- Migrazioni CRM 008–014: **BLOCCATO** fino a backup verificato, diagnostica prerequisiti aggiornata e sequenza controllata.
+- Supabase CLI e backup database: **BLOCCATO** sul Mac Intel; `node -v`/`npm -v` ancora da acquisire e nessun dump prodotto.
+- Edge Functions: sorgenti e type-check CI delle cinque funzioni elencate **COMPLETATO E VERIFICATO**; deploy della versione corrente **ESEGUITO MA NON VERIFICATO** per le due funzioni precedentemente dichiarate deployate, restante stato deploy **DA COMPLETARE/VERIFICARE**.
+- Console live, membership, documenti KB e test end-to-end: **DA COMPLETARE**.
+- Netlify produzione: **BLOCCATO** fino al 4 dicembre 2026 secondo la decisione precedente dell'utente.
+
+### Prossimi passi operativi
+
+1. Acquisire l'output di `node -v` e `npm -v`; scegliere un metodo CLI/strumento PostgreSQL realmente compatibile con macOS Intel, senza insistere sull'installer Homebrew Apple Silicon.
+2. Produrre un'esportazione locale del database e verificarne presenza, dimensione e leggibilità prima di qualsiasi migrazione.
+3. Eseguire la diagnostica CRM read-only dei prerequisiti sul progetto corretto; non ripetere i controlli workspace già documentati se non vi sono cambiamenti.
+4. Solo dopo backup e preflight, definire e applicare le migrazioni CRM autorizzate in modo controllato, senza eseguire il bundle 008–014 in blocco sulla sola base della revisione statica.
+5. Verificare quale versione delle Edge Functions sia effettivamente deployata; pubblicare la versione aggiornata solo con autorizzazione operativa separata e poi collaudare membership e Knowledge Base.
+6. Creare il workspace Zinzino Italia in bozza soltanto dopo aver verificato la console e la Edge Function live; non creare account o inviare inviti automaticamente.
+7. Mantenere sospesi i deploy Netlify di produzione fino alla data già concordata e completare il piano di test runtime con account distinti prima del rilascio ai partner.
+
+### Registro cronologico del MASTER
+
+- 12-11-2026, 19:10 Europe/Rome — verificati HEAD e commit recenti di `main`, inventario ricorsivo dei file, sorgenti console/API, workflow e CI #251; registrati i valori confermati del primo workspace e l'esito dei tentativi CLI/Homebrew su Mac Intel. Distinte le evidenze GitHub correnti dai risultati Supabase precedentemente forniti dall'utente. Modificato esclusivamente `MASTER_NEXTWAY.md`.
+
