@@ -2794,3 +2794,34 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - **Stato: piano preparato, test runtime non eseguito.** Non è disponibile in questo passaggio una connessione autorizzata a un database di staging; non è stata usata né interrogata la produzione.
 - Nessuna migrazione applicata, nessun dato reale modificato, nessun account o invito creato, nessun deploy o merge.
 - Prossimo requisito: predisporre un progetto Supabase staging separato e autorizzare esplicitamente il collaudo runtime su quel progetto. Il piano non autorizza modifiche o deploy in produzione.
+
+
+---
+
+## Ricognizione ambiente staging Supabase — 12 novembre 2026, ore 16:22 CET
+
+### Verifiche repository/GitHub
+- Ricontrollati il branch `fix/nextway-password-recovery`, il MASTER, la checklist di rilascio, il piano collaudo concorrenza, la directory `supabase/`, la directory `supabase/migrations/` e il README Supabase.
+- Il piano `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md` richiede esplicitamente un progetto Supabase di staging distinto dalla produzione e dichiara il test runtime non eseguito.
+- La checklist `docs/NEXTWAY-RELEASE-CHECKLIST.md` prescrive backup, verifica dello schema e cronologia migrazioni prima di qualunque applicazione.
+- Nel branch non risulta presente `supabase/config.toml`; la directory Supabase contiene README, funzioni, migrazioni e materiali di supporto, ma nessuna configurazione locale che identifichi un progetto staging.
+- Il README Supabase descrive una procedura riferita al progetto da selezionare manualmente e non identifica un ambiente staging.
+- Su GitHub risultano i soli branch `main` e `fix/nextway-password-recovery`; non è presente un branch denominato staging. Questo dato non dimostra quanti progetti cloud Supabase esistano.
+- Nessuna integrazione Supabase amministrativa è disponibile in questa sessione per interrogare l'elenco dei progetti cloud dell'account.
+
+### Conclusione verificabile
+- **Staging non documentato e non verificato come esistente.** Non è corretto dichiarare che non esista in assoluto: il repository e gli strumenti attualmente disponibili non consentono di accertarlo nell'account Supabase.
+- Non è stata aperta né interrogata la produzione durante questa ricognizione; nessun progetto cloud è stato creato o modificato.
+
+### Prossimo percorso, senza costi o modifiche implicite
+1. Valutare prima un ambiente locale isolato, se Docker e Supabase CLI sono disponibili; non sono ancora stati verificati su questo Mac.
+2. Se il locale non è praticabile, verificare nel pannello Supabase se il piano attuale consente un secondo progetto gratuito e quali limiti/costi comporta, prima di crearne uno.
+3. Solo dopo identificazione certa dello staging, predisporre schema e migrazioni selezionate e svolgere i test con fixture sintetiche.
+4. Non collegare mai il test harness al progetto di produzione; nessun deploy, migrazione o spesa senza autorizzazione specifica.
+
+### Stato
+- Ricognizione GitHub/repository completata.
+- Esistenza di un progetto cloud staging: non verificabile dagli strumenti attualmente disponibili.
+- Ambiente locale Supabase: da valutare; nessuna verifica Docker/CLI eseguita.
+- Test runtime concorrenti: non eseguiti.
+- PR #1 resta aperta draft; `main` invariato.
