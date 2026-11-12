@@ -12,6 +12,8 @@ on:
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/functions/nextway-workspace-admin/**"
       - "nextway-ai.html"
+      - "nextway-admin.html"
+      - "nextway-admin.js"
       - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
@@ -29,6 +31,7 @@ on:
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-admin-ui.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -104,6 +107,10 @@ jobs:
         run: node scripts/test-nextway-lead-creation-workspace.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
+      - name: Validate NEXTWAY platform admin UI contract
+        run: node scripts/test-nextway-admin-ui.mjs
+      - name: Syntax-check NEXTWAY platform admin browser script
+        run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
         run: node --check nextway-setter.js
       - name: Setup Deno
