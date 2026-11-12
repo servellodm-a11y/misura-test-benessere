@@ -14,38 +14,36 @@ const edge = readFileSync(
   "utf8",
 );
 
-// RPC boundary: authenticated caller, explicit workspace, narrow role allowlist,
-// SECURITY DEFINER with a fixed search_path and no anonymous execution.
-assert.match(migration, /nextway_get_active_setter_governance\\s*\\(/i);
-assert.match(migration, /security definer[\\s\\S]*?set search_path = pg_catalog, public/i);
-assert.match(migration, /auth\\.uid\\(\\) is null/i);
+// RPC boundary and fixed execution context.
+assert.match(migration, /create or replace function public\.nextway_get_active_setter_governance\s*\(/i);
+assert.match(migration, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
+assert.match(migration, /auth\.uid\(\) is null/i);
 assert.match(migration, /p_workspace_id is null/i);
-assert.match(migration, /nextway_has_workspace_access\\s*\\(/i);
+assert.match(migration, /public\.nextway_has_workspace_access\s*\(/i);
 for (const role of ["workspace_owner", "workspace_admin", "workspace_manager", "workspace_member"]) {
   assert.ok(migration.includes("'" + role + "'"), "RPC missing allowed role " + role);
 }
-assert.doesNotMatch(migration, /workspace_viewer/i, "read-only viewers must not receive Setter governance access");
-assert.match(migration, /where workspace_id = p_workspace_id[\\s\\S]*?and status = 'active'/i);
-assert.match(migration, /revoke all on function public\\.nextway_get_active_setter_governance\\(uuid\\)[\\s\\S]*?from public, anon/i);
-assert.match(migration, /grant execute on function public\\.nextway_get_active_setter_governance\\(uuid\\)[\\s\\S]*?to authenticated/i);
-assert.doesNotMatch(migration, /grant execute[\\s\\S]*?to anon/i);
+assert.doesNotMatch(migration, /workspace_viewer/i);
+assert.match(migration, /where workspace_id = p_workspace_id[\s\S]*?and status = 'active'/i);
+assert.match(migration, /revoke all on function public\.nextway_get_active_setter_governance\(uuid\)[\s\S]*?from public, anon/i);
+assert.match(migration, /grant execute on function public\.nextway_get_active_setter_governance\(uuid\)[\s\S]*?to authenticated/i);
+assert.doesNotMatch(migration, /grant execute[\s\S]*?to anon/i);
 
-// Verify the helper called by the RPC actually enforces current membership,
-// active workspace state and the caller's user id (not just its function name).
-assert.match(membership, /create or replace function public\\.nextway_has_workspace_access/i);
-assert.match(membership, /auth\\.uid\\(\\) is not null/i);
-assert.match(membership, /m\\.user_id = auth\\.uid\\(\\)/i);
-assert.match(membership, /m\\.membership_status = 'active'/i);
-assert.match(membership, /w\\.status = 'active'/i);
-assert.match(membership, /m\\.workspace_role = any/i);
-assert.match(membership, /public\\.nextway_is_platform_admin\\(\\)/i);
+// Validate the actual helper body, not merely its invocation.
+assert.match(membership, /create or replace function public\.nextway_has_workspace_access/i);
+assert.match(membership, /auth\.uid\(\) is not null/i);
+assert.match(membership, /m\.user_id = auth\.uid\(\)/i);
+assert.match(membership, /m\.membership_status = 'active'/i);
+assert.match(membership, /w\.status = 'active'/i);
+assert.match(membership, /m\.workspace_role = any/i);
+assert.match(membership, /public\.nextway_is_platform_admin\(\)/i);
+assert.match(membership, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
 
-// Edge integration: fetches governance for the conversation's workspace before
-// claiming generation; failure must stop generation and avoid a provider call.
-assert.match(edge, /objective, workspace_id/);
+// Edge integration: workspace governance must be loaded before generation claim.
+assert.match(edge, /\.select\([\s\S]*?workspace_id/);
 assert.match(edge, /nextway_get_active_setter_governance/);
 assert.match(edge, /Istruzioni e criteri del workspace temporaneamente non disponibili/);
-assert.match(edge, /qualification_criteria:\\s*activeQualificationCriteria/);
+assert.match(edge, /qualification_criteria:\s*activeQualificationCriteria/);
 assert.match(edge, /approvedWorkspaceInstructions/);
 assert.ok(edge.includes("String(item.prompt_body).slice(0, 6000)"));
 assert.ok(edge.includes("serializedConfig.length <= 5000"));
