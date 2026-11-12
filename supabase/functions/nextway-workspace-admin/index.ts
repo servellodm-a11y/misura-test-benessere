@@ -5,8 +5,18 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((v) => v.trim())
+  .filter(Boolean);
+
+// Consente l'interfaccia locale di sviluppo senza rimuovere le origini configurate.
+// L'autorizzazione CORS non sostituisce i controlli server-side di autenticazione e ruolo.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const keyPattern = /^[a-z0-9][a-z0-9_-]{1,79}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 100_000;
