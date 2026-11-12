@@ -31,6 +31,7 @@ on:
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
@@ -61,6 +62,7 @@ on:
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - ".github/workflows/nextway-static-validation.yml"
@@ -110,6 +112,8 @@ jobs:
         run: node scripts/test-nextway-lead-creation-workspace.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
+      - name: Validate NEXTWAY AI Setter governance integration
+        run: node scripts/test-nextway-setter-governance.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
