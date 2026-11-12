@@ -2741,3 +2741,35 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Nessuna migrazione applicata, nessun deploy Supabase/Netlify, nessun merge e nessuna modifica a `main`.
 - Nessuna richiesta di conversione attivata, nessun account creato e nessuna email/invito inviato.
 - Prossimo passo: preparare correzione transazionale e test statici/runtime per il controllo dello stato Lead prima della conversione; rendere privacy-safe la gestione degli errori. Le modifiche restano sul branch e non autorizzano deploy o migrazioni.
+
+
+---
+
+## Correzione integrità provisioning conversioni — 12 novembre 2026
+
+### Correzioni implementate sul branch
+
+- Nuova migrazione candidata `supabase/migrations/20261112170000_nextway_conversion_activation_integrity.sql`.
+- La RPC `nextway_finalize_conversion_activation` blocca la riga Lead con `SELECT ... FOR UPDATE` e verifica che ID, proprietario, stato `In valutazione` e `archived_at IS NULL` siano ancora validi.
+- La transizione Lead a `Convertito cliente` / `Convertito partner` viene eseguita e verificata prima della creazione del record di destinazione. Se non aggiorna esattamente una riga, la funzione solleva un errore e PostgreSQL annulla l'intera transazione.
+- Creazione/aggiornamento di `clients` o `profiles/partner_details` e passaggio della richiesta a `activated` restano nella stessa transazione SQL. Un errore in qualsiasi passaggio annulla anche il cambio stato del Lead.
+- La RPC conserva `SECURITY DEFINER`, `search_path` esplicito e privilegi EXECUTE riservati a `service_role`.
+- La Edge Function non restituisce più il messaggio originale delle eccezioni. Risponde con testo generico, HTTP 500 e `request_id`; i log registrano soltanto request ID e codice errore sanitizzato. Anche il log della pulizia compensativa Auth non registra il messaggio grezzo.
+- Test di regressione aggiornati in `scripts/test-nextway-provisioning-security.mjs` e `scripts/test-nextway-local-static.py`: lock Lead, verifica stato/owner/archivio, ordine transizione-creazione, atomicità, grant service_role e assenza di messaggi di errore grezzi.
+
+### Commit della correzione
+
+- Edge Function error handling: `44dc8e3ab2c1cbba8b9f937edafea72be482aa9c`.
+- Migrazione candidata: `60e261aec8c2693ff3f219fbb5308a34d5fe532f`.
+- Test provisioning: `1b595e17a26f376118c78a03cf71414a89d99a15`.
+- Test statici Python locale: `bc594bf33fb2e2d58da1b6444e050147d7f91891`.
+
+### Stato di verifica e limiti
+
+- Correzioni e test sono presenti nel branch `fix/nextway-password-recovery`; esito CI sul nuovo HEAD da attendere/verificare.
+- I test aggiunti sono controlli statici del contratto sorgente. Non sostituiscono una prova runtime concorrente su PostgreSQL con due sessioni (finalizzazione contro archiviazione/cambio stato).
+- Migrazione soltanto preparata nel repository: **non applicata** a Supabase.
+- Nessun invito Auth, account, cliente, partner o Lead reale creato/modificato.
+- Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`.
+- PR #1 resta draft; non renderla pronta e non effettuare merge.
+- Il vincolo di non intervenire su Netlify produzione prima del 4 dicembre 2026 resta invariato.
