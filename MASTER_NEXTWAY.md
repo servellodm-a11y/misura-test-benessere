@@ -2601,3 +2601,27 @@ Esito da registrare:
 ### Prossima azione minima
 Aprire `http://localhost:8000/nextway-admin.html` nel browser in cui NEXTWAY ha già una sessione valida e verificare se l'elenco profili viene popolato. Se la pagina non è disponibile localmente, prima avviare il server nella cartella repository già indicata nelle istruzioni operative; non eseguire altri reset email.
 
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — test statici locali compatibili con Python 3.9
+
+### Motivo
+Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece presente Python 3.9.6. I test JavaScript esistenti restano invariati e continuano a essere eseguiti da GitHub Actions.
+
+### Adattamento locale
+- Aggiunto `scripts/test-nextway-local-static.py`, compatibile con Python 3.9.
+- Il nuovo script riproduce i tre gruppi di controlli locali già presenti nei test Node:
+  1. allow-list CORS delle sei Edge Functions;
+  2. contratto di sicurezza dell'API workspace-admin e delle due RPC SQL di attivazione;
+  3. struttura della console admin, azioni UI/API, campi workspace non precompilati e rendering sicuro.
+- Lo script legge esclusivamente i file del repository: non contatta Supabase, non modifica dati o file, non invia email e non esegue deploy.
+- Comando locale: `python3 scripts/test-nextway-local-static.py`.
+- Commit del nuovo script: `af90151f879612d979b33ff5672822bd251ca4cc`.
+
+### Stato e limiti
+- Modifica confinata al branch `fix/nextway-password-recovery`; nessun intervento su `main`.
+- Nessun deploy Supabase/Netlify, merge, migrazione o modifica live.
+- I test Node e i type-check Deno restano coperti da GitHub Actions; il nuovo script Python è un ausilio per la verifica statica locale sul Mac, non sostituisce i type-check Deno né un collaudo runtime.
+- Prossimo passo: aggiornare la copia locale con `git pull --ff-only origin fix/nextway-password-recovery`, poi eseguire il comando Python indicato sopra e riportare l'output.
