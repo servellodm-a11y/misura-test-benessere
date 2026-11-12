@@ -2360,3 +2360,21 @@ La stessa Edge Function ora include anche `list_profiles` per offrire alla conso
 - Nessun deploy Edge Function o Netlify eseguito.
 - Il test runtime di upload, approvazione, ricerca documentale e AI Setter resta da eseguire dopo deploy autorizzato e configurazione dei secrets.
 - Il rilascio resta bloccato fino a workspace reale, membership reali, documenti ufficiali approvati, test runtime e verifica isolamento con account distinti.
+
+
+---
+
+## Decisione amministrativa — 12 novembre 2026 — primo workspace
+
+L'amministratore ha confermato che il primo workspace operativo dovrà chiamarsi **Zinzino Italia**.
+
+Valori confermati per la scheda di creazione:
+- nome: `Zinzino Italia`;
+- chiave: `zinzino-italia`;
+- paese mercato: Italia;
+- lingua: `it`;
+- stato iniziale: `draft`.
+
+La console `nextway-admin.html` è stata precompilata con nome e chiave confermati. Il backend forza comunque `status: "draft"` alla creazione; l'attivazione è un'azione separata e amministrativa.
+
+**La conferma riguarda il nome e i valori iniziali, non costituisce ancora ordine di creazione del record.** Al momento di questo aggiornamento non è stato creato alcun workspace o membership su Supabase e non è stato eseguito alcun deploy. Prima della creazione occorre verificare che la console e la Edge Function aggiornata siano effettivamente pubblicate e autorizzate.
