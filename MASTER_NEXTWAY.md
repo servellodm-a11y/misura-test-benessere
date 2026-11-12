@@ -2442,7 +2442,7 @@ Commit:
 - Aggiunta la migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`, con RPC read-only `nextway_get_active_setter_governance(uuid)`.
 - La RPC restituisce solo prompt e criteri attivi del workspace, dopo aver verificato l'utente autenticato e la membership attiva tramite `nextway_has_workspace_access`; il ruolo `workspace_viewer` resta escluso perché in sola lettura.
 - Le bozze e gli elementi archiviati non vengono restituiti; non viene concessa lettura diretta delle tabelle amministrative.
-- La Edge Function AI Setter legge `workspace_id` dalla conversazione, recupera la governance approvata e integra le istruzioni nel prompt e i criteri nel contesto strutturato.
+- La Edge Function AI Setter legge `workspace_id` dalla conversazione, recupera la governance approvata e integra nel prompt al massimo 5 istruzioni (6.000 caratteri ciascuna) e nel contesto al massimo 5 criteri, con configurazioni JSON limitate a 5.000 caratteri.
 - In caso di errore nel recupero della governance di un workspace, la generazione si interrompe con HTTP 503 (fail-closed). Le conversazioni legacy senza workspace mantengono il comportamento standard.
 - Le istruzioni approvate non possono prevalere sulle regole di sicurezza e sul divieto di pressioni o promesse di risultati.
 
