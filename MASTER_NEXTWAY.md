@@ -2206,3 +2206,49 @@ La migrazione `20261111240000_nextway_setter_generation_workspace.sql` usava `CR
 - Nessun deploy Edge Function e nessun deploy Netlify.
 - Nessun record applicativo/test creato o modificato.
 - Prossimo passo: attendere CI verde, poi applicare la migrazione correttiva nel Supabase SQL Editor e fare un postflight mirato su tabella nuova, colonne, RLS, ACL, RPC e retention. Solo dopo preparare il collaudo runtime.
+
+
+---
+
+## Rettifica e aggiornamento — 12 novembre 2026 — isolamento AI Setter e ACL RPC
+
+Questa sezione corregge esplicitamente la ricostruzione iniziale del conflitto descritta nell'addendum precedente.
+
+### Rettifica sulla tabella preesistente
+
+La diagnostica SQL eseguita il 12 novembre sulla tabella preesistente `public.nextway_setter_generation_requests` ha restituito queste colonne:
+
+- `id`, `owner_profile_id`, `conversation_id`, `idempotency_key`, `status`
+- `generated_output`, `cached_response`, `claimed_at`, `completed_at`
+- `created_at`, `updated_at`
+
+La tabella era presente, vuota, con RLS attivo e senza policy; la diagnostica non ha rilevato funzioni SQL dipendenti. **Non** aveva la struttura legacy ipotizzata in precedenza (`user_id`, `response`). Pertanto le precedenti affermazioni che descrivevano quella tabella come schema legacy `user_id/response` e che dichiaravano preservata una simile struttura sono da considerarsi errate e superate.
+
+La migrazione correttiva non ha cancellato né riscritto la tabella preesistente. Ha creato la tabella distinta `public.nextway_setter_workspace_generation_requests`, con le colonne workspace attese, e ha ricollegato a quest'ultima le quattro RPC correnti. La tabella preesistente resta vuota e senza policy; non va confusa con la tabella effettivamente usata dalle RPC aggiornate.
+
+### Esito migrazione correttiva
+
+- Migrazione: `20261112020000_nextway_setter_generation_table_isolation.sql`.
+- Esito dell'esecuzione utente in Supabase SQL Editor: `Success. No rows returned`.
+- Postflight: nuova tabella presente; RLS attivo; accesso diretto revocato; colonne richieste presenti; tutte le quattro RPC collegate alla nuova tabella; funzione retention presente.
+- Nessun record di test o dato applicativo creato.
+- Nessun deploy Edge Function o Netlify eseguito.
+
+### Esito controllo ACL — 12 novembre 2026
+
+Controllo read-only eseguito sulle seguenti funzioni:
+- `nextway_begin_setter_generation(uuid,uuid)`
+- `nextway_store_setter_generation_output(uuid,jsonb)`
+- `nextway_get_staged_setter_output(uuid)`
+- `nextway_complete_setter_generation(uuid,text,text,text,text,text)`
+- `nextway_prune_workspace_setter_generation_requests()`
+
+Risultato restituito dall'utente: per tutte e cinque le funzioni `exists=true`, `authenticated_execute=true`, `anon_execute=false`, `service_role_execute=false`, `security_definer=true`, `search_path_fixed=true`. **5 funzioni su 5 conformi**. Il controllo ha verificato i metadati e i privilegi PostgreSQL; non equivale a un collaudo runtime delle funzioni.
+
+### CI e prossima fase
+
+- GitHub Actions run `43170117140` — workflow `NEXTWAY static validation`: **SUCCESS**, commit `aa62b53608a2f8c7bc9a478778592ad3808b59ad`.
+- La CI copre test statici, controlli contrattuali e type-check Deno; non dimostra l'esecuzione runtime delle RPC, delle Edge Functions o dell'interfaccia.
+- Il successivo aggiornamento documentale del MASTER non è incluso in quel run; non sono state apportate modifiche applicative dopo il commit verificato.
+- Prossimi lavori: audit integrato del frontend e delle Edge Functions rispetto allo schema workspace attuale; aggiornamento del piano di collaudo per riflettere le nuove RPC e la separazione delle tabelle; verifica read-only dei deploy/secrets e delle dipendenze operative dove possibile; definizione del test runtime minimo senza creare record fittizi o inviare messaggi.
+- Nessun deploy Edge Function o Netlify va eseguito senza autorizzazione esplicita separata. Il vincolo di congelamento Netlify fino al 4 dicembre 2026 resta invariato.
