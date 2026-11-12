@@ -200,26 +200,26 @@ def test_conversion_integrity():
 
     contains(edge, "function safeErrorCode(error: unknown)",
              "Sanitizzazione codice errore provisioning assente")
-    excludes(edge, r"safeMessage\\(error\\)|error\\.message|deleteError\\.message",
+    excludes(edge, r"safeMessage\(error\)|error\.message|deleteError\.message",
              "I dettagli grezzi delle eccezioni non devono essere esposti o registrati")
     contains(edge, "Operazione di provisioning non completata",
              "Messaggio generico di errore provisioning assente")
     contains(edge, "request_id: requestId",
              "Identificativo correlazione richiesta assente")
 
-    matches(migration, r"from public\\.nextway_leads l[\\s\\S]*?for update",
+    matches(migration, r"from public\.nextway_leads l[\s\S]*?for update",
             "Lock pessimista del Lead assente")
-    matches(migration, r"l\\.owner_profile_id = r\\.owner_profile_id[\\s\\S]*?l\\.status = 'In valutazione'[\\s\\S]*?l\\.archived_at is null",
+    matches(migration, r"l\.owner_profile_id = r\.owner_profile_id[\s\S]*?l\.status = 'In valutazione'[\s\S]*?l\.archived_at is null",
             "Verifica stato/owner/archivio del Lead assente")
-    matches(migration, r"update public\\.nextway_leads[\\s\\S]*?returning id into v_lead_id[\\s\\S]*?if v_lead_id is null then[\\s\\S]*?raise exception",
+    matches(migration, r"update public\.nextway_leads[\s\S]*?returning id into v_lead_id[\s\S]*?if v_lead_id is null then[\s\S]*?raise exception",
             "La transizione Lead deve essere verificata e atomica")
     update_position = migration.index("update public.nextway_leads")
     partner_position = migration.index("insert into public.partner_details")
     client_position = migration.index("insert into public.clients")
     require(update_position < partner_position and update_position < client_position,
             "I record cliente/partner devono essere creati solo dopo la transizione Lead")
-    matches(migration, r"begin;[\\s\\S]*?commit;", "Migrazione conversione non transazionale")
-    matches(migration, r"grant execute on function public\\.nextway_finalize_conversion_activation\\(uuid, uuid, uuid\\)\\s+to service_role",
+    matches(migration, r"begin;[\s\S]*?commit;", "Migrazione conversione non transazionale")
+    matches(migration, r"grant execute on function public\.nextway_finalize_conversion_activation\(uuid, uuid, uuid\)\s+to service_role",
             "Grant service_role per finalizzazione assente")
     excludes(migration, r"grant execute[^;]*authenticated",
              "La finalizzazione non deve concedere execute ad authenticated", re.I)
@@ -236,7 +236,7 @@ def main():
     except (AssertionError, OSError, UnicodeError) as error:
         print("NEXTWAY LOCAL STATIC: FAIL — " + str(error), file=sys.stderr)
         return 1
-    print("NEXTWAY LOCAL STATIC: tutti e tre i gruppi di controlli superati.")
+    print("NEXTWAY LOCAL STATIC: tutti e quattro i gruppi di controlli superati.")
     return 0
 
 
