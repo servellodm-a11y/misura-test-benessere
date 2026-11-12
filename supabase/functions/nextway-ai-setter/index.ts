@@ -305,42 +305,6 @@ Deno.serve(async (req) => {
       }, 404, responseOrigin);
     }
 
-    // Claim idempotente condiviso nel database, dopo i controlli di accesso al prospect.
-    const { data: claimRows, error: claimError } = await supabase.rpc(
-      "nextway_begin_setter_generation",
-      {
-        p_conversation_id: conversationId,
-        p_idempotency_key: requestId,
-      },
-    );
-    const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
-    if (claimError || !claim) {
-      logSafeFailure("Idempotency claim failed", claimError);
-      return respond({ error: "Controllo duplicazioni temporaneamente non disponibile" }, 503, responseOrigin);
-    }
-    if (claim.completed && claim.cached_response) {
-      return respond(claim.cached_response, 200, responseOrigin);
-    }
-    if (!claim.claimed) {
-      return respond({
-        error: "Questa generazione è già in corso. Attendi prima di riprovare.",
-        retry_after_seconds: claim.retry_after_seconds || 2,
-      }, 409, responseOrigin);
-    }
-
-    // Recupero ultime 20 comunicazioni
-    const { data: history, error: historyError } =
-      await supabase
-        .from("nextway_setter_messages")
-        .select("direction, content, created_at")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-    if (historyError) {
-      throw new Error("Lettura storico non riuscita");
-    }
-
     // Carica esclusivamente istruzioni e criteri approvati per il workspace.
     // La RPC verifica nuovamente membership attiva e non espone le bozze.
     let governance: { prompts?: Array<Record<string, unknown>>; criteria?: Array<Record<string, unknown>> } = {
@@ -379,6 +343,42 @@ Deno.serve(async (req) => {
         description: sanitizeModelText(item.description, 1000),
         config: item.config && typeof item.config === "object" ? item.config : {},
       }));
+
+    // Claim idempotente condiviso nel database, dopo i controlli di accesso al prospect.
+    const { data: claimRows, error: claimError } = await supabase.rpc(
+      "nextway_begin_setter_generation",
+      {
+        p_conversation_id: conversationId,
+        p_idempotency_key: requestId,
+      },
+    );
+    const claim = Array.isArray(claimRows) ? claimRows[0] : claimRows;
+    if (claimError || !claim) {
+      logSafeFailure("Idempotency claim failed", claimError);
+      return respond({ error: "Controllo duplicazioni temporaneamente non disponibile" }, 503, responseOrigin);
+    }
+    if (claim.completed && claim.cached_response) {
+      return respond(claim.cached_response, 200, responseOrigin);
+    }
+    if (!claim.claimed) {
+      return respond({
+        error: "Questa generazione è già in corso. Attendi prima di riprovare.",
+        retry_after_seconds: claim.retry_after_seconds || 2,
+      }, 409, responseOrigin);
+    }
+
+    // Recupero ultime 20 comunicazioni
+    const { data: history, error: historyError } =
+      await supabase
+        .from("nextway_setter_messages")
+        .select("direction, content, created_at")
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+    if (historyError) {
+      throw new Error("Lettura storico non riuscita");
+    }
 
     // Allowlist esplicita e minimizzazione: non inviare note libere,
     // recapiti, URL o numeri telefonici al provider AI.
