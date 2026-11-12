@@ -2554,3 +2554,16 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 ### Registro cronologico del MASTER
 
 - 12-11-2026, 19:34 Europe/Rome — aggiornati HEAD/commit di `main`, inventario repository, PR #1 (71 commit ahead, draft), workflow e log GitHub Actions #251/#292; registrati i risultati CRM forniti dall'utente, la diagnostica prerequisiti non ancora eseguita, la correzione della precedente nota sulla migrazione 011 e il piano staging presente solo nel branch PR. Modificato esclusivamente `MASTER_NEXTWAY.md`.
+
+
+---
+
+## NOTA DI CONTINUITÀ — 12 NOVEMBRE 2026, CONTROLLO SUCCESSIVO ALLA CORREZIONE DELLE 19:34
+
+- Recuperato il MASTER corrente da main: blob SHA 0d93ff050d8abf70bf9baed12469d04375afd8dc; 2.557 righe.
+- HEAD main osservato: e7446613e550376ec1d5c3152c95d852b0751811, commit documentale "docs(nextway): correct MASTER line count and wording". Il diff è limitato a due correzioni testuali nel MASTER: conteggio corretto di 2.473 righe nella sezione precedente e correzione della punteggiatura del percorso del piano staging. Nessun file applicativo o SQL modificato.
+- La continuità GitHub Actions e PR resta quella registrata nella sezione precedente: push main #251 SUCCESS; ultima run PR osservata #292 SUCCESS; PR #1 OPEN/DRAFT/NOT MERGED, base a3fbec076221f0f043d60373e2864d7d07db30d7, head a7e345fb8d8715901486d0ac316512c9494988ba.
+- Non risultano nuove evidenze tecniche Supabase in questo controllo. Il JSON live Lead già riportato resta l'ultimo risultato ricevuto; la diagnostica prerequisiti CRM non risulta ancora eseguita dall'utente. Nessuna query Supabase, migrazione, modifica applicativa o deploy è stato eseguito.
+- Stato: MASTER e correzione documentale **COMPLETATO E VERIFICATO**; PR e test statici **ESEGUITO MA NON VERIFICATO** rispetto al runtime; diagnostica prerequisiti CRM **DA COMPLETARE**; applicazione migrazioni **BLOCCATO** fino a preflight, backup e staging.
+- Prossimo passo invariato: eseguire supabase/diagnostics/nextway_crm_prerequisites_readonly.sql in Supabase SQL Editor e acquisire il JSON completo; non applicare ancora le migrazioni CRM.
+- Registro MASTER: nota aggiunta dopo il commit e744661 per documentare la correzione testuale e confermare che non sono intervenute modifiche applicative o live.
