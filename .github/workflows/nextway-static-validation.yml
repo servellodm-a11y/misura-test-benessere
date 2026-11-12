@@ -26,6 +26,7 @@ on:
       - "scripts/test-nextway-workspace-memberships.mjs"
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
+      - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - ".github/workflows/nextway-static-validation.yml"
@@ -97,6 +98,8 @@ jobs:
         run: node scripts/test-nextway-workspace-scoped-rls.mjs
       - name: Validate NEXTWAY AI Setter generation workspace contract
         run: node scripts/test-nextway-setter-generation-workspace.mjs
+      - name: Validate AI Setter legacy/workspace table isolation
+        run: node scripts/test-nextway-setter-generation-table-isolation.mjs
       - name: Validate NEXTWAY workspace-aware Lead creation contract
         run: node scripts/test-nextway-lead-creation-workspace.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
