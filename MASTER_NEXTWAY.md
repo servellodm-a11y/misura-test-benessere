@@ -2459,3 +2459,38 @@ Commit:
 - Nessun messaggio inviato e nessuna chiamata OpenAI eseguita durante questa modifica.
 - Non è stato eseguito un collaudo runtime; il nuovo test statico e la CI devono ancora essere eseguiti.
 - Netlify resta congelato fino al 4 dicembre 2026.
+
+
+---
+
+## Collaudo autenticazione Edge Function workspace-admin — 12 novembre 2026
+
+### Evidenze operative già acquisite
+- La Edge Function `nextway-workspace-admin` è stata distribuita nel progetto Supabase `nextway-platform` (`obqwbtlltxjfeirstsya`); i secrets richiesti risultavano presenti al momento del deploy.
+- Una richiesta POST anonima all'endpoint ha restituito `HTTP 401 UNAUTHORIZED_NO_AUTH_HEADER`. Questo conferma che l'endpoint è raggiungibile e che una chiamata priva di Bearer token viene respinta; non dimostra ancora l'autorizzazione di un amministratore autenticato.
+- Non sono stati creati workspace, membership o utenti e non sono state inviate email.
+- Il progetto Supabase disponibile è uno solo; non esiste un ambiente Supabase separato di test.
+
+### Verifica del percorso autenticato — ancora da eseguire
+La console `nextway-admin.html` nel branch `fix/nextway-password-recovery` esegue all'avvio:
+1. verifica la sessione Supabase;
+2. chiama `list_profiles` (sola lettura, restituisce ID, ruolo e nome);
+3. chiama `list_workspaces` (sola lettura).
+
+Il test minimo deve essere eseguito nel browser dell'amministratore, con la sessione NEXTWAY già autenticata, aprendo la console locale. Non copiare né condividere access token, refresh token, chiavi o cookie.
+
+Esito da registrare:
+- **Autenticazione/ruolo:** `list_profiles` restituisce HTTP 200 e la console popola l'elenco profili. Questo verifica il percorso Bearer autenticato e il gate `platform_admin`.
+- **Schema workspace:** `list_workspaces` può essere valutata separatamente; un errore relativo a tabella/relazione mancante indica prerequisito schema non applicato, non un errore di autenticazione.
+- Se `list_profiles` restituisce 401/403, fermarsi: non tentare operazioni di scrittura e riportare soltanto il messaggio applicativo, senza credenziali.
+
+### Limiti e protezioni
+- Il test è esclusivamente di lettura: non usare `create_workspace`, `set_membership`, `update_workspace`, approvazioni o salvataggi.
+- Non creare il workspace **Zinzino Italia**: la conferma del nome e dei valori iniziali non è un ordine di creazione.
+- Non applicare migrazioni e non distribuire altre Edge Functions.
+- Netlify produzione resta congelato fino al 4 dicembre 2026.
+- Nessun test autenticato è dichiarato superato finché non viene osservato il risultato nel browser con sessione valida.
+
+### Prossima azione minima
+Aprire `http://localhost:8000/nextway-admin.html` nel browser in cui NEXTWAY ha già una sessione valida e verificare se l'elenco profili viene popolato. Se la pagina non è disponibile localmente, prima avviare il server nella cartella repository già indicata nelle istruzioni operative; non eseguire altri reset email.
+
