@@ -159,7 +159,7 @@ La migrazione `20261112030000_nextway_setter_governance_read_rpc.sql` aggiunge l
 - La Edge Function passa il workspace della conversazione alla RPC.
 - La RPC verifica l'identità e la membership attiva tramite `nextway_has_workspace_access`; i ruoli `workspace_viewer` sono esclusi perché in sola lettura.
 - Vengono restituiti soltanto prompt e criteri con stato `active`; bozze e archiviati non sono visibili.
-- La funzione AI incorpora i prompt approvati nelle istruzioni e i criteri attivi nel contesto strutturato.
+- La funzione AI incorpora al massimo 5 prompt approvati (fino a 6.000 caratteri ciascuno) nelle istruzioni e al massimo 5 criteri nel contesto strutturato; ogni configurazione JSON è limitata a 5.000 caratteri per contenere costi e dimensione del contesto.
 - Le istruzioni amministrative non possono superare le regole di sicurezza del Setter.
 - Se la lettura governance fallisce per una conversazione workspace, la generazione si interrompe con HTTP 503: non procede usando una configurazione incompleta.
 - Le conversazioni legacy senza workspace continuano a usare le istruzioni standard.
