@@ -90,6 +90,86 @@ Deno.serve(async (req) => {
       return respond({ success: true, workspaces: data ?? [] }, 200, origin);
     }
 
+    if (action === "list_memberships") {
+      if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
+        return respond({ error: "workspace_id non valido" }, 400, origin);
+      }
+      const { data, error } = await admin.from("nextway_workspace_memberships")
+        .select("id,workspace_id,user_id,workspace_role,membership_status,invited_by,activated_at,created_at,updated_at")
+        .eq("workspace_id", body.workspace_id)
+        .order("created_at", { ascending: true })
+        .limit(500);
+      if (error) throw error;
+      return respond({ success: true, memberships: data ?? [] }, 200, origin);
+    }
+
+    // Creates or updates a membership record. "invited" is only a database
+    // status: this action does not send an email or create an Auth account.
+    // Suspension is reversible and is used instead of hard deletion.
+    if (action === "set_membership") {
+      if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id) ||
+          typeof body.user_id !== "string" || !uuidPattern.test(body.user_id)) {
+        return respond({ error: "workspace_id o user_id non validi" }, 400, origin);
+      }
+      const allowedRoles = [
+        "workspace_owner",
+        "workspace_admin",
+        "workspace_manager",
+        "workspace_member",
+        "workspace_viewer",
+      ];
+      const allowedStatuses = ["invited", "active", "suspended"];
+      if (!allowedRoles.includes(String(body.workspace_role)) ||
+          !allowedStatuses.includes(String(body.membership_status))) {
+        return respond({ error: "Ruolo o stato membership non valido" }, 400, origin);
+      }
+
+      const { data: workspace, error: workspaceError } = await admin.from("nextway_workspaces")
+        .select("id,status").eq("id", body.workspace_id).maybeSingle();
+      if (workspaceError) throw workspaceError;
+      if (!workspace) return respond({ error: "Workspace non trovato" }, 404, origin);
+      if (body.membership_status === "active" && workspace.status !== "active") {
+        return respond({ error: "Attiva prima il workspace per attivare una membership" }, 409, origin);
+      }
+
+      const { data: authUser, error: userError } = await admin.auth.admin.getUserById(body.user_id);
+      if (userError || !authUser.user) {
+        return respond({ error: "Utente NEXTWAY non trovato" }, 404, origin);
+      }
+
+      const { data: existing, error: existingError } = await admin.from("nextway_workspace_memberships")
+        .select("id,membership_status,activated_at")
+        .eq("workspace_id", body.workspace_id)
+        .eq("user_id", body.user_id)
+        .maybeSingle();
+      if (existingError) throw existingError;
+
+      const membershipStatus = String(body.membership_status);
+      const activatedAt = membershipStatus === "active"
+        ? (existing?.membership_status === "active" && existing.activated_at
+          ? existing.activated_at
+          : new Date().toISOString())
+        : null;
+
+      const { data, error } = await admin.from("nextway_workspace_memberships").upsert({
+        workspace_id: body.workspace_id,
+        user_id: body.user_id,
+        workspace_role: body.workspace_role,
+        membership_status: membershipStatus,
+        invited_by: authData.user.id,
+        activated_at: activatedAt,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "workspace_id,user_id" })
+        .select("id,workspace_id,user_id,workspace_role,membership_status,invited_by,activated_at,created_at,updated_at")
+        .single();
+
+      if (error?.code === "23505") {
+        return respond({ error: "Esiste già un owner attivo o invitato per questo workspace. Sospendi o modifica l'owner attuale prima di assegnarne un altro." }, 409, origin);
+      }
+      if (error) throw error;
+      return respond({ success: true, membership: data }, 200, origin);
+    }
+
     if (action === "list_prompts" || action === "list_criteria") {
       if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
         return respond({ error: "workspace_id non valido" }, 400, origin);
