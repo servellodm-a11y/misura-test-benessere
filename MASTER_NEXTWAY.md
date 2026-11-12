@@ -2478,9 +2478,9 @@ La console `nextway-admin.html` è stata precompilata con nome e chiave conferma
 
 ### Fonti, repository e limiti di accesso
 
-- Recuperato questo MASTER da GitHub `main` immediatamente prima dell'aggiornamento; blob SHA di partenza: `0cf2f753bec42cc87449e9cde22d3e6929fd83fe`. Il documento conteneva 3 righe.
+- Recuperato questo MASTER da GitHub `main` immediatamente prima dell'aggiornamento; blob SHA di partenza: `0cf2f753bec42cc87449e9cde22d3e6929fd83fe`. Il documento conteneva 2.473 righe.
 - HEAD di `main` verificato: `dbeb9944441576734621c9cecba0ea60bac44c62`, commit `docs(nextway): update MASTER continuity for 12 Nov evening`, 12-11-2026 18:14:36 UTC (19:14:36 Europe/Rome). Il commit ha come parent `a3fbec076221f0f043d60373e2864d7d07db30d7`; il diff del commit HEAD modifica soltanto `MASTER_NEXTWAY.md`.
-- Albero Git ricorsivo di `main` recuperato: 140 voci, `truncated=false`. Sono presenti le diagnostiche CRM `nextway_crm_live_status_readonly.sql` e `nextway_crm_prerequisites_readonly.sql`. Il documento `docs/NEXTWAY-STAGING-SETUP-PLAN.md` non è presente in `main): è presente soltanto nel branch della PR #1.
+- Albero Git ricorsivo di `main` recuperato: 140 voci, `truncated=false`. Sono presenti le diagnostiche CRM `nextway_crm_live_status_readonly.sql` e `nextway_crm_prerequisites_readonly.sql`. Il documento `docs/NEXTWAY-STAGING-SETUP-PLAN.md` non è presente in `main`: è presente soltanto nel branch della PR #1.
 - Strumenti disponibili in questa sessione: connettore GitHub per lettura repository, commit, PR, workflow, job e log. Non è disponibile un connettore Supabase o Netlify; non è stata effettuata una lettura diretta dei rispettivi ambienti live. Le conversazioni considerate sono quelle effettivamente presenti nel contesto corrente e i risultati riportati dall'utente; non si presume accesso indiscriminato a tutte le chat storiche.
 
 ### Pull request #1 e branch di lavoro
