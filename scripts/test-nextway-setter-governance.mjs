@@ -19,6 +19,7 @@ assert.match(migration, /create or replace function public\.nextway_get_active_s
 assert.match(migration, /security definer[\s\S]*?set search_path = pg_catalog, public/i);
 assert.match(migration, /auth\.uid\(\) is null/i);
 assert.match(migration, /p_workspace_id is null/i);
+assert.match(migration, /from public\.nextway_workspaces w[\s\S]*?w\.id = p_workspace_id[\s\S]*?w\.status = 'active'/i);
 assert.match(migration, /public\.nextway_has_workspace_access\s*\(/i);
 for (const role of ["workspace_owner", "workspace_admin", "workspace_manager", "workspace_member"]) {
   assert.ok(migration.includes("'" + role + "'"), "RPC missing allowed role " + role);
