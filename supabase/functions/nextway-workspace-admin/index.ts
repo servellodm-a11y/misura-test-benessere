@@ -170,6 +170,69 @@ Deno.serve(async (req) => {
       return respond({ success: true, membership: data }, 200, origin);
     }
 
+    if (action === "list_documents") {
+      if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
+        return respond({ error: "workspace_id non valido" }, 400, origin);
+      }
+      const { data, error } = await admin.from("nextway_knowledge_documents")
+        .select("id,workspace_id,module_key,title,source_type,source_reference,language_code,version_label,valid_from,valid_until,approval_status,content_sha256,uploaded_by,approved_by,approved_at,rejection_reason,created_at,updated_at")
+        .eq("workspace_id", body.workspace_id)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return respond({ success: true, documents: data ?? [] }, 200, origin);
+    }
+
+    if (action === "approve_document" || action === "reject_document") {
+      if (typeof body.document_id !== "string" || !uuidPattern.test(body.document_id)) {
+        return respond({ error: "document_id non valido" }, 400, origin);
+      }
+      const { data: document, error: documentError } = await admin.from("nextway_knowledge_documents")
+        .select("id,workspace_id,approval_status")
+        .eq("id", body.document_id)
+        .maybeSingle();
+      if (documentError) throw documentError;
+      if (!document) return respond({ error: "Documento non trovato" }, 404, origin);
+      if (document.approval_status !== "pending") {
+        return respond({ error: "Solo i documenti in attesa possono essere approvati o respinti" }, 409, origin);
+      }
+
+      const { data: workspace, error: workspaceError } = await admin.from("nextway_workspaces")
+        .select("id,status").eq("id", document.workspace_id).maybeSingle();
+      if (workspaceError) throw workspaceError;
+      if (!workspace || workspace.status === "archived") {
+        return respond({ error: "Workspace non trovato o archiviato" }, 409, origin);
+      }
+
+      const patch = action === "approve_document"
+        ? {
+            approval_status: "approved",
+            approved_by: authData.user.id,
+            approved_at: new Date().toISOString(),
+            rejection_reason: null,
+            updated_at: new Date().toISOString(),
+          }
+        : {
+            approval_status: "rejected",
+            approved_by: null,
+            approved_at: null,
+            rejection_reason: validText(body.reason, 5, 1000) ? body.reason.trim() : null,
+            updated_at: new Date().toISOString(),
+          };
+      if (action === "reject_document" && !patch.rejection_reason) {
+        return respond({ error: "Motivo del rifiuto obbligatorio (5-1000 caratteri)" }, 400, origin);
+      }
+
+      const { data, error } = await admin.from("nextway_knowledge_documents").update(patch)
+        .eq("id", body.document_id)
+        .eq("approval_status", "pending")
+        .select("id,workspace_id,title,approval_status,approved_by,approved_at,rejection_reason,updated_at")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return respond({ error: "Il documento è stato modificato da un'altra operazione. Ricarica l'elenco." }, 409, origin);
+      return respond({ success: true, document: data }, 200, origin);
+    }
+
     if (action === "list_prompts" || action === "list_criteria") {
       if (typeof body.workspace_id !== "string" || !uuidPattern.test(body.workspace_id)) {
         return respond({ error: "workspace_id non valido" }, 400, origin);
