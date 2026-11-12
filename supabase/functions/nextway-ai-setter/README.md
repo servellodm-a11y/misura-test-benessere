@@ -65,6 +65,14 @@ Flusso:
 
 La protezione riduce il rischio di addebiti duplicati quando lo staging è riuscito ma il commit finale è fallito. Non può garantire il recupero se la risposta OpenAI arriva ma non è possibile salvarla nel database; in quel caso un nuovo tentativo dopo la scadenza della lease può ancora richiedere una nuova generazione.
 
+## Isolamento della persistenza workspace
+
+La migrazione correttiva `20261112020000_nextway_setter_generation_table_isolation.sql` crea la tabella dedicata `nextway_setter_workspace_generation_requests` e reindirizza le quattro RPC correnti a questa tabella.
+
+La precedente `nextway_setter_generation_requests` viene conservata senza modifiche per compatibilità con le RPC legacy e con la relativa manutenzione. Le due strutture non devono essere confuse: la tabella legacy usa `user_id`, stati `pending/completed` e campo `response`; la tabella workspace usa `owner_profile_id`, stati `generating/completed`, `generated_output` e `cached_response`.
+
+La nuova tabella non concede accesso diretto ai ruoli applicativi o a `service_role`: le operazioni passano dalle RPC `SECURITY DEFINER`, che verificano identità, proprietà e membership workspace. La pulizia è manuale e riservata a `platform_admin` tramite `nextway_prune_workspace_setter_generation_requests()`: richieste completate oltre 30 giorni e richieste generating abbandonate da oltre 24 ore.
+
 ## Modello autorizzativo
 
 L'Edge Function legge conversazione e lead tramite il JWT dell'utente e quindi rispetta le policy RLS delle tabelle. Le RPC di idempotenza verificano esplicitamente che l'utente sia proprietario della conversazione oppure abbia il ruolo `platform_admin`.
