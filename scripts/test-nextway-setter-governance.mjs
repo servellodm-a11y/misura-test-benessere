@@ -24,6 +24,8 @@ assert.match(edge, /nextway_get_active_setter_governance/);
 assert.match(edge, /Istruzioni e criteri del workspace temporaneamente non disponibili/);
 assert.match(edge, /qualification_criteria:\s*activeQualificationCriteria/);
 assert.match(edge, /approvedWorkspaceInstructions/);
+assert.ok(edge.includes("String(item.prompt_body).slice(0, 6000)"));
+assert.ok(edge.includes("serializedConfig.length <= 5000"));
 assert.ok(edge.includes("mancanti e proporre una domanda utile"));
 assert.match(edge, /Non inviarla: deve rimanere una bozza/);
 
