@@ -2419,3 +2419,16 @@ Commit:
 6. Accedere a NEXTWAY con la nuova password.
 7. Solo dopo test locale e revisione, valutare separatamente un eventuale merge/deploy, che richiede autorizzazione distinta.
 
+
+
+---
+
+## Console amministrativa — istruzioni AI e criteri di qualificazione — 12 novembre 2026
+
+- Estesa la console nextway-admin.html con la sezione per consultare e creare versioni di istruzioni AI e criteri di qualificazione per workspace.
+- Le nuove versioni vengono salvate esclusivamente come bozze; il frontend richiede conferma esplicita prima dell'attivazione o archiviazione.
+- L'attivazione richiama le RPC amministrative già esistenti e sostituisce la versione attiva precedente secondo la logica atomica del database.
+- La configurazione dei criteri viene validata come oggetto JSON prima dell'invio; i dati restituiti sono renderizzati con textContent, senza HTML dinamico.
+- Aggiunti controlli statici per form, azioni e validazione JSON.
+- Nessun workspace, prompt, criterio, lead o conversazione creato. Nessun deploy o invio di messaggi.
+- Modifiche isolate nel branch fix/nextway-password-recovery; nessun intervento su main o Netlify.
