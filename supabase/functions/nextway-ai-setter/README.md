@@ -150,3 +150,19 @@ La risposta contiene `success`, `draft_id`, `message`, `strategy`, `objective`, 
 ## Deploy
 
 Nessun deploy è stato eseguito da questa attività. Le migrazioni e le Edge Functions devono essere applicate/pubblicate e collaudate in ambiente controllato prima del rilascio.
+
+
+## Istruzioni AI e criteri di qualificazione per workspace
+
+La migrazione \`20261112030000_nextway_setter_governance_read_rpc.sql\` aggiunge la RPC read-only \`nextway_get_active_setter_governance(uuid)\`.
+
+- La Edge Function passa il workspace della conversazione alla RPC.
+- La RPC verifica l'identità e la membership attiva tramite \`nextway_has_workspace_access\`.
+- Vengono restituiti soltanto prompt e criteri con stato \`active\`; bozze e archiviati non sono visibili.
+- La funzione AI incorpora i prompt approvati nelle istruzioni e i criteri attivi nel contesto strutturato.
+- Le istruzioni amministrative non possono superare le regole di sicurezza del Setter.
+- Se la lettura governance fallisce per una conversazione workspace, la generazione si interrompe con HTTP 503: non procede usando una configurazione incompleta.
+- Le conversazioni legacy senza workspace continuano a usare le istruzioni standard.
+- La RPC non concede accesso alle tabelle di governance né modifica le autorizzazioni di creazione/attivazione/archiviazione.
+
+La migrazione deve essere applicata a Supabase prima che questa integrazione possa funzionare live. La Edge Function aggiornata deve essere distribuita separatamente. Nessuna delle due operazioni è implicita nel commit GitHub.
