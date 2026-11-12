@@ -2168,3 +2168,41 @@ Le prime sette migrazioni hanno superato i rispettivi controlli postflight già 
 3. Preparare il collaudo runtime controllato per workspace, Knowledge Base, AI Setter Generation e Lead Creation; eseguirlo solo dopo aver definito dati e ambiente di test autorizzati.
 4. Mantenere invariati Netlify e i deploy Edge Functions fino ad autorizzazione esplicita.
 
+
+
+---
+
+## Aggiornamento 12 novembre 2026 — correzione isolamento persistenza AI Setter
+
+### Problema rilevato
+La migrazione `20261111240000_nextway_setter_generation_workspace.sql` usava `CREATE TABLE IF NOT EXISTS public.nextway_setter_generation_requests`, ma il nome era già stato creato dalla migrazione legacy `20261110000200_nextway_setter_idempotency.sql`. PostgreSQL quindi manteneva la struttura legacy (`user_id`, stati `pending/completed`, `response`) invece della struttura workspace richiesta (`owner_profile_id`, stati `generating/completed`, `generated_output`, `cached_response`). Il postflight precedente verificava presenza tabella/RLS/ACL, non la compatibilità delle colonne.
+
+### Correzione versionata
+- Nuova migrazione: `supabase/migrations/20261112020000_nextway_setter_generation_table_isolation.sql`.
+- Nuova tabella dedicata: `public.nextway_setter_workspace_generation_requests`.
+- Le quattro RPC correnti sono sostituite con definizioni che usano esclusivamente la nuova tabella:
+  - `nextway_begin_setter_generation`
+  - `nextway_store_setter_generation_output`
+  - `nextway_get_staged_setter_output`
+  - `nextway_complete_setter_generation`
+- La tabella legacy `nextway_setter_generation_requests` non viene modificata né cancellata; le vecchie funzioni e la retention legacy restano compatibili.
+- Nuova retention manuale admin-only: `nextway_prune_workspace_setter_generation_requests()`; elimina richieste completate oltre 30 giorni e richieste `generating` abbandonate da oltre 24 ore.
+- Accesso diretto alla nuova tabella revocato da `public`, `anon`, `authenticated` e `service_role`; le operazioni avvengono tramite RPC protette.
+- README AI Setter aggiornato.
+- Nuovo test statico `scripts/test-nextway-setter-generation-table-isolation.mjs`, incluso nel workflow `.github/workflows/nextway-static-validation.yml`.
+
+### Commit GitHub
+- Migrazione correttiva iniziale: `0a9e702c437423f9be5f1a37a0bd74c864f29a7d`.
+- Test isolato aggiunto: `b77ff7834c991bd369f883a7bd7386c7bb9c40c8`.
+- Workflow aggiornato: `3ad5b4ffe6e7b158443fc7c1286199f8896bd141`.
+- Migrazione estesa con retention: `96526565059c164ce42c5e170a271bc70997401b`.
+- Test statico corretto: `aa62b53608a2f8c7bc9a478778592ad3808b59ad`.
+- README aggiornato: `b7faebc79767d05c59156289704f6398e0f81f3e`.
+
+### Stato verifica e operatività
+- GitHub Actions run `43170117140` sul commit `aa62b53608a2f8c7bc9a478778592ad3808b59ad`: in attesa dell'esito al momento dell'aggiornamento.
+- Le esecuzioni intermedie del nuovo test hanno inizialmente rilevato un errore di escaping regex nel test stesso; il test è stato riscritto usando controlli stringa espliciti. Non è un errore della migrazione SQL.
+- Migrazione correttiva NON ancora applicata a Supabase.
+- Nessun deploy Edge Function e nessun deploy Netlify.
+- Nessun record applicativo/test creato o modificato.
+- Prossimo passo: attendere CI verde, poi applicare la migrazione correttiva nel Supabase SQL Editor e fare un postflight mirato su tabella nuova, colonne, RLS, ACL, RPC e retention. Solo dopo preparare il collaudo runtime.
