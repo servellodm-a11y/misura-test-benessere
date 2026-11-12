@@ -24,6 +24,17 @@ begin
     raise exception 'Workspace obbligatorio' using errcode = '22023';
   end if;
 
+  -- Archived and draft workspaces must never drive live AI generation,
+  -- including when the caller is a central platform administrator.
+  if not exists (
+    select 1
+    from public.nextway_workspaces w
+    where w.id = p_workspace_id
+      and w.status = 'active'
+  ) then
+    raise exception 'Workspace non attivo' using errcode = '42501';
+  end if;
+
   if not public.nextway_has_workspace_access(
     p_workspace_id,
     array[
