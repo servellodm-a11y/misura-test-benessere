@@ -2304,3 +2304,59 @@ Commit migrazione `5b40ffced28b0059b54b8805324da35a84c6d484`; commit test `f7c9e
 - Nessun deploy Edge Function e nessun deploy Netlify eseguito.
 - Nessun test runtime end-to-end della nuova generazione AI Setter.
 - La piattaforma non è ancora pronta per il rilascio ai partner: restano UI amministrativa, onboarding del workspace reale, membership reali, Knowledge Base operativa, deploy autorizzati e collaudo runtime.
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — console amministrativa e Knowledge Base
+
+### Console amministrativa preparata nel repository
+
+Aggiunti:
+- `nextway-admin.html`: pagina amministrativa con sezioni Workspace, Membership, Knowledge Base e ricerca documentale.
+- `nextway-admin.js`: logica browser per usare le API amministrative e la RPC di ricerca.
+- Collegamento da `nextway-ai.html` alla nuova area amministrativa.
+
+Funzioni UI:
+- creare workspace in stato draft e attivare/archiviare workspace;
+- consultare profili esistenti con identificativo, nome e ruolo, senza esporre email;
+- assegnare/aggiornare membership e sospenderle;
+- caricare PDF/DOCX/TXT tramite `nextway-knowledge-upload`;
+- elencare documenti e approvare/respingere quelli pending;
+- provare la ricerca full-text limitata al workspace tramite `nextway_search_knowledge(uuid,text,text,text,integer)`.
+
+Sicurezza UI:
+- usa solo URL Supabase, publishable key e access token della sessione;
+- non contiene service-role key;
+- i dati dinamici sono renderizzati con `textContent`, non con `innerHTML`;
+- la pagina non costituisce un confine di sicurezza: tutte le azioni amministrative sono ricontrollate lato Edge Function come `platform_admin`;
+- l'azione `invited` non invia email né crea un account Auth;
+- nessun invio automatico di messaggi.
+
+### API Knowledge Base
+
+La Edge Function `nextway-workspace-admin` è stata estesa con:
+- `list_documents`;
+- `approve_document`;
+- `reject_document`.
+
+L'approvazione/rifiuto è limitata a documenti in stato `pending`; il rifiuto richiede motivazione. Le modifiche sono condizionate allo stato pending per evitare sovrascritture concorrenti. La funzione continua a richiedere ruolo `platform_admin`.
+
+La stessa Edge Function ora include anche `list_profiles` per offrire alla console un elenco minimo di profili (id, nome, ruolo), senza indirizzi email.
+
+### Test e CI
+
+- Test aggiunto: `scripts/test-nextway-admin-ui.mjs`.
+- Test amministrazione workspace aggiornato per membership e revisione documenti.
+- Workflow aggiornato per includere la console amministrativa, il relativo test, il controllo sintattico JS e la verifica PR della migrazione di isolamento AI Setter.
+- Run GitHub Actions `43174338611`, commit `9dcf333ba89f14a9bde399a92a7abf1fbd858a99`: **SUCCESS**.
+- Tutti i test statici, il test UI, `node --check` e i cinque `deno check` risultano superati.
+
+### Stato operativo
+
+- Console e API sono presenti nel repository, ma non sono ancora pubblicate su Netlify/Supabase.
+- Nessun workspace, membership, profilo Auth, documento KB o record di test creato.
+- Knowledge Base live resta vuota.
+- Nessun deploy Edge Function o Netlify eseguito.
+- Il test runtime di upload, approvazione, ricerca documentale e AI Setter resta da eseguire dopo deploy autorizzato e configurazione dei secrets.
+- Il rilascio resta bloccato fino a workspace reale, membership reali, documenti ufficiali approvati, test runtime e verifica isolamento con account distinti.
