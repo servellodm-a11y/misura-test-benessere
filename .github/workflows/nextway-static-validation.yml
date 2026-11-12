@@ -38,12 +38,13 @@ on:
       - "nextway-cloud.js"
       - "nextway-setter.js"
       - "nextway-ai.html"
+      - "nextway-admin.html"
+      - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
       - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/functions/nextway-workspace-admin/**"
-      - "supabase/migrations/**"
       - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
@@ -60,6 +61,8 @@ on:
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-generation-table-isolation.mjs"
+      - "scripts/test-nextway-admin-ui.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
