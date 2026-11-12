@@ -25,8 +25,14 @@ function response(body: unknown, status: number, origin: string) {
       ...(origin && allowedOrigins.includes(origin) ? { "Access-Control-Allow-Origin": origin } : {}) },
   });
 }
-function safeMessage(error: unknown) {
-  return error instanceof Error ? error.message.slice(0, 300) : "Errore provisioning";
+function safeErrorCode(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && /^[A-Z0-9_-]{1,32}$/.test(code)) {
+      return code;
+    }
+  }
+  return "UNCLASSIFIED";
 }
 
 async function findExistingInvite(admin: any, email: string, requestId: string) {
@@ -141,7 +147,12 @@ Deno.serve(async (req) => {
         }
         if (invitedUserId) {
           const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
-          if (deleteError) console.error("Compensating Auth cleanup failed", deleteError.message);
+          if (deleteError) {
+            console.error("Compensating Auth cleanup failed", {
+              request_id: requestId,
+              code: safeErrorCode(deleteError),
+            });
+          }
         }
         await admin.rpc("nextway_release_conversion_activation", {
           p_request_id: requestId, p_claim_token: claimToken,
@@ -159,7 +170,13 @@ Deno.serve(async (req) => {
       throw error;
     }
   } catch (error) {
-    console.error("NEXTWAY conversion provisioning failed", safeMessage(error));
-    return response({ error: safeMessage(error) }, 400, origin);
+    console.error("NEXTWAY conversion provisioning failed", {
+      request_id: requestId,
+      code: safeErrorCode(error),
+    });
+    return response({
+      error: "Operazione di provisioning non completata. Verifica lo stato della richiesta prima di riprovare.",
+      request_id: requestId,
+    }, 500, origin);
   }
 });
