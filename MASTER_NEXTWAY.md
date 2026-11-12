@@ -2781,3 +2781,16 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Superati il contratto di sicurezza provisioning aggiornato, il controllo statico Python locale, il type-check Deno della Edge Function `nextway-conversion-provisioning` e tutti gli altri controlli del workflow.
 - Deploy Preview Netlify associata alla PR: stato check `success`; è un ambiente preview, non un deploy di produzione e non applica la migrazione Supabase.
 - Il commit documentale successivo sul MASTER non modifica codice o test. Nessun test runtime con transazioni concorrenti è stato eseguito.
+
+
+---
+
+## Piano collaudo concorrente conversioni — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md`.
+- Il piano definisce sei scenari: Lead già archiviato, Lead con stato cambiato, concorrenza con aggiornamento Lead vincente, concorrenza con finalizzazione vincente, rollback per errore a valle e idempotenza.
+- Specifica l'uso esclusivo di staging Supabase separato, fixture sintetiche, due sessioni PostgreSQL indipendenti e criteri verificabili di superamento.
+- Il test partner, che richiede un invito Auth, è limitato a un account sintetico di staging e prevede verifica della cancellazione a fine test.
+- **Stato: piano preparato, test runtime non eseguito.** Non è disponibile in questo passaggio una connessione autorizzata a un database di staging; non è stata usata né interrogata la produzione.
+- Nessuna migrazione applicata, nessun dato reale modificato, nessun account o invito creato, nessun deploy o merge.
+- Prossimo requisito: predisporre un progetto Supabase staging separato e autorizzare esplicitamente il collaudo runtime su quel progetto. Il piano non autorizza modifiche o deploy in produzione.
