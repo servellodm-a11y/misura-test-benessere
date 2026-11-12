@@ -85,6 +85,36 @@
     <button class="btn" id="knowledge-search" type="button">Cerca nel workspace</button>
     <div id="knowledge-results" class="muted">La ricerca restituisce soltanto contenuti approvati e validi del workspace selezionato.</div>
   </section>
+
+  <section class="panel">
+    <h2>5. Istruzioni AI e criteri di qualificazione</h2>
+    <p class="muted">Le nuove versioni vengono salvate come bozze. L'assistente non le utilizza finché un amministratore non le attiva. L'attivazione sostituisce la versione attiva precedente.</p>
+    <div class="row"><h3>Istruzioni dell'assistente</h3><button class="btn alt" id="governance-refresh" type="button">Aggiorna istruzioni e criteri</button></div>
+    <form id="prompt-create">
+      <div class="grid">
+        <label>Chiave istruzione *<input name="prompt_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. ai_setter_italia"></label>
+        <label>Versione *<input name="version" type="number" min="1" step="1" value="1" required></label>
+      </div>
+      <label>Scopo dell'istruzione *<input name="purpose" required maxlength="240" placeholder="es. Qualificazione iniziale dei potenziali partner"></label>
+      <label>Testo completo dell'istruzione *<textarea name="prompt_body" required maxlength="50000" rows="7" placeholder="Definisci tono, obiettivi, limiti, domande e comportamento dell'assistente."></textarea></label>
+      <button class="btn" type="submit">Salva istruzione come bozza</button>
+    </form>
+    <div id="prompt-list" class="muted">Seleziona un workspace per consultare le istruzioni.</div>
+    <h3>Criteri di qualificazione dei contatti</h3>
+    <form id="criteria-create">
+      <div class="grid">
+        <label>Chiave criteri *<input name="criteria_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. partner_qualification"></label>
+        <label>Versione *<input name="version" type="number" min="1" step="1" value="1" required></label>
+      </div>
+      <label>Nome criteri *<input name="name" required maxlength="160" placeholder="es. Qualificazione partner Italia"></label>
+      <label>Descrizione<textarea name="description" maxlength="2000" placeholder="Spiega cosa deve valutare il sistema."></textarea></label>
+      <label>Configurazione JSON<textarea name="config" required maxlength="20000" rows="6">{}</textarea></label>
+      <p class="muted">La configurazione deve essere un oggetto JSON valido. Esempio iniziale: {"interest":"high|medium|low","availability":"high|medium|low"}.</p>
+      <button class="btn" type="submit">Salva criteri come bozza</button>
+    </form>
+    <div id="criteria-list" class="muted">Seleziona un workspace per consultare i criteri.</div>
+  </section>
+
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/nextway-cloud.js"></script>
