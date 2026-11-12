@@ -67,6 +67,7 @@
       if (selectedWorkspace()) {
         await loadMemberships();
         await loadDocuments();
+        await loadGovernance();
       }
       status("Workspace caricati: " + state.workspaces.length + ".");
     }
@@ -255,7 +256,7 @@
     }
 
     async function loadSelectedWorkspace() {
-      await Promise.all([loadMemberships(), loadDocuments()]);
+      await Promise.all([loadMemberships(), loadDocuments(), loadGovernance()]);
     }
 
     $("workspace-create").addEventListener("submit", async (event) => {
@@ -312,6 +313,126 @@
       } finally {
         button.disabled = false;
       }
+    });
+
+
+    async function loadGovernance() {
+      const workspace = selectedWorkspace();
+      const promptsTarget = $("prompt-list");
+      const criteriaTarget = $("criteria-list");
+      promptsTarget.replaceChildren();
+      criteriaTarget.replaceChildren();
+      if (!workspace) {
+        promptsTarget.append(node("p", "Seleziona un workspace."));
+        criteriaTarget.append(node("p", "Seleziona un workspace."));
+        return;
+      }
+      const [prompts, criteria] = await Promise.all([
+        adminAction({ action: "list_prompts", workspace_id: workspace.id }),
+        adminAction({ action: "list_criteria", workspace_id: workspace.id })
+      ]);
+      renderGovernanceItems(promptsTarget, prompts.items || [], "prompt");
+      renderGovernanceItems(criteriaTarget, criteria.items || [], "criteria");
+      status("Istruzioni AI: " + (prompts.items || []).length + " · Criteri: " + (criteria.items || []).length + ".");
+    }
+
+    function renderGovernanceItems(target, items, kind) {
+      target.replaceChildren();
+      if (!items.length) {
+        target.append(node("p", kind === "prompt" ? "Nessuna istruzione AI configurata." : "Nessun criterio di qualificazione configurato."));
+        return;
+      }
+      items.forEach((item) => {
+        const isPrompt = kind === "prompt";
+        const itemKey = isPrompt ? item.prompt_key : item.criteria_key;
+        const heading = node("strong", (isPrompt ? item.purpose : item.name) + " · v" + item.version);
+        heading.append(node("span", item.status, "pill"));
+        const row = node("div", undefined, "item");
+        row.append(heading);
+        row.append(node("p", "Chiave: " + itemKey + " · ID: " + item.id, "muted"));
+        if (item.description) row.append(node("p", item.description));
+        if (isPrompt && item.prompt_body) row.append(node("p", item.prompt_body.slice(0, 700) + (item.prompt_body.length > 700 ? "…" : ""), "muted"));
+        if (item.status === "draft") {
+          const activate = node("button", "Attiva versione", "btn");
+          activate.type = "button";
+          activate.addEventListener("click", async () => {
+            if (!confirm("Attivare " + itemKey + " versione " + item.version + "? La versione attiva precedente sarà sostituita.")) return;
+            activate.disabled = true;
+            try {
+              await adminAction({ action: isPrompt ? "activate_prompt" : "activate_criteria", item_id: item.id });
+              await loadGovernance();
+              status("Versione attivata.");
+            } catch (error) {
+              status("Attivazione non completata: " + error.message);
+              activate.disabled = false;
+            }
+          });
+          const archive = node("button", "Archivia bozza", "btn warn");
+          archive.type = "button";
+          archive.addEventListener("click", async () => {
+            if (!confirm("Archiviare questa bozza?")) return;
+            archive.disabled = true;
+            try {
+              await adminAction({ action: isPrompt ? "archive_prompt" : "archive_criteria", item_id: item.id });
+              await loadGovernance();
+            } catch (error) {
+              status("Archiviazione non completata: " + error.message);
+              archive.disabled = false;
+            }
+          });
+          row.append(activate, archive);
+        }
+        target.append(row);
+      });
+    }
+
+    $("prompt-create").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const workspace = selectedWorkspace();
+      if (!workspace) { status("Seleziona prima un workspace."); return; }
+      const form = event.currentTarget;
+      const values = Object.fromEntries(new FormData(form).entries());
+      values.version = Number(values.version);
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await adminAction({ action: "save_prompt_draft", workspace_id: workspace.id, ...values });
+        form.reset();
+        form.elements.namedItem("version").value = "1";
+        await loadGovernance();
+        status("Bozza istruzione AI salvata. Non è attiva finché non la attivi.");
+      } catch (error) {
+        status("Bozza istruzione non salvata: " + error.message);
+      } finally { button.disabled = false; }
+    });
+
+    $("criteria-create").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const workspace = selectedWorkspace();
+      if (!workspace) { status("Seleziona prima un workspace."); return; }
+      const form = event.currentTarget;
+      const values = Object.fromEntries(new FormData(form).entries());
+      values.version = Number(values.version);
+      try {
+        values.config = JSON.parse(values.config || "{}");
+        if (!values.config || Array.isArray(values.config) || typeof values.config !== "object") throw new Error("La configurazione deve essere un oggetto JSON.");
+      } catch (error) { status("Configurazione criteri non valida: " + error.message); return; }
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await adminAction({ action: "save_criteria_draft", workspace_id: workspace.id, ...values });
+        form.reset();
+        form.elements.namedItem("version").value = "1";
+        form.elements.namedItem("config").value = "{}";
+        await loadGovernance();
+        status("Bozza criteri salvata. Non è attiva finché non la attivi.");
+      } catch (error) {
+        status("Bozza criteri non salvata: " + error.message);
+      } finally { button.disabled = false; }
+    });
+
+    $("governance-refresh").addEventListener("click", async () => {
+      try { await loadGovernance(); } catch (error) { status("Istruzioni e criteri non disponibili: " + error.message); }
     });
 
     $("documents-refresh").addEventListener("click", async () => {

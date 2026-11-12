@@ -1,3 +1,110 @@
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
+### Verifica finale della schermata di creazione workspace
+- La modifica in `nextway-admin.html` rimuove i valori precompilati da Nome workspace, Chiave univoca e Paese mercato; restano esempi nei placeholder e un avviso che identifica la creazione come scrittura sul database.
+- `scripts/test-nextway-admin-ui.mjs` verifica che i campi siano vuoti e che l'avviso sia presente.
+- GitHub Actions run #269, ID `43231967925`, sul commit `774bdf5`: **SUCCESS**. Tutti i controlli statici e tutti i type-check Deno sono completati con successo, inclusi i nuovi test CORS e UI.
+- La run #266, ID `43231793366`, aveva già verificato con SUCCESS le sei allow-list CORS locali e i relativi controlli.
+- La copia locale del Mac è stata aggiornata dall'utente soltanto fino al commit `fd1b578`; dovrà ricevere gli ulteriori commit del branch prima di provare la nuova interfaccia locale. Non è stato richiesto alcun comando locale in questo passaggio.
+
+### Stato di sicurezza e perimetro
+- Branch di sviluppo: `fix/nextway-password-recovery`; nessuna modifica a `main`, nessun merge.
+- Tutte e sei le Edge Functions chiamate dall'interfaccia locale includono `http://localhost:8000` nell'allow-list senza wildcard e senza rimuovere le origini configurate.
+- Nessun deploy Supabase/Netlify, migrazione SQL o modifica a dati/configurazione live.
+- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
+- Il blocco produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e CI possono continuare sul branch.
+
+### Prossimo passo operativo
+- Aggiornare la copia locale del branch con un solo `git pull --ff-only`, poi provare in locale i flussi di sola lettura. La correzione CORS non avrà effetto sulle funzioni remote finché non saranno distribuite con deploy autorizzato.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — verificata con SUCCESS la CI #269 dopo la rimozione dei valori precompilati dal form workspace. Nessuna azione live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
+### Sicurezza operativa dell'area amministrativa — campi workspace non precompilati
+- In `nextway-admin.html` i campi Nome workspace, Chiave univoca e Paese mercato non hanno più valori precompilati. Gli esempi sono soltanto placeholder.
+- È stato aggiunto un avviso esplicito: la creazione registra un workspace nel database e i campi devono essere compilati/inviati solo dopo verifica e decisione consapevole.
+- Test statico aggiunto a `scripts/test-nextway-admin-ui.mjs`: verifica l'avviso, i placeholder e l'assenza di attributi `value` nei campi che identificano il nuovo workspace.
+- Commit del test: `774bdf55a49e0eee69b625bc2571aa84189f8215`. La CI per questa modifica è in attesa di esito al momento di questo aggiornamento.
+- La modifica non crea né modifica alcun workspace e non cambia la logica di invio del form; rende soltanto esplicita la natura di scrittura dell'operazione e rimuove i valori precompilati.
+
+### Stato complessivo CORS locale
+- Le sei Edge Functions richiamate dalle interfacce locali consentono `http://localhost:8000`, conservano `NEXTWAY_ALLOWED_ORIGINS` e mantengono autenticazione/autorizzazioni server-side.
+- Test dedicato `scripts/test-nextway-local-cors.mjs` inserito nel workflow statico.
+- GitHub Actions run #266 (ID `43231793366`) sul commit `f43a897`: SUCCESS, inclusi test CORS, test sicurezza, controlli UI, sintassi Node e cinque type-check Deno.
+- I risultati CI riguardano il repository, non la funzione remota già pubblicata.
+
+### Perimetro live
+- Nessun deploy Supabase o Netlify, merge, migrazione SQL o modifica al database.
+- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
+- Il blocco di produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e test sul branch continuano.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — rimossi i valori precompilati dal form di creazione workspace e aggiunto il test statico corrispondente. CI della modifica in attesa; nessuna azione live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
+### Sviluppo locale — correzione CORS estesa e verificata in CI
+- Branch di lavoro: `fix/nextway-password-recovery`. Nessuna modifica a `main`.
+- È stata estesa l'origine di sviluppo `http://localhost:8000` alle sei Edge Functions richiamate dalle interfacce NEXTWAY locali:
+  - `nextway-workspace-admin`
+  - `nextway-ai-setter`
+  - `nextway-search`
+  - `nextway-knowledge-ingest`
+  - `nextway-knowledge-upload`
+  - `nextway-conversion-provisioning`
+- Le origini già configurate con `NEXTWAY_ALLOWED_ORIGINS` vengono mantenute e unite all'origine locale senza duplicati. Nessuna funzione usa wildcard CORS; i controlli di autenticazione, JWT, ruolo e autorizzazione server-side restano invariati.
+- Test di regressione aggiunto: `scripts/test-nextway-local-cors.mjs`. Verifica su tutte e sei le funzioni la presenza dell'origine localhost, il mantenimento delle origini configurate, il controllo esplicito dell'origine, la risposta CORS e la gestione OPTIONS, oltre all'assenza di wildcard.
+- Il test specifico dell'area amministrativa è stato esteso in `scripts/test-nextway-workspace-admin-security.mjs` per impedire la regressione del preflight CORS.
+- Workflow `.github/workflows/nextway-static-validation.yml` aggiornato: il nuovo test viene eseguito in CI su push a main e pull request.
+- Ultimo commit di codice/workflow osservato: `f43a8972bf56de5474a694ca5de22164fa1ac84b`.
+- GitHub Actions run #266, ID `43231793366`, sul commit `f43a897`: **SUCCESS**. Tutti i controlli statici, i test di contratto, i controlli sintattici Node e i cinque type-check Deno sono terminati con successo.
+- La CI dimostra la correttezza statica e il type-check dei sorgenti; non dimostra il comportamento runtime delle funzioni già pubblicate su Supabase.
+
+### Limiti operativi invariati
+- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito.
+- Nessun workspace, membership, account, documento, prompt o criterio è stato creato; nessuna email o invito è stato inviato.
+- Il codice aggiornato su GitHub non modifica automaticamente le Edge Functions pubblicate: il problema CORS nel browser resterà fino al deploy autorizzato delle funzioni aggiornate.
+- Resta valido il blocco di produzione fino al 4 dicembre 2026. Lo sviluppo e la validazione sul branch possono continuare.
+- Le migrazioni CRM/workspace restano sospese fino a backup verificato, preflight read-only aggiornato e applicazione controllata per singola migrazione.
+
+### Prossimi passi
+1. Aggiornare la copia locale del branch quando l'utente è pronto a riprendere i test sul Mac.
+2. Proseguire la revisione statica dei flussi UI e dei contratti delle funzioni; non effettuare chiamate di scrittura ai dati live.
+3. Preparare una sequenza di verifica post-deploy limitata alle funzioni e alle migrazioni effettivamente necessarie, da eseguire solo quando autorizzata.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — esteso CORS locale alle sei Edge Functions, aggiunto test dedicato, integrato nel workflow e verificata la CI #266 con esito SUCCESS. Nessun intervento live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
+### Stato operativo aggiornato — sviluppo prosegue senza interventi live
+- Branch di lavoro: `fix/nextway-password-recovery`. Il commit ricevuto dall'utente sul Mac prima di questo aggiornamento era `fd1b578f485b848c0f48fd78acf57899cda26bf5`.
+- Correzione CORS della Edge Function `supabase/functions/nextway-workspace-admin/index.ts`: il sorgente sul branch consente esplicitamente `http://localhost:8000`, mantenendo le origini configurate tramite `NEXTWAY_ALLOWED_ORIGINS`. La risposta preflight OPTIONS e la risposta POST includono `Access-Control-Allow-Origin` solo per origini ammesse.
+- È stato aggiunto un controllo di regressione in `scripts/test-nextway-workspace-admin-security.mjs` che verifica: allow-list localhost, conservazione delle origini configurate, risposta OPTIONS 200 e presenza del controllo sull'origine nella risposta.
+- Commit del test: `720bd3f06a15024a555113b845fe4d8f67c6c3bb` — "Add regression test for NEXTWAY admin CORS preflight". Modificato esclusivamente il branch di lavoro.
+- CI: la run #259 (ID 43230634320) risulta SUCCESS sul commit precedente `fd1b578`. Al momento della registrazione non è ancora disponibile una run associata al commit `720bd3f`; il nuovo controllo va considerato in attesa di CI, non ancora superato.
+- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito. Nessun workspace, membership, utente, documento, prompt o criterio è stato creato.
+- Il vincolo operativo di non toccare la produzione prima del 4 dicembre 2026 resta invariato. Lo sviluppo, la revisione statica, i test CI e la preparazione dei materiali possono proseguire sul branch.
+
+### Prossimi passi di sviluppo
+1. Verificare l'esito CI sul commit `720bd3f`; se fallisce, leggere i log e correggere solo il test o il sorgente interessato.
+2. Proseguire con revisione statica e test non distruttivi dell'area amministrativa e dei contratti Edge Function, senza chiamate di scrittura al progetto Supabase.
+3. Mantenere la distinzione tra test statici/CI e test runtime: la correzione CORS nel repository non modifica la funzione già pubblicata, quindi il browser continuerà a vedere il comportamento remoto precedente fino a un deploy autorizzato.
+4. Tenere bloccate migrazioni CRM/workspace finché non siano disponibili backup verificato e diagnostiche live read-only aggiornate; non eseguire bundle SQL in blocco.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — registrati la correzione CORS già presente nel branch, il test di regressione aggiunto e lo stato CI/deploy. Solo codice di test e documentazione nel branch; nessuna modifica live.
+
+---
+
 ## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:28 (Europe/Rome)
 
 ### Repository, branch e fonti verificate
@@ -2378,3 +2485,354 @@ Valori confermati per la scheda di creazione:
 La console `nextway-admin.html` è stata precompilata con nome e chiave confermati. Il backend forza comunque `status: "draft"` alla creazione; l'attivazione è un'azione separata e amministrativa.
 
 **La conferma riguarda il nome e i valori iniziali, non costituisce ancora ordine di creazione del record.** Al momento di questo aggiornamento non è stato creato alcun workspace o membership su Supabase e non è stato eseguito alcun deploy. Prima della creazione occorre verificare che la console e la Edge Function aggiornata siano effettivamente pubblicate e autorizzate.
+
+
+---
+
+## Intervento locale — 12 novembre 2026 — recupero password NEXTWAY
+
+### Problema rilevato
+- La configurazione Supabase nel browser è stata salvata correttamente.
+- L'utente Auth esistente è l'unico utente registrato e l'indirizzo email inserito in NEXTWAY coincide con quello presente in Authentication → Users.
+- Il login ha restituito `Invalid login credentials`.
+- Il recupero avviato dalla Dashboard Supabase ha reindirizzato alla homepage Netlify, non a una pagina dedicata al cambio password.
+- È stato aggiunto `http://localhost:8000/**` a Authentication → URL Configuration → Redirect URLs, mantenendo invariati Site URL e redirect Netlify.
+- Ulteriori richieste hanno raggiunto il limite email Supabase (`email rate limit exceeded`). Non ripetere richieste fino al ripristino del limite.
+
+### Modifiche preparate su branch separato
+Branch: `fix/nextway-password-recovery` (non `main`).
+
+- `nextway-cloud.js`: aggiunto pulsante **Password dimenticata?**. La richiesta usa `auth.resetPasswordForEmail(email, { redirectTo })` e indirizza a `window.location.origin + '/nextway-reset-password.html'`.
+- `nextway-reset-password.html`: nuova pagina locale che riutilizza URL e Publishable key già salvati nel browser, riconosce il flusso di recupero Supabase e consente di aggiornare la password con `auth.updateUser({ password })`. Dopo il cambio chiude la sessione locale e rimanda all'accesso.
+- La password non viene salvata in localStorage né trasmessa all'applicazione in chiaro da codice personalizzato.
+
+Commit:
+- `4679488fc5a3d2d065df72870e7d7c5d268107e5` — pulsante e richiesta di recupero con redirect esplicito.
+- `1e3c44ddab68df5248acc13bc879cf702df6b73a` — pagina locale di reimpostazione.
+
+### Verifiche eseguite
+- Parsing JavaScript di `nextway-cloud.js`: superato.
+- Parsing JavaScript inline di `nextway-reset-password.html`: superato.
+- Presenza del pulsante, redirectTo, chiamata resetPasswordForEmail e updateUser: verificata.
+- Nessun reset email runtime inviato; nessun cambio password eseguito.
+- Nessuna modifica al branch `main`; nessun deploy Netlify o Supabase eseguito.
+
+### Passi ancora necessari
+1. Portare il branch sul Mac locale e avviare il server locale.
+2. Verificare che la pagina di recupero si apra correttamente.
+3. Attendere il ripristino del limite email.
+4. Dalla pagina `nextway-ai.html`, inserire l'email e premere **Password dimenticata?**; non usare il reset dalla Dashboard per questo test.
+5. Aprire il nuovo link nello stesso browser e verificare il cambio password.
+6. Accedere a NEXTWAY con la nuova password.
+7. Solo dopo test locale e revisione, valutare separatamente un eventuale merge/deploy, che richiede autorizzazione distinta.
+
+
+
+---
+
+## Console amministrativa — istruzioni AI e criteri di qualificazione — 12 novembre 2026
+
+- Estesa la console nextway-admin.html con la sezione per consultare e creare versioni di istruzioni AI e criteri di qualificazione per workspace.
+- Le nuove versioni vengono salvate esclusivamente come bozze; il frontend richiede conferma esplicita prima dell'attivazione o archiviazione.
+- L'attivazione richiama le RPC amministrative già esistenti e sostituisce la versione attiva precedente secondo la logica atomica del database.
+- La configurazione dei criteri viene validata come oggetto JSON prima dell'invio; i dati restituiti sono renderizzati con textContent, senza HTML dinamico.
+- Aggiunti controlli statici per form, azioni e validazione JSON.
+- Nessun workspace, prompt, criterio, lead o conversazione creato. Nessun deploy o invio di messaggi.
+- Modifiche isolate nel branch fix/nextway-password-recovery; nessun intervento su main o Netlify.
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — AI Setter collegato alle istruzioni e ai criteri approvati
+
+### Funzionalità preparata nel repository
+- Aggiunta la migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`, con RPC read-only `nextway_get_active_setter_governance(uuid)`.
+- La RPC restituisce solo prompt e criteri attivi del workspace, dopo aver verificato l'utente autenticato e la membership attiva tramite `nextway_has_workspace_access`; il ruolo `workspace_viewer` resta escluso perché in sola lettura.
+- Le bozze e gli elementi archiviati non vengono restituiti; non viene concessa lettura diretta delle tabelle amministrative.
+- La Edge Function AI Setter legge `workspace_id` dalla conversazione, recupera la governance approvata e integra nel prompt al massimo 5 istruzioni (6.000 caratteri ciascuna) e nel contesto al massimo 5 criteri, con configurazioni JSON limitate a 5.000 caratteri.
+- In caso di errore nel recupero della governance di un workspace, la generazione si interrompe con HTTP 503 (fail-closed). Le conversazioni legacy senza workspace mantengono il comportamento standard.
+- Le istruzioni approvate non possono prevalere sulle regole di sicurezza e sul divieto di pressioni o promesse di risultati.
+
+### Verifiche predisposte
+- Aggiunto `scripts/test-nextway-setter-governance.mjs` per i contratti statici SQL/Edge Function.
+- Aggiornato `docs/NEXTWAY-AI-SETTER-TEST-PLAN.md` con i casi runtime per membership, isolamento tra workspace, ruolo viewer, prompt/criteri draft e fail-closed.
+- Workflow static validation aggiornato per eseguire il nuovo test su push e pull request e includere i nuovi file nei trigger.
+
+### Stato e limiti
+- Modifiche isolate nel branch `fix/nextway-password-recovery`; nessun intervento su `main`.
+- Migrazione SQL preparata ma NON applicata a Supabase.
+- Edge Function aggiornata nel repository ma NON distribuita.
+- Nessun prompt, criterio, lead, conversazione o messaggio creato o modificato.
+- Nessun messaggio inviato e nessuna chiamata OpenAI eseguita durante questa modifica.
+- Non è stato eseguito un collaudo runtime; il nuovo test statico e la CI devono ancora essere eseguiti.
+- Netlify resta congelato fino al 4 dicembre 2026.
+
+
+---
+
+## Collaudo autenticazione Edge Function workspace-admin — 12 novembre 2026
+
+### Evidenze operative già acquisite
+- La Edge Function `nextway-workspace-admin` è stata distribuita nel progetto Supabase `nextway-platform` (`obqwbtlltxjfeirstsya`); i secrets richiesti risultavano presenti al momento del deploy.
+- Una richiesta POST anonima all'endpoint ha restituito `HTTP 401 UNAUTHORIZED_NO_AUTH_HEADER`. Questo conferma che l'endpoint è raggiungibile e che una chiamata priva di Bearer token viene respinta; non dimostra ancora l'autorizzazione di un amministratore autenticato.
+- Non sono stati creati workspace, membership o utenti e non sono state inviate email.
+- Il progetto Supabase disponibile è uno solo; non esiste un ambiente Supabase separato di test.
+
+### Verifica del percorso autenticato — ancora da eseguire
+La console `nextway-admin.html` nel branch `fix/nextway-password-recovery` esegue all'avvio:
+1. verifica la sessione Supabase;
+2. chiama `list_profiles` (sola lettura, restituisce ID, ruolo e nome);
+3. chiama `list_workspaces` (sola lettura).
+
+Il test minimo deve essere eseguito nel browser dell'amministratore, con la sessione NEXTWAY già autenticata, aprendo la console locale. Non copiare né condividere access token, refresh token, chiavi o cookie.
+
+Esito da registrare:
+- **Autenticazione/ruolo:** `list_profiles` restituisce HTTP 200 e la console popola l'elenco profili. Questo verifica il percorso Bearer autenticato e il gate `platform_admin`.
+- **Schema workspace:** `list_workspaces` può essere valutata separatamente; un errore relativo a tabella/relazione mancante indica prerequisito schema non applicato, non un errore di autenticazione.
+- Se `list_profiles` restituisce 401/403, fermarsi: non tentare operazioni di scrittura e riportare soltanto il messaggio applicativo, senza credenziali.
+
+### Limiti e protezioni
+- Il test è esclusivamente di lettura: non usare `create_workspace`, `set_membership`, `update_workspace`, approvazioni o salvataggi.
+- Non creare il workspace **Zinzino Italia**: la conferma del nome e dei valori iniziali non è un ordine di creazione.
+- Non applicare migrazioni e non distribuire altre Edge Functions.
+- Netlify produzione resta congelato fino al 4 dicembre 2026.
+- Nessun test autenticato è dichiarato superato finché non viene osservato il risultato nel browser con sessione valida.
+
+### Prossima azione minima
+Aprire `http://localhost:8000/nextway-admin.html` nel browser in cui NEXTWAY ha già una sessione valida e verificare se l'elenco profili viene popolato. Se la pagina non è disponibile localmente, prima avviare il server nella cartella repository già indicata nelle istruzioni operative; non eseguire altri reset email.
+
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — test statici locali compatibili con Python 3.9
+
+### Motivo
+Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece presente Python 3.9.6. I test JavaScript esistenti restano invariati e continuano a essere eseguiti da GitHub Actions.
+
+### Adattamento locale
+- Aggiunto `scripts/test-nextway-local-static.py`, compatibile con Python 3.9.
+- Il nuovo script riproduce i tre gruppi di controlli locali già presenti nei test Node:
+  1. allow-list CORS delle sei Edge Functions;
+  2. contratto di sicurezza dell'API workspace-admin e delle due RPC SQL di attivazione;
+  3. struttura della console admin, azioni UI/API, campi workspace non precompilati e rendering sicuro.
+- Lo script legge esclusivamente i file del repository: non contatta Supabase, non modifica dati o file, non invia email e non esegue deploy.
+- Comando locale: `python3 scripts/test-nextway-local-static.py`.
+- Commit del nuovo script: `af90151f879612d979b33ff5672822bd251ca4cc`.
+
+### Stato e limiti
+- Modifica confinata al branch `fix/nextway-password-recovery`; nessun intervento su `main`.
+- Nessun deploy Supabase/Netlify, merge, migrazione o modifica live.
+- I test Node e i type-check Deno restano coperti da GitHub Actions; il nuovo script Python è un ausilio per la verifica statica locale sul Mac, non sostituisce i type-check Deno né un collaudo runtime.
+- Prossimo passo: aggiornare la copia locale con `git pull --ff-only origin fix/nextway-password-recovery`, poi eseguire il comando Python indicato sopra e riportare l'output.
+
+
+---
+
+## Verifica runtime console amministrativa locale — 12 novembre 2026
+
+### Esito osservato nel browser
+- La pagina `http://localhost:8000/nextway-admin.html` si apre e mostra correttamente le sezioni Workspace, Membership, Knowledge Base, registro attività, richieste conversione e governance AI.
+- La sessione personale risulta autenticata come `servello.dm@gmail.com`.
+- La console amministrativa mostra però `Accesso o servizio amministrativo non disponibile: Failed to fetch`.
+- La configurazione è quindi distinta: interfaccia locale caricata e sessione personale riconosciuta, ma chiamata alla Edge Function amministrativa non completata dal browser.
+
+### Diagnosi e causa residua
+- La correzione del bridge archivio locale ha superato il precedente errore `Archivio locale non pronto`.
+- Il problema residuo è coerente con il preflight CORS già osservato: la Edge Function remota risponde a OPTIONS ma non restituisce `Access-Control-Allow-Origin` per `http://localhost:8000`.
+- Il branch contiene già la correzione CORS per localhost e il test statico locale ha superato tutti e tre i gruppi di controlli.
+- La versione remota della Edge Function non è stata aggiornata; finché non verrà distribuita la versione corretta, il browser continuerà a bloccare la richiesta cross-origin.
+
+### Stato, vincoli e prossime attività
+- Nessun workspace, membership, documento, prompt o criterio creato o modificato.
+- Nessuna migrazione applicata, nessun deploy Supabase o Netlify, nessun merge.
+- Restano validi i vincoli: nessun deploy/merge senza autorizzazione esplicita e Netlify produzione congelato fino al 4 dicembre 2026.
+- Proseguire sul branch con revisione statica e preparazione del pacchetto di rilascio; il collaudo runtime amministrativo autenticato resta sospeso fino a quando il deploy della Edge Function sarà autorizzato.
+
+
+---
+
+## Revisione statica sicurezza multi-workspace e Knowledge Base — 12 novembre 2026
+
+### Componenti revisionati nel branch
+- Membership: una sola membership per coppia workspace/utente; indice univoco per un solo owner attivo o invitato; lettura autonoma limitata alla propria membership; gestione riservata a platform_admin.
+- Helper `nextway_has_workspace_access`: richiede sessione autenticata e, per i membri, membership attiva, workspace attivo e ruolo incluso nell'allow-list; platform_admin mantiene l'accesso centrale.
+- Workspace: registry e versioni di istruzioni/criteri con RLS; bozze distinte dagli elementi attivi; indici univoci impediscono più versioni attive per la stessa chiave.
+- AI Setter: conversazione vincolata al proprietario e al workspace del Lead; il controllo di accesso al workspace avviene prima del claim di generazione; viewer escluso dalle RPC di generazione.
+- Messaggi Setter: i client autenticati hanno sola lettura diretta; scrittura tramite RPC protette che verificano utente, conversazione, membership e stato.
+- Knowledge Base: upload e ingestione richiedono autenticazione e ruolo platform_admin; i documenti nascono pending; la ricerca usa workspace esplicito, membership attiva, stato approved e finestra di validità.
+- API amministrativa: verifica token e ruolo platform_admin prima delle operazioni; directory profili senza indirizzi email; membership e documenti validati lato server.
+- Rendering console: dati non attendibili inseriti come testo; nessun uso di innerHTML nel renderer amministrativo; nessuna chiave service-role nel codice browser.
+
+### Esito delle verifiche automatiche GitHub
+- Commit verificato: `5589ec034e1f1f45100cc3921ba7364088fb25d4`.
+- Workflow `NEXTWAY static validation`: job `validate` completato con esito SUCCESS.
+- Tutti i 31 passaggi operativi del job risultano completati con esito SUCCESS, inclusi contratti SQL/RLS, membership, isolamento Setter, governance AI, UI admin, test Python locale, sintassi JavaScript e type-check Deno delle cinque Edge Functions.
+- PR #1 resta aperta in stato draft, head sul branch `fix/nextway-password-recovery`, base `main`; non è stata effettuata alcuna fusione.
+
+### Limiti e decisioni
+- Questa è una revisione statica del codice e dei contratti: non sostituisce test runtime RLS, test multiutente, test di concorrenza o verifica con dati di prova su Supabase.
+- Le migrazioni workspace, membership, RLS, Knowledge Base e governance AI presenti nel branch restano candidate e NON applicate.
+- Le Edge Functions aggiornate nel branch, inclusa la correzione CORS per localhost, non sono state ridistribuite.
+- Nessun workspace, membership, documento, prompt, criterio, Lead o messaggio creato o modificato durante la revisione.
+- Nessun deploy Supabase/Netlify, merge o modifica a `main`.
+- Resta bloccato il collaudo runtime amministrativo locale finché la Edge Function remota non riceverà la correzione CORS e il relativo deploy non sarà autorizzato.
+
+### Prossima fase
+1. Completare la revisione dei flussi di caricamento/indicizzazione e delle autorizzazioni Knowledge Base.
+2. Preparare una checklist di migrazioni in ordine, con precondizioni e rollback documentati.
+3. Pianificare test runtime controllati per due workspace e almeno tre ruoli (platform_admin, workspace_member, workspace_viewer), senza usare dati reali.
+
+
+---
+
+## Checklist di rilascio controllato aggiunta — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-RELEASE-CHECKLIST.md` nel branch di lavoro.
+- La checklist separa la catena AI Setter/Lead, la Knowledge Base e la sequenza multi-workspace, elenca le migrazioni candidate e segnala la migrazione legacy `nw_*` come separata, da non applicare automaticamente.
+- Inseriti gate pre-migrazione, requisiti di backup, controlli RLS/grant, matrice runtime a due workspace e ruoli, criteri di approvazione documenti e ordine di rilascio.
+- Il documento è preparatorio e non autorizza alcuna migrazione, deploy o merge.
+- Commit checklist: `bee045a8320bca2f240ba9b74d1204fec911e188`.
+- PR #1 resta aperta draft; `main` non modificato.
+
+
+---
+
+## Revisione statica — ricerca pubblica, AI Setter e provisioning conversioni — 12 novembre 2026
+
+### 1. Ricerca pubblica Tavily — `nextway-search`
+
+- Autenticazione verificata tramite `auth.getUser(token)`; il token viene usato con client Supabase associato alla sessione.
+- Il body viene letto in streaming con limite effettivo di 16 KB; sono ammesse da 1 a 5 query, ciascuna da 1 a 400 caratteri.
+- Il limite di consumo è applicato lato database tramite RPC atomica: 10 unità/minuto per utente, una unità per query inoltrata.
+- Il numero di risultati è limitato tra 1 e 10; le chiamate Tavily hanno timeout di 20 secondi e non richiedono risposta sintetica né contenuto raw.
+- I risultati sono normalizzati e limitati in lunghezza; vengono mantenuti soltanto URL HTTP/HTTPS validi. Gli errori parziali sono distinti dai risultati riusciti.
+- Nessuna creazione automatica di Lead: la risposta avverte che identità, fonte ed evidenza devono essere verificate manualmente.
+- Esito: i controlli statici osservati sono coerenti con autenticazione, minimizzazione della risposta, rate limit e gestione dei risultati non attendibili.
+- Limite: non sono state effettuate chiamate runtime a Tavily né prove di abuso/concorrenza del rate limit.
+
+### 2. AI Setter — `nextway-ai-setter`
+
+- Autenticazione Bearer verificata con Supabase Auth; metodo limitato a POST/OPTIONS e origine controllata da allow-list.
+- Body letto in streaming con limite effettivo di 16 KB; UUID e obiettivo sono validati prima della generazione.
+- Rate limit atomico database: 5 generazioni/minuto per utente.
+- Conversazione e Lead sono recuperati tramite client autenticato e RLS; conversazioni chiuse/archiviate vengono rifiutate.
+- Per conversazioni workspace, istruzioni e criteri vengono recuperati esclusivamente tramite RPC dedicata alla governance attiva; in caso di errore il flusso si interrompe con 503.
+- Il contesto inviato al provider usa un'allow-list di campi, esclude note libere e recapiti/URL, limita lo storico alle ultime 20 comunicazioni e applica limiti di lunghezza e sanitizzazione.
+- Il flusso usa claim idempotente, staging dell'output e completamento tramite RPC; una bozza non conforme non viene salvata.
+- La risposta viene preparata come bozza; nel codice esaminato non è presente un invio automatico a prospect o clienti.
+- Esito: i controlli statici osservati sono coerenti con minimizzazione, autorizzazione, idempotenza e separazione tra generazione e invio.
+- Limite: nessun test runtime OpenAI, RLS, concorrenza, revoca membership o recupero output è stato eseguito in questa revisione.
+
+### 3. Provisioning conversioni — `nextway-conversion-provisioning` e migrazioni 014/015/cleanup
+
+- La Edge Function richiede un Bearer token valido e ruolo `platform_admin`; le operazioni privilegiate usano la chiave service-role esclusivamente lato server.
+- Le RPC di claim, finalizzazione e rilascio sono riservate a `service_role`; il claim è protetto da token e finestra temporale, con recupero degli inviti creati da tentativi precedenti.
+- La migrazione crea vincoli univoci per collegare una richiesta a un solo record `clients` o `partner_details`; la finalizzazione SQL è transazionale e aggiorna lo stato della richiesta.
+- **Rilievo di integrità da correggere prima del rilascio:** la finalizzazione crea/aggiorna il record cliente o partner e poi aggiorna il Lead soltanto se è ancora non archiviato e in stato `In valutazione`. Il codice non verifica che l'UPDATE del Lead abbia modificato una riga. Se il Lead viene archiviato o cambia stato dopo l'approvazione ma prima dell'attivazione, la conversione può comunque risultare `activated` e creare il record cliente/partner, lasciando il Lead in uno stato incoerente. Correzione raccomandata: verificare e bloccare la transizione se il Lead non è ancora convertibile, nella stessa transazione e prima di creare il record di destinazione; predisporre un test concorrente sul cambio stato/archiviazione.
+- **Rilievo di minimizzazione errori:** `safeMessage(error)` restituisce il messaggio originale dell'eccezione, troncato a 300 caratteri; lo stesso testo viene registrato nei log e restituito al client amministrativo. Correzione raccomandata: risposta esterna generica con codice di correlazione e log limitato a codice/status tecnico, senza messaggi SQL o dettagli interni.
+- La funzione restituisce anche identificativi tecnici di attivazione nella risposta amministrativa; verificare che la UI li utilizzi davvero e mantenere soltanto i campi necessari.
+- Limite: nessuna attivazione reale, invito email, prova di retry o test concorrente è stato eseguito durante questa revisione.
+
+### 4. Stato e decisioni
+
+- Revisione esclusivamente statica dei file del branch `fix/nextway-password-recovery`.
+- I due rilievi sul provisioning sono **correzioni raccomandate ancora da implementare**; questa registrazione non modifica il codice.
+- Nessuna migrazione applicata, nessun deploy Supabase/Netlify, nessun merge e nessuna modifica a `main`.
+- Nessuna richiesta di conversione attivata, nessun account creato e nessuna email/invito inviato.
+- Prossimo passo: preparare correzione transazionale e test statici/runtime per il controllo dello stato Lead prima della conversione; rendere privacy-safe la gestione degli errori. Le modifiche restano sul branch e non autorizzano deploy o migrazioni.
+
+
+---
+
+## Correzione integrità provisioning conversioni — 12 novembre 2026
+
+### Correzioni implementate sul branch
+
+- Nuova migrazione candidata `supabase/migrations/20261112170000_nextway_conversion_activation_integrity.sql`.
+- La RPC `nextway_finalize_conversion_activation` blocca la riga Lead con `SELECT ... FOR UPDATE` e verifica che ID, proprietario, stato `In valutazione` e `archived_at IS NULL` siano ancora validi.
+- La transizione Lead a `Convertito cliente` / `Convertito partner` viene eseguita e verificata prima della creazione del record di destinazione. Se non aggiorna esattamente una riga, la funzione solleva un errore e PostgreSQL annulla l'intera transazione.
+- Creazione/aggiornamento di `clients` o `profiles/partner_details` e passaggio della richiesta a `activated` restano nella stessa transazione SQL. Un errore in qualsiasi passaggio annulla anche il cambio stato del Lead.
+- La RPC conserva `SECURITY DEFINER`, `search_path` esplicito e privilegi EXECUTE riservati a `service_role`.
+- La Edge Function non restituisce più il messaggio originale delle eccezioni. Risponde con testo generico, HTTP 500 e `request_id`; i log registrano soltanto request ID e codice errore sanitizzato. Anche il log della pulizia compensativa Auth non registra il messaggio grezzo.
+- Test di regressione aggiornati in `scripts/test-nextway-provisioning-security.mjs` e `scripts/test-nextway-local-static.py`: lock Lead, verifica stato/owner/archivio, ordine transizione-creazione, atomicità, grant service_role e assenza di messaggi di errore grezzi.
+
+### Commit della correzione
+
+- Edge Function error handling: `44dc8e3ab2c1cbba8b9f937edafea72be482aa9c`.
+- Migrazione candidata: `60e261aec8c2693ff3f219fbb5308a34d5fe532f`.
+- Test provisioning: `1b595e17a26f376118c78a03cf71414a89d99a15`.
+- Test statici Python locale: `bc594bf33fb2e2d58da1b6444e050147d7f91891`.
+
+### Stato di verifica e limiti
+
+- Correzioni e test sono presenti nel branch `fix/nextway-password-recovery`; esito CI sul nuovo HEAD da attendere/verificare.
+- I test aggiunti sono controlli statici del contratto sorgente. Non sostituiscono una prova runtime concorrente su PostgreSQL con due sessioni (finalizzazione contro archiviazione/cambio stato).
+- Migrazione soltanto preparata nel repository: **non applicata** a Supabase.
+- Nessun invito Auth, account, cliente, partner o Lead reale creato/modificato.
+- Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`.
+- PR #1 resta draft; non renderla pronta e non effettuare merge.
+- Il vincolo di non intervenire su Netlify produzione prima del 4 dicembre 2026 resta invariato.
+
+
+### Verifica CI della correzione — 12 novembre 2026
+
+- GitHub Actions run #286, commit `5fc1760fc044ec24f0812d398e2851914d0ccaa9`: **SUCCESS**.
+- Superati il contratto di sicurezza provisioning aggiornato, il controllo statico Python locale, il type-check Deno della Edge Function `nextway-conversion-provisioning` e tutti gli altri controlli del workflow.
+- Deploy Preview Netlify associata alla PR: stato check `success`; è un ambiente preview, non un deploy di produzione e non applica la migrazione Supabase.
+- Il commit documentale successivo sul MASTER non modifica codice o test. Nessun test runtime con transazioni concorrenti è stato eseguito.
+
+
+---
+
+## Piano collaudo concorrente conversioni — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md`.
+- Il piano definisce sei scenari: Lead già archiviato, Lead con stato cambiato, concorrenza con aggiornamento Lead vincente, concorrenza con finalizzazione vincente, rollback per errore a valle e idempotenza.
+- Specifica l'uso esclusivo di staging Supabase separato, fixture sintetiche, due sessioni PostgreSQL indipendenti e criteri verificabili di superamento.
+- Il test partner, che richiede un invito Auth, è limitato a un account sintetico di staging e prevede verifica della cancellazione a fine test.
+- **Stato: piano preparato, test runtime non eseguito.** Non è disponibile in questo passaggio una connessione autorizzata a un database di staging; non è stata usata né interrogata la produzione.
+- Nessuna migrazione applicata, nessun dato reale modificato, nessun account o invito creato, nessun deploy o merge.
+- Prossimo requisito: predisporre un progetto Supabase staging separato e autorizzare esplicitamente il collaudo runtime su quel progetto. Il piano non autorizza modifiche o deploy in produzione.
+
+
+---
+
+## Ricognizione ambiente staging Supabase — 12 novembre 2026, ore 16:22 CET
+
+### Verifiche repository/GitHub
+- Ricontrollati il branch `fix/nextway-password-recovery`, il MASTER, la checklist di rilascio, il piano collaudo concorrenza, la directory `supabase/`, la directory `supabase/migrations/` e il README Supabase.
+- Il piano `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md` richiede esplicitamente un progetto Supabase di staging distinto dalla produzione e dichiara il test runtime non eseguito.
+- La checklist `docs/NEXTWAY-RELEASE-CHECKLIST.md` prescrive backup, verifica dello schema e cronologia migrazioni prima di qualunque applicazione.
+- Nel branch non risulta presente `supabase/config.toml`; la directory Supabase contiene README, funzioni, migrazioni e materiali di supporto, ma nessuna configurazione locale che identifichi un progetto staging.
+- Il README Supabase descrive una procedura riferita al progetto da selezionare manualmente e non identifica un ambiente staging.
+- Su GitHub risultano i soli branch `main` e `fix/nextway-password-recovery`; non è presente un branch denominato staging. Questo dato non dimostra quanti progetti cloud Supabase esistano.
+- Nessuna integrazione Supabase amministrativa è disponibile in questa sessione per interrogare l'elenco dei progetti cloud dell'account.
+
+### Conclusione verificabile
+- **Staging non documentato e non verificato come esistente.** Non è corretto dichiarare che non esista in assoluto: il repository e gli strumenti attualmente disponibili non consentono di accertarlo nell'account Supabase.
+- Non è stata aperta né interrogata la produzione durante questa ricognizione; nessun progetto cloud è stato creato o modificato.
+
+### Prossimo percorso, senza costi o modifiche implicite
+1. Valutare prima un ambiente locale isolato, se Docker e Supabase CLI sono disponibili; non sono ancora stati verificati su questo Mac.
+2. Se il locale non è praticabile, verificare nel pannello Supabase se il piano attuale consente un secondo progetto gratuito e quali limiti/costi comporta, prima di crearne uno.
+3. Solo dopo identificazione certa dello staging, predisporre schema e migrazioni selezionate e svolgere i test con fixture sintetiche.
+4. Non collegare mai il test harness al progetto di produzione; nessun deploy, migrazione o spesa senza autorizzazione specifica.
+
+### Stato
+- Ricognizione GitHub/repository completata.
+- Esistenza di un progetto cloud staging: non verificabile dagli strumenti attualmente disponibili.
+- Ambiente locale Supabase: da valutare; nessuna verifica Docker/CLI eseguita.
+- Test runtime concorrenti: non eseguiti.
+- PR #1 resta aperta draft; `main` invariato.
+
+
+## Piano tecnico ambiente di collaudo isolato — 12 novembre 2026
+
+- Creato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` sul branch di lavoro.
+- La priorità è verificare la fattibilità di Supabase locale prima di valutare un secondo progetto cloud.
+- La ricognizione repository ha rilevato l'assenza di `supabase/config.toml` e di un seed locale completo.
+- Le migrazioni NEXTWAY dipendono da uno schema applicativo preesistente (fra cui `profiles`, `clients`, `partner_details`, `nextway_leads), funzioni RPC, trigger e oggetti Storage. Il solo avvio di Supabase locale non basta: serve una baseline schema-only completa, revisionata e priva di dati personali.
+- La verifica Docker/Supabase CLI sul Mac non è ancora stata eseguita; Node/npm non risultavano disponibili e Python era 3.9.6 nella verifica precedente.
+- Piano: verifica locale non distruttiva; baseline schema-only; seed sintetici; test concorrenza A–F; alternativa cloud soltanto previa verifica di costi/limiti e autorizzazione.
+- Nessun progetto staging creato, nessun comando remoto eseguito, nessuna migrazione applicata, nessun deploy e nessuna spesa.

@@ -5,8 +5,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Permette il test locale; autenticazione e autorizzazioni restano obbligatorie.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function response(body: unknown, status: number, origin: string) {
@@ -16,8 +25,14 @@ function response(body: unknown, status: number, origin: string) {
       ...(origin && allowedOrigins.includes(origin) ? { "Access-Control-Allow-Origin": origin } : {}) },
   });
 }
-function safeMessage(error: unknown) {
-  return error instanceof Error ? error.message.slice(0, 300) : "Errore provisioning";
+function safeErrorCode(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && /^[A-Z0-9_-]{1,32}$/.test(code)) {
+      return code;
+    }
+  }
+  return "UNCLASSIFIED";
 }
 
 async function findExistingInvite(admin: any, email: string, requestId: string) {
@@ -132,7 +147,12 @@ Deno.serve(async (req) => {
         }
         if (invitedUserId) {
           const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
-          if (deleteError) console.error("Compensating Auth cleanup failed", deleteError.message);
+          if (deleteError) {
+            console.error("Compensating Auth cleanup failed", {
+              request_id: requestId,
+              code: safeErrorCode(deleteError),
+            });
+          }
         }
         await admin.rpc("nextway_release_conversion_activation", {
           p_request_id: requestId, p_claim_token: claimToken,
@@ -150,7 +170,13 @@ Deno.serve(async (req) => {
       throw error;
     }
   } catch (error) {
-    console.error("NEXTWAY conversion provisioning failed", safeMessage(error));
-    return response({ error: safeMessage(error) }, 400, origin);
+    console.error("NEXTWAY conversion provisioning failed", {
+      request_id: requestId,
+      code: safeErrorCode(error),
+    });
+    return response({
+      error: "Operazione di provisioning non completata. Verifica lo stato della richiesta prima di riprovare.",
+      request_id: requestId,
+    }, 500, origin);
   }
 });

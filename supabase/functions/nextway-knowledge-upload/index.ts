@@ -8,8 +8,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Permette il test locale; autenticazione e autorizzazioni restano obbligatorie.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const BUCKET = "nextway-knowledge";
 const MAX_FILE_BYTES = 12 * 1024 * 1024;
 const MAX_EXTRACTED_CHARS = 500_000;

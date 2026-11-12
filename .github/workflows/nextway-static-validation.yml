@@ -31,7 +31,10 @@ on:
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
+      - "scripts/test-nextway-local-cors.mjs"
+      - "scripts/test-nextway-local-static.py"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -61,8 +64,10 @@ on:
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
+      - "scripts/test-nextway-local-cors.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -96,6 +101,8 @@ jobs:
         run: node scripts/test-nextway-multi-workspace-sql.mjs
       - name: Validate NEXTWAY workspace admin security contract
         run: node scripts/test-nextway-workspace-admin-security.mjs
+      - name: Validate NEXTWAY local CORS allow-lists
+        run: node scripts/test-nextway-local-cors.mjs
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
@@ -110,8 +117,12 @@ jobs:
         run: node scripts/test-nextway-lead-creation-workspace.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
+      - name: Validate NEXTWAY AI Setter governance integration
+        run: node scripts/test-nextway-setter-governance.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
+      - name: Validate NEXTWAY local static checks with Python 3
+        run: python3 scripts/test-nextway-local-static.py
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script

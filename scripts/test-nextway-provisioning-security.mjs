@@ -39,6 +39,36 @@ assert.doesNotMatch(cleanupMigration, /set activation_claimed_at\s*=\s*null\s+wh
 assert.match(cleanupMigration, /status\s*=\s*'activated'[\s\S]*?activation_claim_token\s+is\s+null[\s\S]*?activated_at\s+is\s+not\s+null/);
 
 
+
+const integrityMigration = read("../supabase/migrations/20261112170000_nextway_conversion_activation_integrity.sql");
+assert.match(integrityMigration, /create or replace function public\.nextway_finalize_conversion_activation/);
+assert.match(integrityMigration, /from public\.nextway_leads l[\s\S]*?for update/i,
+  "The Lead row must be locked before conversion");
+assert.match(integrityMigration, /l\.owner_profile_id = r\.owner_profile_id[\s\S]*?l\.status = 'In valutazione'[\s\S]*?l\.archived_at is null/i,
+  "Finalization must revalidate Lead ownership, status, and archive state");
+assert.match(integrityMigration, /update public\.nextway_leads[\s\S]*?returning id into v_lead_id[\s\S]*?if v_lead_id is null then[\s\S]*?raise exception/i,
+  "Lead state transition must affect a row or abort the transaction");
+const leadUpdatePosition = integrityMigration.indexOf("update public.nextway_leads");
+const partnerInsertPosition = integrityMigration.indexOf("insert into public.partner_details");
+const clientInsertPosition = integrityMigration.indexOf("insert into public.clients");
+assert.ok(leadUpdatePosition > 0 && leadUpdatePosition < partnerInsertPosition,
+  "Partner provisioning must follow the successful Lead transition");
+assert.ok(leadUpdatePosition > 0 && leadUpdatePosition < clientInsertPosition,
+  "Customer provisioning must follow the successful Lead transition");
+assert.match(integrityMigration, /begin;[\s\S]*?commit;/i,
+  "Conversion integrity migration must be transactional");
+assert.match(integrityMigration, /revoke all on function public\.nextway_finalize_conversion_activation\(uuid, uuid, uuid\)[\s\S]*?grant execute on function public\.nextway_finalize_conversion_activation\(uuid, uuid, uuid\)\s+to service_role/i,
+  "Finalization RPC must remain service_role-only");
+
+assert.match(fn, /function safeErrorCode\(error: unknown\)/,
+  "Provisioning errors must be reduced to safe diagnostic codes");
+assert.doesNotMatch(fn, /safeMessage\(error\)|error\.message|deleteError\.message/,
+  "Raw exception messages must not be logged or returned");
+assert.match(fn, /request_id: requestId,[\s\S]*?code: safeErrorCode\(error\)/,
+  "Server logs must use request correlation and a sanitized error code");
+assert.match(fn, /error: "Operazione di provisioning non completata[\s\S]*?request_id: requestId[\s\S]*?}, 500, origin/,
+  "Client must receive a generic error and correlation ID, not internal details");
+
 console.log("NEXTWAY provisioning security contract: PASS");
 console.log("JWT verification and platform_admin authorization precede all provisioning side effects");
 console.log("Service-role key remains server-side; browser sends only the conversion request ID");
