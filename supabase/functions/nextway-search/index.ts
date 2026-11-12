@@ -19,9 +19,17 @@ function json(data: unknown, status = 200, origin = "") {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") ?? "";
-  const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-    "https://misura-test-benessere.netlify.app")
-    .split(",").map((x) => x.trim()).filter(Boolean);
+  const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Permette il test locale; autenticazione e autorizzazioni restano obbligatorie.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 
   if (origin && !allowedOrigins.includes(origin)) {
     return json({ error: "Origin non autorizzata." }, 403, allowedOrigins[0] ?? "");
