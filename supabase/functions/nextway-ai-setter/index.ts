@@ -327,22 +327,28 @@ Deno.serve(async (req) => {
 
     const approvedWorkspaceInstructions = (governance.prompts || [])
       .filter((item) => typeof item.prompt_body === "string")
-      .slice(0, 10)
+      .slice(0, 5)
       .map((item) => {
         const purpose = sanitizeModelText(item.purpose, 240);
-        const body = String(item.prompt_body).slice(0, 10000);
+        const body = String(item.prompt_body).slice(0, 6000);
         return purpose + "\n" + body;
       })
       .join("\n\n");
 
     const activeQualificationCriteria = (governance.criteria || [])
-      .slice(0, 10)
-      .map((item) => ({
-        criteria_key: sanitizeModelText(item.criteria_key, 80),
-        name: sanitizeModelText(item.name, 160),
-        description: sanitizeModelText(item.description, 1000),
-        config: item.config && typeof item.config === "object" ? item.config : {},
-      }));
+      .slice(0, 5)
+      .map((item) => {
+        const config = item.config && typeof item.config === "object" ? item.config : {};
+        const serializedConfig = JSON.stringify(config);
+        return {
+          criteria_key: sanitizeModelText(item.criteria_key, 80),
+          name: sanitizeModelText(item.name, 160),
+          description: sanitizeModelText(item.description, 1000),
+          config: serializedConfig.length <= 5000
+            ? config
+            : { truncated: true, excerpt: serializedConfig.slice(0, 5000) },
+        };
+      });
 
     // Claim idempotente condiviso nel database, dopo i controlli di accesso al prospect.
     const { data: claimRows, error: claimError } = await supabase.rpc(
