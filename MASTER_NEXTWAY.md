@@ -2432,3 +2432,29 @@ Commit:
 - Aggiunti controlli statici per form, azioni e validazione JSON.
 - Nessun workspace, prompt, criterio, lead o conversazione creato. Nessun deploy o invio di messaggi.
 - Modifiche isolate nel branch fix/nextway-password-recovery; nessun intervento su main o Netlify.
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — AI Setter collegato alle istruzioni e ai criteri approvati
+
+### Funzionalità preparata nel repository
+- Aggiunta la migrazione \`20261112030000_nextway_setter_governance_read_rpc.sql\`, con RPC read-only \`nextway_get_active_setter_governance(uuid)\`.
+- La RPC restituisce solo prompt e criteri attivi del workspace, dopo aver verificato l'utente autenticato e la membership attiva tramite \`nextway_has_workspace_access\`.
+- Le bozze e gli elementi archiviati non vengono restituiti; non viene concessa lettura diretta delle tabelle amministrative.
+- La Edge Function AI Setter legge \`workspace_id\` dalla conversazione, recupera la governance approvata e integra le istruzioni nel prompt e i criteri nel contesto strutturato.
+- In caso di errore nel recupero della governance di un workspace, la generazione si interrompe con HTTP 503 (fail-closed). Le conversazioni legacy senza workspace mantengono il comportamento standard.
+- Le istruzioni approvate non possono prevalere sulle regole di sicurezza e sul divieto di pressioni o promesse di risultati.
+
+### Verifiche predisposte
+- Aggiunto \`scripts/test-nextway-setter-governance.mjs\` per i contratti statici SQL/Edge Function.
+- Workflow static validation aggiornato per eseguire il nuovo test su push e pull request e includere i nuovi file nei trigger.
+
+### Stato e limiti
+- Modifiche isolate nel branch \`fix/nextway-password-recovery\`; nessun intervento su \`main\`.
+- Migrazione SQL preparata ma NON applicata a Supabase.
+- Edge Function aggiornata nel repository ma NON distribuita.
+- Nessun prompt, criterio, lead, conversazione o messaggio creato o modificato.
+- Nessun messaggio inviato e nessuna chiamata OpenAI eseguita durante questa modifica.
+- Non è stato eseguito un collaudo runtime; il nuovo test statico e la CI devono ancora essere eseguiti.
+- Netlify resta congelato fino al 4 dicembre 2026.
