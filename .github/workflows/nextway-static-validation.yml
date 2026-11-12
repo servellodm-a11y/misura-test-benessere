@@ -34,6 +34,7 @@ on:
       - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - "scripts/test-nextway-local-cors.mjs"
+      - "scripts/test-nextway-local-static.py"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -120,6 +121,8 @@ jobs:
         run: node scripts/test-nextway-setter-governance.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
+      - name: Validate NEXTWAY local static checks with Python 3
+        run: python3 scripts/test-nextway-local-static.py
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
