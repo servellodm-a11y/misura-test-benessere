@@ -2252,3 +2252,55 @@ Risultato restituito dall'utente: per tutte e cinque le funzioni `exists=true`, 
 - Il successivo aggiornamento documentale del MASTER non è incluso in quel run; non sono state apportate modifiche applicative dopo il commit verificato.
 - Prossimi lavori: audit integrato del frontend e delle Edge Functions rispetto allo schema workspace attuale; aggiornamento del piano di collaudo per riflettere le nuove RPC e la separazione delle tabelle; verifica read-only dei deploy/secrets e delle dipendenze operative dove possibile; definizione del test runtime minimo senza creare record fittizi o inviare messaggi.
 - Nessun deploy Edge Function o Netlify va eseguito senza autorizzazione esplicita separata. Il vincolo di congelamento Netlify fino al 4 dicembre 2026 resta invariato.
+
+
+---
+
+## Aggiornamento — 12 novembre 2026 — API membership, SQL retention e CI
+
+### API amministrativa workspace
+
+La Edge Function `supabase/functions/nextway-workspace-admin/index.ts` è stata estesa con due azioni, entrambe protette dal controllo `platform_admin` già eseguito prima del dispatch:
+- `list_memberships`: elenco delle membership di un workspace.
+- `set_membership`: creazione/aggiornamento idempotente per coppia `workspace_id,user_id`, con verifica che l'utente esista già in Supabase Auth.
+
+Vincoli applicativi aggiunti:
+- ruoli allowlist: owner, admin, manager, member, viewer;
+- stati allowlist: invited, active, suspended;
+- l'attivazione è rifiutata se il workspace non è attivo;
+- il vincolo DB continua a impedire più owner attivi/invitati sullo stesso workspace;
+- sospensione reversibile; nessuna cancellazione hard;
+- lo stato `invited` è solo un record applicativo: non crea account Auth e non invia email.
+
+Test statico `scripts/test-nextway-workspace-admin-security.mjs` aggiornato per coprire le due azioni, i controlli ruolo/stato, la verifica dell'utente Auth e il vincolo owner. Commit API `9ecfd3edcb48b2810d432c1d75a7039f2d0d16b4`; commit test `e90282dfcbce07809052cea92e1881297edc3bc4`.
+
+### Correzione sorgente SQL retention
+
+Durante l'audit del file GitHub è stato rilevato che il delimitatore della funzione `nextway_prune_workspace_setter_generation_requests()` era ancora scritto come `as $` / `$;`, benché la versione SQL corretta con `$$` fosse stata eseguita manualmente con successo nel progetto Supabase.
+
+Correzione repository:
+- migrazione aggiornata a delimitatori `as $$` e `$$;`;
+- test statico aggiornato per rifiutare delimitatori singoli;
+- la migrazione live non va riapplicata: il cambiamento GitHub riallinea la sorgente, non richiede una nuova esecuzione SQL.
+
+Commit migrazione `5b40ffced28b0059b54b8805324da35a84c6d484`; commit test `f7c9e3d2e805f921be1e496024921403beda6868`.
+
+### CI finale
+
+- Run `43173858890`, workflow `NEXTWAY static validation`, commit `f7c9e3d2e805f921be1e496024921403beda6868`: **SUCCESS**.
+- Il run ha superato il test statico di isolamento tabelle AI Setter e i controlli del workflow, incluso il type-check Deno.
+- Un run intermedio `43173781094` era fallito per un'asserzione del test che cercava il delimitatore singolo; l'asserzione è stata corretta e il run successivo è verde.
+- Il run `43173661549` aveva già superato l'estensione dell'API membership.
+
+### Documentazione aggiornata
+
+`supabase/diagnostics/NEXTWAY_PRE_RELEASE_TEST_PLAN.md` aggiornato con un addendum che sostituisce le istruzioni obsolete sul vecchio schema idempotenza e documenta membership, stato runtime e prerequisiti di rilascio. Commit `255b8e1aa44f6b5c25c07cf8d0a0ea830673a4d6`.
+
+### Limiti operativi invariati
+
+- Nessun workspace o membership creati; nessun account Auth, Lead o conversazione di test creati.
+- Nessun documento KB o chunk caricato.
+- La nuova API membership è codice repository, non ancora deployata.
+- Nessun deploy Edge Function e nessun deploy Netlify eseguito.
+- Nessun test runtime end-to-end della nuova generazione AI Setter.
+- La piattaforma non è ancora pronta per il rilascio ai partner: restano UI amministrativa, onboarding del workspace reale, membership reali, Knowledge Base operativa, deploy autorizzati e collaudo runtime.
