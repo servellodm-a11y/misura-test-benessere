@@ -1,5 +1,30 @@
 ## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
 
+### Sicurezza operativa dell'area amministrativa — campi workspace non precompilati
+- In `nextway-admin.html` i campi Nome workspace, Chiave univoca e Paese mercato non hanno più valori precompilati. Gli esempi sono soltanto placeholder.
+- È stato aggiunto un avviso esplicito: la creazione registra un workspace nel database e i campi devono essere compilati/inviati solo dopo verifica e decisione consapevole.
+- Test statico aggiunto a `scripts/test-nextway-admin-ui.mjs`: verifica l'avviso, i placeholder e l'assenza di attributi `value` nei campi che identificano il nuovo workspace.
+- Commit del test: `774bdf55a49e0eee69b625bc2571aa84189f8215`. La CI per questa modifica è in attesa di esito al momento di questo aggiornamento.
+- La modifica non crea né modifica alcun workspace e non cambia la logica di invio del form; rende soltanto esplicita la natura di scrittura dell'operazione e rimuove i valori precompilati.
+
+### Stato complessivo CORS locale
+- Le sei Edge Functions richiamate dalle interfacce locali consentono `http://localhost:8000`, conservano `NEXTWAY_ALLOWED_ORIGINS` e mantengono autenticazione/autorizzazioni server-side.
+- Test dedicato `scripts/test-nextway-local-cors.mjs` inserito nel workflow statico.
+- GitHub Actions run #266 (ID `43231793366`) sul commit `f43a897`: SUCCESS, inclusi test CORS, test sicurezza, controlli UI, sintassi Node e cinque type-check Deno.
+- I risultati CI riguardano il repository, non la funzione remota già pubblicata.
+
+### Perimetro live
+- Nessun deploy Supabase o Netlify, merge, migrazione SQL o modifica al database.
+- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
+- Il blocco di produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e test sul branch continuano.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — rimossi i valori precompilati dal form di creazione workspace e aggiunto il test statico corrispondente. CI della modifica in attesa; nessuna azione live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
 ### Sviluppo locale — correzione CORS estesa e verificata in CI
 - Branch di lavoro: `fix/nextway-password-recovery`. Nessuna modifica a `main`.
 - È stata estesa l'origine di sviluppo `http://localhost:8000` alle sei Edge Functions richiamate dalle interfacce NEXTWAY locali:
