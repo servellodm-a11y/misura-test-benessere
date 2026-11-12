@@ -30,8 +30,7 @@ begin
       'workspace_owner',
       'workspace_admin',
       'workspace_manager',
-      'workspace_member',
-      'workspace_viewer'
+      'workspace_member'
     ]::text[]
   ) then
     raise exception 'Accesso al workspace non autorizzato' using errcode = '42501';
