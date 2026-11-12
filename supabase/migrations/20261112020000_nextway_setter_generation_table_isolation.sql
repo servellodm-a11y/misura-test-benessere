@@ -49,6 +49,12 @@ create table if not exists public.nextway_setter_workspace_generation_requests (
 
 create index if not exists nextway_setter_workspace_generation_conversation_idx
   on public.nextway_setter_workspace_generation_requests(conversation_id,created_at desc);
+create index if not exists nextway_setter_workspace_generation_completed_retention_idx
+  on public.nextway_setter_workspace_generation_requests(updated_at)
+  where status='completed';
+create index if not exists nextway_setter_workspace_generation_stale_retention_idx
+  on public.nextway_setter_workspace_generation_requests(claimed_at)
+  where status='generating';
 
 alter table public.nextway_setter_workspace_generation_requests enable row level security;
 revoke all on public.nextway_setter_workspace_generation_requests from public, anon, authenticated, service_role;
@@ -389,6 +395,49 @@ end;
 $$;
 
 
+
+-- Manual, administrator-only retention for the isolated workspace generation store.
+create or replace function public.nextway_prune_workspace_setter_generation_requests()
+returns table (deleted_completed integer, deleted_abandoned_generating integer)
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $
+declare
+  v_actor uuid := auth.uid();
+  v_is_admin boolean := false;
+  v_completed integer := 0;
+  v_generating integer := 0;
+begin
+  if v_actor is null then
+    raise exception 'Autenticazione richiesta' using errcode='28000';
+  end if;
+
+  select exists (
+    select 1 from public.profiles p
+    where p.id=v_actor and p.role='platform_admin'
+  ) into v_is_admin;
+
+  if not v_is_admin then
+    raise exception 'Operazione riservata a platform_admin' using errcode='42501';
+  end if;
+
+  delete from public.nextway_setter_workspace_generation_requests
+  where status='completed'
+    and updated_at < clock_timestamp() - interval '30 days';
+  get diagnostics v_completed = row_count;
+
+  delete from public.nextway_setter_workspace_generation_requests
+  where status='generating'
+    and claimed_at < clock_timestamp() - interval '24 hours';
+  get diagnostics v_generating = row_count;
+
+  return query select v_completed,v_generating;
+end;
+$;
+
+revoke all on function public.nextway_prune_workspace_setter_generation_requests() from public,anon,service_role;
+grant execute on function public.nextway_prune_workspace_setter_generation_requests() to authenticated;
 
 -- Explicit ACLs: only authenticated callers may invoke the guarded RPCs.
 revoke all on function public.nextway_begin_setter_generation(uuid,uuid) from public,anon,service_role;
