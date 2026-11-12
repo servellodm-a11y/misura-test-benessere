@@ -24,7 +24,7 @@ assert.match(edge, /nextway_get_active_setter_governance/);
 assert.match(edge, /Istruzioni e criteri del workspace temporaneamente non disponibili/);
 assert.match(edge, /qualification_criteria:\s*activeQualificationCriteria/);
 assert.match(edge, /approvedWorkspaceInstructions/);
-assert.match(edge, /informazioni[\\s\\S]*mancanti/i);
+assert.ok(edge.includes("mancanti e proporre una domanda utile"));
 assert.match(edge, /Non inviarla: deve rimanere una bozza/);
 
 console.log("NEXTWAY AI Setter approved workspace governance contract: PASS");
