@@ -1,5 +1,29 @@
 ## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
 
+### Verifica finale della schermata di creazione workspace
+- La modifica in `nextway-admin.html` rimuove i valori precompilati da Nome workspace, Chiave univoca e Paese mercato; restano esempi nei placeholder e un avviso che identifica la creazione come scrittura sul database.
+- `scripts/test-nextway-admin-ui.mjs` verifica che i campi siano vuoti e che l'avviso sia presente.
+- GitHub Actions run #269, ID `43231967925`, sul commit `774bdf5`: **SUCCESS**. Tutti i controlli statici e tutti i type-check Deno sono completati con successo, inclusi i nuovi test CORS e UI.
+- La run #266, ID `43231793366`, aveva già verificato con SUCCESS le sei allow-list CORS locali e i relativi controlli.
+- La copia locale del Mac è stata aggiornata dall'utente soltanto fino al commit `fd1b578`; dovrà ricevere gli ulteriori commit del branch prima di provare la nuova interfaccia locale. Non è stato richiesto alcun comando locale in questo passaggio.
+
+### Stato di sicurezza e perimetro
+- Branch di sviluppo: `fix/nextway-password-recovery`; nessuna modifica a `main`, nessun merge.
+- Tutte e sei le Edge Functions chiamate dall'interfaccia locale includono `http://localhost:8000` nell'allow-list senza wildcard e senza rimuovere le origini configurate.
+- Nessun deploy Supabase/Netlify, migrazione SQL o modifica a dati/configurazione live.
+- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
+- Il blocco produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e CI possono continuare sul branch.
+
+### Prossimo passo operativo
+- Aggiornare la copia locale del branch con un solo `git pull --ff-only`, poi provare in locale i flussi di sola lettura. La correzione CORS non avrà effetto sulle funzioni remote finché non saranno distribuite con deploy autorizzato.
+
+### Registro cronologico
+- 12-11-2026, 14:47 Europe/Rome — verificata con SUCCESS la CI #269 dopo la rimozione dei valori precompilati dal form workspace. Nessuna azione live.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
+
 ### Sicurezza operativa dell'area amministrativa — campi workspace non precompilati
 - In `nextway-admin.html` i campi Nome workspace, Chiave univoca e Paese mercato non hanno più valori precompilati. Gli esempi sono soltanto placeholder.
 - È stato aggiunto un avviso esplicito: la creazione registra un workspace nel database e i campi devono essere compilati/inviati solo dopo verifica e decisione consapevole.
