@@ -47,6 +47,9 @@ assert.ok(searchHtml.includes('Per approfondire, qui trova il mio riferimento:')
 assert.ok(searchHtml.includes('linkSelect.value=recommended'));
 assert.ok(searchHtml.includes("segment==='customers'||segment==='wellness_pro'?'general'"));
 assert.ok(searchHtml.includes("explicitZinzinoInterest?'replica':'none'"));
+assert.ok(searchHtml.includes('const detectedRole=rolePatterns.find'));
+assert.ok(searchHtml.includes('const personalizedLine=detectedRole'));
+assert.ok(searchHtml.includes('non attribuire ruoli o interessi non documentati'));
 // Compile the browser script without executing DOM/network actions.
 const inlineScripts = [...searchHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
 const messageScript = inlineScripts.find(source => source.includes('function createMessageDraftPanel('));
@@ -63,6 +66,9 @@ assert.ok(archiveHtml.includes('Prepara un messaggio per questo Lead'));
 assert.ok(archiveHtml.includes('Sito da proporre (facoltativo)'));
 assert.ok(archiveHtml.includes('BOZZA DA INVIARE MANUALMENTE'));
 assert.ok(archiveHtml.includes('Nessun link aggiunto'));
+assert.ok(archiveHtml.includes('const personalization=profession'));
+assert.ok(archiveHtml.includes('const evidenceExcerpt='));
+assert.ok(archiveHtml.includes('non dedurre qualifiche o interessi'));
 assert.ok(archiveHtml.includes('websites.generalWellnessWebsite'));
 assert.ok(archiveHtml.includes('websites.zinzinoReplicaWebsite'));
 const archiveScripts = [...archiveHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
