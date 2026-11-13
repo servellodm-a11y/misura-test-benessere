@@ -2577,7 +2577,7 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 
 - MASTER recuperato da `main` prima della scrittura: blob SHA `3ddd44ca69b79b9c875f35bc60732fef2d6bffcd`. HEAD `main`: `4344bd2a181667ec6e80a704d298625e1321bb85` (12 novembre, commit documentale).
 - Commit recenti esaminati: `4344bd2`, `e744661`, `9133d4d`, `dbeb994`, `a3fbec0`, `b2ce72e`, `cd813d8`, `c46a789`, `9dcf333`, `18b38e1`. L'ultimo push CI su main è #251, sul precedente commit di codice `b2ce72e`.
-- Albero ricorsivo main: 140 elementi, senza troncamento; presenti sei Edge Functions e migrazioni fino a `20261112020000_nextway_setter_generation_table_isolation.sql`. Non risultano in main `nextway-company-config.js) né le migrazioni `20261113110000`–`20261113150000`.
+- Albero ricorsivo main: 140 elementi, senza troncamento; presenti sei Edge Functions e migrazioni fino a `20261112020000_nextway_setter_generation_table_isolation.sql`. Non risultano in main `nextway-company-config.js` né le migrazioni `20261113110000`–`20261113150000`.
 - PR #1 / branch `fix/nextway-password-recovery`: HEAD remoto `e0b5098f88417597010e5845a61d0c16d65c2689`, albero 208 elementi; PR OPEN, DRAFT, NOT MERGED, 84 file modificati, 534 commit dichiarati dai metadati, `mergeable=false`. Base SHA restituito dalla PR: `a3fbec076221f0f043d60373e2864d7d07db30d7`. Nessun merge.
 - Ultimo pull locale confermato dall'utente il 13 novembre alle 13:42: `955cf9d..f2b00a0`, fast-forward, solo `nextway-motore-ricerca.html` (+83/-7). Il branch remoto è poi avanzato a `e0b5098`; sincronizzazione locale successiva non confermata.
 - In questo aggiornamento sono stati letti file, migrazioni, documenti, albero Git e CI. Nessun accesso diretto a Supabase/Netlify.
@@ -2605,7 +2605,7 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 
 - Progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`. Gli esiti seguenti sono output riferiti dall'utente, non una nuova lettura live dell'assistente.
 - **P0 Rate Limit e Governance — COMPLETATO E VERIFICATO:** il 13 novembre alle 07:37 l'utente ha eseguito il draft SQL nel Supabase SQL Editor (`Success. No rows returned`). Verifica: Tabella Rate Limit OK; RPC Rate Limit OK; RPC Governance OK; RLS Rate Limit ATTIVA; Accesso RPC Rate Limit OK; Accesso RPC Governance OK. Dal sorgente del draft: `nextway_api_rate_limits`, `nextway_consume_api_rate_limit(text,integer)`, `nextway_get_active_setter_governance(uuid)`.
-- **Workspace — COMPLETATO E VERIFICATO per gli output disponibili:** il 13 novembre alle 07:25 l'utente ha confermato workspaces, prompts e prospect criteria presenti con RLS/accesso; il 12 novembre aveva verificato `nextway_workspace_memberships` con RLS attiva, 0 righe, FK a `auth.users` e `nextway_workspaces`, UNIQUE `(workspace_id,user_id)) e vincoli ruolo/stato. Il 13 novembre alle 09:29 ha confermato le policy `nextway_workspace_memberships_admin_all` e `nextway_workspace_memberships_self_read`.
+- **Workspace — COMPLETATO E VERIFICATO per gli output disponibili:** il 13 novembre alle 07:25 l'utente ha confermato workspaces, prompts e prospect criteria presenti con RLS/accesso; il 12 novembre aveva verificato `nextway_workspace_memberships` con RLS attiva, 0 righe, FK a `auth.users` e `nextway_workspaces`, UNIQUE `(workspace_id,user_id)` e vincoli ruolo/stato. Il 13 novembre alle 09:29 ha confermato le policy `nextway_workspace_memberships_admin_all` e `nextway_workspace_memberships_self_read`.
 - Le RPC `nextway_activate_workspace_prompt/criteria(uuid,uuid)` erano state verificate il 12 novembre come SECURITY DEFINER, `search_path=pg_catalog, public`, EXECUTE solo `service_role`. `workspace_id` presente su leads, knowledge documents e setter conversations con FK RESTRICT; FK anche su prompts e prospect criteria.
 - **Privilegi RPC conversione — COMPLETATO E VERIFICATO per la diagnostica utente del 13 novembre alle 09:36:** claim/finalize/release/guard/set_updated_at EXECUTE solo a `postgres, service_role`; `nextway_has_workspace_access` e `nextway_is_platform_admin` anche ad `authenticated`; nessun EXECUTE a anon/PUBLIC. Anomalia live: `nextway_is_platform_admin()` aveva `search_path=public`. La migrazione branch `20261113110000` fissa `pg_catalog, public`, ma non risulta applicata.
 - **Storage — COMPLETATO E VERIFICATO all'ultima lettura utente dell'11 novembre:** `nextway-knowledge` privato, 12 MiB, MIME PDF/DOCX/TXT, 0 oggetti e quattro policy admin authenticated SELECT/INSERT/UPDATE/DELETE. Non ricontrollato il 13 novembre.
@@ -2652,7 +2652,7 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 - Estrazione DDL core: **BLOCCATO** dall'errore di formato.
 - Configurazione staging: **ESEGUITO MA NON VERIFICATO** come file branch; progetto e baseline: **DA COMPLETARE**.
 - CLI nel Terminale serale: **BLOCCATO** fino a chiarimento della discrepanza con l'output mattutino.
-- Deploy Edge Functions: **DA COMPLETARE/VERIFICARE**.
+- Deploy Edge Functions: **DA COMPLETARE**.
 - Merge PR #1: **BLOCCATO** fino a CI verde, staging e test.
 - Netlify produzione/test reali prima del 4 dicembre: **BLOCCATO** per decisione utente.
 
