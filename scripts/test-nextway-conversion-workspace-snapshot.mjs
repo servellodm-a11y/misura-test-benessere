@@ -5,6 +5,7 @@ const snapshot = fs.readFileSync("supabase/migrations/20261113120000_nextway_con
 const finalize = fs.readFileSync("supabase/migrations/20261113130000_nextway_conversion_workspace_finalization.sql", "utf8");
 const cloud = fs.readFileSync("nextway-cloud.js", "utf8");
 const edge = fs.readFileSync("supabase/functions/nextway-conversion-provisioning/index.ts", "utf8");
+const isolation = fs.readFileSync("supabase/diagnostics/nextway_conversion_workspace_isolation_transactional_test.sql", "utf8");
 
 const checks = [
   ["workspace snapshot column with RESTRICT FK", /add column if not exists workspace_id uuid[\s\S]*references public\.nextway_workspaces\(id\) on delete restrict/i.test(snapshot)],
@@ -31,6 +32,12 @@ const checks = [
   ["workspace client projection excludes viewer", /nextway_has_workspace_access\([\s\S]*workspace_owner[\s\S]*workspace_member/i.test(finalize) && !/array\[[^\]]*workspace_viewer/i.test(finalize)],
   ["Edge Function binds Auth invite to request", /nextway_conversion_request_id: requestId/i.test(edge)],
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
+  ["transactional A/B test requires two partners and two Leads", /servono almeno due profili partner[\s\S]*servono almeno due Lead/i.test(isolation)],
+  ["transactional A/B test rolls back all fixtures", /begin;[\s\S]*rollback;/i.test(isolation)],
+  ["A cannot read workspace B and vice versa", /A ha ottenuto accesso al workspace B[\s\S]*B ha ottenuto accesso al workspace A/i.test(isolation)],
+  ["viewer and invited membership are denied", /workspace_viewer[\s\S]*membership_status='invited'[\s\S]*Membership invited ha letto/i.test(isolation)],
+  ["attribution table direct access is denied", /nextway_client_workspace_attributions[\s\S]*insufficient_privilege/i.test(isolation)],
+  ["workspace RPC uses only active non-viewer membership", /nextway_list_workspace_clients\(v_ws_a\)[\s\S]*nextway_list_workspace_clients\(v_ws_b\)/i.test(isolation)],
 ];
 
 for (const [name, passed] of checks) {
