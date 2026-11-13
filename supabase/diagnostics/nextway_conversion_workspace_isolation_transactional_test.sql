@@ -122,6 +122,7 @@ declare
   v_req_b uuid;
 begin
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
   v_req_a := public.nextway_create_lead_conversion_request(
     current_setting('nextway.test.lead_a')::uuid,'customer',
@@ -129,6 +130,7 @@ begin
   );
 
   perform set_config('request.jwt.claim.sub',v_user_a::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_a::text,'role','authenticated')::text,true);
   v_req_b := public.nextway_create_lead_conversion_request(
     current_setting('nextway.test.lead_b')::uuid,'customer',
@@ -153,6 +155,7 @@ declare
   v_rows integer;
 begin
   perform set_config('request.jwt.claim.sub',v_admin::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_admin::text,'role','authenticated')::text,true);
 
   update public.nextway_lead_conversion_requests
@@ -255,6 +258,7 @@ declare
 begin
   -- Partner B è membro A: può leggere il cliente A tramite RPC, non con SELECT diretta.
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
 
   select count(*) into v_count from public.nextway_lead_conversion_requests where id=v_req_a;
@@ -275,6 +279,7 @@ begin
 
   -- Partner A è membro B: controllo speculare.
   perform set_config('request.jwt.claim.sub',v_user_a::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_a::text,'role','authenticated')::text,true);
   select count(*) into v_count from public.nextway_list_workspace_clients(v_ws_b);
   if v_count<>1 then raise exception 'Membro A non legge il cliente condiviso nel workspace B.'; end if;
@@ -313,6 +318,7 @@ declare
   v_denied boolean:=false;
 begin
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
   begin
     perform count(*) from public.nextway_list_workspace_clients(v_ws_a);
@@ -337,6 +343,7 @@ declare
   v_denied boolean:=false;
 begin
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
   begin
     perform count(*) from public.nextway_list_workspace_clients(v_ws_a);
