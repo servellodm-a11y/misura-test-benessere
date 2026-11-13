@@ -377,3 +377,23 @@ Nessuno dei tre registri individuati può essere assunto come registro delle mig
 4. Nessuna query sulle righe dei registri Auth/Realtime/Storage, nessuna migrazione, DDL/DML, deploy, merge o modifica a `main`.
 
 **Stato:** struttura registri candidati completata; registro migrazioni applicative NEXTWAY non identificato; nessuna modifica al database.
+
+
+## 13. Preparazione ripristino controllato — 13 novembre 2026
+
+Preparati sul branch di lavoro due artefatti, senza applicare modifiche al database:
+
+1. `docs/NEXTWAY-PRODUCTION-REPAIR-PLAN.md`: piano di ripristino per oggetti P0/P1/P2, dipendenze, sequenza, cautele e divieti.
+2. `docs/NEXTWAY-REPAIR-PREFLIGHT-REPORT.sql`: query diagnostica read-only che restituisce una sola riga e una sola cella `report`, con prerequisiti strutturali, colonne legacy, RLS e stato delle RPC target.
+
+La query pre-flight è stata corretta per mostrare i nomi espliciti delle tabelle anche quando una relazione non esiste. Non è ancora stata eseguita dall'utente.
+
+### Sequenza pianificata
+- P0: tabella e RPC rate limit, usando la migrazione base seguita dalla migrazione che porta la firma finale `(text, integer)`.
+- P0 workspace: RPC governance, dopo controllo delle tabelle workspace e degli helper di autorizzazione.
+- P1: funzione trigger di pulizia output staged, dopo controllo delle colonne legacy.
+- P2: indici e RPC retention, dopo controllo di `status`, `updated_at`, `lease_expires_at`; la funzione elimina record solo quando invocata, quindi non deve essere chiamata senza autorizzazione specifica.
+
+Non si deve applicare alcuna migrazione se il pre-flight segnala dipendenze mancanti o oggetti target già presenti. Non riapplicare la migrazione workspace table isolation già dichiarata applicata. Non eseguire in blocco tutte le migrazioni.
+
+**Stato:** piano e query pre-flight preparati; nessuna query ancora eseguita; nessuna migrazione, DDL/DML, deploy, merge o modifica a `main`.
