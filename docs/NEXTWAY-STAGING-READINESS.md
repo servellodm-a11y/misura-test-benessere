@@ -2,7 +2,7 @@
 
 Data: 13 novembre 2026  
 Branch: `fix/nextway-password-recovery`  
-Esito: **NON PRONTO PER LA CREAZIONE/APPLICAZIONE DELLE MIGRAZIONI**.
+Esito: **PREPARAZIONE AVANZATA; NON ANCORA PRONTO PER CREARE/APPLICARE LE MIGRAZIONI**.
 
 Questo documento registra la preparazione tecnica necessaria prima di creare un progetto Supabase staging. Non autorizza la creazione del progetto, l'applicazione di migrazioni, l'uso di credenziali remote o l'invio di email.
 
@@ -39,13 +39,15 @@ La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea
 
 **Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve una baseline schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
 
-### B3 — trigger legacy Setter da correggere prima del collaudo da zero
+### B3 — trigger legacy Setter: correzione forward-only preparata
 
 La migrazione `20261110000700_nextway_clear_stale_staged_output.sql` installa un trigger su `public.nextway_setter_generation_requests` e assegna `NEW.generated_output := null`.
 
 La tabella creata dalla migrazione `20261110000200_nextway_setter_idempotency.sql` non dichiara la colonna `generated_output`; dichiara invece `response`. La successiva migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` crea una tabella distinta, `nextway_setter_workspace_generation_requests`, che contiene `generated_output`, e dichiara esplicitamente di preservare la tabella legacy.
 
-**Conseguenza:** la migrazione 007 non è coerente con la tabella legacy su cui installa il trigger. Va corretta o sostituita con una migrazione forward-only che rimuova il trigger legacy errato e, se ancora necessario, installi il comportamento sulla tabella workspace corretta. Non modificare retroattivamente una migrazione già potenzialmente applicata; la soluzione deve essere additiva e compatibile con entrambi gli stati già esistenti.
+**Correzione preparata sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger dalla tabella legacy e sposta l'azzeramento di `generated_output` sulla tabella workspace, usando le colonne `owner_profile_id`, `idempotency_key` e `conversation_id`. La migrazione è forward-only e verifica preventivamente la presenza della tabella/colonne richieste. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
+
+**Stato:** preparata; in attesa del workflow CI. Non applicata a nessun database.
 
 ### B4 — migrazioni Setter legacy non certificate per una nuova installazione
 
@@ -57,7 +59,7 @@ Non classificare l'intera catena come applicabile finché la revisione non è co
 
 1. Ottenere una baseline schema-only completa e sanitizzata del database core, senza righe applicative, utenti Auth, storage objects, segreti o dati personali.
 2. Confrontare la baseline con le migrazioni versionate e definire quali oggetti sono baseline preesistenti e quali sono creati dalle migrazioni.
-3. Correggere il difetto legacy 007 con migrazione forward-only, preservando la compatibilità e senza riscrivere migrazioni storiche già applicate.
+3. Verificare CI e sottoporre a revisione SQL la correzione forward-only 007; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
 4. Definire e revisionare `supabase/config.toml` per staging, senza collegare il progetto reale.
 5. Preparare secret manifest con soli nomi e descrizioni, mai valori; distinguere chiavi pubbliche, service role e secret Edge Function.
 6. Creare il progetto Supabase staging solo dopo autorizzazione esplicita e controllo di eventuali costi/limiti del piano.
@@ -81,7 +83,7 @@ Non classificare l'intera catena come applicabile finché la revisione non è co
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | DA PREPARARE |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
-| Correzione forward-only trigger Setter 007 | DA COMPLETARE |
+| Correzione forward-only trigger Setter 007 | PREPARATA, CI IN CORSO |
 | Progetto Supabase staging | NON CREATO |
 | Test PostgreSQL/Auth/concorrenza | NON ESEGUITI |
 | Progetto reale | NON MODIFICATO |
