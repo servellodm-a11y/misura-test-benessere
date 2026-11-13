@@ -79,7 +79,7 @@ function init(){
     const item=document.createElement('div');item.className='nwresult';
     const title=document.createElement('strong');title.textContent=(req.conversion_type==='partner'?'Collaboratore / Partner':'Cliente')+' · '+req.full_name;
     const lead=document.createElement('p');lead.className='nwmuted';lead.textContent='Lead: '+(req.lead?.display_name||'Nome non disponibile')+' · Email: '+req.email+' · Telefono: '+(req.phone||'non indicato');
-    const meta=document.createElement('p');meta.className='nwmuted';meta.textContent='Proprietario / sponsor proposto: '+req.owner_profile_id+' · Richiesta: '+new Date(req.created_at).toLocaleString('it-IT');
+    const meta=document.createElement('p');meta.className='nwmuted';const workspaceLabel=req.workspace?.name?(req.workspace.partner_name?req.workspace.name+' · '+req.workspace.partner_name:req.workspace.name):(req.workspace_id?'Workspace '+req.workspace_id:'Percorso legacy centrale');meta.textContent='Workspace: '+workspaceLabel+' · Proprietario / sponsor: '+req.owner_profile_id+' · Richiesta: '+new Date(req.created_at).toLocaleString('it-IT');
     item.append(title,lead,meta);
     if(queueStatus==='pending'){
      const actions=document.createElement('div');actions.className='actions';
