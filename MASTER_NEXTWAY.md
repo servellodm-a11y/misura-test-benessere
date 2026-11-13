@@ -3401,3 +3401,18 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Preparata diagnostica `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql` per verificare metadati e RLS della baseline core, senza leggere righe applicative. Non eseguita.
 - Restano aperti: baseline schema-only core completa, confronto con migrazioni, creazione progetto cloud staging (solo dopo autorizzazione esplicita), migrazioni PostgreSQL e test Auth/concorrenza.
 - Nessuna modifica a `nextway-platform`; nessun deploy, invito/email, account di test o migrazione applicata.
+
+## 13 novembre 2026 — Ricostruzione delta baseline core
+
+- Creata `docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md` per distinguere la DDL core originaria dalle modifiche già introdotte dalle migrazioni.
+- La mappa individua modifiche dirette su cinque tabelle core:
+  - `nextway_leads`: archiviazione logica, vincolo status, audit, workspace_id/FK/index e policy/trigger workspace;
+  - `nextway_setter_conversations`: workspace_id/FK/index e policy workspace;
+  - `nextway_knowledge_documents`: workspace_id/FK/index, indici di deduplicazione workspace/global e policy;
+  - `partner_details`: `nextway_conversion_request_id` con FK RESTRICT e unique index parziale (migrazione 110015);
+  - `clients`: `nextway_conversion_request_id` con FK RESTRICT e unique index parziale (migrazione 110015).
+- Nessun ALTER TABLE diretto individuato su `profiles` e `nextway_setter_messages`; le dipendenze funzionali vanno comunque preservate.
+- Aggiunto `scripts/test-nextway-core-baseline-delta.mjs`, che controlla la mappa contro tutte le migrazioni versionate. Integrato nel workflow CI.
+- Primo CI run `43413932182` fallito perché il test non includeva le aggiunte conversion request a `partner_details` e `clients`; la mappa e il test sono stati corretti. Run `43414160598` avviato sul commit `3faa66e517f0caf40988ebb581545c72355be5ce`, in corso al momento dell'annotazione.
+- **Blocco residuo reale:** il repository non contiene la DDL originaria completa pre-migrazioni. Il dump noto `/tmp/nextway-public-schema.sql` è uno snapshot dello schema corrente e contiene già modifiche versionate; non è sicuro trasformarlo automaticamente in baseline con sostituzioni testuali. Nessuna baseline SQL eseguibile è stata inventata.
+- Nessuna operazione DB eseguita; nessuna migrazione applicata; staging non creato; progetto reale invariato.
