@@ -64,6 +64,7 @@ const checks = [
   ["transactional test performs Lead workspace changes under admin JWT", /Le modifiche di workspace ai Lead[\s\S]*request\.jwt\.claim\.sub',v_admin[\s\S]*Trasferimento amministrativo successivo del Lead A[\s\S]*request\.jwt\.claim\.sub',current_setting\('nextway\.test\.admin'/i.test(isolation)],
   ["transactional test requires two partner profiles and one eligible Lead each", /servono due partner con partner_details e un Lead convertibile libero ciascuno/i.test(isolation)],
   ["transactional test rolls back all fixtures", /begin;[\s\S]*rollback;/i.test(isolation)],
+  ["transactional test uses SQL SELECT for JWT setup outside PL/pgSQL blocks", /Trasferimento amministrativo successivo del Lead A[\s\S]*select set_config\('request\.jwt\.claim\.sub'[\s\S]*?update public\.nextway_leads/i.test(isolation) && !/Trasferimento amministrativo successivo del Lead A[\s\S]*?perform set_config/i.test(isolation)],
   ["cross-workspace members are denied the opposite workspace", /Membro B accede al workspace B senza membership[\s\S]*Membro A accede al workspace A senza membership/i.test(isolation)],
   ["viewer and invited membership are denied", /workspace_viewer[\s\S]*membership_status='invited'[\s\S]*Membership invited ha letto/i.test(isolation)],
   ["attribution table direct access is denied", /nextway_client_workspace_attributions[\s\S]*insufficient_privilege/i.test(isolation)],
