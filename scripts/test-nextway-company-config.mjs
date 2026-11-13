@@ -416,3 +416,9 @@ assert.ok(searchHtml.includes('function saveSearchHistory(prospects)'));
 assert.ok(searchHtml.includes('function renderSearchHistory()'));
 assert.ok(searchHtml.includes('archive_status:alreadyAcquired?\'acquired\':\'new\''));
 assert.ok(searchHtml.includes('Già presente nel CRM'));
+
+assert.ok(archiveHtml.includes("status:String(lead.status||'Da verificare')"));
+assert.ok(archiveHtml.includes("prospects};"));
+assert.ok(searchHtml.includes("crm_status:crmMatch?.status||''"));
+assert.ok(searchHtml.includes("DA RICONTATTARE · IN FOLLOW-UP"));
+assert.ok(searchHtml.includes("followupCount"));
