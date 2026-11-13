@@ -112,3 +112,9 @@ La sequenza effettiva è:
 Lo staging sarà pronto solo quando B1–B4 saranno risolti, la catena migrazioni sarà riproducibile su uno schema pulito, i controlli di sicurezza saranno superati e il progetto separato sarà stato creato con autorizzazione esplicita.
 
 Fino a quel momento, la scelta corretta è non avviare un collaudo runtime che potrebbe fallire per difetti strutturali già individuabili staticamente.
+
+## Ricerca della DDL originaria nella cronologia Git — 13 novembre 2026
+
+Controllata la storia completa del percorso `supabase/migrations` disponibile nel repository e il commit iniziale `ee6e6ab707a1af658b05d999643c89f08ee9480a` (5 novembre 2026). Il repository nasce con un solo file di migrazione, che crea tabelle `nw_*` additive e dichiara di non modificare tabelle esistenti. Non è presente una baseline storica per le tabelle core preesistenti.
+
+Quindi il repository Git non fornisce il dump originario cercato. Resta possibile che esista un backup esterno o un dump locale sul Mac, ma non è stato presunto né cercato in percorsi locali senza autorizzazione/necessità. Non usare la migrazione iniziale `nw_*` come schema base delle tabelle core: è un modello separato.
