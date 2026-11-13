@@ -65,7 +65,7 @@ assert.match(transactionalTest, /begin;[\s\S]*rollback;/i);
 assert.match(transactionalTest, /nextway_create_lead_conversion_request[\s\S]*'partner'/i);
 assert.match(transactionalTest, /cancel pending[\s\S]*already_cancelled/i);
 assert.match(transactionalTest, /cancel ready[\s\S]*reviewed_by/i);
-assert.match(transactionalTest, /cancel provisioning[\s\S]*activation_claim_token is null/i);
+assert.match(transactionalTest, /cancel provisioning[\s\S]*v_row\.activation_claim_token is not null/i);
 assert.match(transactionalTest, /nextway_claim_conversion_activation[\s\S]*nextway_release_conversion_activation[\s\S]*nextway_finalize_conversion_activation/i);
 assert.match(transactionalTest, /set local role service_role/i);
 assert.match(transactionalTest, /set local role authenticated/i);
