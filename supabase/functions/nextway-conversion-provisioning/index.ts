@@ -150,12 +150,23 @@ Deno.serve(async (req) => {
         // Delete only an invite created by this execution. A recovered invite may
         // belong to an earlier timed-out attempt and must remain available for retry.
         if (invitedUserId && inviteCreatedByThisAttempt) {
-          const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
-          if (deleteError) {
-            console.error("Compensating Auth cleanup failed", {
+          // The invite may have been accepted while finalization was in flight.
+          // Never delete an Auth account after its email has been confirmed.
+          const { data: cleanupUser, error: cleanupLookupError } =
+            await admin.auth.admin.getUserById(invitedUserId);
+          if (cleanupLookupError) {
+            console.error("Compensating Auth cleanup lookup failed", {
               request_id: requestId,
-              code: safeErrorCode(deleteError),
+              code: safeErrorCode(cleanupLookupError),
             });
+          } else if (cleanupUser.user && !cleanupUser.user.email_confirmed_at) {
+            const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
+            if (deleteError) {
+              console.error("Compensating Auth cleanup failed", {
+                request_id: requestId,
+                code: safeErrorCode(deleteError),
+              });
+            }
           }
         }
         await admin.rpc("nextway_release_conversion_activation", {
