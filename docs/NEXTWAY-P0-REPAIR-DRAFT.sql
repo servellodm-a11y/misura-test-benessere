@@ -57,6 +57,9 @@ begin
      or to_regprocedure('public.nextway_consume_api_rate_limit(text)') is not null then
     raise exception 'Una firma della RPC rate limit è già presente: fermarsi e riconciliare.';
   end if;
+  if to_regprocedure('public.nextway_get_active_setter_governance(uuid)') is not null then
+    raise exception 'RPC nextway_get_active_setter_governance(uuid) già presente: fermarsi e riconciliare.';
+  end if;
 end;
 $preflight$;
 
