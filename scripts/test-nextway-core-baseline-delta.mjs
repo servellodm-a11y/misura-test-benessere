@@ -12,8 +12,8 @@ const get = (prefix) => {
 const all = [...migrations.values()].join("\n");
 
 const conversion = get("20261111001500");
-assert.match(conversion, /alter table public\\.partner_details[\\s\\S]*add column if not exists nextway_conversion_request_id/i);
-assert.match(conversion, /alter table public\\.clients[\\s\\S]*add column if not exists nextway_conversion_request_id/i);
+assert.match(conversion, /alter table public\.partner_details[\s\S]*add column if not exists nextway_conversion_request_id/i);
+assert.match(conversion, /alter table public\.clients[\s\S]*add column if not exists nextway_conversion_request_id/i);
 assert.match(conversion, /partner_details_nextway_conversion_request_uidx/i);
 assert.match(conversion, /clients_nextway_conversion_request_uidx/i);
 
