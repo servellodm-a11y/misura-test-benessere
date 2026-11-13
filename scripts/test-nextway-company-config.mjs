@@ -345,7 +345,8 @@ assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit
 assert.ok(searchHtml.includes('priority_score:priorityScore'));
 assert.ok(searchHtml.includes('segmentScore*.55+score*.30+documentaryScore*.15'));
 assert.ok(searchHtml.includes('b.dataset.segmentPriority'));
-assert.ok(searchHtml.includes('coerenza_segmento','priorita_segmento'));
+assert.ok(searchHtml.includes('coerenza_segmento'));
+assert.ok(searchHtml.includes('priorita_segmento'));
 assert.ok(searchHtml.includes("fitTitle.textContent='Valore commerciale · '+commercialFit.prospect_type"));
 assert.ok(searchHtml.includes('punteggio_pertinenza_commerciale'));
 assert.ok(searchHtml.includes('commercial_fit:value.commercial_fit'));
