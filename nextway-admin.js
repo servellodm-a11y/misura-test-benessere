@@ -266,6 +266,18 @@
       event.preventDefault();
       const form = event.currentTarget;
       const values = Object.fromEntries(new FormData(form).entries());
+      const lines = (value) => String(value || "").split(/\\r?\\n/).map((item) => item.trim()).filter(Boolean);
+      values.settings = {
+        profile_version: 1,
+        offering: lines(values.profile_offering),
+        audiences: lines(values.profile_audiences),
+        discovery: { keywords: lines(values.profile_discovery_terms) },
+        messaging: { approved_positioning: String(values.profile_positioning || "").trim() }
+      };
+      delete values.profile_offering;
+      delete values.profile_audiences;
+      delete values.profile_discovery_terms;
+      delete values.profile_positioning;
       const button = form.querySelector('button[type="submit"]');
       button.disabled = true;
       try {
