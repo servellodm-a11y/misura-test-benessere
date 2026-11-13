@@ -25,7 +25,7 @@ Il progetto reale resta fuori dal perimetro di tutte le prove.
 
 Nel branch non risulta presente `supabase/config.toml`. Non è quindi disponibile una configurazione locale dichiarativa da usare per un progetto staging. Non eseguire `supabase init` automaticamente: prima occorre definire e revisionare la configurazione desiderata, inclusi Auth, Edge Functions e porte locali.
 
-### B2 — manca una baseline completa dello schema applicativo
+### B2 — baseline core: manifest preparato, schema completo ancora necessario
 
 Le migrazioni versionate non costituiscono, da sole, una ricostruzione completa e autonoma del database applicativo già esistente. Diverse migrazioni presuppongono tabelle preesistenti come:
 - `public.profiles`;
@@ -37,7 +37,9 @@ Le migrazioni versionate non costituiscono, da sole, una ricostruzione completa 
 
 La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea le tabelle del modulo AI Assistant (`nw_*`), non una baseline completa di queste tabelle core.
 
-**Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve una baseline schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
+**Preparazione completata:** creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md` con gli oggetti core preesistenti, le colonne minime note, le strutture create dalle migrazioni e le esclusioni sui dati.
+
+**Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve ancora la baseline SQL schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
 
 ### B3 — trigger Setter: riallineamento dopo la separazione delle tabelle
 
@@ -68,7 +70,7 @@ La sequenza effettiva è:
 
 1. Ottenere una baseline schema-only completa e sanitizzata del database core, senza righe applicative, utenti Auth, storage objects, segreti o dati personali.
 2. Confrontare la baseline con le migrazioni versionate e definire quali oggetti sono baseline preesistenti e quali sono creati dalle migrazioni.
-3. Verificare CI e sottoporre a revisione SQL la correzione forward-only 007; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
+3. Verificare CI e sottoporre a revisione SQL il riallineamento forward-only del trigger Setter; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
 4. Definire e revisionare `supabase/config.toml` per staging, senza collegare il progetto reale.
 5. Preparare secret manifest con soli nomi e descrizioni, mai valori; distinguere chiavi pubbliche, service role e secret Edge Function.
 6. Creare il progetto Supabase staging solo dopo autorizzazione esplicita e controllo di eventuali costi/limiti del piano.
@@ -92,7 +94,7 @@ La sequenza effettiva è:
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | DA PREPARARE |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
-| Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA; runtime DA ESEGUIRE |
+| Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
 | Test PostgreSQL/Auth/concorrenza | NON ESEGUITI |
 | Progetto reale | NON MODIFICATO |
