@@ -2836,3 +2836,17 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - La verifica Docker/Supabase CLI sul Mac non è ancora stata eseguita; Node/npm non risultavano disponibili e Python era 3.9.6 nella verifica precedente.
 - Piano: verifica locale non distruttiva; baseline schema-only; seed sintetici; test concorrenza A–F; alternativa cloud soltanto previa verifica di costi/limiti e autorizzazione.
 - Nessun progetto staging creato, nessun comando remoto eseguito, nessuna migrazione applicata, nessun deploy e nessuna spesa.
+
+
+---
+
+## Ambiente locale NEXTWAY — verifica Mac e strategia a risorse ridotte — 13 novembre 2026
+
+- Verificati sul Mac, con comandi informativi e senza connessioni remote: Docker Desktop 29.9.3 installato e daemon attivo; Supabase CLI 3.1.0 installata.
+- Rilevati: architettura Intel x86_64; RAM fisica 8 GiB; memoria VM Docker 3.82 GiB; 382 GiB liberi sul volume dati; 2 immagini Docker (1.56 GB); nessun container attivo.
+- La documentazione CLI Supabase raccomanda almeno 7 GB assegnati a Docker per lo stack completo. Non aumentare la memoria Docker sul Mac attuale e non tentare il full stack.
+- Aggiornato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` con strategia a profili: prima profilo SQL locale isolato; profilo d'integrazione ridotto solo in seguito e se le risorse lo consentono. La lista servizi da escludere dovrà essere validata sulla CLI 3.1.0.
+- Restano prerequisiti bloccanti: `supabase/config.toml` assente, seed locale assente e baseline schema-only completa da preparare. Le dipendenze Auth/Storage devono essere incluse nella baseline quando richieste dalle migrazioni; PostgreSQL-only non certifica i test Auth/Storage/Edge Functions.
+- Non eseguire `supabase init` nella directory esistente prima di aver definito una procedura che preservi `supabase/` e `supabase/.temp/`.
+- Nessun container avviato, nessuna immagine rimossa, nessun file locale modificato, nessuna connessione remota, nessuna migrazione o test runtime eseguito.
+- Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`, nessun progetto cloud creato e nessuna spesa.
