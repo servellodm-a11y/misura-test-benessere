@@ -121,6 +121,16 @@ assert.ok(archiveHtml.includes('incomingIdentityKeys'));
 assert.ok(archiveHtml.includes('existingKeys.includes(key)'));
 assert.ok(archiveHtml.includes('meta.identity_keys=[...new Set'));
 assert.ok(searchHtml.includes('identity_keys:identityKeys'));
+assert.ok(archiveHtml.includes("cloud_id:typeof lead.cloud_id==='string'?lead.cloud_id:''"),'CRM index must expose cloud lead IDs for activity matching');
+const cloudHtml=fs.readFileSync('nextway-cloud.js','utf8');
+assert.ok(cloudHtml.includes('async function getLeadActivitySummary(cloudIds)'),'Cloud API must expose a bounded CRM activity summary');
+assert.ok(cloudHtml.includes('getLeadActivitySummary,addLeadActivity'),'CRM activity summary must be part of the public cloud API');
+assert.ok(searchHtml.includes('getLeadActivitySummary(crmIds)'),'Prospect search must retrieve real CRM activities');
+assert.ok(searchHtml.includes('last_contact_at:latestContact?.occurred_at||null'),'Agenda must distinguish the last recorded contact');
+assert.ok(searchHtml.includes('next_followup_at:nextFollowup?.next_action_at||null'),'Agenda must show the next open follow-up');
+assert.ok(searchHtml.includes('Nota/esito registrato: '),'Agenda must show recorded outcome notes without inventing a result');
+assert.ok(searchHtml.includes('Prossimo follow-up: '),'Agenda must display the scheduled follow-up date');
+
 assert.ok(searchHtml.includes('dedupeKeys.map(key=>seenProspects.get(key)).find(Boolean)'));
 assert.ok(searchHtml.includes('dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry))'));
 assert.ok(searchHtml.includes('const seenProspects=new Map()'));
