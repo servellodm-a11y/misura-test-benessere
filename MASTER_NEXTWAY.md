@@ -3340,3 +3340,16 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Nessun cambiamento alla regola di attivazione: workspace attivo, utente Auth con email confermata, membership `invited` preesistente; per Partner convertiti, richiesta `activated` e corrispondenza esatta tra utente e workspace.
 - La membership continua a essere attivata dall'amministratore tramite Edge Function; non esiste un'automatica attivazione al solo click del link email. `partner_details.status = active` non conferisce accesso workspace.
 - Nessun DB remoto modificato, nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
+
+## 13 novembre 2026 — Preparazione collaudo transazionale e staging Partner
+
+- Rilevato e corretto un errore SQL nel test workspace A/B: tre istruzioni `PERFORM` erano fuori da un blocco PL/pgSQL; sostituite con `SELECT set_config(...)`.
+- Aggiunto `supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql`: fixture rollback-only per annullamento da `pending`, `ready_for_activation` e `provisioning`, retry idempotente, conservazione revisione, invalidazione claim e rifiuto di claim/release/finalizer tardivi. Richiede un partner, un Lead legacy `workspace_id IS NULL` libero e un platform_admin. Non crea Auth users, non invia email e termina con `ROLLBACK`.
+- Rafforzato `scripts/test-nextway-partner-cancellation-sql.mjs` per controllare staticamente che il test transazionale sia rollback-only, usi ruoli corretti e non invochi Auth/email/HTTP. Aggiornato il workflow per reagire anche alla modifica della fixture SQL.
+- Aggiunto `docs/NEXTWAY-PARTNER-STAGING-TEST-PROTOCOL.md` con fasi di staging isolato, test SQL, gare a due sessioni (finalize-vs-cancel, cancel-vs-finalize, claim-vs-cancel), prove Supabase Auth, RLS e criteri di accettazione.
+- Il protocollo evidenzia anche il caso critico in cui l'invito venga accettato mentre l'annullamento prevale: l'account Auth confermato non deve essere cancellato automaticamente e può richiedere riconciliazione amministrativa.
+- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43411870118`, commit `0aece2a527894176bcccd517f807552409a17631`, conclusione **success**. Tutti i controlli statici, fixture contract, test invite/cancellation e type-check Deno sono passati.
+- I test SQL rollback-only e concorrenza NON sono stati eseguiti: manca un progetto staging separato. Il test A/B continua a richiedere due partner e i rispettivi Lead; il test cancellazione richiede un partner e un Lead legacy libero.
+- Nessun progetto staging creato, nessuna migrazione applicata, nessun DB remoto modificato, nessun deploy, nessuna email o utente di test creato. Il progetto reale `nextway-platform` resta intatto.
+- `main` invariato; PR #1 resta aperta, draft e non mergeata. Nessun rebase o merge.
+- Prossimo passo: ottenere un ambiente staging isolato e le fixture sintetiche necessarie; soltanto lì eseguire il protocollo runtime. Fino ad allora, mantenere il ciclo Partner come implementato ma non collaudato end-to-end.
