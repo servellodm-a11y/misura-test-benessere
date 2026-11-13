@@ -39,15 +39,15 @@ La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea
 
 **Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve una baseline schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
 
-### B3 — trigger legacy Setter: correzione forward-only preparata
+### B3 — trigger Setter: riallineamento dopo la separazione delle tabelle
 
 La migrazione `20261110000700_nextway_clear_stale_staged_output.sql` installa un trigger su `public.nextway_setter_generation_requests` e assegna `NEW.generated_output := null`.
 
 La tabella creata dalla migrazione `20261110000200_nextway_setter_idempotency.sql` non dichiara la colonna `generated_output`; dichiara invece `response`. La successiva migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` crea una tabella distinta, `nextway_setter_workspace_generation_requests`, che contiene `generated_output`, e dichiara esplicitamente di preservare la tabella legacy.
 
-**Correzione preparata sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger dalla tabella legacy e sposta l'azzeramento di `generated_output` sulla tabella workspace, usando le colonne `owner_profile_id`, `idempotency_key` e `conversation_id`. La migrazione è forward-only e verifica preventivamente la presenza della tabella/colonne richieste. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
+**Riallineamento preparato sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger non più necessario dalla tabella legacy e installa la protezione sulla tabella workspace, usando `owner_profile_id`, `idempotency_key` e `conversation_id`. La migrazione è forward-only e verifica preventivamente la presenza della tabella/colonne richieste. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
 
-**Stato:** preparata; CI superata (run `43412386590`). La migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
+**Stato:** preparata; CI superata (run `43412386590`). Il contratto statico è stato corretto per riflettere la cronologia reale delle colonne legacy; la migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
 
 ### B4 — migrazioni Setter legacy non certificate per una nuova installazione
 
