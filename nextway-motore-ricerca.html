@@ -176,6 +176,15 @@ async function runSearch(){
     const card=document.createElement('article');card.className='query';
     const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
     const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
+    const pageContent=String(item.page_content||'').slice(0,5000);
+    const publicContacts=extractPublicContacts(pageContent);
+    const contactSummary=document.createElement('p');contactSummary.className='muted';
+    const contactParts=[];
+    if(publicContacts.emails.length)contactParts.push('Email pubblicate: '+publicContacts.emails.join(', '));
+    if(publicContacts.phones.length)contactParts.push('Telefoni pubblicati: '+publicContacts.phones.join(', '));
+    if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
+    if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
+    contactSummary.textContent=contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.';
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
     const capture=document.createElement('button');capture.className='btn alt';capture.textContent='Acquisisci nel mio archivio';
@@ -184,20 +193,30 @@ async function runSearch(){
       const segment=$('segment').value;
       const category=segment==='customers'?'final_customer':segment==='wellness_pro'?'wellness_professional':'potential_partner';
       const partnerTypes={wellness_networker:'Networker attivo di altra azienda',other_networker:'Networker attivo di altra azienda',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / professionista',side_income:'Altro profilo individuale',business_seeking:'Altro profilo individuale'};
-      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence:item.snippet,url,category,partner_type:partnerTypes[segment]||''});
+      const evidence=[item.snippet||'',pageContent].filter(Boolean).join('\n\n').slice(0,3900);
+      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',public_contacts:publicContacts});
       if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
       capture.disabled=true;
       capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
-    card.append(title,snippet,document.createElement('br'),link,copy,capture);list.append(card);
+    card.append(title,snippet,contactSummary,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
   status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
+}
+function extractPublicContacts(value){
+ const text=String(value||'').slice(0,5000);
+ const unique=items=>[...new Set(items)].slice(0,5);
+ const emails=unique((text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(x=>x.toLowerCase()));
+ const phones=unique((text.match(/(?:\+?\d[\d\s().-]{7,}\d)/g)||[]).map(x=>x.trim()).filter(x=>{const n=x.replace(/\D/g,'');return n.length>=9&&n.length<=15}));
+ const whatsapp=unique((text.match(/https?:\/\/(?:wa\.me\/[^\s)\]]+|api\.whatsapp\.com\/[^\s)\]]+|web\.whatsapp\.com\/[^\s)\]]+)/gi)||[]).map(x=>x.replace(/[.,;]+$/,'')));
+ const socials=unique((text.match(/https?:\/\/(?:www\.)?(?:linkedin\.com\/(?:in|company)\/[^\s)\]]+|instagram\.com\/[^\s)\]]+|facebook\.com\/[^\s)\]]+|tiktok\.com\/@?[^\s)\]]+|youtube\.com\/(?:@|channel\/|c\/)[^\s)\]]+)/gi)||[]).map(x=>x.replace(/[.,;]+$/,'')));
+ return {emails,phones,whatsapp,socials};
 }
 function safeUrl(value){try{const u=new URL(String(value||''));return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}}
 $('copyall').addEventListener('click',()=>{if(!generated.length)build();navigator.clipboard?.writeText(generated.map((x,i)=>(i+1)+'. '+x.label+'\n'+x.query).join('\n\n'))});
