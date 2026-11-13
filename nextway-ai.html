@@ -289,7 +289,12 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
     const item=document.createElement('div');item.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
     const title=document.createElement('strong');title.textContent=(activityTypes[ev.activity_type]||'Attività')+' · '+ev.subject;item.append(title);
     const date=document.createElement('p');date.className='small';date.textContent='Registrata: '+new Date(ev.occurred_at).toLocaleString('it-IT');item.append(date);
-    if(ev.details){const body=document.createElement('p');body.className='small';body.style.whiteSpace='pre-wrap';body.textContent=ev.details;item.append(body);}
+    if(ev.details){
+     const outcomeMatch=String(ev.details).match(/^Esito NEXTWAY: ([^\\r\\n]+)\\r?\\n?/);
+     if(outcomeMatch){const outcomeLine=document.createElement('p');outcomeLine.className='small';outcomeLine.textContent='Esito: '+outcomeMatch[1];item.append(outcomeLine);}
+     const visibleDetails=String(ev.details).replace(/^Esito NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').trim();
+     if(visibleDetails){const body=document.createElement('p');body.className='small';body.style.whiteSpace='pre-wrap';body.textContent=visibleDetails;item.append(body);}
+    }
     if(ev.next_action_at){const due=document.createElement('p');due.className='small';due.textContent='Follow-up: '+new Date(ev.next_action_at).toLocaleString('it-IT')+' · '+(ev.next_action_status==='open'?'Aperto':ev.next_action_status==='done'?'Completato':'Annullato');if(ev.next_action_status==='open'&&new Date(ev.next_action_at)<new Date())due.style.fontWeight='700';item.append(due);
      if(ev.next_action_status==='open'){const actions=document.createElement('div');actions.className='actions';[['done','Segna completato'],['cancelled','Annulla follow-up']].forEach(([status,label])=>{const button=document.createElement('button');button.type='button';button.className='btn alt';button.textContent=label;button.addEventListener('click',async()=>{button.disabled=true;try{await window.NEXTWAY_CLOUD.setLeadActivityStatus(ev.id,status);await loadEvents();}catch(err){alert('Aggiornamento non riuscito: '+err.message);button.disabled=false;}});actions.append(button);});item.append(actions);}
     }
