@@ -3416,3 +3416,5 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Primo CI run `43413932182` fallito perché il test non includeva le aggiunte conversion request a `partner_details` e `clients`; la mappa e il test sono stati corretti. Run `43414160598` avviato sul commit `3faa66e517f0caf40988ebb581545c72355be5ce`, in corso al momento dell'annotazione.
 - **Blocco residuo reale:** il repository non contiene la DDL originaria completa pre-migrazioni. Il dump noto `/tmp/nextway-public-schema.sql` è uno snapshot dello schema corrente e contiene già modifiche versionate; non è sicuro trasformarlo automaticamente in baseline con sostituzioni testuali. Nessuna baseline SQL eseguibile è stata inventata.
 - Nessuna operazione DB eseguita; nessuna migrazione applicata; staging non creato; progetto reale invariato.
+
+- Esito successivo: CI run `43414160598` sul commit `3faa66e517f0caf40988ebb581545c72355be5ce` **SUCCESS**, 46 step, zero fallimenti; il test `Validate NEXTWAY core baseline migration deltas` è SUCCESS. Gli aggiornamenti successivi sono documentazione soltanto.
