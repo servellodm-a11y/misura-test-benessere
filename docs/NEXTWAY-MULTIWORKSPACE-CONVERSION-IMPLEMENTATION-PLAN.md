@@ -294,3 +294,41 @@ Aggiornato `nextway-cloud.js`: la creazione usa la nuova RPC e le letture di det
 Aggiunto `scripts/test-nextway-conversion-workspace-snapshot.mjs` per controlli statici. Revisione statica dei file sul branch: 8/9 controlli superati.
 
 **Limite attuale:** questa tranche non implementa ancora la membership invited del partner, l'attribuzione cliente, la nuova finalizzazione atomica e le policy RLS di lettura clienti. La migrazione è preparatoria e NON applicata; il database remoto non è stato modificato. Prima di proseguire con la finalizzazione va completato il disegno RLS/attribuzione clienti e verificata la compatibilità della policy restrictive live.
+
+
+## Implementazione preparatoria — conversione multi-workspace (13 novembre 2026)
+
+Sono state aggiunte sul branch due migrazioni ulteriori:
+
+### Snapshot e proposta conversione
+`20261113120000_nextway_conversion_request_workspace_snapshot.sql`
+- Aggiunge `workspace_id` nullable alla richiesta, FK RESTRICT e indice.
+- La RPC `nextway_create_lead_conversion_request` blocca il Lead e deriva dal database owner, sponsor e workspace; il client non invia né decide lo snapshot.
+- Per Lead workspace richiede membership active e ruolo owner/admin/manager/member; viewer escluso.
+- Per Lead legacy NULL mantiene il percorso owner/platform_admin.
+- Revoca INSERT diretto ad authenticated e rende immutabile lo snapshot nel trigger guard.
+
+### Finalizzazione e accesso clienti
+`20261113130000_nextway_conversion_workspace_finalization.sql`
+- Sostituisce la finalizzazione live con una transazione che blocca richiesta e Lead, verifica owner/stato/archiviazione, confronta workspace snapshot e Lead corrente e richiede workspace attivo.
+- Per partner verifica anche che l'utente Auth sia associato alla stessa richiesta tramite `raw_user_meta_data.nextway_conversion_request_id`.
+- Non esegue UPSERT distruttivi su `profiles` o `partner_details`: completa solo i campi null di un profilo già partner e compatibile; conflitti di ruolo, email, sponsor o dettagli bloccano l'intera transazione.
+- Crea membership `workspace_member / invited`; se esiste già una membership per la coppia workspace/utente, blocca invece di sovrascriverla.
+- Per cliente crea la riga `clients` e, se workspace-scoped, una riga in `nextway_client_workspace_attributions` nella stessa transazione.
+- La tabella attribuzioni non concede accesso diretto. RLS è attiva e i privilegi diretti sono revocati.
+- La lettura dei clienti workspace avviene tramite `nextway_list_workspace_clients(uuid)`, che restituisce una proiezione limitata e richiede membership active con ruolo owner/admin/manager/member. Viewer escluso. Non è stata aggiunta una policy SELECT generalizzata a `clients`.
+- L'Edge Function continua a inviare solo request ID, claim token e Auth user ID; workspace non è accettato dal payload.
+
+### UI e test statici
+- `nextway-cloud.js` crea le richieste tramite RPC e include lo snapshot nelle letture.
+- La coda amministrativa include nome e partner del workspace; per richieste legacy mostra il percorso centrale.
+- `scripts/test-nextway-conversion-workspace-snapshot.mjs` contiene 22 asserzioni statiche su migrazioni, RPC, RLS, UI ed Edge Function.
+
+### Limiti e gate residui
+- La revisione statica dei contenuti recuperati ha superato 21/21 controlli logici preliminari; il conteggio esatto dello script è 22 asserzioni, da eseguire in ambiente Node sul branch.
+- Non è stato eseguito un parser PostgreSQL, un test transazionale, un test RLS runtime o un test Edge Function.
+- Il profilo Auth creato da eventuali trigger deve avere ruolo partner e dati compatibili; la finalizzazione rifiuta profili non compatibili senza sovrascriverli.
+- La RPC clienti è predisposta, ma non è stata aggiunta una schermata CRM clienti workspace: l'interfaccia va costruita separatamente usando la sola RPC e non una SELECT diretta.
+- Prima di qualsiasi applicazione remota occorre confrontare i nomi/tipi delle colonne e i trigger effettivi live, applicare in ambiente controllato e testare i casi A/B, legacy NULL, viewer, membership invited/suspended/esistente, workspace archiviato, retry e rollback.
+
+**Stato:** implementazione preparatoria sul branch completata per snapshot, finalizzazione, membership invited, attribuzione cliente, RPC di lettura limitata e contesto workspace in coda. Non certificata runtime e NON applicata al database remoto. Nessun deploy.
