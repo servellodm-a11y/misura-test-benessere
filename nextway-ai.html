@@ -218,10 +218,15 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const details=document.createElement('textarea');details.maxLength=4000;details.rows=3;details.placeholder='Esito, contenuto essenziale e prossimi passi (max 4.000 caratteri)';
   const occurred=document.createElement('input');occurred.type='datetime-local';occurred.value=new Date().toISOString().slice(0,16);
   const next=document.createElement('input');next.type='datetime-local';
+  const nextField=field('Prossimo follow-up (facoltativo)',next);
   const outcome=document.createElement('select');
-  const outcomeOptions=[['not_classified','Non classificato'],['no_answer','Nessuna risposta'],['information_requested','Ha chiesto informazioni'],['interested','Ha manifestato interesse'],['not_interested','Non interessato'],['meeting_scheduled','Appuntamento fissato'],['followup_needed','Ricontatto necessario']];
-  outcomeOptions.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;outcome.append(option);});
-  form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next),field('Esito del contatto',outcome));
+  const preMeetingOutcomes=[['not_classified','Non classificato'],['no_answer','Nessuna risposta'],['information_requested','Ha chiesto informazioni'],['interested','Ha manifestato interesse'],['not_interested','Non interessato'],['meeting_scheduled','Appuntamento fissato'],['followup_needed','Ricontatto necessario']];
+  const zoomOutcomes=[['zoom_interested','Interessato'],['zoom_not_interested','Non interessato']];
+  let outcomeOptions=preMeetingOutcomes;
+  function refreshActivityOutcomeOptions(){const isZoomClosure=type.value==='meeting';outcomeOptions=isZoomClosure?zoomOutcomes:preMeetingOutcomes;const previous=outcome.value;outcome.replaceChildren();outcomeOptions.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;outcome.append(option);});if(outcomeOptions.some(([value])=>value===previous))outcome.value=previous;nextField.hidden=isZoomClosure;next.value=isZoomClosure?'':next.value;next.disabled=isZoomClosure;subject.placeholder=isZoomClosure?'Es. Zoom di presentazione — incontro concluso':'Es. Primo contatto, risposta ricevuta…';details.placeholder=isZoomClosure?'Nota interna facoltativa sull’incontro (non genera attività successive)':'Esito, contenuto essenziale e prossimi passi (max 4.000 caratteri)';refreshZoomProposal();}
+  refreshActivityOutcomeOptions();
+  form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),nextField,field('Esito del contatto',outcome));
+  type.addEventListener('change',refreshActivityOutcomeOptions);
   const detailsWrap=field('Dettagli',details);detailsWrap.style.gridColumn='1 / -1';form.append(detailsWrap);
   const draftPanel=document.createElement('section');draftPanel.style.cssText='grid-column:1 / -1;border:1px solid #dfe5ef;border-radius:10px;padding:12px;background:#f8faff';
   const draftTitle=document.createElement('strong');draftTitle.textContent='Prepara un messaggio per questo Lead';
@@ -293,7 +298,7 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const zoomHint=document.createElement('p');zoomHint.className='small';zoomHint.setAttribute('aria-live','polite');
   function refreshZoomProposal(){
    const selectedOutcome=outcome.value;
-   zoomPanel.hidden=!['interested','meeting_scheduled'].includes(selectedOutcome);
+   zoomPanel.hidden=type.value==='meeting'||!['interested','meeting_scheduled'].includes(selectedOutcome);
    if(zoomPanel.hidden){zoomText.value='';zoomHint.textContent='La proposta Zoom si attiva solo per interesse espresso o appuntamento già fissato.';return;}
    const greeting='Buongiorno'+(leadName?' '+leadName:'')+',';
    const profile=[profession,company,location].filter(Boolean).join(' · ');
@@ -340,7 +345,7 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(!subject.value.trim()){feedback.textContent='Inserisci l’oggetto dell’attività.';return;}
    save.disabled=true;feedback.textContent='Salvataggio nel cloud…';
-   try{const outcomeLabel=outcomeOptions.find(([value])=>value===outcome.value)?.[1]||'Non classificato';const activityDetails=(outcome.value!=='not_classified'?'Esito NEXTWAY: '+outcomeLabel+'\n':'')+details.value;if(activityDetails.length>4000)throw new Error('Riduci i dettagli: il limite complessivo è 4.000 caratteri.');await window.NEXTWAY_CLOUD.addLeadActivity(x.cloud_id,{activity_type:type.value,subject:subject.value,details:activityDetails,occurred_at:occurred.value,next_action_at:next.value});form.reset();occurred.value=new Date().toISOString().slice(0,16);feedback.textContent='Attività registrata nel cloud.';await loadEvents();}
+   try{const outcomeLabel=outcomeOptions.find(([value])=>value===outcome.value)?.[1]||'Non classificato';const isZoomClosure=type.value==='meeting';const marker=isZoomClosure?'Esito Zoom NEXTWAY: '+outcomeLabel:'Esito NEXTWAY: '+outcomeLabel;const activityDetails=(outcome.value!=='not_classified'?marker+'\n':'')+details.value;if(activityDetails.length>4000)throw new Error('Riduci i dettagli: il limite complessivo è di 4.000 caratteri.');await window.NEXTWAY_CLOUD.addLeadActivity(x.cloud_id,{activity_type:type.value,subject:subject.value,details:activityDetails,occurred_at:occurred.value,next_action_at:isZoomClosure?'':next.value});form.reset();occurred.value=new Date().toISOString().slice(0,16);feedback.textContent='Attività registrata nel cloud.';await loadEvents();}
    catch(err){feedback.textContent='Salvataggio non riuscito: '+err.message;}
    finally{save.disabled=false;}
   });
@@ -384,7 +389,7 @@ el('loadFollowups').addEventListener('click',async()=>{
   const latestContact=new Map();
   activityRows.filter(ev=>['call','message','email','meeting'].includes(ev.activity_type)).forEach(ev=>{if(!latestContact.has(ev.lead_id))latestContact.set(ev.lead_id,ev);});
   const nowForAgenda=new Date(),todayForAgenda=new Date(nowForAgenda);todayForAgenda.setHours(0,0,0,0);
-  const outcomeLabel=ev=>String(ev?.details||'').match(/^Esito NEXTWAY: ([^\\r\\n]+)/m)?.[1]||'';
+  const outcomeLabel=ev=>String(ev?.details||'').match(/^Esito(?: Zoom)? NEXTWAY: ([^\\r\\n]+)/m)?.[1]||'';
   const agendaRows=[...latestContact.entries()].map(([leadId,ev])=>{
    const lead=leadByCloudId.get(leadId);if(!lead)return null;
    const outcome=outcomeLabel(ev),followups=events.filter(item=>item.lead_id===leadId),next=followups[0]||null;
@@ -394,7 +399,7 @@ el('loadFollowups').addEventListener('click',async()=>{
    if(status==='non interessato'||status==='escluso'||outcome.toLocaleLowerCase('it').includes('non interessato')){code='stop';label='Non ricontattare';action='Interrompere i contatti e rispettare la scelta espressa.';priority=99;}
    else if(next&&new Date(next.next_action_at)<=nowForAgenda){code='due';label='Follow-up scaduto / oggi';action='Eseguire il ricontatto previsto e registrare l’esito.';priority=0;}
    else if(outcome.includes('Appuntamento fissato')){code='meeting';label='Appuntamento fissato';action='Preparare l’incontro e verificare data e modalità.';priority=1;}
-   else if(outcome.includes('Ha manifestato interesse')){code='interested';label='Interessato · da qualificare';action='Approfondire le esigenze e proporre una Zoom call se conferma il proprio interesse.';priority=2;}
+   else if(outcome.includes('Ha manifestato interesse')||outcome==='Interessato'){code='interested';label='Interessato · percorso di adesione';action='Avviare la conversione come cliente o partner secondo la scelta emersa durante la Zoom. Nessun follow-up commerciale post-incontro.';priority=2;}
    else if(outcome.includes('Ha chiesto informazioni')){code='info';label='Informazioni richieste';action='Preparare le informazioni richieste e definire il prossimo passo.';priority=3;}
    else if(next){code='planned';label='Follow-up programmato';action='Attendere la scadenza del promemoria.';priority=4;}
    else if(outcome.includes('Nessuna risposta')||outcome.includes('Ricontatto necessario')){code='retry';label='Ricontatto da pianificare';action='Valutare un ricontatto appropriato, senza invii automatici.';priority=3;}
