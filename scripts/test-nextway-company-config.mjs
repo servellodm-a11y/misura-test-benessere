@@ -74,7 +74,12 @@ assert.ok(!dedupeContext.buildProspectIdentityKeys('https://site.example/studio'
 assert.ok(!dedupeContext.buildProspectIdentityKeys('https://site.example/studio',{phones:['02 1234 5678']}).some(key=>key.startsWith('phone:')),'Landline numbers must not merge different people');
 assert.ok(searchHtml.includes('card.dataset.priorityScore=String(assessment.score||0)'));assert.ok(searchHtml.includes('card.dataset.priorityScore=String(assessment.score||0)'));
 assert.ok(searchHtml.includes('sortedCards=[...list.querySelectorAll'));
-assert.ok(searchHtml.includes('Lista unica · ordinata per qualità delle evidenze'));
+assert.ok(searchHtml.includes('Lista unica · prima le persone identificabili, poi le altre fonti da verificare'));
+assert.ok(searchHtml.includes("card.dataset.personPriority=assessment.individual?'1':'0'"));
+assert.ok(searchHtml.includes("PERSONA IDENTIFICABILE · verifica ruolo e attualità"));
+assert.ok(searchHtml.includes('person_confirmed:assessment.individual'));
+assert.ok(searchHtml.includes('Number(b.person_confirmed)-Number(a.person_confirmed)'));
+assert.ok(searchHtml.includes('Number(b.dataset.personPriority)-Number(a.dataset.personPriority)'));
 assert.ok(searchHtml.includes('duplicateEntry.daily.sources=duplicateEntry.sources'));
 assert.ok(searchHtml.includes('duplicateEntry.daily.duplicate_count++'));
 assert.ok(searchHtml.includes('dailyProspects.sort('));
