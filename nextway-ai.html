@@ -82,6 +82,292 @@ const points=x=>['fit','activity','presence','interest','approach'].reduce((n,k)
 const rank=n=>n>=80?'A':n>=65?'B':n>=50?'C':'Sotto soglia';
 function getProspectQuality(x){if(x?.evidence_quality&&typeof x.evidence_quality==='object')return x.evidence_quality;const note=String(x?.notes||'');const match=note.match(/PUNTEGGIO DOCUMENTALE:\s*(\d+)\/100\s*\(identità\s*(\d+)\/40;\s*coerenza segmento\s*(\d+)\/40;\s*prove pubbliche\s*(\d+)\/20\)\.\s*Classificazione:\s*([^\.]+)\.([\s\S]*?)Motivazioni:\s*([\s\S]*?)\. Questo punteggio/i);if(!match)return null;return {score:Number(match[1]),identityScore:Number(match[2]),relevanceScore:Number(match[3]),evidenceScore:Number(match[4]),entityType:match[5].trim(),identity:match[6].trim(),reasons:match[7].split(';').map(v=>v.trim()).filter(Boolean)};}
 function getVerificationPriority(x){const quality=getProspectQuality(x);if(!quality||!Number.isFinite(Number(quality.score)))return 'missing';const score=Number(quality.score),type=String(quality.entityType||'Identità individuale non confermata');if(score>=80&&type==='Possibile profilo individuale')return 'high';if(score>=50&&['Possibile profilo individuale','Identità individuale non confermata'].includes(type))return 'medium';return 'low';}
+function getLeadPublicContacts(lead){
+ const raw=lead?.public_contacts&&typeof lead.public_contacts==='object'?lead.public_contacts:{};
+ const note=String(lead?.notes||'');
+ const extract=(key)=>[...note.matchAll(new RegExp('^'+key+':\\s*(.+)if(!activeOwnerId)throw new Error('Accedi con il tuo account NEXTWAY prima di modificare l’archivio.');localStorage.setItem(KEY+':'+activeOwnerId,JSON.stringify(data));draw()}
+function draw(){const visible=data.filter(x=>!x.is_test);el('count').textContent=visible.filter(x=>!x.archived_at).length;el('todo').textContent=visible.filter(x=>!x.archived_at&&x.status==='Da verificare').length;el('top').textContent=visible.filter(x=>!x.archived_at&&points(x)>=80&&x.status!=='Escluso').length;el('dupes').textContent=visible.length-new Set(visible.filter(x=>x.url).map(x=>x.url.toLowerCase())).size;const active=visible.filter(x=>!x.archived_at);const verificationCounts={high:0,medium:0,low:0,missing:0};active.forEach(x=>verificationCounts[getVerificationPriority(x)]++);el('verifyHigh').textContent=verificationCounts.high;el('verifyMedium').textContent=verificationCounts.medium;el('verifyLow').textContent=verificationCounts.low;el('verifyMissing').textContent=verificationCounts.missing;el('stageContacted').textContent=active.filter(x=>['Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner'].includes(x.status)).length;el('stageFollowup').textContent=active.filter(x=>x.status==='In follow-up').length;el('stageEvaluation').textContent=active.filter(x=>x.status==='In valutazione').length;el('stageConverted').textContent=active.filter(x=>['Convertito cliente','Convertito partner'].includes(x.status)).length;
+let q=el('query').value.trim().toLocaleLowerCase('it'),c=el('cat').value,s=el('state').value,af=el('archiveFilter').value,sort=el('sort').value,qualification=el('qualificationFilter').value,partner=el('partnerFilter').value,qualityFilter=el('prospectQualityFilter').value,entityFilter=el('entityTypeFilter').value;let rows=data.filter(x=>{const quality=getProspectQuality(x),score=quality?Number(quality.score):null;const qualityMatch=!qualityFilter||(qualityFilter==='missing'?!quality:qualityFilter==='high'?score>=80:qualityFilter==='medium'?score>=50&&score<80:score<50);return (af==='all'||(af==='archived'?!!x.archived_at:!x.archived_at))&&(!q||[x.name,x.profession,x.company_brand,x.location,x.source,x.url,x.evidence,x.notes,x.partner_type].join(' ').toLocaleLowerCase('it').includes(q))&&(!c||x.category===c)&&(!s||x.status===s)&&(!qualification||x.qualification===qualification)&&(!partner||x.partner_type===partner)&&qualityMatch&&(!entityFilter||(quality?.entityType||'Identità individuale non confermata')===entityFilter)});rows.sort((a,b)=>sort==='recent'?new Date(b.created||0)-new Date(a.created||0):sort==='oldest'?new Date(a.created||0)-new Date(b.created||0):sort==='name'?String(a.name||'').localeCompare(String(b.name||''),'it',{sensitivity:'base'}):sort==='prospect_quality'?(Number(getProspectQuality(b)?.score??-1)-Number(getProspectQuality(a)?.score??-1))||points(b)-points(a):points(b)-points(a));let root=el('records');root.replaceChildren();
+if(!rows.length){let d=document.createElement('div');d.className='empty';d.textContent='Nessun Lead corrispondente. Inserisci un nominativo verificato per iniziare.';root.append(d);return}
+rows.forEach(x=>{let a=document.createElement('article');a.className='lead';a.dataset.cloudId=x.cloud_id||'';let n=points(x),sourceUrl=safeHttpUrl(x.url);const verificationPriority=getVerificationPriority(x),verificationLabel=verificationPriority==='high'?'Verifica alta':verificationPriority==='medium'?'Verifica media':verificationPriority==='low'?'Da approfondire':'Qualità non disponibile';a.innerHTML='<div class="leadhead"><strong>'+esc(x.name)+(x.is_test?' <span class="tag">TEST TECNICO</span>':'')+'</strong><span class="tag">'+labels[x.category]+'</span><span class="tag">'+verificationLabel+'</span><b class="score">'+n+'/100 · '+rank(n)+'</b></div><p>'+esc(x.profession||'Professione non indicata')+' · '+esc(x.location||'Località non indicata')+' · '+esc(x.status)+' · '+esc(x.qualification||'Da approfondire')+'</p><p>Identità: '+esc(x.identity_check||'Non registrata')+(x.partner_type?' · Profilo: '+esc(x.partner_type):'')+(x.networker_stage?' · Esperienza networker: '+esc(x.networker_stage):'')+(getProspectQuality(x)?' · Qualità ricerca: '+esc(getProspectQuality(x).score)+'/100 · identità '+esc(getProspectQuality(x).identityScore)+'/40 · segmento '+esc(getProspectQuality(x).relevanceScore)+'/40 · prove '+esc(getProspectQuality(x).evidenceScore)+'/20 · '+esc(getProspectQuality(x).entityType):'')+(x.company_brand?' · Azienda/brand: '+esc(x.company_brand):'')+(x.signal_type?' · Segnale: '+esc(x.signal_type):'')+'</p><p>'+esc(x.evidence)+'</p><p>Fonte: '+esc(x.source)+' · '+(sourceUrl?'<a target="_blank" rel="noopener noreferrer" href="'+esc(sourceUrl)+'">Apri fonte ↗</a>':'<span aria-disabled="true">Fonte non valida</span>')+'</p><p>'+esc(x.notes||'')+'</p>'+(x.archived_at?'<p class="small"><b>Archiviato:</b> '+esc(new Date(x.archived_at).toLocaleString('it-IT'))+(x.archive_reason?' · <b>Motivo:</b> '+esc(x.archive_reason):'')+'</p>':'');
+const publicContactsPanel=renderLeadPublicContacts(x);if(publicContactsPanel)a.append(publicContactsPanel);if(x.archived_at){const archiveInfo=document.createElement('p');archiveInfo.className='small';archiveInfo.style.cssText='padding:8px 10px;border-left:3px solid #9a6b24;background:#fbf6ea;border-radius:4px';archiveInfo.textContent='LEAD ARCHIVIATO · '+new Date(x.archived_at).toLocaleString('it-IT')+' · Motivo: '+(x.archive_reason||'Non specificato');a.append(archiveInfo);}let bar=document.createElement('div');bar.className='actions';if(x._sync_conflict){
+ let conflict=document.createElement('div');conflict.className='panel';conflict.style.margin='12px 0';conflict.style.borderColor='#d69b35';
+ let warning=document.createElement('p');warning.className='small';warning.textContent='Conflitto di sincronizzazione: le modifiche locali sono conservate. Confronta le due versioni e scegli esplicitamente quale mantenere.';conflict.append(warning);
+ let compare=document.createElement('button');compare.className='btn alt';compare.textContent='Confronta versioni';conflict.append(compare);
+ let details=document.createElement('div');details.style.marginTop='10px';conflict.append(details);
+ compare.addEventListener('click',async()=>{
+  const api=window.NEXTWAY_CLOUD;if(!api){alert('Connessione centrale non disponibile.');return;}
+  compare.disabled=true;compare.textContent='Lettura versione cloud…';details.replaceChildren();
+  try{
+   const latest=await api.getLeadForConflict(x.cloud_id);const remote=latest.record;
+   const fields=[['Nome','name'],['Professione','profession'],['Azienda / brand','company_brand'],['Località','location'],['Categoria','category'],['Profilo Partner','partner_type'],['Segnale pubblico','signal_type'],['Fonte','source'],['URL','url'],['Evidenza','evidence'],['Identità','identity_check'],['Qualificazione','qualification'],['Stato','status'],['Note','notes'],['Coerenza target','fit'],['Attività verificabile','activity'],['Presenza pubblica','presence'],['Interesse pubblico','interest'],['Pertinenza approccio','approach']];
+   const heading=document.createElement('p');heading.className='small';heading.textContent='Versione cloud aggiornata: '+(latest.updated_at||'non disponibile')+'. Controlla i valori prima di scegliere.';details.append(heading);
+   fields.forEach(([label,key])=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:minmax(110px,.5fr) 1fr 1fr;gap:8px;padding:7px 0;border-top:1px solid #e5eaf1;font-size:12px;overflow-wrap:anywhere';const l=document.createElement('strong');l.textContent=label;const local=document.createElement('span');local.textContent='Locale: '+String(x[key]??'—');const cloudValue=document.createElement('span');cloudValue.textContent='Cloud: '+String(remote[key]??'—');if(String(x[key]??'')!==String(remote[key]??'')){local.style.fontWeight='700';cloudValue.style.fontWeight='700';}row.append(l,local,cloudValue);details.append(row);});
+   const actions=document.createElement('div');actions.className='actions';
+   const keepCloud=document.createElement('button');keepCloud.className='btn';keepCloud.textContent='Conserva versione cloud';
+   keepCloud.addEventListener('click',async()=>{if(!confirm('Sostituire i dati locali con la versione cloud attualmente presente?'))return;keepCloud.disabled=true;try{const current=await api.getLeadForConflict(x.cloud_id);Object.assign(x,current.record);x.cloud_updated_at=current.updated_at;x.local_dirty=false;delete x._sync_conflict;persist();}catch(err){alert('Non è stato possibile aggiornare la copia locale: '+err.message);keepCloud.disabled=false;}});
+   const keepLocal=document.createElement('button');keepLocal.className='btn alt';keepLocal.textContent='Conserva versione locale e aggiorna cloud';
+   keepLocal.addEventListener('click',async()=>{if(!confirm('Confermi di sostituire la versione cloud con i dati locali mostrati? L’operazione sarà eseguita solo se la versione cloud non cambia ancora.'))return;keepLocal.disabled=true;try{const saved=await api.resolveLeadConflict(x.cloud_id,latest.updated_at,x);Object.assign(x,saved.record);x.cloud_updated_at=saved.updated_at;x.local_dirty=false;delete x._sync_conflict;persist();}catch(err){alert(err.message);keepLocal.disabled=false;}});
+   actions.append(keepCloud,keepLocal);details.append(actions);
+  }catch(err){const msg=document.createElement('p');msg.className='small';msg.textContent='Confronto non disponibile: '+err.message;details.append(msg);}
+  compare.disabled=false;compare.textContent='Aggiorna confronto cloud';
+ });a.append(conflict);
+}let edit=document.createElement('button');edit.className='btn';edit.textContent='Modifica Lead';edit.disabled=!!x.archived_at||!!x._sync_conflict;edit.title=x._sync_conflict?'Risolvi prima il conflitto di sincronizzazione':'Modifica i dati del Lead';edit.addEventListener('click',()=>startEdit(x));let archive=document.createElement('button');archive.className='btn alt';archive.textContent=x.archived_at?'Ripristina':'Archivia';archive.addEventListener('click',async()=>{const cloud=window.NEXTWAY_CLOUD;if(!cloud){alert('Connessione centrale non ancora caricata.');return;}if(!x.cloud_id){alert('Questo Lead è solo locale. Usa prima “Sincronizza archivio locale”.');return;}if(x.local_dirty){alert('Questo Lead contiene modifiche locali non sincronizzate. Sincronizza prima l’archivio e ripeti l’operazione: nessuna modifica locale verrà scartata.');return;}if(x._sync_conflict){alert('Risolvi prima il conflitto di sincronizzazione.');return;}let reason='';if(!x.archived_at){const entered=prompt('Motivo dell’archiviazione (facoltativo, massimo 500 caratteri):','Non attivo / non pertinente');if(entered===null)return;reason=entered.trim().slice(0,500);}try{archive.disabled=true;if(x.archived_at){const result=await cloud.restoreLead(x.cloud_id,x.cloud_updated_at);x.archived_at=null;x.archive_reason='';x.cloud_updated_at=result.updated_at;}else{const result=await cloud.archiveLead(x.cloud_id,reason,x.cloud_updated_at);x.archived_at=result.archived_at;x.archive_reason=result.archive_reason||reason;x.cloud_updated_at=result.updated_at;}delete x._sync_conflict;persist();}catch(err){alert('Operazione non completata: '+err.message);archive.disabled=false;}});let sel=document.createElement('select');['Da verificare','Verificato','Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner','Non interessato','Escluso'].forEach(v=>{let o=document.createElement('option');o.textContent=v;o.selected=x.status===v;sel.append(o)});sel.addEventListener('change',()=>{x.status=sel.value;x.local_dirty=true;persist()});let del=document.createElement('button');del.className='btn red';del.textContent='Rimuovi copia locale';del.title='Rimuove solo la copia da questo browser; non cancella il Lead dal cloud né la sua cronologia.';del.addEventListener('click',()=>{if(confirm('Rimuovere la copia locale da questo browser? Il Lead cloud e la cronologia non verranno cancellati. Se resta nel cloud, potrà ricomparire alla prossima sincronizzazione.')){data=data.filter(y=>y.id!==x.id);persist()}});bar.append(edit,archive,sel,del);
+ let historyBtn=document.createElement('button');historyBtn.className='btn alt';historyBtn.textContent='Cronologia modifiche';historyBtn.disabled=!x.cloud_id;
+ let historyBox=document.createElement('div');historyBox.className='panel';historyBox.style.margin='10px 0';historyBox.hidden=true;
+ historyBtn.addEventListener('click',async()=>{
+  historyBox.hidden=!historyBox.hidden;if(historyBox.hidden)return;
+  historyBox.replaceChildren();const loading=document.createElement('p');loading.className='small';loading.textContent='Caricamento cronologia…';historyBox.append(loading);
+  try{
+   const api=window.NEXTWAY_CLOUD;if(!api)throw new Error('Connessione centrale non caricata.');
+   const events=await api.getLeadHistory(x.cloud_id);historyBox.replaceChildren();
+   const title=document.createElement('strong');title.textContent='Cronologia · '+events.length+' eventi (massimo 50)';historyBox.append(title);
+   if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Nessuna modifica registrata. La cronologia inizia dall’attivazione della migrazione audit su Supabase.';historyBox.append(empty);}
+   const names={display_name:'Nome',profession:'Professione',company_brand:'Azienda / brand',location:'Località',category:'Categoria',partner_type:'Profilo partner',discovery_mode:'Modalità',public_signal:'Segnale pubblico',source_name:'Fonte',source_url:'URL',public_evidence:'Evidenza',verified_at:'Data verifica',identity_check:'Verifica identità',qualification:'Qualificazione',score_fit:'Coerenza target',score_activity:'Attività',score_presence:'Presenza',score_interest:'Interesse',score_approach:'Pertinenza',status:'Stato',notes:'Note',archived_at:'Archiviazione',archive_reason:'Motivo archiviazione',owner_profile_id:'Proprietario'};
+   events.forEach(ev=>{
+    const item=document.createElement('div');item.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
+    const head=document.createElement('strong');head.textContent=(ev.action==='INSERT'?'Creato':ev.action==='DELETE'?'Eliminato':'Modificato')+' · '+new Date(ev.created_at).toLocaleString('it-IT');item.append(head);
+    const actor=document.createElement('p');actor.className='small';actor.textContent='Eseguito da: '+(ev.actor_name||'identità non disponibile');item.append(actor);
+    (ev.changed_fields||[]).forEach(key=>{
+     const before=ev.before_data?ev.before_data[key]:undefined,after=ev.after_data?ev.after_data[key]:undefined;
+     const row=document.createElement('p');row.className='small';const label=document.createElement('b');label.textContent=(names[key]||key)+': ';row.append(label);
+     const val=document.createElement('span');if(key==='notes'||key==='public_evidence'){val.textContent='[valore non registrato per riservatezza]';}else{val.textContent=ev.action==='INSERT'?String(after??'—'):ev.action==='DELETE'?String(before??'—'):(String(before??'—')+' → '+String(after??'—'));}row.append(val);item.append(row);
+    });
+    historyBox.append(item);
+   });
+  }catch(err){historyBox.replaceChildren();const msg=document.createElement('p');msg.className='small';msg.textContent='Cronologia non disponibile: '+err.message+'. Verifica che la migrazione audit sia stata applicata su Supabase e che il tuo account abbia accesso al Lead.';historyBox.append(msg);}
+ });
+ const activityBtn=document.createElement('button');activityBtn.className='btn alt';activityBtn.textContent='Attività e follow-up';activityBtn.disabled=!x.cloud_id;activityBtn.title=!x.cloud_id?'Sincronizza il Lead prima di registrare attività':x.archived_at?'Consulta la cronologia; per nuove attività ripristina il Lead':'Registra contatti e prossime azioni';
+ const activityBox=document.createElement('div');activityBox.className='panel';activityBox.style.margin='10px 0';activityBox.hidden=true;
+ const activityTypes={call:'Telefonata',message:'Messaggio',email:'Email',meeting:'Incontro',note:'Nota',task:'Attività'};
+ activityBtn.addEventListener('click',async()=>{
+  activityBox.hidden=!activityBox.hidden;if(activityBox.hidden)return;
+  activityBox.replaceChildren();
+  const heading=document.createElement('strong');heading.textContent='Registro contatti e prossime azioni';activityBox.append(heading);
+  const form=document.createElement('form');form.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0';
+  const field=(labelText,control)=>{const wrap=document.createElement('label');wrap.className='small';wrap.textContent=labelText;wrap.append(control);control.style.cssText='display:block;width:100%;padding:8px;border:1px solid #ccd5e2;border-radius:7px;margin-top:4px;font:inherit';return wrap;};
+  const type=document.createElement('select');Object.entries(activityTypes).forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;type.append(option);});
+  const subject=document.createElement('input');subject.required=true;subject.maxLength=180;subject.placeholder='Es. Primo contatto, risposta ricevuta…';
+  const details=document.createElement('textarea');details.maxLength=4000;details.rows=3;details.placeholder='Esito, contenuto essenziale e prossimi passi (max 4.000 caratteri)';
+  const occurred=document.createElement('input');occurred.type='datetime-local';occurred.value=new Date().toISOString().slice(0,16);
+  const next=document.createElement('input');next.type='datetime-local';
+  form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next));
+  const detailsWrap=field('Dettagli',details);detailsWrap.style.gridColumn='1 / -1';form.append(detailsWrap);
+  const draftPanel=document.createElement('section');draftPanel.style.cssText='grid-column:1 / -1;border:1px solid #dfe5ef;border-radius:10px;padding:12px;background:#f8faff';
+  const draftTitle=document.createElement('strong');draftTitle.textContent='Prepara un messaggio per questo Lead';
+  const draftNote=document.createElement('p');draftNote.className='small';draftNote.textContent='Genera e copia una bozza. Non viene inviata e non viene registrata come contatto effettuato. Registra l’attività solo dopo aver inviato personalmente il messaggio.';
+  const draftChannel=document.createElement('select');
+  [['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email'],['sms','SMS']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;draftChannel.append(o);});
+  const draftWebsite=document.createElement('select');
+  const noLink=document.createElement('option');noLink.value='none';noLink.textContent='Nessun link — consigliato per il primo contatto';draftWebsite.append(noLink);
+  const companyConfig=window.NEXTWAY_COMPANY_CONFIG?.active;
+  const websites=companyConfig?.consultantChannels||{};
+  if(websites.generalWellnessWebsite){const o=document.createElement('option');o.value='general';o.textContent=websites.generalWellnessWebsite.label+' — sito generale';draftWebsite.append(o);}
+  if(websites.zinzinoReplicaWebsite){const o=document.createElement('option');o.value='replica';o.textContent=websites.zinzinoReplicaWebsite.label+' — approfondimento Zinzino';draftWebsite.append(o);}
+  const leadEvidence=[x.name,x.profession,x.company_brand,x.evidence,x.notes].filter(Boolean).join(' ').toLocaleLowerCase('it');
+  const hasZinzinoSignal=/zinzino|balancetest|balance test|balance oil/.test(leadEvidence);
+  draftWebsite.value=(x.category==='final_customer'||x.category==='wellness_professional')?'general':hasZinzinoSignal?'replica':'none';
+  const draftText=document.createElement('textarea');draftText.rows=6;draftText.maxLength=4000;draftText.style.cssText='width:100%;padding:9px;margin:8px 0;font:inherit';
+  const draftActions=document.createElement('div');draftActions.className='actions';
+  const generateDraft=document.createElement('button');generateDraft.type='button';generateDraft.className='btn alt';generateDraft.textContent='Aggiorna bozza';
+  const copyDraft=document.createElement('button');copyDraft.type='button';copyDraft.className='btn alt';copyDraft.textContent='Copia bozza';
+  const insertDraft=document.createElement('button');insertDraft.type='button';insertDraft.className='btn alt';insertDraft.textContent='Inserisci nel registro attività';
+  const draftHint=document.createElement('p');draftHint.className='small';draftHint.setAttribute('aria-live','polite');
+  const leadName=String(x.name||'').trim();
+  const isCustomer=x.category==='final_customer';
+  const isProfessional=x.category==='wellness_professional';
+  const audience=isCustomer?'persona interessata al benessere':isProfessional?'professionista del settore benessere':x.partner_type||'potenziale partner';
+  const topic=isCustomer?'un percorso basato sulla misurazione e sulla consapevolezza del benessere':isProfessional?'un confronto professionale su benessere e strumenti di misurazione':'un confronto su un progetto professionale nel settore del benessere';
+  // Personalizza solo con dati esplicitamente presenti nel Lead; non dedurre qualifiche o interessi.
+  const profession=String(x.profession||'').trim();
+  const company=String(x.company_brand||'').trim();
+  const location=String(x.location||'').trim();
+  const evidenceText=String(x.evidence||'').replace(/\s+/g,' ').trim();
+  const evidenceExcerpt=evidenceText.length>180?evidenceText.slice(0,177).trimEnd()+'…':evidenceText;
+  const personalization=profession
+    ? 'Ho notato la sua attività come '+profession+(company?' presso '+company:'')+(location?' a '+location:'')+'. '
+    : company
+      ? 'Ho notato la sua attività collegata a '+company+(location?' a '+location:'')+'. '
+      : evidenceExcerpt
+        ? 'Le scrivo dopo aver letto questa informazione pubblica: «'+evidenceExcerpt+'». '
+        : '';
+  const channelDrafts={
+   whatsapp:'Buongiorno'+(leadName?' '+leadName:'')+', mi farebbe piacere condividere con lei un’idea su '+topic+'. '+personalization+'Se l’argomento è pertinente ai suoi interessi, posso inviarle qualche informazione qui. Nessun impegno.',
+   facebook:'Buongiorno'+(leadName?' '+leadName:'')+'! Sto approfondendo un progetto legato al benessere e mi farebbe piacere un confronto, anche breve, su '+topic+'. '+personalization+'Se può interessarle, le racconto volentieri di cosa si tratta.',
+   linkedin:'Buongiorno'+(leadName?' '+leadName:'')+', sto entrando in contatto con '+audience+' per un confronto su '+topic+'. '+personalization+'Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
+   instagram:'Ciao'+(leadName?' '+leadName:'')+'! Sto conoscendo persone interessate al benessere e mi farebbe piacere confrontarmi su '+topic+'. '+personalization+'Se ti va, posso raccontarti brevemente di cosa si tratta.',
+   email:'Oggetto: Un possibile confronto sul benessere\\n\\nBuongiorno'+(leadName?' '+leadName:'')+',\\n\\nmi farebbe piacere proporle un breve confronto su '+topic+'. '+personalization+'Se l’argomento è di suo interesse, posso inviarle qualche informazione o concordare una breve telefonata, senza impegno.\\n\\nCordiali saluti',
+   sms:'Buongiorno'+(leadName?' '+leadName:'')+', sto approfondendo un progetto sul benessere. '+personalization+'Se il tema le interessa, mi farebbe piacere un breve confronto. Nessun impegno.'
+  };
+  function refreshLeadDraft(){
+   const selected=draftWebsite.value==='general'?websites.generalWellnessWebsite:draftWebsite.value==='replica'?websites.zinzinoReplicaWebsite:null;
+   draftText.value=(channelDrafts[draftChannel.value]||'')+(selected?'\\n\\nPer approfondire, qui trova il mio riferimento: '+selected.url:'');
+   draftHint.textContent=draftWebsite.value==='general'?'Sito generale: comunicazione sul benessere, senza presentarlo come sito ufficiale Zinzino.':draftWebsite.value==='replica'?'Sito replica: usarlo quando esiste già interesse specifico per Zinzino.':'Nessun link aggiunto. È l’impostazione consigliata per il primo contatto con un potenziale partner.';
+  }
+  generateDraft.addEventListener('click',refreshLeadDraft);draftChannel.addEventListener('change',refreshLeadDraft);draftWebsite.addEventListener('change',refreshLeadDraft);
+  copyDraft.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(draftText.value);copyDraft.textContent='Copiato';}catch(err){draftText.focus();draftText.select();copyDraft.textContent='Seleziona e copia';}});
+  insertDraft.addEventListener('click',()=>{type.value=draftChannel.value==='email'?'email':'message';subject.value='Bozza '+draftChannel.options[draftChannel.selectedIndex].text+' — '+(leadName||'Lead');details.value='BOZZA DA INVIARE MANUALMENTE — non ancora inviata.\\n\\n'+draftText.value;feedback.textContent='Bozza inserita nel modulo. Dopo averla inviata personalmente, torna qui e registra l’attività.';});
+  draftActions.append(generateDraft,copyDraft,insertDraft);
+  draftPanel.append(draftTitle,draftNote,field('Canale',draftChannel),field('Sito da proporre (facoltativo)',draftWebsite),draftText,draftActions,draftHint);
+  form.append(draftPanel);refreshLeadDraft();
+
+  const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Registra attività';const feedback=document.createElement('p');feedback.className='small';feedback.setAttribute('aria-live','polite');feedback.style.gridColumn='1 / -1';form.append(save,feedback);if(x.archived_at){save.disabled=true;feedback.textContent='Lead archiviato: puoi consultare la cronologia, ma non registrare nuove attività.';}activityBox.append(form);
+  const list=document.createElement('div');activityBox.append(list);
+  const renderEvents=events=>{
+   list.replaceChildren();const sub=document.createElement('p');sub.className='small';sub.textContent=events.length+' attività registrate · massimo 100';list.append(sub);
+   if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Nessuna attività registrata per questo Lead.';list.append(empty);return;}
+   events.forEach(ev=>{
+    const item=document.createElement('div');item.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
+    const title=document.createElement('strong');title.textContent=(activityTypes[ev.activity_type]||'Attività')+' · '+ev.subject;item.append(title);
+    const date=document.createElement('p');date.className='small';date.textContent='Registrata: '+new Date(ev.occurred_at).toLocaleString('it-IT');item.append(date);
+    if(ev.details){const body=document.createElement('p');body.className='small';body.style.whiteSpace='pre-wrap';body.textContent=ev.details;item.append(body);}
+    if(ev.next_action_at){const due=document.createElement('p');due.className='small';due.textContent='Follow-up: '+new Date(ev.next_action_at).toLocaleString('it-IT')+' · '+(ev.next_action_status==='open'?'Aperto':ev.next_action_status==='done'?'Completato':'Annullato');if(ev.next_action_status==='open'&&new Date(ev.next_action_at)<new Date())due.style.fontWeight='700';item.append(due);
+     if(ev.next_action_status==='open'){const actions=document.createElement('div');actions.className='actions';[['done','Segna completato'],['cancelled','Annulla follow-up']].forEach(([status,label])=>{const button=document.createElement('button');button.type='button';button.className='btn alt';button.textContent=label;button.addEventListener('click',async()=>{button.disabled=true;try{await window.NEXTWAY_CLOUD.setLeadActivityStatus(ev.id,status);await loadEvents();}catch(err){alert('Aggiornamento non riuscito: '+err.message);button.disabled=false;}});actions.append(button);});item.append(actions);}
+    }
+    list.append(item);
+   });
+  };
+  const loadEvents=async()=>{list.replaceChildren();const loading=document.createElement('p');loading.className='small';loading.textContent='Caricamento attività…';list.append(loading);const events=await window.NEXTWAY_CLOUD.getLeadActivities(x.cloud_id);renderEvents(events);};
+  form.addEventListener('submit',async event=>{
+   event.preventDefault();if(!subject.value.trim()){feedback.textContent='Inserisci l’oggetto dell’attività.';return;}
+   save.disabled=true;feedback.textContent='Salvataggio nel cloud…';
+   try{await window.NEXTWAY_CLOUD.addLeadActivity(x.cloud_id,{activity_type:type.value,subject:subject.value,details:details.value,occurred_at:occurred.value,next_action_at:next.value});form.reset();occurred.value=new Date().toISOString().slice(0,16);feedback.textContent='Attività registrata nel cloud.';await loadEvents();}
+   catch(err){feedback.textContent='Salvataggio non riuscito: '+err.message;}
+   finally{save.disabled=false;}
+  });
+  try{await loadEvents();}catch(err){list.replaceChildren();const msg=document.createElement('p');msg.className='small';msg.textContent='Registro non disponibile: '+err.message+'. La migrazione CRM attività deve essere applicata su Supabase.';list.append(msg);}
+ });
+ const conversionBtn=document.createElement('button');conversionBtn.className='btn alt';conversionBtn.textContent='Avvia conversione';conversionBtn.disabled=!x.cloud_id||!!x.archived_at||!!x._sync_conflict||x.status!=='In valutazione';conversionBtn.title=x.status!=='In valutazione'?'Porta prima il Lead nello stato In valutazione':'Crea una richiesta di conversione sottoposta a revisione amministrativa';const conversionBox=document.createElement('div');conversionBox.className='panel';conversionBox.style.margin='10px 0';conversionBox.hidden=true;
+ conversionBtn.addEventListener('click',async()=>{
+  conversionBox.hidden=!conversionBox.hidden;if(conversionBox.hidden)return;conversionBox.replaceChildren();
+  const heading=document.createElement('strong');heading.textContent='Richiesta di conversione assistita';conversionBox.append(heading);
+  const info=document.createElement('p');info.className='small';info.textContent='La richiesta viene collegata al proprietario del Lead, che sarà indicato come sponsor. Non crea account o profili: viene inviata a platform_admin per la verifica.';conversionBox.append(info);
+  const form=document.createElement('form');form.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0';
+  const field=(labelText,control)=>{const wrap=document.createElement('label');wrap.className='small';wrap.textContent=labelText;wrap.append(control);control.style.cssText='display:block;width:100%;padding:8px;border:1px solid #ccd5e2;border-radius:7px;margin-top:4px;font:inherit';return wrap;};
+  const type=document.createElement('select');[['customer','Cliente'],['partner','Collaboratore / Partner']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;type.append(o);});type.value=x.category==='potential_partner'?'partner':'customer';
+  const fullName=document.createElement('input');fullName.required=true;fullName.maxLength=160;fullName.value=x.name||'';
+  const email=document.createElement('input');email.type='email';email.required=true;email.maxLength=254;email.placeholder='email@esempio.it';
+  const phone=document.createElement('input');phone.type='tel';phone.maxLength=40;phone.value='';
+  form.append(field('Tipo conversione',type),field('Nome e cognome *',fullName),field('Email *',email),field('Telefono',phone));
+  const feedback=document.createElement('p');feedback.className='small';feedback.style.gridColumn='1 / -1';feedback.setAttribute('aria-live','polite');
+  const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Invia per revisione';form.append(save,feedback);conversionBox.append(form);
+  form.addEventListener('submit',async event=>{event.preventDefault();save.disabled=true;feedback.textContent='Invio richiesta…';try{const req=await window.NEXTWAY_CLOUD.createLeadConversionRequest(x.cloud_id,{conversion_type:type.value,full_name:fullName.value,email:email.value,phone:phone.value});feedback.textContent='Richiesta registrata · '+(req.status==='pending'?'In attesa di revisione amministrativa':'Stato: '+req.status);save.hidden=true;const note=document.createElement('p');note.className='small';note.textContent='Richiesta ID: '+req.id+' · Sponsor proposto: proprietario del Lead.';conversionBox.append(note);}catch(err){feedback.textContent='Richiesta non inviata: '+err.message;save.disabled=false;}});
+  try{const existing=await window.NEXTWAY_CLOUD.getLeadConversionRequest(x.cloud_id);if(existing){const status=document.createElement('p');status.className='small';status.textContent='Ultima richiesta: '+(existing.status==='pending'?'In attesa di revisione':existing.status==='ready_for_activation'?'Verificata · pronta per attivazione':'Respinta')+' · '+existing.full_name+' · '+existing.email;conversionBox.append(status);if(existing.review_notes){const notes=document.createElement('p');notes.className='small';notes.textContent='Nota revisione: '+existing.review_notes;conversionBox.append(notes);}if(existing.status!=='rejected')form.hidden=true;else{const retry=document.createElement('p');retry.className='small';retry.textContent='La richiesta precedente è stata respinta: puoi correggere i dati e inviarne una nuova.';conversionBox.append(retry);}}}catch(err){feedback.textContent='Non è stato possibile leggere le richieste: '+err.message;}
+ });
+ bar.append(historyBtn,activityBtn,conversionBtn);a.append(bar,historyBox,activityBox,conversionBox);root.append(a)})}
+let editingLeadId='';
+function startEdit(lead){if(!activeOwnerId)throw new Error('Accedi prima di modificare un Lead.');if(lead.archived_at||lead._sync_conflict)throw new Error('Ripristina il Lead o risolvi il conflitto prima di modificarlo.');editingLeadId=lead.id;const form=el('form');const fields={name:'name',profession:'profession',company_brand:'company_brand',location:'location',category:'category',partner_type:'partner_type',mode:'mode',signal_type:'signal_type',source:'source',url:'url',evidence:'evidence',verified_at:'verified_at',identity_check:'identity_check',qualification:'qualification',fit:'fit',activity:'activity',presence:'presence',interest:'interest',approach:'approach',notes:'notes'};Object.entries(fields).forEach(([field,key])=>{if(form.elements[field])form.elements[field].value=lead[key]??'';});el('formTitle').textContent='Modifica Lead · '+lead.name;el('formSubmit').textContent='Salva modifiche';el('cancelEdit').hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'});}
+function cancelEdit(){editingLeadId='';el('form').reset();el('formTitle').textContent='Nuovo Lead';el('formSubmit').textContent='Salva Lead';el('cancelEdit').hidden=true;}
+el('cancelEdit').addEventListener('click',cancelEdit);
+el('form').addEventListener('reset',()=>{if(editingLeadId)cancelEdit();});
+el('form').addEventListener('submit',e=>{e.preventDefault();if(!activeOwnerId){alert('Accedi con il tuo account NEXTWAY prima di creare un Lead.');return;}let formData=new FormData(e.target),values=Object.fromEntries(formData.entries());if(!safeHttpUrl(values.url)){alert('Inserisci un indirizzo web http o https valido, senza credenziali.');return}values.url=safeHttpUrl(values.url);const existing=editingLeadId?data.find(y=>y.id===editingLeadId):null;if(editingLeadId&&!existing){alert('Il Lead da modificare non è più presente nell’archivio. Ricarica i dati.');cancelEdit();return;}if(data.some(y=>y!==existing&&!y.is_test&&y.url&&values.url&&y.url.toLowerCase()===values.url.toLowerCase())){alert('URL già presente: possibile duplicato. Controlla il Lead esistente prima di inserirlo di nuovo.');return}if(values.identity_check!=='confirmed'&&values.qualification==='Qualificato'){alert('Per qualificare un Lead devi prima confermare l’identità individuale.');return}if(values.qualification==='Qualificato'&&points(values)<50){alert('Il punteggio è sotto 50: non può essere qualificato.');return}if(existing){Object.assign(existing,values);existing.status=values.qualification==='Escluso'?'Escluso':(existing.status==='Escluso'?'Da verificare':existing.status);existing.local_dirty=true;delete existing._sync_conflict;cancelEdit();}else{values.id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);values.status=values.qualification==='Escluso'?'Escluso':'Da verificare';values.created=new Date().toISOString();values.local_dirty=true;data.unshift(values);e.target.reset();}persist();});
+['query','cat','state','archiveFilter','qualificationFilter','partnerFilter','prospectQualityFilter','entityTypeFilter','sort'].forEach(id=>el(id).addEventListener(id==='query'?'input':'change',draw));
+el('showVerifyHigh').addEventListener('click',()=>{el('archiveFilter').value='active';el('prospectQualityFilter').value='high';el('entityTypeFilter').value='Possibile profilo individuale';el('sort').value='prospect_quality';draw();});
+el('loadFollowups').addEventListener('click',async()=>{
+ const button=el('loadFollowups'),panel=el('followupQueue');button.disabled=true;panel.hidden=false;panel.replaceChildren();
+ const loading=document.createElement('p');loading.className='small';loading.textContent='Caricamento prossimi follow-up…';panel.append(loading);
+ try{
+  const api=window.NEXTWAY_CLOUD;if(!api)throw new Error('Connessione centrale non caricata.');
+  const events=await api.getOpenLeadActivities(100);panel.replaceChildren();
+  const heading=document.createElement('strong');heading.textContent='Prossime azioni aperte · '+events.length;panel.append(heading);
+  const now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()),tomorrowStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),weekEnd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+7);const overdue=events.filter(ev=>new Date(ev.next_action_at)<todayStart).length,today=events.filter(ev=>{const d=new Date(ev.next_action_at);return d>=todayStart&&d<tomorrowStart;}).length,week=events.filter(ev=>{const d=new Date(ev.next_action_at);return d>=todayStart&&d<weekEnd;}).length;const summary=document.createElement('p');summary.className='small';summary.textContent='Scaduti: '+overdue+' · Oggi: '+today+' · Entro 7 giorni: '+week;panel.append(summary);
+  if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Non ci sono follow-up aperti registrati.';panel.append(empty);return;}
+  events.forEach(ev=>{
+   const row=document.createElement('div');row.style.cssText='border-top:1px solid #e5eaf1;padding:9px 0;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap';
+   const info=document.createElement('div');const lead=document.createElement('strong');lead.textContent=ev.lead?.display_name||'Lead senza nome';const subject=document.createElement('p');subject.className='small';const activityLabels={call:'Telefonata',message:'Messaggio',email:'Email',meeting:'Incontro',note:'Nota',task:'Attività'};subject.textContent=ev.subject+' · '+(activityLabels[ev.activity_type]||'Attività');const due=document.createElement('p');due.className='small';const date=new Date(ev.next_action_at);due.textContent='Scadenza: '+date.toLocaleString('it-IT');if(date<new Date()){due.textContent+=' · SCADUTO';due.style.fontWeight='700';}info.append(lead,subject,due);
+   const actions=document.createElement('div');actions.className='actions';const open=document.createElement('button');open.type='button';open.className='btn alt';open.textContent='Apri Lead';open.addEventListener('click',async()=>{open.disabled=true;try{let card=Array.from(el('records').children).find(node=>node.dataset.cloudId===ev.lead_id);if(!data.some(item=>item.cloud_id===ev.lead_id)){const result=await api.getLeadById(ev.lead_id);if(!data.some(item=>item.cloud_id===ev.lead_id)){data.unshift(result.record);persist();}}el('query').value='';el('archiveFilter').value='all';['cat','state','qualificationFilter','partnerFilter'].forEach(id=>el(id).value='');draw();card=Array.from(el('records').children).find(node=>node.dataset.cloudId===ev.lead_id);if(card){card.scrollIntoView({behavior:'smooth',block:'center'});const toggle=Array.from(card.querySelectorAll('button')).find(btn=>btn.textContent==='Attività e follow-up');const panels=card.querySelectorAll('.panel');const activityPanel=panels[panels.length-1];if(toggle&&activityPanel?.hidden)toggle.click();}else throw new Error('Lead recuperato ma non visualizzabile con i filtri correnti.');}catch(err){alert('Apertura Lead non riuscita: '+err.message);}finally{open.disabled=false;}});
+   const done=document.createElement('button');done.type='button';done.className='btn';done.textContent='Completa';done.addEventListener('click',async()=>{done.disabled=true;try{await api.setLeadActivityStatus(ev.id,'done');button.click();}catch(err){alert('Aggiornamento non riuscito: '+err.message);done.disabled=false;}});
+   actions.append(open,done);row.append(info,actions);panel.append(row);
+  });
+ }catch(err){panel.replaceChildren();const msg=document.createElement('p');msg.className='small';msg.textContent='Follow-up non disponibili: '+err.message+'. Verifica che la migrazione CRM attività sia stata applicata su Supabase.';panel.append(msg);}
+ finally{button.disabled=false;}
+});
+el('csv').addEventListener('click',()=>{let keys=['name','profession','company_brand','partner_company_id','partner_company_name','signal_type','location','category','partner_type','networker_stage','mode','source','url','evidence','verified_at','identity_check','qualification','fit','activity','presence','interest','approach','notes','status','created'];let out=[keys.join(';'),...data.map(x=>keys.map(k=>'"'+String(x[k]??'').replace(/"/g,'""')+'"').join(';'))].join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+out],{type:'text/csv;charset=utf-8'}));a.download='nextway-ai-lead.csv';a.click();URL.revokeObjectURL(a.href)});
+
+const csvKeys=['name','profession','company_brand','partner_company_id','partner_company_name','signal_type','location','category','partner_type','networker_stage','mode','source','url','evidence','prospect_score','prospect_identity_score','prospect_relevance_score','prospect_evidence_score','prospect_entity_type','prospect_score_reasons','verified_at','identity_check','qualification','fit','activity','presence','interest','approach','notes','status','created'];
+function downloadText(filename,content,type){const a=document.createElement('a');const u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+el('jsonBackup').addEventListener('click',()=>downloadText('nextway-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({format:'NEXTWAY_BACKUP_V1',exported_at:new Date().toISOString(),records:data},null,2),'application/json'));
+el('csvTemplate').addEventListener('click',()=>downloadText('nextway-modello-import.csv','\\ufeff'+csvKeys.join(';')+'\\r\\n','text/csv;charset=utf-8'));
+let importRows=[];
+function parseCSV(text){
+ const first=(text.split(/\r?\n/,1)[0]||'');const semi=(first.match(/;/g)||[]).length,comma=(first.match(/,/g)||[]).length,delim=semi>=comma?';':',';
+ const rows=[];let row=[],cell='',quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++}else if(ch==='"')quoted=false;else cell+=ch}
+ else if(ch==='"')quoted=true;else if(ch===delim){row.push(cell);cell=''}else if(ch==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))rows.push(row);row=[];cell=''}else cell+=ch}
+ row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))rows.push(row);
+ if(!rows.length)return [];
+ const headers=rows.shift().map(v=>v.replace(/^\uFEFF/,'').trim());
+ return rows.map(values=>Object.fromEntries(headers.map((h,i)=>[h,(values[i]??'').trim()])));
+}
+function validateImport(rows){
+ const cats=['potential_partner','final_customer','wellness_professional'],statuses=['Da verificare','Verificato','Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner','Non interessato','Escluso'];
+ const seen=new Set(data.filter(x=>x.url).map(x=>String(x.url).trim().toLowerCase()));let valid=[],duplicates=0,invalid=0;
+ rows.forEach(raw=>{
+  const x={...raw};x.name=String(x.name||'').trim();x.url=String(x.url||'').trim();x.source=String(x.source||'').trim();x.evidence=String(x.evidence||'').trim();
+  if(!x.name||!x.source||!x.evidence||!safeHttpUrl(x.url)||!cats.includes(x.category)){invalid++;return}
+  x.url=safeHttpUrl(x.url);const key=x.url.toLowerCase();if(seen.has(key)){duplicates++;return}seen.add(key);
+  const limits={fit:30,activity:20,presence:15,interest:20,approach:15};
+  Object.keys(limits).forEach(k=>x[k]=Math.max(0,Math.min(limits[k],Number(x[k]||0)||0)));
+  x.identity_check=['pending','confirmed','uncertain'].includes(x.identity_check)?x.identity_check:'pending';
+  x.qualification=['Da approfondire','Qualificato','Escluso'].includes(x.qualification)?x.qualification:'Da approfondire';
+  if(x.qualification==='Qualificato'&&(x.identity_check!=='confirmed'||Object.keys(limits).reduce((n,k)=>n+x[k],0)<50)){invalid++;return}
+  x.status=statuses.includes(x.status)?x.status:(x.qualification==='Escluso'?'Escluso':'Da verificare');
+  x.id='imp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);x.created=x.created||new Date().toISOString();valid.push(x);
+ });
+ return {valid,duplicates,invalid,total:rows.length};
+}
+let backupRows=[];
+el('previewBackup').addEventListener('click',async()=>{
+ const file=el('backupFile').files[0];if(!file){el('backupReport').textContent='Seleziona un backup JSON.';return}
+ if(file.size>10*1024*1024){el('backupReport').textContent='File troppo grande: massimo 10 MB.';return}
+ try{const obj=JSON.parse(await file.text());if(obj.format!=='NEXTWAY_BACKUP_V1'||!Array.isArray(obj.records))throw new Error('Formato non riconosciuto');
+ const report=validateImport(obj.records);backupRows=report.valid;
+ el('backupReport').textContent='Backup riconosciuto · Record validi: '+report.valid.length+' · Già presenti: '+report.duplicates+' · Non validi: '+report.invalid+'. Nessun dato è stato ancora ripristinato.';
+ el('restoreBackup').disabled=!report.valid.length;
+ }catch(err){backupRows=[];el('restoreBackup').disabled=true;el('backupReport').textContent='Backup non valido o illeggibile. Nessun dato modificato.'}
+});
+el('restoreBackup').addEventListener('click',()=>{
+ if(!activeOwnerId){alert('Accedi con il tuo account NEXTWAY prima di ripristinare un archivio.');return;}
+ if(!backupRows.length)return;
+ if(!confirm('Unire '+backupRows.length+' record del backup all’archivio attuale? I record esistenti non saranno sovrascritti.'))return;
+ const count=backupRows.length;data=[...backupRows,...data];backupRows=[];persist();
+ el('restoreBackup').disabled=true;el('backupReport').textContent='Ripristino completato: '+count+' record aggiunti.';
+});
+el('previewImport').addEventListener('click',async()=>{
+ const file=el('importFile').files[0];if(!file){el('importReport').textContent='Seleziona prima un file CSV.';return}
+ if(file.size>5*1024*1024){el('importReport').textContent='File troppo grande: massimo 5 MB.';return}
+ try{const parsed=parseCSV((await file.text()).replace(/^\uFEFF/,''));
+ const report=validateImport(parsed);importRows=report.valid;
+ el('importReport').textContent='Righe lette: '+report.total+' · Pronte: '+report.valid.length+' · Duplicati URL: '+report.duplicates+' · Non valide: '+report.invalid+'. Nessun dato è stato ancora importato.';
+ el('confirmImport').disabled=!report.valid.length;
+ }catch(err){importRows=[];el('confirmImport').disabled=true;el('importReport').textContent='Impossibile leggere il CSV. Verifica che sia UTF-8 con intestazioni NEXTWAY.'}
+});
+el('confirmImport').addEventListener('click',()=>{
+ if(!activeOwnerId){alert('Accedi con il tuo account NEXTWAY prima di importare Lead.');return;}
+ if(!importRows.length)return;
+ if(!confirm('Importare '+importRows.length+' Lead validi? I record esistenti non saranno sovrascritti.'))return;
+ data=[...importRows,...data];const count=importRows.length;importRows=[];persist();
+ el('confirmImport').disabled=true;el('importReport').textContent='Importazione completata: '+count+' Lead aggiunti all’archivio locale.';
+});
+el('deleteTests').addEventListener('click',()=>{if(!activeOwnerId){alert('Accedi con il tuo account NEXTWAY.');return;}let n=data.filter(x=>x.is_test).length;if(!n){alert('Non ci sono test tecnici da eliminare.');return}if(confirm('Eliminare '+n+' record TEST TECNICO? I Lead reali resteranno invariati.')){data=data.filter(x=>!x.is_test);persist()}});el('wipe').addEventListener('click',()=>{if(!activeOwnerId){alert('Accedi con il tuo account NEXTWAY.');return;}if(confirm('Confermi la cancellazione di tutto l’archivio locale?')){data=[];persist()}});draw();
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script src="/nextway-setter.js"></script></body></html>,'gmi'))].map(m=>m[1].trim()).filter(Boolean);
+ const unique=items=>[...new Set(items)].slice(0,5);
+ const emails=unique([...(Array.isArray(raw.emails)?raw.emails:[]),...extract('Email pubblicata')]).filter(v=>/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v));
+ const phones=unique([...(Array.isArray(raw.phones)?raw.phones:[]),...extract('Telefono pubblicato')]).filter(v=>{const n=v.replace(/\\D/g,'');return n.length>=9&&n.length<=15;});
+ const whatsapp=unique([...(Array.isArray(raw.whatsapp)?raw.whatsapp:[]),...extract('Link WhatsApp pubblicato')]).map(safeHttpUrl).filter(v=>{try{return ['wa.me','api.whatsapp.com','web.whatsapp.com'].includes(new URL(v).hostname)}catch{return false}});
+ const socials=unique([...(Array.isArray(raw.socials)?raw.socials:[]),...extract('Profilo social pubblicato')]).map(safeHttpUrl).filter(Boolean);
+ return {emails,phones,whatsapp,socials};
+}
+function renderLeadPublicContacts(lead){
+ const contacts=getLeadPublicContacts(lead),groups=[['Email pubblicate',contacts.emails,'email'],['Telefoni pubblicati',contacts.phones,'phone'],['WhatsApp pubblicati',contacts.whatsapp,'whatsapp'],['Profili social pubblicati',contacts.socials,'social']];
+ if(!groups.some(([,items])=>items.length))return null;
+ const panel=document.createElement('section');panel.className='panel';panel.style.cssText='margin:12px 0;padding:12px;background:#fbfcff';
+ const heading=document.createElement('strong');heading.textContent='Recapiti pubblicati nella fonte';
+ const note=document.createElement('p');note.className='small';note.textContent='Dati estratti dalla pagina associata al Lead. La titolarità e l’attualità dei recapiti non sono verificate: controlla la fonte prima di contattare.';
+ panel.append(heading,note);
+ groups.forEach(([label,items,type])=>{if(!items.length)return;const group=document.createElement('div');group.style.cssText='margin-top:9px';const title=document.createElement('div');title.className='small';title.style.fontWeight='700';title.textContent=label;group.append(title);items.forEach(value=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:5px 0';const shown=document.createElement('span');shown.style.cssText='font-size:13px;overflow-wrap:anywhere';shown.textContent=value;row.append(shown);const action=document.createElement('button');action.className='btn alt';action.type='button';action.textContent='Copia';action.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(value);action.textContent='Copiato';}catch{action.textContent='Copia non disponibile';}});row.append(action);if(type==='email'||type==='phone'||type==='whatsapp'||type==='social'){const link=document.createElement('a');link.className='btn alt';link.textContent=type==='email'?'Apri email':type==='phone'?'Chiama':type==='whatsapp'?'Apri WhatsApp':'Apri profilo';if(type==='email')link.href='mailto:'+value;else if(type==='phone'){const digits=value.replace(/[^+\\d]/g,'');link.href='tel:'+digits;}else link.href=value;if(type==='whatsapp'||type==='social'){link.target='_blank';link.rel='noopener noreferrer';}row.append(link);}group.append(row);});panel.append(group);});
+ return panel;
+}
 function persist(){if(!activeOwnerId)throw new Error('Accedi con il tuo account NEXTWAY prima di modificare l’archivio.');localStorage.setItem(KEY+':'+activeOwnerId,JSON.stringify(data));draw()}
 function draw(){const visible=data.filter(x=>!x.is_test);el('count').textContent=visible.filter(x=>!x.archived_at).length;el('todo').textContent=visible.filter(x=>!x.archived_at&&x.status==='Da verificare').length;el('top').textContent=visible.filter(x=>!x.archived_at&&points(x)>=80&&x.status!=='Escluso').length;el('dupes').textContent=visible.length-new Set(visible.filter(x=>x.url).map(x=>x.url.toLowerCase())).size;const active=visible.filter(x=>!x.archived_at);const verificationCounts={high:0,medium:0,low:0,missing:0};active.forEach(x=>verificationCounts[getVerificationPriority(x)]++);el('verifyHigh').textContent=verificationCounts.high;el('verifyMedium').textContent=verificationCounts.medium;el('verifyLow').textContent=verificationCounts.low;el('verifyMissing').textContent=verificationCounts.missing;el('stageContacted').textContent=active.filter(x=>['Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner'].includes(x.status)).length;el('stageFollowup').textContent=active.filter(x=>x.status==='In follow-up').length;el('stageEvaluation').textContent=active.filter(x=>x.status==='In valutazione').length;el('stageConverted').textContent=active.filter(x=>['Convertito cliente','Convertito partner'].includes(x.status)).length;
 let q=el('query').value.trim().toLocaleLowerCase('it'),c=el('cat').value,s=el('state').value,af=el('archiveFilter').value,sort=el('sort').value,qualification=el('qualificationFilter').value,partner=el('partnerFilter').value,qualityFilter=el('prospectQualityFilter').value,entityFilter=el('entityTypeFilter').value;let rows=data.filter(x=>{const quality=getProspectQuality(x),score=quality?Number(quality.score):null;const qualityMatch=!qualityFilter||(qualityFilter==='missing'?!quality:qualityFilter==='high'?score>=80:qualityFilter==='medium'?score>=50&&score<80:score<50);return (af==='all'||(af==='archived'?!!x.archived_at:!x.archived_at))&&(!q||[x.name,x.profession,x.company_brand,x.location,x.source,x.url,x.evidence,x.notes,x.partner_type].join(' ').toLocaleLowerCase('it').includes(q))&&(!c||x.category===c)&&(!s||x.status===s)&&(!qualification||x.qualification===qualification)&&(!partner||x.partner_type===partner)&&qualityMatch&&(!entityFilter||(quality?.entityType||'Identità individuale non confermata')===entityFilter)});rows.sort((a,b)=>sort==='recent'?new Date(b.created||0)-new Date(a.created||0):sort==='oldest'?new Date(a.created||0)-new Date(b.created||0):sort==='name'?String(a.name||'').localeCompare(String(b.name||''),'it',{sensitivity:'base'}):sort==='prospect_quality'?(Number(getProspectQuality(b)?.score??-1)-Number(getProspectQuality(a)?.score??-1))||points(b)-points(a):points(b)-points(a));let root=el('records');root.replaceChildren();
