@@ -230,26 +230,26 @@ async function getLeadForConflict(cloudId){
   if(fullName.length<2||fullName.length>160)throw new Error('Inserisci nome e cognome (2-160 caratteri).');
   if(email.length>254||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))throw new Error('Indirizzo email non valido.');
   if(phone.length>40)throw new Error('Numero di telefono troppo lungo.');
-  const {c,s}=await active();
-  const {data:lead,error:leadError}=await c.from('nextway_leads').select('id,owner_profile_id,status,archived_at').eq('id',cloudId).single();
-  if(leadError)throw leadError;
-  if(lead.archived_at)throw new Error('Un Lead archiviato non può essere convertito.');
-  if(lead.status!=='In valutazione')throw new Error('Porta prima il Lead nello stato “In valutazione”.');
-  const {data,error}=await c.from('nextway_lead_conversion_requests').insert({
-   lead_id:lead.id,owner_profile_id:lead.owner_profile_id,sponsor_profile_id:lead.owner_profile_id,
-   created_by:s.user.id,conversion_type:type,full_name:fullName,email,phone:phone||null
-  }).select('id,lead_id,owner_profile_id,sponsor_profile_id,conversion_type,full_name,email,phone,status,created_at').single();
+  const {c}=await active();
+  const {data:requestId,error}=await c.rpc('nextway_create_lead_conversion_request',{
+   p_lead_id:cloudId,p_conversion_type:type,p_full_name:fullName,p_email:email,p_phone:phone||null
+  });
   if(error){
    if(error.code==='23505')throw new Error('Esiste già una richiesta attiva per questo Lead o per questo indirizzo email. Controlla la coda conversioni prima di riprovare.');
    throw error;
   }
+  if(!requestId)throw new Error('La richiesta di conversione non è stata creata.');
+  const {data,error:readError}=await c.from('nextway_lead_conversion_requests')
+   .select('id,lead_id,owner_profile_id,sponsor_profile_id,created_by,workspace_id,conversion_type,full_name,email,phone,status,created_at')
+   .eq('id',requestId).single();
+  if(readError)throw readError;
   return data;
  }
  async function getLeadConversionRequest(cloudId){
   if(!cloudId)throw new Error('Lead non collegato al cloud.');
   const {c}=await active();
   const {data,error}=await c.from('nextway_lead_conversion_requests')
-   .select('id,lead_id,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at')
+   .select('id,lead_id,workspace_id,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at')
    .eq('lead_id',cloudId).order('created_at',{ascending:false}).limit(1);
   if(error)throw error;
   return (data||[])[0]||null;
@@ -259,7 +259,7 @@ async function getLeadForConflict(cloudId){
   const {c}=await active();
   if(!(await isPlatformAdmin()))throw new Error('Accesso riservato a platform_admin.');
   const {data,error}=await c.from('nextway_lead_conversion_requests')
-   .select('id,lead_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at,lead:nextway_leads(display_name)')
+   .select('id,lead_id,workspace_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at,lead:nextway_leads(display_name)')
    .eq('status',status).order('created_at',{ascending:true}).limit(100);
   if(error)throw error;
   return data||[];
