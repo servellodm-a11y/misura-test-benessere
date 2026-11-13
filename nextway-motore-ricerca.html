@@ -209,7 +209,8 @@ async function runSearch(){
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · non misura l’interesse commerciale';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
-    const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,$('segment').value,url,publicContacts);
+    const messageSegment=targetAssessment.segment==='unclassified'?$('segment').value:targetAssessment.segment;
+    const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,messageSegment,url,publicContacts);
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
