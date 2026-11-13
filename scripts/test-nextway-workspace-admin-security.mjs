@@ -30,6 +30,8 @@ assert.doesNotMatch(edge, /select\([^\n]*email[^\n]*\)/i, "admin profile directo
 
 assert.match(edge, /auth\.admin\.getUserById\(body\.user_id\)/);
 assert.match(edge, /onConflict: "workspace_id,user_id"/);
+assert.match(edge, /select\("id,membership_status,activated_at,invited_by"\)/);
+assert.match(edge, /invited_by: existing\?\.invited_by \?\? authData\.user\.id/);
 assert.match(edge, /membership_status === "active"/);
 assert.match(edge, /workspace\.status !== "active"/);
 assert.match(edge, /workspace_owner[\s\S]*?workspace_admin[\s\S]*?workspace_manager[\s\S]*?workspace_member[\s\S]*?workspace_viewer/);
