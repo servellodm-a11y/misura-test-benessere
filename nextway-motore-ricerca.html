@@ -188,7 +188,8 @@ async function runSearch(){
   const groups=payload.results||[];let total=0;
   groups.forEach((group,index)=>{
    const heading=document.createElement('h3');heading.textContent=generated[index]?.label||('Ricerca '+(index+1));list.append(heading);
-   (group.results||[]).forEach(item=>{
+   const rankedResults=(group.results||[]).map(item=>({...item,_assessment:assessSearchEvidence(item.title,item.snippet,String(item.page_content||'').slice(0,5000),safeUrl(item.url),extractPublicContacts(String(item.page_content||'').slice(0,5000)),$('segment').value)})).sort((a,b)=>b._assessment.score-a._assessment.score);
+   rankedResults.forEach(item=>{
     const url=safeUrl(item.url);if(!url)return;total++;
     const card=document.createElement('article');card.className='query';
     const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
@@ -202,10 +203,10 @@ async function runSearch(){
     if(publicContacts.phones.length)contactParts.push('Telefoni pubblicati: '+publicContacts.phones.join(', '));
     if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
     if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
-    const assessment=assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
-    const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Qualità evidenze: '+assessment.score+'/100 · '+assessment.identity+' · Compatibilità commerciale: non valutata';
+    const assessment=item._assessment||assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
+    const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · Interesse commerciale: non deducibile';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
-    const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Elementi rilevati: '+assessment.reasons.join(' · ')+'. Il punteggio misura solo la completezza delle evidenze, non l’interesse della persona né la sua idoneità commerciale.';
+    const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
     const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,$('segment').value,url,publicContacts);
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
@@ -290,32 +291,50 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  box.append(heading,note,linkLabel,linkSelect,recommendation,select,output,copy);refresh();return box;
 }
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
- const t=String(title||''),body=String(snippet||'')+' '+String(pageContent||'');
- const hasRole=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|imprenditor|titolare|founder|team leader|networker|distributore|consulente|coach|fisioterap|farmacist|medic|trainer/i.test(body);
- const personLike=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(t.trim());
- const personEvidence=personLike&&hasRole;
- const signalBySegment={
-  wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|benessere|wellness/i,
-  wellness_networker:/network marketing|networker|vendita diretta|wellness|team leader/i,
-  new_networker:/ho iniziato da poco|nuovo distributore|nuova distributrice|primi passi|new to network marketing/i,
-  other_networker:/network marketing|networker|vendita diretta|social selling/i,
-  entrepreneur:/imprenditor|titolare|founder|azienda|business owner/i,
-  side_income:/lavoro extra|part.time|seconda attività|entrata aggiuntiva|reddito integrativo/i,
-  business_seeking:/attività imprenditoriale|mettersi in proprio|nuovo progetto|business indipendente/i,
-  exnetworker:/ex.networker|ex distributore|ex incaricato|esperienza network marketing/i,
-  customers:/benessere|nutrizione|alimentazione|fitness|stile di vita/i
+ const t=String(title||'').trim(),body=(String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
+ const text=(t+' '+body).toLocaleLowerCase('it');
+ const host=(()=>{try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch{return '';}})();
+ const socialProfile=/linkedin\.com\/in\/|instagram\.com\/[^/]+\/?$|facebook\.com\/[^/]+\/?$|tiktok\.com\/@|youtube\.com\/@/i.test(url||'');
+ const personTitle=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,3}(?:\s*[|–-]\s*[^|–-]{2,70})?$/.test(t);
+ const selfIdentification=/\b(mi chiamo|sono\s+(?:un[oa]?\s+)?(?:nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|coach|imprenditor|consulent|networker|titolare))\b/i.test(body);
+ const roleEvidence=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|consulent|imprenditor|titolare|founder|team leader|networker|distributore|brand partner|vendita diretta/i.test(text);
+ const organizationEvidence=/\b(srl|s\.r\.l|spa|s\.p\.a|azienda|società|company|centro|studio associato|team ufficiale|contatti|chi siamo)\b/i.test(t+' '+body);
+ const directoryEvidence=/directory|elenco professionisti|trova un professionista|portale|catalogo|annuario|pagine gialle|job board|offerte di lavoro|annunci di lavoro|articolo|blog|news|magazine/i.test(t+' '+host);
+ const individual=!!(socialProfile||selfIdentification||(personTitle&&roleEvidence));
+ const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
+ const segmentSignals={
+  wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|studio.*benessere/i,
+  wellness_networker:/network marketing|networker|vendita diretta|brand partner|distributore indipendente|team leader/i,
+  new_networker:/ho iniziato da poco|sono all[’']inizio|primi passi nel network|nuov[oa] incaricat[oa]|nuovo distributore|nuova distributrice|sto imparando/i,
+  other_networker:/network marketing|networker|vendita diretta|social selling|distributore indipendente/i,
+  entrepreneur:/imprenditor|titolare|founder|business owner|amministratore|azienda/i,
+  side_income:/cerco un lavoro extra|cerco un secondo lavoro|attività part.time|lavoro part.time|entrata aggiuntiva|reddito integrativo/i,
+  business_seeking:/cerco un’attività|cerco un'attività|avviare un’attività|mettermi in proprio|nuovo progetto imprenditoriale|cerco un business/i,
+  exnetworker:/ex.networker|ex distributore|ex incaricato|ho lasciato il network marketing|esperienza precedente nel network marketing/i,
+  customers:/cerco consigli|cerco informazioni|cerco un professionista|interesse per il benessere|nutrizione|alimentazione|stile di vita|omega.3/i
  };
- const signal=(signalBySegment[segment]||/benessere|wellness|network marketing|professionista/i).test(body);
+ const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text);
+ const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
  const contactCount=['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0);
- const reasons=[],score=(url?15:0)+(t.trim()?10:0)+(body.trim().length>=500?20:body.trim().length>=120?12:0)+(hasRole?20:0)+(personEvidence?15:0)+(contactCount?10:0)+(signal?10:0);
- if(url)reasons.push('fonte web presente');
- if(body.trim().length>=120)reasons.push('contenuto testuale disponibile');
- if(hasRole)reasons.push('segnale professionale');
- if(personEvidence)reasons.push('possibile nome e ruolo nella fonte');
- if(contactCount)reasons.push('recapito o profilo pubblico rilevato');
- if(signal)reasons.push('segnale coerente con il segmento');
- if(!personEvidence)reasons.push('identità individuale non confermata');
- return {score,identity:personEvidence?'Possibile persona · da verificare':'Pagina/organizzazione o identità non chiara',reasons};
+ let identityScore=(socialProfile?24:0)+(selfIdentification?16:0)+(personTitle&&roleEvidence?14:0)+(roleEvidence?6:0);
+ identityScore=Math.min(40,identityScore);
+ let relevanceScore=(explicitSegmentSignal?30:0)+(broadIndustrySignal?10:0);
+ relevanceScore=Math.min(40,relevanceScore);
+ let evidenceScore=(url?5:0)+(body.length>=500?5:body.length>=150?3:0)+(contactCount?5:0)+(t.length>=12?2:0)+(host?3:0);
+ evidenceScore=Math.min(20,evidenceScore);
+ const penalty=directoryEvidence?20:organizationEvidence&&!individual?8:0;
+ const score=Math.max(0,Math.min(100,identityScore+relevanceScore+evidenceScore-penalty));
+ const reasons=[];
+ if(socialProfile)reasons.push('URL riconducibile a un profilo social individuale');
+ if(selfIdentification)reasons.push('autopresentazione esplicita nel testo');
+ if(personTitle&&roleEvidence)reasons.push('titolo compatibile con nome e ruolo');
+ if(explicitSegmentSignal)reasons.push('segnale testuale specifico per il segmento');
+ else if(broadIndustrySignal)reasons.push('solo segnale generico di settore');
+ if(contactCount)reasons.push('recapiti pubblicati rilevati, da verificare');
+ if(directoryEvidence)reasons.push('possibile directory, articolo o annuncio: pertinenza ridotta');
+ if(organizationEvidence&&!individual)reasons.push('prevalenza di segnali aziendali, non di identità personale');
+ if(!individual)reasons.push('persona fisica non identificata con sufficiente evidenza');
+ return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual};
 }
 function classifyNetworkerStage(value){
  const t=String(value||'').toLocaleLowerCase('it');
