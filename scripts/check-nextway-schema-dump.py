@@ -22,6 +22,7 @@ def scan_sql(source):
     state = "normal"
     block_depth = 0
     dollar_end = None
+    single_quote_backslash_escape = False
 
     def add_visible(ch, current_line):
         nonlocal statement_line
@@ -57,6 +58,12 @@ def scan_sql(source):
                 continue
             if ch == "'":
                 add_visible(" ", line)
+                previous = source[i - 1] if i > 0 else ""
+                before_previous = source[i - 2] if i > 1 else ""
+                single_quote_backslash_escape = (
+                    previous in ("E", "e")
+                    and (not before_previous or not (before_previous.isalnum() or before_previous in "_$"))
+                )
                 state = "single_quote"
                 i += 1
                 continue
@@ -109,7 +116,7 @@ def scan_sql(source):
 
         if state in ("single_quote", "double_quote"):
             quote = "'" if state == "single_quote" else '"'
-            if ch == "\\" and state == "single_quote" and i + 1 < n:
+            if ch == "\\" and state == "single_quote" and single_quote_backslash_escape and i + 1 < n:
                 if nxt == "\n":
                     line += 1
                 i += 2
