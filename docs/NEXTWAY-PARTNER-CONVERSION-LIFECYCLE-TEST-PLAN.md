@@ -60,7 +60,7 @@ Lo stato `rejected` della richiesta è previsto per la revisione prima del provi
 `partner_details.status = active` viene creato durante la finalizzazione, mentre la membership workspace resta `invited`. Sono due dimensioni diverse: il Partner può esistere nel sistema ma non avere ancora accesso al workspace. UI e API devono continuare a controllare la membership per ogni accesso workspace; non usare `partner_details.status` come autorizzazione.
 
 
-## Proposta di gestione annullamento post-invito — non applicata
+## Specifica tecnica di gestione annullamento post-invito — definita, non implementata
 
 La richiesta `rejected` deve restare riservata al rifiuto amministrativo prima del provisioning. Non va riutilizzata per rappresentare un invito ignorato, scaduto o rifiutato dal destinatario.
 
@@ -72,7 +72,7 @@ Regole di sicurezza proposte:
 - account Auth confermato ma conversione non finalizzata: nessun profilo Partner o membership deve essere creato dalla richiesta annullata; l'account Auth resta un'identità senza accesso NEXTWAY finché non interviene una procedura amministrativa separata;
 - conversione già `activated`: non usare la cancellazione della richiesta. Serve un processo distinto di sospensione/offboarding che sospenda la membership e disattivi i dettagli Partner, preservando audit e storico.
 
-Questa proposta richiede una migrazione per il nuovo stato e i metadati, l'aggiornamento della guard function, una RPC amministrativa atomica e test di concorrenza con claim/finalizer. Non è stata implementata perché tocca il modello persistente e non va introdotta senza una revisione completa delle transizioni e delle policy.
+La specifica completa, inclusi vincoli da aggiornare, firma RPC, guard, lock e matrice di concorrenza, è registrata in `docs/NEXTWAY-PARTNER-CANCELLATION-TECHNICAL-SPEC.md`. La progettazione è completata; migrazione, RPC e guard non sono state implementate.
 
 ## Strategia di test senza utenti fittizi nel database reale
 
@@ -104,12 +104,19 @@ Solo in ambiente isolato, con casella di test controllata: invio, accettazione, 
 
 ## Gate di uscita
 
-Non considerare il ciclo Partner chiuso finché:
+La semantica di annullamento è ora definita nella specifica tecnica collegata, ma il ciclo Partner non è chiuso finché:
 - la procedura per reinviare un invito scaduto non è definita e testata;
-- la semantica di annullamento dopo l'invio non è definita;
+- la migrazione, la RPC, la guard e i test di annullamento non sono implementati e superati;
 - i test A e B non sono superati;
 - il test C non è superato in staging prima dell'applicazione delle migrazioni.
 
 ## Protezioni operative
 
 Questo piano non autorizza migrazioni, DDL/DML sul progetto reale, deploy Supabase/Netlify, invii email, creazione utenti reali, merge della PR o modifiche a `main`.
+
+
+## Aggiornamento audit — 13 novembre 2026
+
+La revisione delle migrazioni esistenti ha precisato i vincoli da coordinare: check dello stato richiesta, check coerenza revisione, check coerenza claim/attivazione e trigger `nextway_guard_conversion_request_review()`. Non è sufficiente aggiungere `cancelled` al solo check dello stato. La nuova specifica tecnica definisce come preservare i dati di revisione quando l'annullamento avviene dopo l'approvazione e come rappresentare l'annullamento da `pending` senza simulare una revisione.
+
+La gara annullamento/finalizzazione deve essere risolta dal lock della stessa riga richiesta. Il progetto staging non è ancora disponibile: test API Auth, test SQL e gare a due sessioni restano bloccati. Nessuna modifica al database reale o invio email è stato effettuato.
