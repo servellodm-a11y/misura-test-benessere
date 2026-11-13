@@ -11,6 +11,7 @@ on:
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "scripts/test-nextway-partner-cancellation-spec.mjs"
+      - "scripts/test-nextway-partner-cancellation-sql.mjs"
       - "scripts/test-nextway-partner-invite-lifecycle.mjs"
       - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
@@ -60,6 +61,7 @@ on:
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "scripts/test-nextway-partner-invite-lifecycle.mjs"
       - "scripts/test-nextway-partner-cancellation-spec.mjs"
+      - "scripts/test-nextway-partner-cancellation-sql.mjs"
       - "scripts/test-nextway-conversion-workspace-preflight.mjs"
       - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
@@ -145,6 +147,8 @@ jobs:
         run: node scripts/test-nextway-partner-invite-lifecycle.mjs
       - name: Validate Partner cancellation lifecycle specification
         run: node scripts/test-nextway-partner-cancellation-spec.mjs
+      - name: Validate Partner cancellation SQL contract
+        run: node scripts/test-nextway-partner-cancellation-sql.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
