@@ -20,7 +20,7 @@ Il collaudo non deve creare utenti, inviti, email o dati di prova nel progetto S
 - Un retry recupera un invito precedente associato alla stessa richiesta. Se l'utente esiste ma non ha confermato l'email, l'Edge Function ora richiama `inviteUserByEmail` per reinviare l'invito allo stesso account e verifica che ID, email e metadata della richiesta siano rimasti coerenti. Se l'utente ha già confermato l'email, non reinvia e riutilizza quell'ID. Un invito creato dal tentativo corrente può essere eliminato in compensazione solo se non risulta confermato; un invito recuperato non viene eliminato.
 - L'attivazione amministrativa della membership richiede email Auth confermata, membership `invited` preesistente e coerenza tra richiesta attivata, utente e workspace.
 
-Questi sono controlli statici sul codice, non test runtime.
+Questi sono controlli statici sul codice. È stato aggiunto il modulo puro `invite-lifecycle.mjs`, usato dall'Edge Function, e il test Node `scripts/test-nextway-partner-invite-lifecycle.mjs`: esecuzione isolata locale **6/6 superata** per creazione, reinvio, riuso dopo conferma, mismatch email e mismatch request ID. Il test non chiama Supabase Auth e non invia email.
 
 ## Casi del ciclo da collaudare
 
@@ -33,7 +33,7 @@ Questi sono controlli statici sul codice, non test runtime.
 | Errore dopo creazione invito nel tentativo corrente | Cleanup solo se l'account non è stato confermato; claim rilasciato | Da testare in staging |
 | Errore dopo recupero di invito precedente | Non eliminare l'account recuperato; rendere possibile il retry | Da testare in staging |
 | Invito accettato prima del retry | Riutilizzare lo stesso Auth user; non cancellarlo; completare la finalizzazione se ancora pendente | Da testare in staging |
-| Invito scaduto/non più utilizzabile | Reinviare l'invito all'account non confermato già associato, mantenendo ID e metadata | Implementato staticamente; da testare in staging |
+| Invito scaduto/non più utilizzabile | Reinviare l'invito all'account non confermato già associato, mantenendo ID e metadata | Implementato; unit test 6/6; API Auth da testare in staging |
 | Email già appartenente a un account Auth non legato alla richiesta | Fail closed; nessuna associazione automatica | Da testare in staging |
 | Profilo o partner_details incompatibile già esistente | Rollback completo; nessuna sovrascrittura | Da testare in staging |
 | Membership già esistente | Bloccare e richiedere riconciliazione; non fare UPSERT cieco | Da testare in staging |
@@ -58,6 +58,21 @@ Lo stato `rejected` della richiesta è previsto per la revisione prima del provi
 ### 3. Coerenza degli stati
 
 `partner_details.status = active` viene creato durante la finalizzazione, mentre la membership workspace resta `invited`. Sono due dimensioni diverse: il Partner può esistere nel sistema ma non avere ancora accesso al workspace. UI e API devono continuare a controllare la membership per ogni accesso workspace; non usare `partner_details.status` come autorizzazione.
+
+
+## Proposta di gestione annullamento post-invito — non applicata
+
+La richiesta `rejected` deve restare riservata al rifiuto amministrativo prima del provisioning. Non va riutilizzata per rappresentare un invito ignorato, scaduto o rifiutato dal destinatario.
+
+La proposta tecnica è introdurre una transizione esplicita `cancelled` per la richiesta, con `cancelled_at`, `cancelled_by` e motivo obbligatorio. La cancellazione deve essere un'operazione server-side amministrativa che blocca la richiesta con lock, invalida il claim e impedisce al finalizer di completarla. Se il provisioning è in corso, l'operazione deve coordinarsi con il claim: non deve dichiarare annullata una richiesta mentre un finalizer può ancora completarla.
+
+Regole di sicurezza proposte:
+- prima dell'invito: annullare la richiesta senza creare Auth, profilo o membership;
+- invito inviato ma non accettato: annullare la richiesta e impedire la finalizzazione; non cancellare automaticamente un account Auth recuperato o già confermato;
+- account Auth confermato ma conversione non finalizzata: nessun profilo Partner o membership deve essere creato dalla richiesta annullata; l'account Auth resta un'identità senza accesso NEXTWAY finché non interviene una procedura amministrativa separata;
+- conversione già `activated`: non usare la cancellazione della richiesta. Serve un processo distinto di sospensione/offboarding che sospenda la membership e disattivi i dettagli Partner, preservando audit e storico.
+
+Questa proposta richiede una migrazione per il nuovo stato e i metadati, l'aggiornamento della guard function, una RPC amministrativa atomica e test di concorrenza con claim/finalizer. Non è stata implementata perché tocca il modello persistente e non va introdotta senza una revisione completa delle transizioni e delle policy.
 
 ## Strategia di test senza utenti fittizi nel database reale
 
