@@ -360,7 +360,7 @@ async function runSearch(){
       const partnerTypes={wellness_pro:'Professionista salute e benessere',wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / titolare',side_income:'Ricerca lavoro extra · da verificare',business_seeking:'Ricerca attività imprenditoriale · da verificare'};
       const evidence=['SCHEDA PROSPECT (campi estratti automaticamente, da verificare)','Nome: '+profile.name,'Professione: '+profile.profession,'Azienda: '+profile.organization,'Località: '+profile.location,'Priorità di verifica: '+profile.priority,'Motivazione priorità: '+profile.priority_reason,'Classificazione: '+profile.category,'Motivazione classificazione: '+targetAssessment.reason,'Qualificazione commerciale: '+qualification.status,'Tipo prospect: '+commercialFit.prospect_type,'Pertinenza commerciale: '+commercialFit.commercial_fit_score+'/100','Segnale commerciale: '+commercialFit.signal_label,'Intenzione: '+commercialFit.explicit_intent,'Prossima azione: '+commercialFit.suggested_next_step,'Azione suggerita: '+qualification.action,'Motivazioni qualificazione: '+qualification.reasons.join(' · '),'Fonte: '+url,item.snippet||'',pageContent].filter(Boolean).join('\\n\\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
-      const enrichedAssessment={...assessment,target_classification:targetAssessment,prospect_profile:profile,commercial_qualification:qualification,commercial_fit:commercialFit};
+      const enrichedAssessment={...assessment,target_classification:targetAssessment,prospect_profile:profile,commercial_qualification:{...qualification,commercial_fit:commercialFit},commercial_fit:commercialFit};
       const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,sources:dailyEntry.source_evidence,category,partner_type:targetAssessment.role||partnerTypes[targetAssessment.segment]||partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:{emails:dailyEntry.emails,phones:dailyEntry.phones,whatsapp:dailyEntry.whatsapp,socials:dailyEntry.socials},identity_keys:identityKeys,evidence_quality:enrichedAssessment,fit_status:'Non valutato',company_id:activeCompany?.id||'zinzino',company_name:activeCompany?.name||'Zinzino'});
       if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
@@ -527,7 +527,7 @@ function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assess
 }
 
 function assessCommercialFit(title,snippet,pageContent,selectedSegment,targetAssessment,assessment,contacts){
- const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\\s+/g,' ').trim();
+ const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
  const text=raw.toLocaleLowerCase('it'),selected=String(selectedSegment||'');
  const type=targetAssessment?.kind==='customer'?'cliente':targetAssessment?.kind==='partner'?'partner':'da qualificare';
  const explicitCustomer=/(cerco consigli|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|vorrei migliorare la mia alimentazione|interessat[oa] a migliorare il benessere|vorrei una consulenza|cerco una consulenza)/i.test(text);
