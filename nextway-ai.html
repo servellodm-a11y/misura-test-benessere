@@ -47,9 +47,26 @@ window.NEXTWAY_LOCAL_ARCHIVE={
   if(!activeOwnerId)throw new Error('Accedi a NEXTWAY prima di acquisire un risultato.');
   const url=safeHttpUrl(record?.url);
   if(!url)throw new Error('URL della fonte non valido.');
-  const canonicalUrl=value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'');}catch{return String(value||'').trim().toLowerCase();}};
-  const duplicate=data.find(x=>!x.is_test&&x.url&&canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url));
-  if(duplicate){const meta=readProspectMetadata(duplicate);meta.sources=mergeLeadSourceRecords(meta.sources,record?.sources||[{url,title:duplicate.name,snippet:String(record?.evidence||'').slice(0,1200),evidence:record?.evidence||'',public_contacts:record?.public_contacts||{}}]);meta.public_contacts=mergeLeadPublicContactSets(meta.public_contacts,record?.public_contacts||{});writeProspectMetadata(duplicate,meta);duplicate.public_contacts=meta.public_contacts;duplicate.local_dirty=true;persist();return {duplicate:true,lead:duplicate};}
+  const canonicalUrl=value=>canonicalLeadSourceUrl(value);
+  const incomingIdentityKeys=[...new Set((Array.isArray(record?.identity_keys)?record.identity_keys:[]).map(value=>String(value||'').trim().toLowerCase()).filter(value=>/^(linkedin:[a-z0-9._-]{2,100}|email:[^\s@]+@[^\s@]+\.[^\s@]+|phone:\d{9,15})$/.test(value)))];
+  const duplicate=data.find(x=>{
+   if(x.is_test)return false;
+   const sameUrl=x.url&&canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url);
+   if(sameUrl)return true;
+   const existingKeys=readProspectMetadata(x).identity_keys||[];
+   return incomingIdentityKeys.some(key=>existingKeys.includes(key));
+  });
+  if(duplicate){
+   const meta=readProspectMetadata(duplicate);
+   meta.sources=mergeLeadSourceRecords(meta.sources,record?.sources||[{url,title:duplicate.name,snippet:String(record?.evidence||'').slice(0,1200),evidence:record?.evidence||'',public_contacts:record?.public_contacts||{}}]);
+   meta.public_contacts=mergeLeadPublicContactSets(meta.public_contacts,record?.public_contacts||{});
+   meta.identity_keys=[...new Set([...(Array.isArray(meta.identity_keys)?meta.identity_keys:[]),...incomingIdentityKeys])];
+   writeProspectMetadata(duplicate,meta);
+   duplicate.public_contacts=meta.public_contacts;
+   duplicate.local_dirty=true;
+   persist();
+   return {duplicate:true,lead:duplicate,match:duplicate.url&&canonicalUrl(safeHttpUrl(duplicate.url))===canonicalUrl(url)?'url':'identity'};
+  }
   const title=String(record?.title||'').trim().slice(0,120);
   const evidence=String(record?.evidence||'').trim().slice(0,4000);
   if(!title||!evidence)throw new Error('Il risultato non contiene titolo o evidenza sufficienti.');
@@ -82,7 +99,7 @@ window.NEXTWAY_LOCAL_ARCHIVE={
    created:new Date().toISOString(),local_dirty:true
   };
   const sourceRecords=mergeLeadSourceRecords(record?.sources||[],[{url,title,evidence,snippet:String(record?.evidence||'').slice(0,1200),collected_at:new Date().toISOString(),public_contacts:publicContacts}]);
-  const metadata={sources:sourceRecords,public_contacts:mergeLeadPublicContactSets(publicContacts)};
+  const metadata={sources:sourceRecords,public_contacts:mergeLeadPublicContactSets(publicContacts),identity_keys:incomingIdentityKeys};
   lead.public_contacts=metadata.public_contacts;writeProspectMetadata(lead,metadata);
   data.unshift(lead);persist();return {duplicate:false,lead};
  }
