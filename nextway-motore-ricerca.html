@@ -224,7 +224,7 @@ function classifyNetworkerStage(value){
  const t=String(value||'').toLocaleLowerCase('it');
  const has=patterns=>patterns.some(p=>p.test(t));
  if(has([/\bex[- ]?networker\b/,/ex distributore/,/ex incaricat[oa]/,/ho lasciato il network marketing/,/former network marketer/]))return 'Ex-networker';
- if(has([/ho iniziato da poco/,/sono all[’']inizio/,/primi passi nel network/,/nuov[oa] incaricat[oa]/,/nuovo distributore|nuova distributrice|nuova distributrice/,/new to network marketing/,/just started network marketing/,/beginner training/,/sto imparando/]))return 'Alle prime armi · segnale esplicito';
+ if(has([/ho iniziato da poco/,/sono all[’']inizio/,/primi passi nel network/,/nuov[oa] incaricat[oa]/,/nuovo distributore|nuova distributrice/,/new to network marketing/,/just started network marketing/,/beginner training/,/sto imparando/]))return 'Alle prime armi · segnale esplicito';
  if(has([/team leader/,/leader di team/,/costruisco il mio team/,/sviluppo team/,/gestione team/,/formazione del team/,/team builder/,/network marketing da [0-9]+ anni/]))return 'Esperienza / leadership · segnale esplicito';
  if(has([/network marketing/,/networker/,/vendita diretta/,/distributore indipendente/,/brand partner/,/consulente indipendente/]))return 'Networker · livello da verificare';
  return 'Non classificabile dai dati disponibili';
