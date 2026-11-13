@@ -409,3 +409,33 @@ Report ricevuto dall'utente:
 La verifica statica delle migrazioni ha chiarito che le ultime due colonne non sono prerequisiti da ripristinare: la tabella legacy corrente usa `owner_profile_id` e `claimed_at`, secondo `20261111240000_nextway_setter_generation_workspace.sql`; lo store workspace è distinto. Le migrazioni cleanup e retention del vecchio schema `user_id/lease_expires_at` sono obsolete e incompatibili con il modello attuale. Non applicarle e non aggiungere le colonne mancanti.
 
 Preparato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` come draft non applicato per i due componenti P0: Rate Limit (firma finale `(text, integer)`) e Governance RPC. Il file include guardie strutturali e non scrive dati applicativi. Non è stata eseguita alcuna modifica DB.
+
+## 15. Aggiornamento dopo ripristino P0 — 13 novembre 2026
+
+L'utente ha eseguito `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` nel SQL Editor del progetto `nextway-platform`; esito comunicato: `Success. No rows returned`. La successiva verifica read-only ha riportato:
+
+| Controllo | Esito comunicato |
+|---|---|
+| Tabella Rate Limit | OK |
+| RPC Rate Limit | OK |
+| RPC Governance | OK |
+| RLS Rate Limit | ATTIVA |
+| Accesso RPC Rate Limit | OK |
+| Accesso RPC Governance | OK |
+
+**Il ripristino P0 è COMPLETATO E VERIFICATO secondo il risultato SQL fornito dall'utente.** Le precedenti sezioni che descrivono rate limit e governance come mancanti sono superate da questo addendum e non devono essere usate come stato corrente.
+
+### Migrazioni legacy P1/P2: escluse
+
+La migrazione cleanup staged `20261110000700_nextway_clear_stale_staged_output.sql` e la migrazione retention `20261110000400_nextway_idempotency_retention.sql` sono basate su colonne/stati del vecchio schema (`user_id`, `lease_expires_at`, `pending`). Lo schema attuale della tabella legacy Setter usa `owner_profile_id` e `claimed_at`; lo store workspace è separato. Non applicare queste migrazioni, non aggiungere colonne obsolete e non ricreare il vecchio modello.
+
+L'assenza delle vecchie funzioni/trigger non costituisce, da sola, una lacuna da riparare con quelle migrazioni. Un eventuale meccanismo sostitutivo dovrà essere progettato solo se un test runtime sul modello workspace-aware dimostrerà una necessità concreta.
+
+### Gate di prontezza ancora aperti
+
+- Riconciliazione completa delle definizioni schema-only: tipi, sequenze, ownership, grant, FK, funzioni, trigger e policy; il confronto lessicale esistente non è un parser PostgreSQL e non certifica importabilità.
+- Baseline locale riproducibile, configurazione Supabase locale e seed sintetici: non ancora certificati/preparati.
+- Test PostgreSQL isolati e test d'integrazione runtime: non ancora eseguiti.
+- Verifica della versione delle Edge Functions effettivamente distribuite: distinta dalla validazione statica del branch; non dedurla dal solo sorgente GitHub.
+
+Non ripetere le query già concluse su registri managed Auth/Realtime/Storage: non identificano il registro delle migrazioni applicative NEXTWAY. Non eseguire migrazioni o deploy per colmare questi gate documentali.
