@@ -33,6 +33,8 @@ on:
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-conversion-workspace-preflight.mjs"
       - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
