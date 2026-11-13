@@ -51,6 +51,8 @@ assert.ok(searchHtml.includes('const detectedRole=rolePatterns.find'));
 assert.ok(searchHtml.includes('const personalizedLine=detectedRole'));
 assert.ok(searchHtml.includes('const rankedResults=(group.results||[])'));
 assert.ok(searchHtml.includes('entityType,identity'));
+assert.ok(searchHtml.includes('const linkedinPersonProfile='));
+assert.ok(searchHtml.includes('const individual=!!(linkedinPersonProfile||selfIdentification||(personTitle&&roleEvidence))'));
 assert.ok(searchHtml.includes('identityScore,relevanceScore,evidenceScore'));
 assert.ok(searchHtml.includes('Pertinenza documentale:'));
 assert.ok(searchHtml.includes('non dimostra interesse o idoneità commerciale'));
