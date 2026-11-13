@@ -97,3 +97,17 @@ La relazione deve consentire più attribuzioni solo se il modello di business lo
 - Disegno architetturale: DEFINITO.
 - Migrazione e modifiche runtime: NON ANCORA IMPLEMENTATE.
 - Motivo del gate: mancano i corpi live delle RPC e l'inventario delle query/permessi effettivi dei consumatori di clients. Scrivere sostituzioni senza questi elementi rischia di rompere il percorso legacy o introdurre bypass RLS.
+
+## Verifica aggiuntiva UI — codice branch
+
+La lettura diretta di `nextway-cloud.js` sul branch ha confermato:
+
+- `createLeadConversionRequest()` legge il Lead con `id, owner_profile_id, status, archived_at`, quindi non legge `workspace_id`.
+- L'INSERT è diretto su `nextway_lead_conversion_requests` e invia `lead_id`, `owner_profile_id`, `sponsor_profile_id`, `created_by`, tipo e dati contatto; non invia workspace.
+- `getLeadConversionRequest()` non include workspace nella SELECT.
+- `getLeadConversionQueue()` non include workspace nella SELECT; la relazione Lead seleziona solo `display_name`.
+- La UI della coda mostra Lead, email, telefono, owner/sponsor e data; non mostra workspace.
+- La coda e le azioni di revisione restano correttamente protette lato UI da `isPlatformAdmin()`; la Edge Function di provisioning ripete il controllo server-side.
+- In `nextway-cloud.js` non è presente una lettura diretta da `clients`; il pannello CRM corrente non espone ancora una vista clienti workspace-scoped in questo file. Le letture di `partner_details` individuate servono alla risoluzione dei nomi nell'audit attività, non alla gestione membership.
+
+Conseguenza: l'aggiornamento UI dovrà essere atomico con la migrazione che introduce il campo e/o la RPC. Non pubblicare una UI che selezioni `workspace_id` prima che la migrazione sia stata approvata e applicata in un rilascio coordinato.
