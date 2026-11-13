@@ -1,11 +1,10 @@
--- NEXTWAY: test transazionale end-to-end conversione cliente e isolamento workspace A/B.
+-- NEXTWAY: test transazionale end-to-end proposta, revisione, claim e conversione cliente A/B.
 -- Eseguire SOLO in ambiente di test dopo aver applicato le migrazioni candidate.
 -- Prerequisiti: due profili partner con partner_details, ciascuno con un Lead
 -- "In valutazione" non archiviato e senza richiesta attiva; un platform_admin.
--- Sposta temporaneamente i due Lead nei workspace di test, finalizza due conversioni
--- customer con service_role e verifica RPC/RLS. Tutto termina con ROLLBACK.
+-- Tutti i record/aggiornamenti sono temporanei e terminano con ROLLBACK.
 -- Nessuna email/invito viene inviato; nessuna Edge Function viene chiamata.
--- Se i prerequisiti mancano, il test si interrompe PRIMA di creare o modificare dati.
+-- Se i prerequisiti mancano, il test si interrompe prima di creare/modificare dati.
 
 begin;
 
@@ -17,14 +16,12 @@ declare
   v_admin uuid;
   v_ws_a uuid;
   v_ws_b uuid;
-  v_req_a uuid;
-  v_req_b uuid;
-  v_token_a uuid := gen_random_uuid();
-  v_token_b uuid := gen_random_uuid();
   v_email_a text := 'nw-ws-test-a-' || gen_random_uuid()::text || '@example.invalid';
   v_email_b text := 'nw-ws-test-b-' || gen_random_uuid()::text || '@example.invalid';
 begin
-  if to_regprocedure('public.nextway_finalize_conversion_activation(uuid,uuid,uuid)') is null
+  if to_regprocedure('public.nextway_create_lead_conversion_request(uuid,text,text,text,text)') is null
+     or to_regprocedure('public.nextway_claim_conversion_activation(uuid,uuid)') is null
+     or to_regprocedure('public.nextway_finalize_conversion_activation(uuid,uuid,uuid)') is null
      or to_regprocedure('public.nextway_list_workspace_clients(uuid)') is null
      or to_regclass('public.nextway_client_workspace_attributions') is null
      or not exists (
@@ -79,8 +76,8 @@ begin
           'NEXTWAY TEST Workspace B','Test Partner B','active')
   returning id into v_ws_b;
 
-  -- A è membro del workspace A ma non proprietario del cliente A;
-  -- B è membro del workspace B ma non proprietario del cliente B.
+  -- Il partner B propone la conversione del Lead A come membro di A;
+  -- il partner A propone la conversione del Lead B come membro di B.
   insert into public.nextway_workspace_memberships
     (workspace_id,user_id,workspace_role,membership_status,activated_at)
   values
@@ -102,55 +99,108 @@ begin
     raise exception 'TEST INTERROTTO: impossibile associare i Lead ai workspace temporanei.';
   end if;
 
-  insert into public.nextway_lead_conversion_requests
-    (lead_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,
-     full_name,email,status,reviewed_by,reviewed_at,workspace_id,
-     activation_claim_token,activation_claimed_at)
-  values
-    (v_leads[1],v_users[1],v_users[1],v_users[1],'customer',
-     'NEXTWAY Test Client A',v_email_a,'provisioning',v_admin,now(),v_ws_a,v_token_a,now())
-  returning id into v_req_a;
-
-  insert into public.nextway_lead_conversion_requests
-    (lead_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,
-     full_name,email,status,reviewed_by,reviewed_at,workspace_id,
-     activation_claim_token,activation_claimed_at)
-  values
-    (v_leads[2],v_users[2],v_users[2],v_users[2],'customer',
-     'NEXTWAY Test Client B',v_email_b,'provisioning',v_admin,now(),v_ws_b,v_token_b,now())
-  returning id into v_req_b;
-
   perform set_config('nextway.test.user_a',v_users[1]::text,true);
   perform set_config('nextway.test.user_b',v_users[2]::text,true);
   perform set_config('nextway.test.admin',v_admin::text,true);
   perform set_config('nextway.test.workspace_a',v_ws_a::text,true);
   perform set_config('nextway.test.workspace_b',v_ws_b::text,true);
-  perform set_config('nextway.test.request_a',v_req_a::text,true);
-  perform set_config('nextway.test.request_b',v_req_b::text,true);
-  perform set_config('nextway.test.token_a',v_token_a::text,true);
-  perform set_config('nextway.test.token_b',v_token_b::text,true);
+  perform set_config('nextway.test.lead_a',v_leads[1]::text,true);
+  perform set_config('nextway.test.lead_b',v_leads[2]::text,true);
+  perform set_config('nextway.test.email_a',v_email_a,true);
+  perform set_config('nextway.test.email_b',v_email_b,true);
 end;
 $$;
 
--- Simula il chiamante interno: finalizzazione server-side, nessuna chiave segreta.
+-- I membri attivi propongono conversioni: il workspace è derivato dal Lead.
+set local role authenticated;
+
+do $$
+declare
+  v_user_a uuid := current_setting('nextway.test.user_a')::uuid;
+  v_user_b uuid := current_setting('nextway.test.user_b')::uuid;
+  v_req_a uuid;
+  v_req_b uuid;
+begin
+  perform set_config('request.jwt.claim.sub',v_user_b::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
+  v_req_a := public.nextway_create_lead_conversion_request(
+    current_setting('nextway.test.lead_a')::uuid,'customer',
+    'NEXTWAY Test Client A',current_setting('nextway.test.email_a'),null
+  );
+
+  perform set_config('request.jwt.claim.sub',v_user_a::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_a::text,'role','authenticated')::text,true);
+  v_req_b := public.nextway_create_lead_conversion_request(
+    current_setting('nextway.test.lead_b')::uuid,'customer',
+    'NEXTWAY Test Client B',current_setting('nextway.test.email_b'),null
+  );
+
+  if v_req_a is null or v_req_b is null then
+    raise exception 'La RPC di creazione non ha restituito gli ID delle richieste.';
+  end if;
+  perform set_config('nextway.test.request_a',v_req_a::text,true);
+  perform set_config('nextway.test.request_b',v_req_b::text,true);
+end;
+$$;
+
+-- Revisione amministrativa delle due richieste.
+reset role;
+set local role authenticated;
+
+do $$
+declare
+  v_admin uuid := current_setting('nextway.test.admin')::uuid;
+  v_rows integer;
+begin
+  perform set_config('request.jwt.claim.sub',v_admin::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',v_admin::text,'role','authenticated')::text,true);
+
+  update public.nextway_lead_conversion_requests
+  set status='ready_for_activation',reviewed_by=v_admin,reviewed_at=now()
+  where id in (
+    current_setting('nextway.test.request_a')::uuid,
+    current_setting('nextway.test.request_b')::uuid
+  ) and status='pending';
+  get diagnostics v_rows=row_count;
+  if v_rows<>2 then raise exception 'La revisione amministrativa ha aggiornato % richieste invece di 2.',v_rows; end if;
+end;
+$$;
+
+-- Claim e finalizzazione tramite service_role.
+reset role;
 set local role service_role;
 select set_config('request.jwt.claim.role','service_role',true);
 select set_config('request.jwt.claims',jsonb_build_object('role','service_role')::text,true);
 
 do $$
 declare
+  v_token_a uuid := gen_random_uuid();
+  v_token_b uuid := gen_random_uuid();
+  v_claim_a jsonb;
+  v_claim_b jsonb;
   v_result_a jsonb;
   v_result_b jsonb;
 begin
+  perform set_config('nextway.test.token_a',v_token_a::text,true);
+  perform set_config('nextway.test.token_b',v_token_b::text,true);
+
+  v_claim_a := public.nextway_claim_conversion_activation(
+    current_setting('nextway.test.request_a')::uuid,v_token_a
+  );
+  v_claim_b := public.nextway_claim_conversion_activation(
+    current_setting('nextway.test.request_b')::uuid,v_token_b
+  );
+
+  if coalesce((v_claim_a->>'already_activated')::boolean,true)
+     or coalesce((v_claim_b->>'already_activated')::boolean,true) then
+    raise exception 'Claim inatteso: A %, B %',v_claim_a,v_claim_b;
+  end if;
+
   v_result_a := public.nextway_finalize_conversion_activation(
-    current_setting('nextway.test.request_a')::uuid,
-    current_setting('nextway.test.token_a')::uuid,
-    null
+    current_setting('nextway.test.request_a')::uuid,v_token_a,null
   );
   v_result_b := public.nextway_finalize_conversion_activation(
-    current_setting('nextway.test.request_b')::uuid,
-    current_setting('nextway.test.token_b')::uuid,
-    null
+    current_setting('nextway.test.request_b')::uuid,v_token_b,null
   );
 
   if coalesce((v_result_a->>'success')::boolean,false) is not true
@@ -196,7 +246,7 @@ declare
   v_count integer;
   v_denied boolean;
 begin
-  -- Partner B è membro A: può leggere il cliente A tramite RPC, ma non con SELECT diretta.
+  -- Partner B è membro A: può leggere il cliente A tramite RPC, non con SELECT diretta.
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
   select count(*) into v_count from public.nextway_list_workspace_clients(v_ws_a);
@@ -228,7 +278,6 @@ begin
   end;
   if not v_denied then raise exception 'Membro A accede al workspace A senza membership.'; end if;
 
-  -- La tabella di attribuzione non è direttamente leggibile da authenticated.
   v_denied:=false;
   begin
     perform count(*) from public.nextway_client_workspace_attributions;
@@ -239,8 +288,6 @@ end;
 $$;
 
 reset role;
-
--- Viewer e membership invited non devono accedere alla proiezione clienti.
 update public.nextway_workspace_memberships
 set workspace_role='workspace_viewer'
 where workspace_id=current_setting('nextway.test.workspace_a')::uuid
