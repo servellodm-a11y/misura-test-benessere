@@ -3191,3 +3191,26 @@ GitHub Actions: workflow `NEXTWAY static validation`, run #295, commit codice `4
 Documento di dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Stato strutturale: `docs/NEXTWAY-STRUCTURAL-RECONCILIATION-STATUS.md`.
 
 **Gate aperti:** versione remota Edge Functions non verificata; test end-to-end runtime non eseguiti; importabilità del dump e riconciliazione completa di tipi/vincoli/sequenze/ownership/ACL non certificate. Nessuna migrazione, deploy, merge, seed, modifica DB live o modifica a `main` eseguita. PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato.
+
+### Audit Knowledge Base e caricamento documenti — 13 novembre 2026
+
+Completata revisione statica aggiuntiva di Edge Functions Knowledge Ingest/Upload, migrazioni Knowledge Base/Storage/Workspace RLS e test automatizzati.
+
+**Esito statico:**
+- entrambe le funzioni richiedono autenticazione valida e ruolo `platform_admin`;
+- ingest rifiuta workspace non valido o archiviato e deduplica per workspace/modulo/hash;
+- documenti inseriti in stato `pending`, mai approvati automaticamente;
+- chunking 9.000 caratteri con overlap 500; limite SQL chunk 12.000 caratteri;
+- bucket `nextway-knowledge` privato, file max 12 MiB, PDF/DOCX/TXT;
+- cleanup file su duplicato/errore e collegamento storage al documento dopo ingest;
+- PDF max 250 pagine; DOCX/TXT estratti lato server; PDF scansiti senza testo rifiutati, OCR non disponibile;
+- RLS e RPC di ricerca sono workspace-scoped; la vecchia firma di ricerca senza workspace viene revocata;
+- deduplicazione hash separata tra documenti centrali senza workspace e documenti dei singoli workspace.
+
+Test statici già presenti per SQL, ingest, upload e RLS workspace. Nessuna incompatibilità certa rilevata nel confronto codice/migrazioni.
+
+**Limite:** non sono stati eseguiti upload reali, test runtime/rollback storage, test di isolamento tra due workspace, né confronto con le versioni Edge remote. La Knowledge Base è quindi **ESEGUITA MA NON VERIFICATA A RUNTIME**, non certificata end-to-end.
+
+Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit documentale audit KB: `ec0d41b`.
+
+Nessuna migrazione, DDL/DML, deploy, seed, test con dati reali, merge o modifica a `main`. PR #1 resta draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
