@@ -227,7 +227,7 @@ async function runSearch(){
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const t=String(title||''),body=String(snippet||'')+' '+String(pageContent||'');
  const hasRole=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|imprenditor|titolare|founder|team leader|networker|distributore|consulente|coach|fisioterap|farmacist|medic|trainer/i.test(body);
- const personLike=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(t.trim());
+ const personLike=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(t.trim());
  const personEvidence=personLike&&hasRole;
  const signalBySegment={
   wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|benessere|wellness/i,
