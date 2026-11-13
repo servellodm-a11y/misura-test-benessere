@@ -1,33 +1,29 @@
--- NEXTWAY: verifica mirata in SOLA LETTURA di migrazioni e oggetti Setter.
+-- NEXTWAY: verifica mirata in SOLA LETTURA di oggetti Setter e registro migrazioni.
 -- Eseguire nel SQL Editor del progetto nextway-platform (ref obqwbtlltxjfeirstsya).
--- Non modifica dati o schema. Non contiene INSERT/UPDATE/DELETE/DDL.
--- Se la tabella supabase_migrations.schema_migrations non è accessibile,
--- interrompere e segnalare l'errore: non sostituire con altre tabelle.
+-- Non modifica dati o schema. Contiene esclusivamente SELECT sui cataloghi.
+-- La precedente ipotesi supabase_migrations.schema_migrations è risultata
+-- non valida per questo progetto: qui non viene referenziata direttamente.
 
-begin transaction read only;
+-- RISULTATO 1: cerca eventuali tabelle di registro migrazioni senza presumere
+-- schema o nome. L'assenza di righe significa che non è stato trovato un
+-- registro con questi nomi convenzionali, non che le migrazioni non siano state applicate.
+select
+  n.nspname as schema_name,
+  c.relname as relation_name,
+  c.relkind as relation_kind
+from pg_catalog.pg_class c
+join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+where c.relkind in ('r', 'p')
+  and (
+    c.relname ilike '%migration%'
+    or n.nspname ilike '%migration%'
+  )
+  and n.nspname not in ('pg_catalog', 'information_schema')
+order by n.nspname, c.relname;
 
-with expected_migrations(version, label) as (
-  values
-    ('20261110000100', 'Rate limit: tabella e prima RPC'),
-    ('20261110000300', 'Rate limit: RPC a unità (firma text, integer)'),
-    ('20261110000400', 'Retention idempotenza Setter legacy'),
-    ('20261110000700', 'Pulizia output staged Setter legacy'),
-    ('20261112020000', 'Isolamento tabella generation workspace'),
-    ('20261112030000', 'RPC governance Setter workspace')
-),
-migration_status as (
-  select
-    'MIGRATION'::text as category,
-    e.version as item,
-    e.label as detail,
-    exists (
-      select 1
-      from supabase_migrations.schema_migrations m
-      where m.version = e.version
-    ) as present
-  from expected_migrations e
-),
-object_status as (
+-- RISULTATO 2: stato degli oggetti richiesti dal codice Setter.
+select category, item, detail, present
+from (
   select 'TABLE'::text as category,
          'public.nextway_setter_generation_requests'::text as item,
          'Store legacy Setter'::text as detail,
@@ -66,12 +62,5 @@ object_status as (
   select 'FUNCTION', 'public.nextway_prune_setter_generation_requests()',
          'RPC manuale admin-only per retention legacy',
          to_regprocedure('public.nextway_prune_setter_generation_requests()') is not null
-)
-select category, item, detail, present
-from migration_status
-union all
-select category, item, detail, present
-from object_status
+) as object_status
 order by category, item;
-
-commit;
