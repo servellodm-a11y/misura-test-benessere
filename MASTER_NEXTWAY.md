@@ -2751,3 +2751,58 @@ Le seguenti attività sono state riscontrate nei commit, nei file e nei document
 ### Registro cronologico del MASTER
 
 - 13-11-2026, 19:35 Europe/Rome — aggiunti stato GitHub aggiornato di `main` e PR #1, confronto 534 ahead/4 behind, CI #520 FAILURE e dettaglio dell'asserzione audit; sintetizzati i lavori del branch su prospect search, agenda/Zoom, workspace/Partner e preparazione staging; registrati il pull locale riferito, l'errore di formato del dump, i risultati Supabase P0 e CRM e i limiti di verifica. Modificato esclusivamente `MASTER_NEXTWAY.md`.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:49 (Europe/Rome)
+
+### Fonti, repository e stato dei branch
+
+- Recuperato il MASTER da GitHub `main` immediatamente prima della modifica: blob SHA di partenza `db5fe1eb04aab4a658f14dc6373421102ab96418`; 2.754 righe. La sezione è aggiunta in coda, senza riscrivere le registrazioni cronologiche precedenti.
+- HEAD di `main` verificato tramite endpoint branch: `7bb8883f3198829511b4d9520591fc36de0cac67`, commit del 13-11-2026 18:40:38 UTC, messaggio `docs(nextway): update MASTER continuity for 13 Nov evening`. Il diff del commit contiene soltanto l'aggiornamento di `MASTER_NEXTWAY.md`; nessuna modifica applicativa è stata rilevata in quel commit.
+- PR #1 `NEXTWAY: verifica integrazione AI Setter governance`: OPEN, DRAFT, NOT MERGED; head remoto `e0b5098f88417597010e5845a61d0c16d65c2689` (13-11-2026 16:10:33 UTC); metadato PR: 84 file modificati, 534 commit. Il confronto aggiornato `main...fix/nextway-password-recovery` restituisce DIVERGED, 534 commit ahead e 7 behind; `mergeable=false`. La PR riporta ancora base SHA `a3fbec076221f0f043d60373e2864d7d07db30d7`, mentre il branch `main` è avanzato a `7bb8883`. Non è stato eseguito merge, rebase o aggiornamento del branch.
+- Gli 84 file del confronto includono modifiche a workflow, console e motore prospect, script di test, documentazione di baseline/staging, diagnostiche SQL, Edge Functions e migrazioni. I dettagli funzionali già descritti nella sezione delle 19:35 restano riferiti al branch PR, non a `main`; non sono stati promossi in produzione da questo controllo.
+- Il connettore GitHub ha consentito lettura di branch, commit, confronto PR, workflow, job e log. Non è disponibile un connettore Supabase o un accesso diretto al progetto Netlify. Sono state considerate le conversazioni e le evidenze effettivamente presenti nel contesto corrente e le note già registrate nel MASTER; non si presume accesso a tutte le chat storiche.
+
+### GitHub Actions e Netlify Deploy Preview
+
+- **PR #1, run #520**, ID `43460040655`, commit `e0b5098`: FAILURE. Il job `validate` fallisce allo step `Validate NEXTWAY audit`; gli step successivi (contratti SQL/sicurezza, controlli UI e type-check Deno) risultano SKIPPED. Il log del job è stato letto integralmente.
+- La causa immediata è ora circoscritta e confrontata con i due file del medesimo commit PR:
+  - `scripts/validate-nextway-audit.mjs`, blob `200138fab4ebbbaa300a52b0c29fc3ca060d7d0f`, riga 42, richiede con `assert.match` la sequenza senza spazi/newline `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount`;
+  - `nextway-ai.html`, blob `99595147ff67e57abb305f306bac797fe10f9d5d`, riga 43, contiene `window.NEXTWAY_LOCAL_ARCHIVE={` e va a capo prima di `activate:activateLocalAccount`.
+- Il log conferma quindi un disallineamento di formattazione tra regex e sorgente: il test si aspetta che `activate` segua immediatamente la parentesi graffa, mentre il sorgente introduce un newline. Questo spiega la failure osservata, ma non decide da solo se rendere il test whitespace-tolerant o cambiare il formato sorgente. Non è stato modificato né il test né il codice in questa attività documentale.
+- Run #519 (ID `43459970766`) risulta anch'essa FAILURE; non è stata usata come prova della stessa causa senza una revisione separata del suo log. La #520 è l'ultima run PR disponibile nell'elenco controllato.
+- **Main, run #251**, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Job `validate` e tutti gli step elencati risultano SUCCESS, inclusi validatore audit, contratti SQL/sicurezza, controlli UI e cinque type-check Deno. La run è precedente al codice del branch PR e non ne certifica le modifiche.
+- Il log #251 riporta avvisi non bloccanti di deprecazione Node.js 20 per alcune GitHub Actions e del modulo Node `punycode`; il job è comunque SUCCESS.
+- Nei check associati alla run PR #520 compare anche un controllo Netlify `Pages changed` con esito neutral e una pagina generata in Deploy Preview: `nextway-motore-ricerca.html`, URL `https://deploy-preview-1--misura-test-benessere.netlify.app/nextway-motore-ricerca`. È un'anteprima PR, non prova di deploy Netlify in produzione e non è stata avviata manualmente in questo controllo. Non risulta verificato un deploy di produzione.
+
+### Supabase e CRM — ultimo stato disponibile
+
+- Non è stata effettuata una nuova interrogazione diretta Supabase: il connettore non è disponibile. Resta valido l'ultimo JSON fornito dall'utente per la diagnostica CRM live: `public.nextway_leads` presente, RLS attiva, FORCE RLS non attivo; quattro policy SELECT/INSERT/UPDATE/DELETE per `authenticated`, con accesso al proprietario o a `platform_admin`; `nextway_lead_activities` e `nextway_lead_conversion_requests` assenti al momento della query.
+- La relazione `supabase_migrations.schema_migrations` non era disponibile nel contesto SQL e la diagnostica è stata corretta per non dipenderne. Questo non consente di dedurre lo storico delle migrazioni.
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente su `main`; non è ancora stato ricevuto un risultato di esecuzione. Colonne `archived_*`, vincoli degli stati, tabella idempotenza e firme RPC restano DA COMPLETARE. Non applicare le migrazioni CRM sulla sola base del contenuto del repository.
+- I risultati utente già registrati su Rate Limit/Governance P0, workspace, membership e Storage restano evidenze storiche riferite alle rispettive date; non sono stati ripetuti né presentati come nuove letture live.
+
+### Matrice di stato al 13 novembre, ore 19:49
+
+- MASTER su `main`, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** al termine di questa attività.
+- HEAD main e commit documentale `7bb8883`: **COMPLETATO E VERIFICATO**; commit limitato al MASTER.
+- PR #1, stato OPEN/DRAFT/NOT MERGED, confronto 534 ahead/7 behind e 84 file: **COMPLETATO E VERIFICATO** quanto ai metadati GitHub; merge **BLOCCATO** fino a riallineamento, CI verde e gate staging/runtime.
+- CI main #251: **COMPLETATO E VERIFICATO** per gli step statici/type-check di quel commit; non è validazione runtime né del branch PR.
+- CI PR #520: **BLOCCATO** dal disallineamento regex/newline nel validatore NEXTWAY audit; gli step successivi sono SKIPPED.
+- Deploy Preview Netlify PR: **ESEGUITO MA NON VERIFICATO** quanto al comportamento applicativo; GitHub segnala la pagina generata, ma non è stato eseguito un collaudo browser completo. Deploy Netlify produzione: **NON ESEGUITO/DA VERIFICARE**.
+- CRM live: **COMPLETATO E VERIFICATO** limitatamente al JSON utente su tabella Lead/RLS/policy e assenza delle due tabelle correlate; prerequisiti CRM completi **DA COMPLETARE**.
+- Applicazione migrazioni, test PostgreSQL/Auth/concorrenza, deploy Edge Functions e verifica Netlify produzione: **DA COMPLETARE/BLOCCATO** secondo i gate già registrati.
+- Vincolo operativo utente invariato: nessun deploy Netlify di produzione e nessun test con utenti/conversioni reali prima del 4 dicembre 2026. Nessuna modifica live è stata eseguita in questo controllo.
+
+### Prossimo passo operativo preciso
+
+1. Sul branch PR, correggere il contratto del test audit in modo che verifichi l'esportazione senza dipendere da spaziatura/newline, oppure uniformare il sorgente se il formato è un requisito esplicito; non indebolire i controlli di isolamento.
+2. Rilanciare la CI completa sul branch e verificare che tutti gli step prima saltati, inclusi i type-check Deno, vengano eseguiti e passino.
+3. Eseguire in Supabase la diagnostica read-only `nextway_crm_prerequisites_readonly.sql` e acquisire il JSON; completare la riconciliazione schema prima di proporre migrazioni.
+4. Mantenere staging isolato, backup completo/restore verificato e test sintetici come gate prima di qualsiasi migrazione o deploy live.
+
+### Registro cronologico del MASTER
+
+- 13-11-2026, 19:49 Europe/Rome — verificati HEAD main `7bb8883`, stato/confronto PR #1 (534 ahead/7 behind, 84 file), run CI PR #520 e log dettagliato della failure audit, file sorgente e regex responsabili, run main #251 e relativi step, Deploy Preview Netlify segnalata dal check PR; ribaditi i risultati CRM forniti dall'utente e la diagnostica prerequisiti ancora da eseguire. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni, segreti, deploy o impostazioni.
