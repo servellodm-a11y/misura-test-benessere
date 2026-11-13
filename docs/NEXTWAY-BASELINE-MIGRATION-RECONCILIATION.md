@@ -235,3 +235,53 @@ La migrazione `20261112030000_nextway_setter_governance_read_rpc.sql` definisce 
 - **DA RISOLVERE:** rate limit, trigger/cleanup legacy, retention legacy e governance RPC; verifica strutturale completa.
 - **DA MIGLIORARE:** parser di trigger/indici e conteggi RLS.
 - **NON ESEGUITO:** import locale, seed, migrazioni, test runtime, modifiche al database remoto o deploy.
+
+
+## 9. Verifica SQL read-only degli oggetti e ricerca registri — 13 novembre 2026
+
+L'utente ha eseguito nel SQL Editor una query diagnostica composta da una sola SELECT con CTE, interrogando i cataloghi PostgreSQL e `to_regclass`/`to_regprocedure`. La query è stata eseguita correttamente, senza errori. Non contiene DDL o DML e non ha modificato schema o dati.
+
+### Registri candidati individuati
+
+La ricerca ha restituito tre relazioni candidate:
+
+| Schema | Relazione |
+|---|---|
+| `auth` | `schema_migrations` |
+| `realtime` | `schema_migrations` |
+| `storage` | `migrations` |
+
+Questi risultati identificano soltanto relazioni candidate per nome. Non dimostrano che contengano il registro delle migrazioni applicative NEXTWAY. Non è stato letto alcun contenuto delle relazioni e non va presunto che una di esse sostituisca il registro convenzionale Supabase.
+
+### Stato degli oggetti NEXTWAY verificato nel database
+
+| Oggetto | Risultato |
+|---|---|
+| `public.nextway_setter_generation_requests` | **PRESENTE** |
+| `public.nextway_setter_workspace_generation_requests` | **PRESENTE** |
+| `public.nextway_api_rate_limits` | **NON TROVATO** |
+| `public.nextway_consume_api_rate_limit(text, integer)` | **NON TROVATA** |
+| `public.nextway_get_active_setter_governance(uuid)` | **NON TROVATA** |
+| `public.nextway_clear_stale_setter_output()` | **NON TROVATA** |
+| `public.nextway_clear_stale_setter_output_trg` | **NON TROVATO** |
+| `public.nextway_prune_setter_generation_requests()` | **NON TROVATA** |
+
+I risultati confermano la presenza dei due store Setter e confermano nel database interrogato le assenze già rilevate nel dump schema-only per rate limit, governance, cleanup/trigger e retention legacy.
+
+### Interpretazione e prossimi passi
+
+- **P0 — rate limit:** tabella e RPC non risultano presenti. Il codice sorgente del branch usa la RPC prima di proseguire con la generazione AI Setter; il percorso può quindi restituire HTTP 503 se la versione distribuita dipende da questa RPC.
+- **P0 — governance workspace:** la RPC non risulta presente. Il percorso Setter per conversazioni con workspace può restituire HTTP 503 se la versione distribuita la invoca.
+- **P1 — cleanup staged output:** funzione e trigger non risultano presenti; resta da ripristinare/verificare la protezione contro output staged obsoleti alla riassegnazione della lease.
+- **P2 — retention legacy:** la RPC di pulizia non risulta presente; la manutenzione corrispondente non è disponibile tramite questa funzione.
+- I due store Setter sono presenti e non devono essere ricreati.
+- I tre registri candidati devono essere identificati prima di consultare i loro dati: non eseguire SELECT su tabelle managed senza aver prima stabilito quale sia il registro pertinente e quali colonne contenga.
+- Non applicare migrazioni in produzione sulla base di questi risultati. Prima occorre ricostruire la cronologia e verificare il codice Edge Function effettivamente distribuito.
+
+**Limite probatorio:** la query dimostra la presenza/assenza degli oggetti elencati nel database al momento dell'esecuzione. Non dimostra quali migrazioni siano state applicate, né quale versione della Edge Function sia attualmente distribuita.
+
+### Stato aggiornato
+
+- **COMPLETATO:** query read-only eseguita con successo; due tabelle Setter confermate presenti; sei oggetti/funzioni/trigger non trovati; tre relazioni candidate a registro individuate.
+- **DA COMPLETARE:** identificazione del registro migrazioni pertinente; confronto della cronologia con le 31 migrazioni; verifica della versione Edge Function distribuita.
+- **NON ESEGUITO:** migrazioni, DDL/DML, deploy, import, seed, test runtime o modifiche al database.
