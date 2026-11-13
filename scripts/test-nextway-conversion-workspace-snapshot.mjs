@@ -35,6 +35,7 @@ const checks = [
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
   ["transactional test creates requests through authenticated RPC", /nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_a[\s\S]*nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_b/i.test(isolation)],
   ["transactional test includes admin review", /status='ready_for_activation'[\s\S]*reviewed_by=v_admin[\s\S]*reviewed_at=now\(\)/i.test(isolation)],
+  ["transactional test sets authenticated JWT role explicitly", /request\.jwt\.claim\.role','authenticated'/i.test(isolation)],
   ["transactional test claims both requests as service_role", /nextway_claim_conversion_activation\([\s\S]*nextway\.test\.request_a[\s\S]*nextway_claim_conversion_activation\([\s\S]*nextway\.test\.request_b/i.test(isolation)],
   ["transactional test avoids direct request inserts", !/insert into public\.nextway_lead_conversion_requests/i.test(isolation)],
   ["transactional test checks request visibility after Lead transfer", /Trasferimento amministrativo successivo del Lead A[\s\S]*nextway_lead_conversion_requests where id=v_req_a/i.test(isolation)],
