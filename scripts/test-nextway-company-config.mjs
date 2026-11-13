@@ -130,6 +130,13 @@ assert.ok(searchHtml.includes('last_contact_at:latestContact?.occurred_at||null'
 assert.ok(searchHtml.includes('next_followup_at:nextFollowup?.next_action_at||null'),'Agenda must show the next open follow-up');
 assert.ok(searchHtml.includes('Nota/esito registrato: '),'Agenda must show recorded outcome notes without inventing a result');
 assert.ok(searchHtml.includes('Prossimo follow-up: '),'Agenda must display the scheduled follow-up date');
+assert.ok(archiveHtml.includes("['information_requested','Ha chiesto informazioni']"),'CRM activity form must classify information requests');
+assert.ok(archiveHtml.includes("['interested','Ha manifestato interesse']"),'CRM activity form must classify interested responses');
+assert.ok(archiveHtml.includes("['not_interested','Non interessato']"),'CRM activity form must classify negative responses');
+assert.ok(archiveHtml.includes("['no_answer','Nessuna risposta']"),'CRM activity form must classify no-answer outcomes');
+assert.ok(archiveHtml.includes('Esito NEXTWAY: '+ " + " + 'outcomeLabel'),'CRM must persist the selected outcome with the activity without a schema migration');
+assert.ok(searchHtml.includes('last_contact_outcome:outcomeMatch?.[1]||'),'Prospect agenda must read the last recorded contact outcome');
+assert.ok(searchHtml.includes('Esito ultimo contatto: '),'Prospect agenda must display the latest response classification');
 assert.ok(searchHtml.includes('getOpenLeadActivities(100)'),'Daily agenda must include all CRM open follow-ups');
 assert.ok(searchHtml.includes('Follow-up aperti nel CRM · agenda generale'),'Daily agenda must show the CRM-wide follow-up queue');
 assert.ok(searchHtml.includes('attività aperte · '),'Daily agenda must summarize overdue, due-today and future follow-ups');
