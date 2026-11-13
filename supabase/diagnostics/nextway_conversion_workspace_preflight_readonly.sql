@@ -10,7 +10,7 @@ with target(table_name) as (
 ),
 tables as (
   select t.table_name,
-         to_regclass(format('public.%I',t.table_name)) is not null as exists,
+         to_regclass(format('public.%I',t.table_name)) is not null as table_exists,
          coalesce(c.relrowsecurity,false) as rls_enabled,
          coalesce(c.relforcerowsecurity,false) as rls_forced,
          case when c.oid is null then null else pg_get_userbyid(c.relowner) end as owner
