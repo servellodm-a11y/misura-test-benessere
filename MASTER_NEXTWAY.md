@@ -3430,3 +3430,14 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Identificate come core alterate direttamente: `nextway_leads`, `nextway_setter_conversations`, `partner_details`, `clients`; `nextway_setter_messages` non ha aggiunte di colonne individuate ma riceve modifiche a policy/privilegi. Le tabelle NEXTWAY create dalle migrazioni sono classificate separatamente.
 - **Limite operativo:** il dump `/tmp/nextway-public-schema.sql` risiede sul Mac dell'utente e non è accessibile dal workspace GitHub di questa sessione. Non sono stati quindi confrontati i blocchi DDL reali né ricostruiti i corpi originari di funzioni/policy/ACL. Nessun file SQL eseguibile è stato generato per supposizione.
 - Stato: inventario migrazioni **COMPLETATO staticamente**; confronto dump-oggetti **DA COMPLETARE**; baseline SQL **NON PRODOTTA**; nessuna operazione DB, deploy o merge.
+
+
+## 13 novembre 2026 — Preparazione estrazione DDL core dal dump locale
+
+- Creato `scripts/extract-nextway-core-ddl.py` sul branch `fix/nextway-password-recovery`.
+- Lo script legge il dump testuale locale `/tmp/nextway-public-schema.sql` e genera `/tmp/nextway-core-ddl-extract.sql`; non si collega a Supabase, non esegue SQL e non modifica il dump originale.
+- Il filtro include le definizioni DDL riferite alle tabelle core selezionate, i relativi vincoli/indici/policy/trigger/ACL e un elenco ristretto di funzioni centrali. È stata aggiunta un’esclusione esplicita delle sezioni `TABLE DATA` e delle istruzioni `COPY`.
+- Aggiunta la guida operativa `docs/NEXTWAY-CORE-DDL-EXTRACTION.md` con un comando breve da eseguire sul Mac. Nessun dump o dato è stato trasferito in GitHub.
+- Il dump locale non è accessibile da questa sessione: l’estrazione effettiva e il confronto delle definizioni restano **DA COMPLETARE** sul Mac.
+- PR #1 controllata: aperta, draft, base `main`, non mergeata. HEAD branch osservato: `f9c01ea282db1e5d633e4af91e599f3a23019bb2`.
+- Nessuna migrazione applicata, nessuna modifica al database Supabase, nessun deploy, nessuna modifica a `main`.
