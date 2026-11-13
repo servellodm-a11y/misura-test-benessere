@@ -34,19 +34,19 @@ assert.match(migration, /status = 'cancelled'[\s\S]*?cancelled_at is not null[\s
 assert.match(migration, /status = 'cancelled'[\s\S]*?\(reviewed_by is null and reviewed_at is null\)[\s\S]*?\(reviewed_by is not null and reviewed_at is not null\)/i);
 assert.match(migration, /old\.status not in \('pending','ready_for_activation','provisioning'\)/i);
 assert.match(migration, /auth\.uid\(\) is not null[\s\S]*?nextway_is_platform_admin/i);
-assert.match(migration, /new\\.activation_claim_token is not null[\\s\\S]*?new\\.activation_claimed_at is not null[\\s\\S]*?new\\.activation_user_id is not null[\\s\\S]*?new\\.activated_at is not null/i);
-assert.match(migration, /activation_claim_token = null[\\s\\S]*?activation_claimed_at = null[\\s\\S]*?activation_user_id = null[\\s\\S]*?activated_at = null/i);
+assert.match(migration, /new\.activation_claim_token is not null[\s\\S]*?new\.activation_claimed_at is not null[\s\\S]*?new\.activation_user_id is not null[\s\\S]*?new\.activated_at is not null/i);
+assert.match(migration, /activation_claim_token = null[\s\\S]*?activation_claimed_at = null[\s\\S]*?activation_user_id = null[\s\\S]*?activated_at = null/i);
 
 // The pre-existing activation-state CHECK must accept cancelled rows with all
 // activation fields NULL (its generic non-provisioning/non-activated branch).
-assert.match(provisioning, /add constraint nextway_conversion_activation_state_check check[\\s\\S]*?status not in \\('provisioning','activated'\\)[\\s\\S]*?activation_claim_token is null[\\s\\S]*?activation_claimed_at is null[\\s\\S]*?activation_user_id is null[\\s\\S]*?activated_at is null/i);
+assert.match(provisioning, /add constraint nextway_conversion_activation_state_check check[\s\\S]*?status not in \('provisioning','activated'\)[\s\\S]*?activation_claim_token is null[\s\\S]*?activation_claimed_at is null[\s\\S]*?activation_user_id is null[\s\\S]*?activated_at is null/i);
 
 // Cancellation must not remove any pre-existing provisioning transitions.
-assert.match(migration, /old\\.status = 'pending'[\\s\\S]*?new\\.status not in \\('ready_for_activation','rejected'\\)/i);
-assert.match(migration, /old\\.status = 'ready_for_activation' and new\\.status = 'provisioning'/i);
-assert.match(migration, /old\\.status = 'provisioning' and new\\.status = 'provisioning'/i);
-assert.match(migration, /old\\.status = 'provisioning' and new\\.status = 'ready_for_activation'/i);
-assert.match(migration, /old\\.status = 'provisioning' and new\\.status = 'activated'/i);
+assert.match(migration, /old\.status = 'pending'[\s\\S]*?new\.status not in \('ready_for_activation','rejected'\)/i);
+assert.match(migration, /old\.status = 'ready_for_activation' and new\.status = 'provisioning'/i);
+assert.match(migration, /old\.status = 'provisioning' and new\.status = 'provisioning'/i);
+assert.match(migration, /old\.status = 'provisioning' and new\.status = 'ready_for_activation'/i);
+assert.match(migration, /old\.status = 'provisioning' and new\.status = 'activated'/i);
 assert.match(migration, /new\.reviewed_by is distinct from old\.reviewed_by[\s\S]*?new\.reviewed_at is distinct from old\.reviewed_at[\s\S]*?new\.review_notes is distinct from old\.review_notes/i);
 assert.match(migration, /if r\.status = 'cancelled'[\s\S]*?already_cancelled/i);
 assert.match(migration, /if r\.status = 'activated'[\s\S]*?offboarding/i);
