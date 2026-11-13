@@ -3169,3 +3169,7 @@ La query legge solo metadati di catalogo. Non legge dati applicativi o corpi fun
 Eseguire una sola volta `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` nel SQL Editor Supabase e riportare la cella `report`. Con quel risultato si potrà completare il confronto con dump e migrazioni e classificare le differenze prima del bootstrap PostgreSQL locale.
 
 Nessuna migrazione, modifica DB, deploy, merge, import o seed eseguito. `main` invariato; PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato. P0 Rate Limit/Governance resta COMPLETATO E VERIFICATO secondo il report SQL già fornito dall'utente; non ripetere quei controlli.
+
+
+### Aggiornamento report strutturale: output suddiviso in blocchi
+Il file `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` è stato aggiornato per restituire righe numerate `parte`, `totale_parti`, `report_parziale`, con segmenti da massimo 6.000 caratteri. Questo evita il limite di lunghezza del singolo messaggio. L'utente deve eseguire la query una sola volta e copiare tutte le righe in ordine, inviandole in messaggi separati. Query ancora da eseguire; nessuna modifica DB. Commit correzione CTE `50683a8` (versione chunked iniziale `de54793`).
