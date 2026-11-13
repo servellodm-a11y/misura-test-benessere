@@ -244,6 +244,7 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const insertDraft=document.createElement('button');insertDraft.type='button';insertDraft.className='btn alt';insertDraft.textContent='Inserisci nel registro attività';
   const draftHint=document.createElement('p');draftHint.className='small';draftHint.setAttribute('aria-live','polite');
   const leadName=String(x.name||'').trim();
+  let latestConversationContext='';
   const isCustomer=x.category==='final_customer';
   const isProfessional=x.category==='wellness_professional';
   const audience=isCustomer?'persona interessata al benessere':isProfessional?'professionista del settore benessere':x.partner_type||'potenziale partner';
@@ -297,11 +298,12 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
    const greeting='Buongiorno'+(leadName?' '+leadName:'')+',';
    const profile=[profession,company,location].filter(Boolean).join(' · ');
    const context=profile?'Mi farebbe piacere approfondire con lei alcuni spunti collegati alla sua attività ('+profile+'). ':'';
+   const conversation=latestConversationContext?'Riprendendo quanto annotato nel nostro ultimo contatto: «'+latestConversationContext+'». ':'';
    if(selectedOutcome==='interested'){
-    zoomText.value=greeting+'\n\nGrazie per avermi manifestato il suo interesse. '+context+'Le propongo una breve videochiamata su Zoom, così posso illustrarle il progetto con chiarezza e rispondere alle sue domande.\n\nSe le fa piacere, può scegliere direttamente il giorno e l’orario più comodi qui:\n'+NEXTWAY_CALENDLY_URL+'\n\nA presto!';
+    zoomText.value=greeting+'\n\nGrazie per avermi manifestato il suo interesse. '+context+conversation+'Le propongo una breve videochiamata su Zoom, così posso illustrarle il progetto con chiarezza e rispondere alle sue domande.\n\nSe le fa piacere, può scegliere direttamente il giorno e l’orario più comodi qui:\n'+NEXTWAY_CALENDLY_URL+'\n\nA presto!';
     zoomHint.textContent='Interesse esplicito selezionato: link Calendly incluso. Verifica che la proposta sia coerente con quanto vi siete detti prima di inviarla.';
    }else{
-    zoomText.value=greeting+'\n\nConfermo con piacere il nostro appuntamento. Sarà l’occasione per approfondire con calma i temi di cui abbiamo parlato e rispondere alle sue domande.\n\nA presto!';
+    zoomText.value=greeting+'\n\nConfermo con piacere il nostro appuntamento. '+conversation+'Sarà l’occasione per approfondire con calma i temi di cui abbiamo parlato e rispondere alle sue domande.\n\nA presto!';
     zoomHint.textContent='Appuntamento già fissato: testo di conferma senza nuovo link di prenotazione. Aggiungi manualmente data, ora e modalità Zoom se necessario.';
    }
   }
@@ -314,6 +316,9 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const list=document.createElement('div');activityBox.append(list);
   const renderEvents=events=>{
    list.replaceChildren();const sub=document.createElement('p');sub.className='small';sub.textContent=events.length+' attività registrate · massimo 100';list.append(sub);
+   const latest=events.find(ev=>ev&&['call','message','email','meeting'].includes(ev.activity_type));
+   latestConversationContext=latest?[String(latest.subject||'').trim(),String(latest.details||'').replace(/^Esito NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').replace(/\\s+/g,' ').trim()].filter(Boolean).join(' — ').slice(0,220):'';
+   refreshZoomProposal();
    if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Nessuna attività registrata per questo Lead.';list.append(empty);return;}
    events.forEach(ev=>{
     const item=document.createElement('div');item.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
