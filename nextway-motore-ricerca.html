@@ -178,10 +178,23 @@ async function runSearch(){
     const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
-    card.append(title,snippet,document.createElement('br'),link,copy);list.append(card);
+    const capture=document.createElement('button');capture.className='btn alt';capture.textContent='Acquisisci nel mio archivio';
+    capture.addEventListener('click',()=>{
+     try{
+      const segment=$('segment').value;
+      const category=segment==='customers'?'final_customer':segment==='wellness_pro'?'wellness_professional':'potential_partner';
+      const partnerTypes={wellness_networker:'Networker attivo di altra azienda',other_networker:'Networker attivo di altra azienda',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / professionista',side_income:'Altro profilo individuale',business_seeking:'Altro profilo individuale'};
+      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence:item.snippet,url,category,partner_type:partnerTypes[segment]||''});
+      if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
+      capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
+      capture.disabled=true;
+      capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
+     }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
+    });
+    card.append(title,snippet,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
-  status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. Nessun contatto è stato creato o contattato automaticamente.';
+  status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
