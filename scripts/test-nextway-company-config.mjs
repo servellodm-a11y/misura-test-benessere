@@ -342,6 +342,10 @@ assert.ok([direct,highlyRelevant,interesting,deepen,discard].every(result=>resul
 
 assert.ok(searchHtml.includes('function assessCommercialFit('));
 assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit_score'));
+assert.ok(searchHtml.includes('priority_score:priorityScore'));
+assert.ok(searchHtml.includes('segmentScore*.55+score*.30+documentaryScore*.15'));
+assert.ok(searchHtml.includes('b.dataset.segmentPriority'));
+assert.ok(searchHtml.includes('coerenza_segmento','priorita_segmento'));
 assert.ok(searchHtml.includes("fitTitle.textContent='Valore commerciale · '+commercialFit.prospect_type"));
 assert.ok(searchHtml.includes('punteggio_pertinenza_commerciale'));
 assert.ok(searchHtml.includes('commercial_fit:value.commercial_fit'));
@@ -355,11 +359,15 @@ const customerFit=assessFit('Profilo personale','Cerco un nutrizionista per una 
 assert.equal(customerFit.prospect_type,'cliente');
 assert.equal(customerFit.signal_strength,'forte');
 assert.equal(customerFit.explicit_intent,'dichiarato');
+assert.equal(customerFit.priority_tier,'Alta pertinenza');
+assert.equal(customerFit.segment_match,true);
 assert.ok(customerFit.commercial_fit_score>customerFit.documentary_score);
 const professionalFit=assessFit('Mario Rossi - Nutrizionista','Sono nutrizionista','Consulenze nutrizionali','wellness_pro',{kind:'partner',segment:'wellness_pro',confidence:'media'}, {score:85},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(professionalFit.prospect_type,'partner');
 assert.equal(professionalFit.signal_strength,'debole');
 assert.equal(professionalFit.explicit_intent,'non dichiarato');
+assert.equal(professionalFit.segment_match,true);
+assert.ok(professionalFit.priority_score>0);
 assert.ok(professionalFit.reasons.some(reason=>reason.includes('non prova interesse')));
 const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-time','', 'side_income',{kind:'partner',segment:'side_income',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(opportunityFit.signal_strength,'forte');
@@ -367,6 +375,8 @@ assert.equal(opportunityFit.explicit_intent,'dichiarato');
 const genericFit=assessFit('Profilo personale','Benessere e stile di vita','', 'customers',{kind:'unknown',segment:'unclassified',confidence:'bassa'}, {score:25},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(genericFit.prospect_type,'da qualificare');
 assert.equal(genericFit.commercial_fit_score,0);
+assert.equal(genericFit.priority_score,0);
+assert.equal(genericFit.priority_tier,'Bassa pertinenza');
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
 assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
