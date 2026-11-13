@@ -21,9 +21,11 @@ Il progetto reale resta fuori dal perimetro di tutte le prove.
 
 ## 2. Blocchi individuati nel repository
 
-### B1 — manca la configurazione Supabase CLI versionata
+### B1 — configurazione Supabase CLI preparata, non collegata
 
-Nel branch non risulta presente `supabase/config.toml`. Non è quindi disponibile una configurazione locale dichiarativa da usare per un progetto staging. Non eseguire `supabase init` automaticamente: prima occorre definire e revisionare la configurazione desiderata, inclusi Auth, Edge Functions e porte locali.
+Creato `supabase/config.toml` con project label locale `nextway-staging-prepared`, redirect esclusivamente localhost, signup e accesso anonimo disabilitati, Studio/Analytics disabilitati e nessun remote project configurato. Il file non contiene project ref, URL di produzione o segreti. Aggiunto `scripts/test-nextway-staging-config.py` al workflow CI.
+
+La configurazione non crea un progetto Supabase e non collega alcun remote. Non eseguire `supabase init`, `supabase link` o `supabase start`; il Mac Intel da 8 GB non è adatto allo stack locale completo. Prima di un collegamento remoto andranno acquisiti il project ref staging e la versione PostgreSQL effettiva, senza copiarli dal progetto produzione.
 
 ### B2 — baseline core: manifest preparato, schema completo ancora necessario
 
@@ -92,7 +94,8 @@ La sequenza effettiva è:
 |---|---|
 | Protocollo di collaudo Partner | COMPLETATO |
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
-| Configurazione CLI staging | DA PREPARARE |
+| Configurazione CLI staging | PREPARATA, CI IN CORSO |
+| Manifest baseline core | COMPLETATO |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
 | Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
