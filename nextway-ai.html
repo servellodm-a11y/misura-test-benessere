@@ -23,6 +23,7 @@
 <script src="/nextway-company-config.js"></script>
 <script>
 const KEY='nextway_ai_records_v1';let activeOwnerId=null,data=[];
+const NEXTWAY_CALENDLY_URL='https://calendly.com/mimmo_servello';
 function activateLocalAccount(userId){
  if(typeof userId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId))throw new Error('Profilo autenticato non valido: archivio locale non aperto.');
  if(activeOwnerId===userId)return;
@@ -342,8 +343,46 @@ el('loadFollowups').addEventListener('click',async()=>{
  const loading=document.createElement('p');loading.className='small';loading.textContent='Caricamento prossimi follow-up…';panel.append(loading);
  try{
   const api=window.NEXTWAY_CLOUD;if(!api)throw new Error('Connessione centrale non caricata.');
-  const events=await api.getOpenLeadActivities(100);panel.replaceChildren();
-  const heading=document.createElement('strong');heading.textContent='Prossime azioni aperte · '+events.length;panel.append(heading);
+  const events=await api.getOpenLeadActivities(100);
+  const cloudIds=data.filter(lead=>!lead.is_test&&!lead.archived_at&&lead.cloud_id).map(lead=>lead.cloud_id).slice(0,100);
+  const activityRows=cloudIds.length?await api.getLeadActivitySummary(cloudIds):[];
+  const leadByCloudId=new Map(data.filter(lead=>lead.cloud_id).map(lead=>[lead.cloud_id,lead]));
+  const latestContact=new Map();
+  activityRows.filter(ev=>['call','message','email','meeting'].includes(ev.activity_type)).forEach(ev=>{if(!latestContact.has(ev.lead_id))latestContact.set(ev.lead_id,ev);});
+  const nowForAgenda=new Date(),todayForAgenda=new Date(nowForAgenda);todayForAgenda.setHours(0,0,0,0);
+  const outcomeLabel=ev=>String(ev?.details||'').match(/^Esito NEXTWAY: ([^\\r\\n]+)/m)?.[1]||'';
+  const agendaRows=[...latestContact.entries()].map(([leadId,ev])=>{
+   const lead=leadByCloudId.get(leadId);if(!lead)return null;
+   const outcome=outcomeLabel(ev),followups=events.filter(item=>item.lead_id===leadId),next=followups[0]||null;
+   const status=String(lead.status||'').toLocaleLowerCase('it');
+   let code='research',label='Da approfondire',action='Verificare il Lead e registrare un esito esplicito prima di decidere.';
+   let priority=6;
+   if(status==='non interessato'||status==='escluso'||outcome.toLocaleLowerCase('it').includes('non interessato')){code='stop';label='Non ricontattare';action='Interrompere i contatti e rispettare la scelta espressa.';priority=99;}
+   else if(next&&new Date(next.next_action_at)<=nowForAgenda){code='due';label='Follow-up scaduto / oggi';action='Eseguire il ricontatto previsto e registrare l’esito.';priority=0;}
+   else if(outcome.includes('Appuntamento fissato')){code='meeting';label='Appuntamento fissato';action='Preparare l’incontro e verificare data e modalità.';priority=1;}
+   else if(outcome.includes('Ha manifestato interesse')){code='interested';label='Interessato · da qualificare';action='Approfondire le esigenze e proporre una Zoom call se conferma il proprio interesse.';priority=2;}
+   else if(outcome.includes('Ha chiesto informazioni')){code='info';label='Informazioni richieste';action='Preparare le informazioni richieste e definire il prossimo passo.';priority=3;}
+   else if(next){code='planned';label='Follow-up programmato';action='Attendere la scadenza del promemoria.';priority=4;}
+   else if(outcome.includes('Nessuna risposta')||outcome.includes('Ricontatto necessario')){code='retry';label='Ricontatto da pianificare';action='Valutare un ricontatto appropriato, senza invii automatici.';priority=3;}
+   return {lead,ev,next,outcome,code,label,action,priority};
+  }).filter(Boolean).sort((a,b)=>a.priority-b.priority||new Date(b.ev.occurred_at)-new Date(a.ev.occurred_at));
+  panel.replaceChildren();
+  const heading=document.createElement('strong');heading.textContent='Agenda commerciale generale · '+agendaRows.length+' Lead con attività recenti';panel.append(heading);
+  const agendaNote=document.createElement('p');agendaNote.className='small';agendaNote.textContent='Basata sui Lead sincronizzati e caricati in questo archivio (massimo 100) e sulle ultime attività disponibili. Le azioni restano manuali.';panel.append(agendaNote);
+  const agendaSummary=document.createElement('p');agendaSummary.className='small';agendaSummary.textContent='Da ricontattare: '+agendaRows.filter(x=>x.code==='due'||x.code==='retry').length+' · Interessati: '+agendaRows.filter(x=>x.code==='interested').length+' · Informazioni richieste: '+agendaRows.filter(x=>x.code==='info').length+' · Appuntamenti: '+agendaRows.filter(x=>x.code==='meeting').length+' · Da non ricontattare: '+agendaRows.filter(x=>x.code==='stop').length;panel.append(agendaSummary);
+  agendaRows.forEach(item=>{
+   const row=document.createElement('div');row.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
+   const title=document.createElement('strong');title.textContent=item.lead.name+' · '+item.label;
+   const detail=document.createElement('p');detail.className='small';detail.textContent='Ultimo contatto: '+new Date(item.ev.occurred_at).toLocaleString('it-IT')+' · '+(item.ev.subject||'senza oggetto')+(item.outcome?' · Esito: '+item.outcome:'');
+   const action=document.createElement('p');action.textContent='Prossima azione: '+item.action;
+   const controls=document.createElement('div');controls.className='actions';
+   const open=document.createElement('button');open.type='button';open.className='btn alt';open.textContent='Apri Lead';open.addEventListener('click',()=>{el('query').value=item.lead.name;el('archiveFilter').value='all';draw();const card=Array.from(el('records').children).find(node=>node.dataset.cloudId===item.lead.cloud_id);card?.scrollIntoView({behavior:'smooth',block:'center'});});
+   controls.append(open);
+   if(item.code==='interested'){const booking=document.createElement('a');booking.className='btn';booking.href=NEXTWAY_CALENDLY_URL;booking.target='_blank';booking.rel='noopener noreferrer';booking.textContent='Proponi Zoom · Calendly';controls.append(booking);}
+   if(item.code==='meeting'){const booking=document.createElement('a');booking.className='btn alt';booking.href=NEXTWAY_CALENDLY_URL;booking.target='_blank';booking.rel='noopener noreferrer';booking.textContent='Apri Calendly';controls.append(booking);}
+   row.append(title,detail,action,controls);panel.append(row);
+  });
+  const headingFollowups=document.createElement('strong');headingFollowups.textContent='Promemoria aperti · '+events.length;panel.append(headingFollowups);
   const now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()),tomorrowStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),weekEnd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+7);const overdue=events.filter(ev=>new Date(ev.next_action_at)<todayStart).length,today=events.filter(ev=>{const d=new Date(ev.next_action_at);return d>=todayStart&&d<tomorrowStart;}).length,week=events.filter(ev=>{const d=new Date(ev.next_action_at);return d>=todayStart&&d<weekEnd;}).length;const summary=document.createElement('p');summary.className='small';summary.textContent='Scaduti: '+overdue+' · Oggi: '+today+' · Entro 7 giorni: '+week;panel.append(summary);
   if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Non ci sono follow-up aperti registrati.';panel.append(empty);return;}
   events.forEach(ev=>{
