@@ -6,6 +6,7 @@ const migration = read("../supabase/migrations/20261113140000_nextway_partner_co
 const provisioning = read("../supabase/migrations/20261111001500_nextway_conversion_provisioning.sql");
 const snapshot = read("../supabase/migrations/20261113120000_nextway_conversion_request_workspace_snapshot.sql");
 const finalization = read("../supabase/migrations/20261113130000_nextway_conversion_workspace_finalization.sql");
+const transactionalTest = read("../supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql");
 
 const required = [
   "cancelled_at timestamptz",
@@ -60,6 +61,17 @@ assert.match(provisioning, /where id=p_request_id and status='provisioning' and 
 assert.match(finalization, /from public\.nextway_lead_conversion_requests[\s\S]*?for update/i);
 assert.match(finalization, /r\.status <> 'provisioning'[\s\S]*?activation_claim_token is distinct from p_claim_token/i);
 assert.match(snapshot, /new\.workspace_id is distinct from old\.workspace_id/i);
+assert.match(transactionalTest, /begin;[\\s\\S]*rollback;/i);
+assert.match(transactionalTest, /nextway_create_lead_conversion_request[\\s\\S]*'partner'/i);
+assert.match(transactionalTest, /cancel pending[\\s\\S]*already_cancelled/i);
+assert.match(transactionalTest, /cancel ready[\\s\\S]*reviewed_by/i);
+assert.match(transactionalTest, /cancel provisioning[\\s\\S]*activation_claim_token is null/i);
+assert.match(transactionalTest, /nextway_claim_conversion_activation[\\s\\S]*nextway_release_conversion_activation[\\s\\S]*nextway_finalize_conversion_activation/i);
+assert.match(transactionalTest, /set local role service_role/i);
+assert.match(transactionalTest, /set local role authenticated/i);
+assert.doesNotMatch(transactionalTest, /auth\\.admin|inviteUserByEmail|sendEmail|net\\.http/i);
+assert.match(transactionalTest, /TEST INTERROTTO[\\s\\S]*migrazioni candidate non presenti/i);
+
 
 console.log("NEXTWAY Partner cancellation SQL contract: PASS");
 console.log("State/review/cancellation constraints, admin-only RPC, immutable review data, claim invalidation and finalizer serialization are statically cross-checked.");
