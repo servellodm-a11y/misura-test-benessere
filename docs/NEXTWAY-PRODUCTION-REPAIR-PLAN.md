@@ -66,3 +66,27 @@ Nessuna migrazione, DDL/DML, deploy, merge, seed, creazione di workspace/members
 - **COMPLETATO:** piano di ripristino e query pre-flight preparati sul branch.
 - **DA COMPLETARE:** esecuzione del pre-flight e revisione delle dipendenze/privilegi live.
 - **NON ESEGUITO:** qualsiasi modifica al database o deploy.
+
+## Aggiornamento dopo pre-flight — 13 novembre 2026
+
+Il pre-flight restituisce:
+- Dipendenze base Auth/profiles/Lead/conversazioni e helper workspace: presenti.
+- Tabelle workspace e RLS: presenti.
+- Rate limit table/RPC e governance RPC: assenti.
+- La tabella legacy `nextway_setter_generation_requests` NON ha `user_id` e `lease_expires_at`.
+
+### Interpretazione corretta della tabella legacy
+
+L'assenza di `user_id` e `lease_expires_at` non è una lacuna da correggere aggiungendo colonne. La migrazione workspace-aware `20261111240000_nextway_setter_generation_workspace.sql` definisce lo store legacy con `owner_profile_id`, `claimed_at`, `generated_output`, `cached_response` e stati `generating/completed`. La successiva migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` crea uno store workspace separato e mantiene la tabella legacy.
+
+Le migrazioni `20261110000700_nextway_clear_stale_staged_output.sql` e `20261110000400_nextway_idempotency_retention.sql` appartengono al vecchio schema `user_id/lease_expires_at/pending`. Sono incompatibili con la struttura attuale: NON applicarle, NON aggiungere colonne per farle passare e NON ricreare il vecchio modello. La protezione e il flusso attuale vanno valutati sulle funzioni workspace-aware già presenti.
+
+### Draft P0
+
+Creato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql`, non applicato. Contiene:
+- guardie preliminari su prerequisiti e oggetti target;
+- creazione tabella rate limit e RPC con firma finale `(text, integer)`;
+- creazione RPC governance workspace;
+- grant/revoke e search_path fisso, in linea con le migrazioni sorgenti.
+
+Il draft è una proposta tecnica da revisionare, non un'autorizzazione all'esecuzione. Prima dell'applicazione servono controllo finale delle colonne workspace, privilegi effettivi, backup e autorizzazione esplicita.
