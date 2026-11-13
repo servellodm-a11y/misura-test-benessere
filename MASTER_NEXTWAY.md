@@ -3033,3 +3033,7 @@ Stato: preparazione completata; nessuna modifica database, migrazione, DDL/DML, 
 ### Esito pre-flight ripristino — 13 novembre 2026
 Pre-flight read-only ricevuto: fondamenta Auth/profiles/Lead/conversazioni, workspace, helper e RLS risultano presenti. Rate Limit e RPC governance risultano assenti. La tabella legacy Setter non possiede `user_id` e `lease_expires_at` perché la migrazione workspace-aware la definisce con `owner_profile_id` e `claimed_at`; la migrazione successiva crea uno store workspace distinto. Le vecchie migrazioni cleanup/retention che richiedono `user_id/lease_expires_at` sono incompatibili e vanno escluse, senza aggiungere colonne.
 Preparato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` (non applicato) per ripristinare solo Rate Limit e Governance, con guardie sui prerequisiti. Nessuna migrazione, DDL/DML, deploy o merge eseguiti.
+
+
+### Autorizzazione ripristino P0 — 13 novembre 2026
+L'utente ha autorizzato il ripristino Rate Limit + Governance. Draft confrontato con migrazioni sorgenti e chiamate Edge Function; aggiunta guardia che impedisce la sostituzione della RPC governance se già presente. Esecuzione DB non effettuata: questa sessione non dispone di connessione Supabase/SQL Editor autenticata. Non dichiarare il ripristino applicato; l'esecuzione richiede il SQL Editor autenticato e successiva verifica read-only. Nessuna modifica al database.
