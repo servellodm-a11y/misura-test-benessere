@@ -45,9 +45,9 @@ window.NEXTWAY_LOCAL_ARCHIVE={
  getOwner:()=>activeOwnerId,
  getIndex(){
   if(!activeOwnerId)return {urls:[],identity_keys:[]};
-  const urls=[],identityKeys=[];
-  for(const lead of data){if(lead.is_test)continue;const key=canonicalLeadSourceUrl(lead.url);if(key)urls.push(key);const meta=readProspectMetadata(lead);if(Array.isArray(meta.identity_keys))identityKeys.push(...meta.identity_keys.filter(value=>typeof value==='string'));}
-  return {urls:[...new Set(urls)],identity_keys:[...new Set(identityKeys)]};
+  const urls=[],identityKeys=[],prospects=[];
+  for(const lead of data){if(lead.is_test)continue;const key=canonicalLeadSourceUrl(lead.url),meta=readProspectMetadata(lead),keys=Array.isArray(meta.identity_keys)?meta.identity_keys.filter(value=>typeof value==='string'):[];if(key)urls.push(key);identityKeys.push(...keys);prospects.push({url:key,identity_keys:keys,status:String(lead.status||'Da verificare'),name:String(lead.name||'').slice(0,120)});}
+  return {urls:[...new Set(urls)],identity_keys:[...new Set(identityKeys)],prospects};
  },
  addFromSearch(record){
   if(!activeOwnerId)throw new Error('Accedi a NEXTWAY prima di acquisire un risultato.');
