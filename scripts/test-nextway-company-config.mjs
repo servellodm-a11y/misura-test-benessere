@@ -343,6 +343,26 @@ assert.ok([direct,highlyRelevant,interesting,deepen,discard].every(result=>resul
 assert.ok(searchHtml.includes('function assessCommercialFit('));
 assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit_score'));
 assert.ok(searchHtml.includes('priority_score:priorityScore'));
+assert.ok(searchHtml.includes('function assessSourceQuality('));
+assert.ok(searchHtml.includes('source_quality_score=sourceQuality.quality_score'));
+assert.ok(searchHtml.includes('sourceQuality.quality_score>duplicateEntry.daily.source_quality.quality_score'));
+assert.ok(searchHtml.includes('affidabilita_fonte'));
+assert.ok(archiveHtml.includes('commercial.source_quality'));
+const sourceStart=searchHtml.indexOf('function assessSourceQuality(');
+const sourceEnd=searchHtml.indexOf('function buildProspectProfile(',sourceStart);
+const sourceContext={Date,URL};
+new Function('ctx',searchHtml.slice(sourceStart,sourceEnd)+';ctx.fn=assessSourceQuality')(sourceContext);
+const assessSource=sourceContext.fn;
+const recentSource=assessSource({published_at:'2026-11-01'},'https://www.iss.it/test','');
+assert.equal(recentSource.source_type,'Istituzione o registro professionale');
+assert.equal(recentSource.freshness_label,'Recente · entro 6 mesi');
+const oldSource=assessSource({published_at:'2022-01-01'},'https://example.com/test','');
+assert.equal(oldSource.freshness_label,'Datato · oltre 2 anni');
+assert.ok(oldSource.quality_score<recentSource.quality_score);
+const socialSource=assessSource({},'https://www.instagram.com/profilo','');
+assert.equal(socialSource.source_type,'Social network');
+assert.equal(socialSource.freshness_score,50);
+
 assert.ok(searchHtml.includes('segmentScore*.55+score*.30+documentaryScore*.15'));
 assert.ok(searchHtml.includes('b.dataset.segmentPriority'));
 assert.ok(searchHtml.includes('coerenza_segmento'));
