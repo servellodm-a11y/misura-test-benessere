@@ -81,3 +81,57 @@ Fermarsi se:
 - Baseline schema-only: da ricostruire e revisionare.
 - Test runtime: non eseguiti.
 - Nessuna migrazione applicata, nessun progetto creato, nessun deploy o spesa.
+
+
+## Addendum operativo — profili locali a risorse ridotte — 13 novembre 2026
+
+### Ambiente Mac rilevato (sola lettura)
+
+Risultati forniti dall'utente il 13 novembre 2026:
+
+- Architettura: Intel `x86_64`.
+- RAM fisica: 8 GiB.
+- Docker Desktop: 29.9.3; daemon attivo, contesto `desktop-linux`.
+- Memoria assegnata alla VM Docker: 3.82 GiB.
+- Supabase CLI: 3.1.0.
+- Spazio libero sul volume dati: 382 GiB.
+- Immagini Docker presenti: 2, per 1.56 GB; nessun container attivo.
+- Nessuna installazione o modifica è stata effettuata durante queste verifiche.
+
+### Valutazione risorse
+
+La documentazione CLI Supabase raccomanda almeno 7 GB di RAM assegnata a Docker per avviare l'intero stack. Il Mac dispone di 8 GB fisici e Docker ha 3.82 GiB assegnati: non si deve aumentare ora tale limite né tentare l'avvio completo. Lo spazio disco è adeguato.
+
+### Strategia a profili, non avvio completo
+
+Preparare due profili distinti, da validare prima dell'esecuzione:
+
+1. **Profilo SQL isolato:** mantenere il solo motore PostgreSQL e avviare soltanto i componenti strettamente indispensabili alla baseline schema-only. Scopo: validare struttura, vincoli, funzioni SQL, RLS e concorrenza con sessioni PostgreSQL indipendenti. Questo profilo non certifica Auth, API REST, Storage o Edge Functions.
+2. **Profilo integrazione ridotto (eventuale):** attivare solo i servizi necessari ai test applicativi NEXTWAY — Auth, PostgREST, Storage API, gateway ed Edge Runtime — ed escludere i componenti non richiesti, ad esempio Realtime, image proxy, Studio, log/telemetria e connection pooler, se la versione CLI/configurazione lo consente. Avviarlo soltanto dopo aver misurato il profilo SQL e verificato la memoria residua.
+
+La CLI documenta l'opzione `supabase start -x` per escludere servizi; la lista effettivamente supportata deve essere verificata sulla CLI 3.1.0 prima di comporre il comando. Non copiare comandi da versioni diverse senza verifica.
+
+### Dipendenze e baseline
+
+- Il repository continua a non avere `supabase/config.toml` né un seed locale completo.
+- Non eseguire `supabase init` direttamente nella cartella di lavoro finché non è stato verificato come preservare integralmente la directory `supabase/` già esistente e il contenuto non tracciato `supabase/.temp/`.
+- Prima di avviare un profilo occorre preparare e revisionare `config.toml`, baseline schema-only completa e seed esclusivamente sintetico.
+- La baseline deve contenere tutte le dipendenze richieste dalle migrazioni selezionate, comprese le strutture Auth/Storage se referenziate. Un profilo PostgreSQL-only non deve essere usato per dichiarare superati test che richiedono i servizi Auth/Storage.
+- Non collegare il progetto locale a un ref remoto; nessun comando `--remote`, `db pull`, `db push`, `link`, deploy o accesso al progetto di produzione in questa fase.
+
+### Prossimo ordine di lavoro
+
+1. Inventariare le dipendenze effettive delle migrazioni e dei test A–F, classificandole per PostgreSQL, Auth, Storage, API e Edge Runtime.
+2. Definire il profilo SQL e la lista esatta di esclusione compatibile con CLI 3.1.0.
+3. Preparare configurazione e baseline in modo non distruttivo, preservando file esistenti e `.temp/`.
+4. Avviare soltanto il profilo SQL locale dopo revisione; misurare memoria e stabilità.
+5. Valutare il profilo integrazione ridotto solo se il primo lascia risorse sufficienti.
+
+### Stato aggiornato
+
+- Verifica Docker/CLI: **COMPLETATA**.
+- Risorse Mac: **MISURATE**; spazio disco adeguato, RAM insufficiente per il full stack raccomandato.
+- Configurazione locale, baseline e seed: **DA PREPARARE**.
+- Ambiente locale avviato: **NO**.
+- Migrazioni/test runtime: **NON ESEGUITI**.
+- Produzione, Netlify, progetto cloud, PR e `main`: **NON MODIFICATI**.
