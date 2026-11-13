@@ -3353,3 +3353,6 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Nessun progetto staging creato, nessuna migrazione applicata, nessun DB remoto modificato, nessun deploy, nessuna email o utente di test creato. Il progetto reale `nextway-platform` resta intatto.
 - `main` invariato; PR #1 resta aperta, draft e non mergeata. Nessun rebase o merge.
 - Prossimo passo: ottenere un ambiente staging isolato e le fixture sintetiche necessarie; soltanto lì eseguire il protocollo runtime. Fino ad allora, mantenere il ciclo Partner come implementato ma non collaudato end-to-end.
+
+- Chiarita nella fixture Partner la gestione dell'errore: il percorso riuscito termina con `ROLLBACK`; se un'asserzione fallisce, la transazione è abortita e occorre eseguire `ROLLBACK` prima di riutilizzare la sessione.
+- **CI riconfermato dopo la modifica della fixture:** run `43411999773`, commit `a88310dd5a2658f826f4fa8c9850073dccfdce05`, conclusione **success**. Test statici/contrattuali e type-check Deno completati.
