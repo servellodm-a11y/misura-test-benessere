@@ -61,3 +61,27 @@ Il dump può contenere definizioni SQL e corpi delle funzioni, ma non deve conte
 - Esportazione schema-only remota: da eseguire solo dopo verifica della sintassi CLI 3.1.0 e conferma del target.
 - Import locale: non eseguito.
 - Migrazioni/test runtime: non eseguiti.
+
+
+## Esito effettivo del recupero — 13 novembre 2026
+
+La procedura descritta sopra è stata eseguita con Supabase CLI 3.1.0, dopo aver controllato `supabase db dump --help`. Il dump è stato prodotto in `/tmp/nextway-public-schema.sql` dal progetto identificato dalla CLI come `nextway-platform` (ref `obqwbtlltxjfeirstsya`).
+
+- File: circa 154 KB / 3.615 righe.
+- SHA-256: `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
+- Nessuna occorrenza di istruzioni `COPY` o `INSERT INTO` nei controlli eseguiti.
+- Inventario strutturale rilevato: 21 tabelle, 22 funzioni `SECURITY DEFINER`, 53 policy RLS, 11 trigger e 48 indici.
+- Le definizioni esaminate includono impostazioni `search_path`; il dump usa `CREATE OR REPLACE TRIGGER`.
+- Nessuna migrazione o scrittura SQL è stata eseguita sul database remoto.
+
+Il dump resta in `/tmp` e non è stato committato. La sua revisione è **strutturalmente promettente ma non conclusiva**: occorre ancora confrontare i nomi e le definizioni degli oggetti uno per uno con le 31 migrazioni, controllare tipi, sequenze, ownership, grant, FK e dipendenze. I conteggi non sono una certificazione di importabilità.
+
+È stato creato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con l'inventario statico delle 31 migrazioni, le dipendenze managed Auth/Storage, i limiti probatori e la sequenza di costruzione sicura.
+
+### Stato aggiornato
+
+- Esportazione schema-only: **COMPLETATA**.
+- Controllo assenza di righe dati: **COMPLETATO nei controlli effettuati**.
+- Riconciliazione puntuale dump/migrazioni: **DA COMPLETARE**.
+- Import locale, configurazione CLI, seed e test runtime: **NON ESEGUITI**.
+- Nessuna modifica al database remoto, deploy, merge o intervento su `main`.
