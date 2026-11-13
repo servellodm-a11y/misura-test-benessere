@@ -3316,3 +3316,17 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Migrazione e RPC sono soltanto nel branch. Non sono state applicate al progetto `nextway-platform`.
 - **DA COMPLETARE:** revisione SQL indipendente, test rollback-only con fixture di staging, prove concorrenti con due sessioni PostgreSQL, test API Auth e invito su progetto Supabase separato.
 - Nessuna modifica DB remoto, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
+
+## 13 novembre 2026 — Revisione indipendente annullamento e audit invito Auth
+
+- Confrontata la nuova `nextway_guard_conversion_request_review()` della migrazione `20261113140000` con la versione precedente in `20261111001500` e con l'aggiornamento workspace `20261113120000`.
+- **COMPLETATO E VERIFICATO (revisione statica):** le transizioni precedenti sono conservate: pending → ready/rejected; ready → provisioning; provisioning → provisioning (renew), ready (release), activated (finalize). Il nuovo ramo `cancelled` è separato e richiede platform_admin autenticato, metadati coerenti e campi claim/attivazione null.
+- Verificato che il preesistente `nextway_conversion_activation_state_check` accetta `cancelled` tramite il ramo generico per gli stati diversi da provisioning/activated, purché i quattro campi di attivazione siano null. Nessuna modifica a quel vincolo è necessaria.
+- Rafforzato `scripts/test-nextway-partner-cancellation-sql.mjs`: ora controlla anche activation-state CHECK, azzeramento di activation_user_id/activated_at e conservazione esplicita delle transizioni preesistenti.
+- **COMPLETATO E VERIFICATO:** GitHub Actions run `43410087510`, commit `69515d776a9ac855c40c910c3d84ebca55d35f46`, conclusione **success**. Tutti gli step del job `validate`, inclusi test Partner invite, specifica e contratto SQL cancellation, e type-check Deno, sono passati.
+- Audit supplementare Edge Function Auth: il ramo `resend` riutilizza l'ID Auth esistente e verifica email + metadata request ID dopo `inviteUserByEmail`; il ramo `reuse_confirmed` non reinvia né elimina l'account; il cleanup può eliminare solo un invito creato dal tentativo corrente e non confermato. Il finalizer verifica anche `auth.users.raw_user_meta_data.nextway_conversion_request_id` prima di associare il Partner.
+- **DA COMPLETARE / BLOCCATO:** il comportamento reale di reinvio su un account Supabase Auth esistente ma non confermato non è dimostrato dai test puri. La documentazione ufficiale indica di inviare un nuovo invito quando il link scade, ma il comportamento API va collaudato sul progetto staging e sulla versione Auth effettiva; esistono segnalazioni storiche su `/invite` e reinvii. Nessuna email di prova va inviata dal progetto reale.
+- Il test CI è statico/unitario: non dimostra invito email reale, accettazione, trigger Auth, membership invited→active, PostgreSQL runtime o gare concorrenti.
+- Stato Git: PR #1 open/draft, non mergeata; branch `fix/nextway-password-recovery`. `main` invariato. Nessun rebase/merge.
+- Stato operativo invariato: nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email, nessun utente o dato di prova creato; nessuna modifica al database `nextway-platform`.
+- Prossimo lavoro: preparare un protocollo staging Auth + PostgreSQL con fixture sintetiche e test concorrenti a due sessioni; mantenere il progetto reale intatto fino ad autorizzazione esplicita.
