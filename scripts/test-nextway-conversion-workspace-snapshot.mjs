@@ -7,6 +7,7 @@ const snapshot = fs.readFileSync("supabase/migrations/20261113120000_nextway_con
 const finalize = fs.readFileSync("supabase/migrations/20261113130000_nextway_conversion_workspace_finalization.sql", "utf8");
 const cloud = fs.readFileSync("nextway-cloud.js", "utf8");
 const edge = fs.readFileSync("supabase/functions/nextway-conversion-provisioning/index.ts", "utf8");
+const workspaceAdmin = fs.readFileSync("supabase/functions/nextway-workspace-admin/index.ts", "utf8");
 const isolation = fs.readFileSync("supabase/diagnostics/nextway_conversion_workspace_isolation_transactional_test.sql", "utf8");
 
 const checks = [
@@ -39,6 +40,7 @@ const checks = [
   ["Partner finalizer validates Auth email and request metadata", /lower\(u\.email\) = lower\(r\.email\)[\s\S]*raw_user_meta_data ->> 'nextway_conversion_request_id' = r\.id::text/i.test(finalize)],
   ["Partner finalizer refuses incompatible pre-existing profiles and details", /v_profile\.role::text <> 'partner'[\s\S]*profilo incompatibile[\s\S]*v_partner\.nextway_conversion_request_id is distinct from r\.id/i.test(finalize)],
   ["Partner membership is created as invited, never active by finalizer", /workspace_role, membership_status, invited_by\)[\s\S]*'workspace_member', 'invited'/i.test(finalize) && !/membership_status\s*=\s*'active'/i.test(finalize)],
+  ["Workspace membership activation requires confirmed Auth email", /body\.membership_status === "active"[\s\S]*!authUser\.user\.email_confirmed_at[\s\S]*deve prima accettare l'invito/i.test(workspaceAdmin)],
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
   ["transactional test creates requests through authenticated RPC", /nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_a[\s\S]*nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_b/i.test(isolation)],
   ["transactional test includes admin review", /status='ready_for_activation'[\s\S]*reviewed_by=v_admin[\s\S]*reviewed_at=now\(\)/i.test(isolation)],
