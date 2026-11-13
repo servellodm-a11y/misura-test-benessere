@@ -194,7 +194,11 @@ async function runSearch(){
     if(publicContacts.phones.length)contactParts.push('Telefoni pubblicati: '+publicContacts.phones.join(', '));
     if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
     if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
+    const assessment=assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
+    const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Qualità evidenze: '+assessment.score+'/100 · '+assessment.identity+' · Compatibilità commerciale: non valutata';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
+    const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Elementi rilevati: '+assessment.reasons.join(' · ')+'. Il punteggio misura solo la completezza delle evidenze, non l’interesse della persona né la sua idoneità commerciale.';
+
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
     const capture=document.createElement('button');capture.className='btn alt';capture.textContent='Acquisisci nel mio archivio';
@@ -205,20 +209,48 @@ async function runSearch(){
       const partnerTypes={wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / professionista',side_income:'Altro profilo individuale',business_seeking:'Altro profilo individuale'};
       const evidence=[item.snippet||'',pageContent].filter(Boolean).join('\n\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
-      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts});
+      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts,evidence_quality:assessment,fit_status:'Non valutato'});
       if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
       capture.disabled=true;
       capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
-    card.append(title,snippet,contactSummary,document.createElement('br'),link,copy,capture);list.append(card);
+    card.append(title,snippet,quality,contactSummary,reasons,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
   status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
+}
+function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
+ const t=String(title||''),body=String(snippet||'')+' '+String(pageContent||'');
+ const hasRole=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|imprenditor|titolare|founder|team leader|networker|distributore|consulente|coach|fisioterap|farmacist|medic|trainer/i.test(body);
+ const personLike=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(t.trim());
+ const personEvidence=personLike&&hasRole;
+ const signalBySegment={
+  wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|benessere|wellness/i,
+  wellness_networker:/network marketing|networker|vendita diretta|wellness|team leader/i,
+  new_networker:/ho iniziato da poco|nuovo distributore|nuova distributrice|primi passi|new to network marketing/i,
+  other_networker:/network marketing|networker|vendita diretta|social selling/i,
+  entrepreneur:/imprenditor|titolare|founder|azienda|business owner/i,
+  side_income:/lavoro extra|part.time|seconda attività|entrata aggiuntiva|reddito integrativo/i,
+  business_seeking:/attività imprenditoriale|mettersi in proprio|nuovo progetto|business indipendente/i,
+  exnetworker:/ex.networker|ex distributore|ex incaricato|esperienza network marketing/i,
+  customers:/benessere|nutrizione|alimentazione|fitness|stile di vita/i
+ };
+ const signal=(signalBySegment[segment]||/benessere|wellness|network marketing|professionista/i).test(body);
+ const contactCount=['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0);
+ const reasons=[],score=(url?15:0)+(t.trim()?10:0)+(body.trim().length>=500?20:body.trim().length>=120?12:0)+(hasRole?20:0)+(personEvidence?15:0)+(contactCount?10:0)+(signal?10:0);
+ if(url)reasons.push('fonte web presente');
+ if(body.trim().length>=120)reasons.push('contenuto testuale disponibile');
+ if(hasRole)reasons.push('segnale professionale');
+ if(personEvidence)reasons.push('possibile nome e ruolo nella fonte');
+ if(contactCount)reasons.push('recapito o profilo pubblico rilevato');
+ if(signal)reasons.push('segnale coerente con il segmento');
+ if(!personEvidence)reasons.push('identità individuale non confermata');
+ return {score,identity:personEvidence?'Possibile persona · da verificare':'Pagina/organizzazione o identità non chiara',reasons};
 }
 function classifyNetworkerStage(value){
  const t=String(value||'').toLocaleLowerCase('it');
