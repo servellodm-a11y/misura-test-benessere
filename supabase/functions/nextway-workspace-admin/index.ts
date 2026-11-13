@@ -174,6 +174,11 @@ Deno.serve(async (req) => {
       if (userError || !authUser.user) {
         return respond({ error: "Utente NEXTWAY non trovato" }, 404, origin);
       }
+      if (body.membership_status === "active" && !authUser.user.email_confirmed_at) {
+        return respond({
+          error: "L'utente deve prima accettare l'invito e confermare l'indirizzo email."
+        }, 409, origin);
+      }
 
       const { data: existing, error: existingError } = await admin.from("nextway_workspace_memberships")
         .select("id,membership_status,activated_at")
