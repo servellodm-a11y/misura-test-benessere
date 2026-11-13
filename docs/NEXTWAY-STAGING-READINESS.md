@@ -47,7 +47,7 @@ La tabella creata dalla migrazione `20261110000200_nextway_setter_idempotency.sq
 
 **Correzione preparata sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger dalla tabella legacy e sposta l'azzeramento di `generated_output` sulla tabella workspace, usando le colonne `owner_profile_id`, `idempotency_key` e `conversation_id`. La migrazione è forward-only e verifica preventivamente la presenza della tabella/colonne richieste. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
 
-**Stato:** preparata; in attesa del workflow CI. Non applicata a nessun database.
+**Stato:** preparata; CI superata (run `43412386590`). La migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
 
 ### B4 — migrazioni Setter legacy non certificate per una nuova installazione
 
@@ -83,7 +83,7 @@ Non classificare l'intera catena come applicabile finché la revisione non è co
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | DA PREPARARE |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
-| Correzione forward-only trigger Setter 007 | PREPARATA, CI IN CORSO |
+| Correzione forward-only trigger Setter 007 | PREPARATA, CI SUPERATA; runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
 | Test PostgreSQL/Auth/concorrenza | NON ESEGUITI |
 | Progetto reale | NON MODIFICATO |
