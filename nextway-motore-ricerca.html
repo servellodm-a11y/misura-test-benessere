@@ -493,7 +493,7 @@ function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assess
  const isOrganization=/Azienda o organizzazione/.test(assessment?.entityType||'')&&!hasPerson;
  let status='Da approfondire',action='Aprire la fonte originale e verificare identità, ruolo, attualità e corrispondenza con il segmento.';
  let reasons=[];
- if(isDirectory||isOrganization||(!hasPerson&&!hasSegmentSignal&&!directContacts&&!socialContacts)){
+ if(isDirectory||isOrganization||(!hasPerson&&!hasSegmentSignal&&!directContacts&&!socialContacts&&Number(assessment?.score||0)<20)){
   status='Non adatto · da scartare';
   action='Non acquisire nel CRM. Scartare il risultato oppure conservarlo solo come fonte di ricerca, se contiene un collegamento utile.';
   reasons.push(isDirectory?'La fonte sembra una directory, un articolo o un annuncio, non un prospect individuale.':isOrganization?'Il risultato descrive un’organizzazione e non identifica una persona.':'Non emergono identità, segnali di segmento o canali di contatto sufficienti.');
