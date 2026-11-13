@@ -31,6 +31,7 @@ const checks = [
   ["customer workspace attribution created", /insert into public\.nextway_client_workspace_attributions/i.test(finalize)],
   ["attribution table has no direct authenticated grants", /revoke all on table public\.nextway_client_workspace_attributions from public, anon, authenticated, service_role/i.test(finalize)],
   ["workspace client projection excludes viewer", /nextway_has_workspace_access\([\s\S]*workspace_owner[\s\S]*workspace_member/i.test(finalize) && !/array\[[^\]]*workspace_viewer/i.test(finalize)],
+  ["workspace client RPC granted only to authenticated", /revoke all on function public\.nextway_list_workspace_clients\(uuid\) from public, anon, service_role/i.test(finalize) && /grant execute on function public\.nextway_list_workspace_clients\(uuid\) to authenticated/i.test(finalize)],
   ["Edge Function binds Auth invite to request", /nextway_conversion_request_id: requestId/i.test(edge)],
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
   ["transactional test creates requests through authenticated RPC", /nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_a[\s\S]*nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_b/i.test(isolation)],
