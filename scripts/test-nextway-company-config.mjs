@@ -295,7 +295,7 @@ assert.ok(searchHtml.includes('qualificazione_commerciale'));
 const qualificationStart=searchHtml.indexOf('function qualifyCommercialProspect(');
 const qualificationEnd=searchHtml.indexOf('function buildProspectProfile(',qualificationStart);
 assert.ok(qualificationStart>=0&&qualificationEnd>qualificationStart,'Commercial qualification helper must be present');
-const qualificationContext={URL};
+const qualificationContext={URL,safeUrl:value=>String(value||'')};
 vm.runInNewContext(searchHtml.slice(qualificationStart,qualificationEnd)+';this.qualifyCommercialProspect=qualifyCommercialProspect;',qualificationContext);
 const qualify=qualificationContext.qualifyCommercialProspect;
 const personAssessment={individual:true,score:82,entityType:'Possibile profilo individuale'};
