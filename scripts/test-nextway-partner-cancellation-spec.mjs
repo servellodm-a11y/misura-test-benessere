@@ -21,8 +21,8 @@ for (const token of [
 
 assert.match(spec, /Caso A[\s\S]*annullamento[\s\S]*finalizer/i);
 assert.match(spec, /Caso B[\s\S]*finalizzazione[\s\S]*annullamento/i);
-assert.match(spec, /account Auth confermato[\s\S]*non eliminato/i);
-assert.match(spec, /membership[\s\S]*non viene creato/i);
+assert.match(spec, /Non eliminare account recuperati[\s\S]*né account con email confermata/i);
+assert.match(spec, /membership[\s\S]*viene creato dalla finalizzazione annullata/i);
 assert.match(lifecycle, /NEXTWAY-PARTNER-CANCELLATION-TECHNICAL-SPEC\.md/);
 
 // Existing claim and release paths must already fail closed after cancellation invalidates a claim.
