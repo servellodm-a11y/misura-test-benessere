@@ -390,7 +390,15 @@ async function runSearch(){
     const sourceQuality=assessSourceQuality(item,url,pageContent);
     commercialFit.source_quality_score=sourceQuality.quality_score;
     commercialFit.source_quality=sourceQuality;
-    commercialFit.priority_score=Math.round(commercialFit.priority_score*.85+sourceQuality.quality_score*.15);
+    const priorityEligible=assessment.individual===true&&commercialFit.segment_match===true&&commercialFit.prospect_type!=='da qualificare'&&(commercialFit.prospect_type!=='cliente'||commercialFit.explicit_intent==='dichiarato');
+    if(priorityEligible){
+     commercialFit.priority_score=Math.round(commercialFit.priority_score*.85+sourceQuality.quality_score*.15);
+     commercialFit.priority_gate='Persona identificabile e segmento coerente; priorità documentale calcolata.';
+    }else{
+     commercialFit.priority_score=0;
+     commercialFit.priority_gate='Priorità esclusa: occorre confermare una persona individuale e la corrispondenza al segmento; per i clienti serve anche una richiesta esplicita.';
+     commercialFit.reasons.push(commercialFit.priority_gate);
+    }
     commercialFit.priority_tier=commercialFit.priority_score>=80?'Alta pertinenza':commercialFit.priority_score>=55?'Da verificare':'Bassa pertinenza';
     card.dataset.segmentPriority=String(commercialFit.priority_score);card.dataset.segmentTier=commercialFit.priority_tier;
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
