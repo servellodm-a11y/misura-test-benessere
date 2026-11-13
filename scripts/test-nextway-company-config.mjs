@@ -130,6 +130,9 @@ assert.ok(searchHtml.includes('last_contact_at:latestContact?.occurred_at||null'
 assert.ok(searchHtml.includes('next_followup_at:nextFollowup?.next_action_at||null'),'Agenda must show the next open follow-up');
 assert.ok(searchHtml.includes('Nota/esito registrato: '),'Agenda must show recorded outcome notes without inventing a result');
 assert.ok(searchHtml.includes('Prossimo follow-up: '),'Agenda must display the scheduled follow-up date');
+assert.ok(searchHtml.includes('getOpenLeadActivities(100)'),'Daily agenda must include all CRM open follow-ups');
+assert.ok(searchHtml.includes('Follow-up aperti nel CRM · agenda generale'),'Daily agenda must show the CRM-wide follow-up queue');
+assert.ok(searchHtml.includes('attività aperte · '),'Daily agenda must summarize overdue, due-today and future follow-ups');
 
 assert.ok(searchHtml.includes('dedupeKeys.map(key=>seenProspects.get(key)).find(Boolean)'));
 assert.ok(searchHtml.includes('dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry))'));
