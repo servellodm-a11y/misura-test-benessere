@@ -42,6 +42,8 @@ const checks = [
   ["Partner finalizer refuses incompatible pre-existing profiles and details", /v_profile\.role::text <> 'partner'[\s\S]*profilo incompatibile[\s\S]*v_partner\.nextway_conversion_request_id is distinct from r\.id/i.test(finalize)],
   ["Partner membership is created as invited, never active by finalizer", /workspace_role, membership_status, invited_by\)[\s\S]*'workspace_member', 'invited'/i.test(finalize) && !/membership_status\s*=\s*'active'/i.test(finalize)],
   ["Workspace membership activation requires confirmed Auth email", /body\.membership_status === "active"[\s\S]*!authUser\.user\.email_confirmed_at[\s\S]*deve prima accettare l'invito/i.test(workspaceAdmin)],
+  ["Workspace activation requires a pre-existing invited membership", /if \(body\.membership_status === "active"\)[\s\S]*!existing \|\| !\["invited", "active"\]\.includes\(existing\.membership_status\)/i.test(workspaceAdmin)],
+  ["Conversion-created Partner activation is bound to its request and workspace", /partner_details[\s\S]*nextway_conversion_request_id[\s\S]*nextway_lead_conversion_requests[\s\S]*status !== "activated"[\s\S]*activation_user_id !== body\.user_id[\s\S]*workspace_id !== body\.workspace_id/i.test(workspaceAdmin)],
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
   ["transactional test creates requests through authenticated RPC", /nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_a[\s\S]*nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_b/i.test(isolation)],
   ["transactional test includes admin review", /status='ready_for_activation'[\s\S]*reviewed_by=v_admin[\s\S]*reviewed_at=now\(\)/i.test(isolation)],
