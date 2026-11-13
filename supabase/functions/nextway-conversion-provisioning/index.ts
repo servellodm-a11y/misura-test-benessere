@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { classifyPartnerInvite } from "./invite-lifecycle.mjs";
 
 const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -120,11 +121,12 @@ Deno.serve(async (req) => {
           nextway_conversion_request_id: requestId,
         };
 
-        if (existingInvite?.email_confirmed_at) {
+        const inviteAction = classifyPartnerInvite(existingInvite, email, requestId);
+        if (inviteAction === "reuse_confirmed") {
           // An already accepted invite is not resent or deleted. The finalizer
           // will bind this exact Auth user to the pending conversion.
           invitedUserId = existingInvite.id;
-        } else if (existingInvite) {
+        } else if (inviteAction === "resend") {
           // Supabase Auth can re-send an invitation to an existing, unconfirmed
           // invitee. Reuse the same user; never create a second identity. Confirm
           // the API returned that exact user and that request metadata survived.
