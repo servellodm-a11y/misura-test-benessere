@@ -2902,3 +2902,16 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Lo script stampa conteggi, nomi, riferimenti agli schemi managed e SHA-256; non stampa corpi funzione/valori, non apre connessioni e non esegue SQL.
 - Esecuzione prevista dal repository locale: `python3 scripts/analyze-nextway-schema-baseline.py`. Il dump predefinito atteso è `/tmp/nextway-public-schema.sql`.
 - Script non ancora eseguito sul Mac. Il suo output sarà un ausilio per la riconciliazione, non una certificazione PostgreSQL.
+
+
+---
+
+## Confronto baseline / migrazioni eseguito sul Mac — 13 novembre 2026
+
+- L'utente ha eseguito `python3 scripts/analyze-nextway-schema-baseline.py` sul branch aggiornato a `ed8187d`; il dump mantiene SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
+- Esito statico: 12 tabelle NEXTWAY già presenti nel dump; 12 tabelle `nw_*` non presenti sono quelle della fondazione AI Assistant draft e restano intenzionalmente escluse. Le 4 policy Storage mancanti sono su `storage.objects`, schema gestito non incluso nel dump `public`.
+- Lo script ha falsi positivi lessicali (`already` come trigger e `if` come indice) e discrepanze nei conteggi delle policy: non usare i suoi totali come certificazione.
+- **Discrepanza sostanziale:** il dump non rileva `public.nextway_setter_generation_requests`, ma la migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` richiede esplicitamente che la tabella legacy esista e dichiara di preservarla. Non ricrearla per supposizione; chiarire prima la differenza.
+- Altre differenze da chiarire: assenza di `nextway_api_rate_limits` / `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output` e relativo trigger, `nextway_prune_setter_generation_requests`, `nextway_get_active_setter_governance`.
+- Aggiornato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con classificazione e decisione. Baseline ancora non certificata/importabile.
+- Prossimo passo: controlli mirati read-only sul dump locale per confermare la tabella legacy, i nomi esatti e i riferimenti; migliorare il parser. Nessuna migrazione, import, seed, test runtime, modifica remota, deploy, merge o modifica a `main`.
