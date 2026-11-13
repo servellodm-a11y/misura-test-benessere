@@ -193,11 +193,12 @@ async function runSearch(){
    const rankedResults=(group.results||[]).map(item=>({...item,_assessment:assessSearchEvidence(item.title,item.snippet,String(item.page_content||'').slice(0,5000),safeUrl(item.url),extractPublicContacts(String(item.page_content||'').slice(0,5000)),$('segment').value)})).sort((a,b)=>b._assessment.score-a._assessment.score);
    rankedResults.forEach(item=>{
     const url=safeUrl(item.url);if(!url)return;
+    const pageContent=String(item.page_content||'').slice(0,5000);
+    const publicContacts=extractPublicContacts(pageContent);
+    const assessment=item._assessment||assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
     const card=document.createElement('article');card.className='query';card.dataset.priorityScore=String(assessment.score||0);card.dataset.identityScore=String(assessment.identityScore||0);
     const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
     const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
-    const pageContent=String(item.page_content||'').slice(0,5000);
-    const publicContacts=extractPublicContacts(pageContent);
     const contactSummary=document.createElement('p');contactSummary.className='muted';
     const networkerStage=classifyNetworkerStage((item.title||'')+' '+(item.snippet||'')+' '+pageContent);
     const contactParts=[];
@@ -205,7 +206,6 @@ async function runSearch(){
     if(publicContacts.phones.length)contactParts.push('Telefoni pubblicati: '+publicContacts.phones.join(', '));
     if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
     if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
-    const assessment=item._assessment||assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
     const targetAssessment=classifyProspectTarget(item.title,item.snippet,pageContent,$('segment').value);
     const dedupeKey=buildProspectDedupeKey(url,item.title,assessment,targetAssessment);
     const duplicateEntry=seenProspects.get(dedupeKey);
