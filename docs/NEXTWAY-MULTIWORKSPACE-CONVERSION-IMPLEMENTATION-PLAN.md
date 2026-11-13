@@ -306,7 +306,7 @@ Sono state aggiunte sul branch due migrazioni ulteriori:
 - La RPC `nextway_create_lead_conversion_request` blocca il Lead e deriva dal database owner, sponsor e workspace; il client non invia né decide lo snapshot.
 - Per Lead workspace richiede membership active e ruolo owner/admin/manager/member; viewer escluso.
 - Per Lead legacy NULL mantiene il percorso owner/platform_admin.
-- Revoca INSERT diretto ad authenticated e rende immutabile lo snapshot nel trigger guard.
+- Revoca INSERT diretto ad authenticated, rende immutabile lo snapshot nel trigger guard e serializza le richieste concorrenti con la stessa email, includendo lo stato provisioning nei controlli anti-duplicato.
 
 ### Finalizzazione e accesso clienti
 `20261113130000_nextway_conversion_workspace_finalization.sql`
@@ -322,10 +322,10 @@ Sono state aggiunte sul branch due migrazioni ulteriori:
 ### UI e test statici
 - `nextway-cloud.js` crea le richieste tramite RPC e include lo snapshot nelle letture.
 - La coda amministrativa include nome e partner del workspace; per richieste legacy mostra il percorso centrale.
-- `scripts/test-nextway-conversion-workspace-snapshot.mjs` contiene 22 asserzioni statiche su migrazioni, RPC, RLS, UI ed Edge Function.
+- `scripts/test-nextway-conversion-workspace-snapshot.mjs` contiene 24 asserzioni statiche su migrazioni, RPC, RLS, UI ed Edge Function.
 
 ### Limiti e gate residui
-- La revisione statica dei contenuti recuperati ha superato 21/21 controlli logici preliminari; il conteggio esatto dello script è 22 asserzioni, da eseguire in ambiente Node sul branch.
+- La revisione statica manuale dei contenuti recuperati ha superato 24/24 controlli logici. Lo script contiene le stesse 24 asserzioni; l'esecuzione Node end-to-end resta da effettuare sul branch.
 - Non è stato eseguito un parser PostgreSQL, un test transazionale, un test RLS runtime o un test Edge Function.
 - Il profilo Auth creato da eventuali trigger deve avere ruolo partner e dati compatibili; la finalizzazione rifiuta profili non compatibili senza sovrascriverli.
 - La RPC clienti è predisposta, ma non è stata aggiunta una schermata CRM clienti workspace: l'interfaccia va costruita separatamente usando la sola RPC e non una SELECT diretta.
