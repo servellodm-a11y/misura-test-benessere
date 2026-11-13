@@ -64,11 +64,7 @@
       state.workspaces = result.workspaces || [];
       renderWorkspaceSelect();
       renderWorkspaces();
-      if (selectedWorkspace()) {
-        await loadMemberships();
-        await loadDocuments();
-        await loadGovernance();
-      }
+      if (selectedWorkspace()) await loadSelectedWorkspace();
       status("Workspace caricati: " + state.workspaces.length + ".");
     }
 
@@ -86,6 +82,13 @@
         item.append(heading);
         item.append(node("p", "Chiave: " + workspace.workspace_key + " · ID: " + workspace.id, "muted"));
         if (workspace.sector) item.append(node("p", "Settore: " + workspace.sector, "muted"));
+        const settings = workspace.settings && typeof workspace.settings === "object" ? workspace.settings : {};
+        const offeringCount = Array.isArray(settings.offering) ? settings.offering.length : 0;
+        const audienceCount = Array.isArray(settings.audiences) ? settings.audiences.length : 0;
+        const keywordCount = settings.discovery && Array.isArray(settings.discovery.keywords) ? settings.discovery.keywords.length : 0;
+        if (offeringCount || audienceCount || keywordCount) {
+          item.append(node("p", "Profilo commerciale: " + offeringCount + " offerte · " + audienceCount + " pubblici · " + keywordCount + " parole chiave", "muted"));
+        }
         const selectButton = node("button", "Seleziona", "btn alt");
         selectButton.type = "button";
         selectButton.addEventListener("click", async () => {
