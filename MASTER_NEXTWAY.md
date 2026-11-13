@@ -3021,3 +3021,11 @@ L'utente ha eseguito il report SQL read-only in una sola cella. Metadati:
 Nessuno dei tre è identificato come registro delle migrazioni applicative NEXTWAY. La relazione `supabase_migrations.schema_migrations` non esiste nel progetto. Questo non prova che le migrazioni applicative non siano state eseguite: potrebbero essere state eseguite via SQL Editor o altri strumenti senza un registro CLI accessibile.
 Decisione: non interrogare le righe dei tre registri managed. Ricostruire le migrazioni NEXTWAY confrontando definizioni live e file SQL del branch; verificare separatamente le versioni Edge Function effettivamente distribuite. Nessuna migrazione automatica.
 Stato: metadati registri completati; registro applicativo non identificato; nessuna modifica remota, DDL/DML, deploy, merge o modifica a `main`.
+
+
+### Preparazione ripristino controllato — 13 novembre 2026
+Preparati sul branch `fix/nextway-password-recovery`:
+- `docs/NEXTWAY-PRODUCTION-REPAIR-PLAN.md`: piano di ripristino per rate limit P0, governance workspace P0, cleanup staged P1 e retention P2; include dipendenze, ordine e cautele.
+- `docs/NEXTWAY-REPAIR-PREFLIGHT-REPORT.sql`: query read-only in una sola cella che controlla tabelle, colonne, helper, RLS e presenza delle RPC target. Non ancora eseguita.
+Sequenza: pre-flight; valutazione prerequisiti e privilegi; pacchetti separati basati sulle migrazioni originali; backup/rollback e autorizzazione esplicita prima di qualsiasi applicazione. Non riapplicare la migration workspace table isolation già dichiarata applicata; non applicare in blocco le migrazioni.
+Stato: preparazione completata; nessuna modifica database, migrazione, DDL/DML, deploy, merge o modifica a `main`.
