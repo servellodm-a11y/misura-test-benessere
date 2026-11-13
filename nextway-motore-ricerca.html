@@ -210,7 +210,6 @@ async function runSearch(){
     const targetAssessment=classifyProspectTarget(item.title,item.snippet,pageContent,$('segment').value);
     const identityKeys=buildProspectIdentityKeys(url,publicContacts);
     const dedupeKeys=[...new Set([...identityKeys,'url:'+canonicalProspectUrl(url)])];
-    const dedupeKey=buildProspectDedupeKey(url,item.title,assessment,targetAssessment,publicContacts);
     const duplicateEntry=dedupeKeys.map(key=>seenProspects.get(key)).find(Boolean);
     if(duplicateEntry){
       duplicateEntry.sources=[...new Set([...duplicateEntry.sources,url])];
@@ -382,7 +381,7 @@ function buildProspectIdentityKeys(url,contacts){
  const linkedin=normalized.match(/linkedin\.com\/in\/([^/?]+)/i);
  if(linkedin)keys.push('linkedin:'+linkedin[1].toLowerCase());
  for(const email of (contacts?.emails||[])){const value=String(email||'').trim().toLowerCase();if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))keys.push('email:'+value);}
- for(const phone of (contacts?.phones||[])){const value=String(phone||'').replace(/\D/g,'');if(value.length>=9&&value.length<=15)keys.push('phone:'+value);}
+ for(const phone of (contacts?.phones||[])){let value=String(phone||'').replace(/\D/g,'');if(value.startsWith('00'))value=value.slice(2);if(value.length>=9&&value.length<=15)keys.push('phone:'+value);}
  return [...new Set(keys)];
 }
 function buildProspectDedupeKey(url,title,assessment,target,contacts){
