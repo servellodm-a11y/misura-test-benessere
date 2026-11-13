@@ -54,6 +54,12 @@ for i, match in enumerate(matches):
     sections.append((marker, section))
 
 def selected(marker: str, section: str) -> bool:
+    # Hard exclusion: pg_dump data sections must never enter the extract.
+    if re.search(r"; Type: [^;]*\\bDATA\\b", marker, re.IGNORECASE):
+        return False
+    if re.search(r"(?m)^COPY\\s", section, re.IGNORECASE):
+        return False
+
     # Keep only objects explicitly in public schema; do not include auth/storage.
     if "Schema: public;" not in marker and "Type: ACL;" not in marker:
         return False
