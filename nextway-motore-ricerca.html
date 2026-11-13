@@ -317,6 +317,7 @@ async function runSearch(){
       const sourceQuality=assessSourceQuality(item,url,pageContent);
       const sourceRecord={url,title:item.title||'',snippet:String(item.snippet||'').slice(0,1200),evidence:pageContent.slice(0,4000),collected_at:new Date().toISOString(),public_contacts:publicContacts,source_quality:sourceQuality};
       if(!duplicateEntry.daily.source_quality||sourceQuality.quality_score>duplicateEntry.daily.source_quality.quality_score)duplicateEntry.daily.source_quality=sourceQuality;
+      if(duplicateEntry.daily.commercial_fit){duplicateEntry.daily.commercial_fit.source_quality=duplicateEntry.daily.source_quality;duplicateEntry.daily.commercial_fit.source_quality_score=duplicateEntry.daily.source_quality.quality_score;}
       const sourceKey=value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'')}catch{return String(value||'').toLowerCase()}};
       if(!duplicateEntry.daily.source_evidence.some(source=>sourceKey(source.url)===sourceKey(url)))duplicateEntry.daily.source_evidence.push(sourceRecord);
       for(const field of ['emails','phones','whatsapp','socials']){duplicateEntry.daily[field]=[...new Set([...duplicateEntry.daily[field],...publicContacts[field]])].slice(0,10);}
@@ -335,6 +336,7 @@ async function runSearch(){
     const commercialFit=assessCommercialFit(item.title,item.snippet,pageContent,$('segment').value,targetAssessment,assessment,publicContacts);
     const sourceQuality=assessSourceQuality(item,url,pageContent);
     commercialFit.source_quality_score=sourceQuality.quality_score;
+    commercialFit.source_quality=sourceQuality;
     commercialFit.priority_score=Math.round(commercialFit.priority_score*.85+sourceQuality.quality_score*.15);
     commercialFit.priority_tier=commercialFit.priority_score>=80?'Alta pertinenza':commercialFit.priority_score>=55?'Da verificare':'Bassa pertinenza';
     card.dataset.segmentPriority=String(commercialFit.priority_score);card.dataset.segmentTier=commercialFit.priority_tier;
