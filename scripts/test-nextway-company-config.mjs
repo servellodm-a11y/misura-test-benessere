@@ -56,7 +56,7 @@ assert.ok(searchHtml.includes('id="exportDaily"'));
 assert.ok(searchHtml.includes('dailyProspects.push('));
 assert.ok(searchHtml.includes('motivazione'));
 assert.ok(searchHtml.includes('messaggio_primo_contatto'));
-assert.ok(searchHtml.includes('exportDaily').includes('exportDaily'));
+assert.ok(searchHtml.includes("$('exportDaily').addEventListener"));
 assert.ok(searchHtml.includes('function classifyProspectTarget('));
 assert.ok(searchHtml.includes('Potenziale partner'));
 assert.ok(searchHtml.includes('Potenziale cliente'));
