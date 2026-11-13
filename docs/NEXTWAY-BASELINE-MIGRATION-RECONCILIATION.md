@@ -1,0 +1,139 @@
+# NEXTWAY — riconciliazione baseline e migrazioni
+
+Data: 13 novembre 2026  
+Branch: `fix/nextway-password-recovery`  
+Commit sorgente analizzato: `d11e3e812f11b5949ebd388b976d35cdfd2e83dd`
+
+## 1. Scopo e decisione
+
+Questo documento collega il dump schema-only recuperato dal progetto Supabase di produzione con l'inventario delle migrazioni presenti nel repository. Serve a preparare un ambiente locale riproducibile, non ad autorizzare modifiche al progetto remoto.
+
+**Decisione attuale: baseline recuperata, riconciliazione oggetto-per-oggetto ancora da completare.** Non importare ancora il dump e non applicare in blocco le migrazioni.
+
+## 2. Evidenza del dump schema-only
+
+Il 13 novembre 2026 è stato eseguito, dopo verifica della sintassi con Supabase CLI 3.1.0, il comando:
+
+```bash
+supabase db dump --remote=obqwbtlltxjfeirstsya --schema public --file /tmp/nextway-public-schema.sql
+```
+
+Risultato documentato nel Terminale:
+
+- destinazione identificata dalla CLI: progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`, ambiente production;
+- file prodotto: `/tmp/nextway-public-schema.sql`;
+- dimensione: circa 154 KB, 3.615 righe;
+- controllo `COPY` / `INSERT INTO`: zero occorrenze;
+- SHA-256: `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`;
+- nessuna migrazione o scrittura SQL è stata eseguita sul database remoto.
+
+Inventario strutturale ricavato dai controlli sul dump:
+
+| Oggetto | Conteggio |
+|---|---:|
+| Tabelle nello schema applicativo | 21 |
+| Funzioni `SECURITY DEFINER` | 22 |
+| Policy RLS | 53 |
+| Trigger | 11 |
+| Indici | 48 |
+
+Le definizioni di funzione contengono impostazioni `search_path`; i trigger sono dichiarati con `CREATE OR REPLACE TRIGGER`. I conteggi sono stati corretti dopo aver individuato limiti nelle prime espressioni di ricerca.
+
+**Limite probatorio:** il dump completo è rimasto in `/tmp` sul Mac e non è stato caricato nel repository o reso disponibile come contenuto integrale in questa revisione. I conteggi non dimostrano che ogni oggetto sia corretto, né consentono da soli di associare una tabella o funzione a una specifica migrazione.
+
+## 3. Inventario delle 31 migrazioni
+
+L'elenco seguente è stato letto dal branch indicato e ogni file SQL è stato esaminato staticamente per le dichiarazioni principali. La classificazione non equivale all'esecuzione o alla convalida PostgreSQL.
+
+### Fondazione AI Assistant — da mantenere separata
+
+1. `20261105000100_nextway_ai_assistant_foundation.sql` — crea il modello iniziale AI Assistant e le tabelle `nw_*`; resta **draft separato**, non includerlo automaticamente nella sequenza di staging.
+
+### Rate limit, idempotenza e recupero Setter
+
+2. `20261110000100_nextway_distributed_rate_limit.sql` — tabella rate limit e RPC di consumo.
+3. `20261110000200_nextway_setter_idempotency.sql` — prima tabella richieste generazione Setter e funzioni begin/complete.
+4. `20261110000300_nextway_rate_limit_units.sql` — aggiornamento unità/semantica rate limit.
+5. `20261110000400_nextway_idempotency_retention.sql` — retention richieste idempotenti.
+6. `20261110000500_nextway_setter_output_recovery.sql` — memorizzazione e recupero output temporaneo.
+7. `20261110000600_nextway_setter_output_authorization_hardening.sql` — rafforzamento autorizzazioni delle funzioni output.
+8. `20261110000700_nextway_clear_stale_staged_output.sql` — pulizia output scaduti.
+
+### CRM, audit, Lead e conversioni
+
+9. `20261110000800_nextway_leads_soft_archive.sql` — metadati archiviazione Lead e trigger.
+10. `20261110000900_nextway_lead_audit_trail.sql` — tabella audit Lead, policy e trigger.
+11. `20261110001000_nextway_audit_data_minimization.sql` — minimizzazione dei dati registrati dall'audit.
+12. `20261110001100_nextway_lead_creation_idempotency.sql` — richieste idempotenti creazione Lead, RPC e policy.
+13. `20261110001200_nextway_lead_activities.sql` — attività Lead, policy e trigger aggiornamento.
+14. `20261110001300_nextway_lead_lifecycle.sql` — aggiornamento stati/ciclo di vita Lead.
+15. `20261110001400_nextway_lead_conversion_requests.sql` — richieste conversione, policy, trigger e guard.
+16. `20261111001500_nextway_conversion_provisioning.sql` — claim/finalizzazione/rilascio attivazione conversione.
+17. `20261111150000_nextway_conversion_claim_cleanup.sql` — pulizia/rafforzamento finalizzazione claim.
+18. `20261111160000_nextway_trigger_function_privileges.sql` — privilegi delle funzioni trigger.
+19. `20261112170000_nextway_conversion_activation_integrity.sql` — integrità della finalizzazione conversione.
+
+### Knowledge Base e multi-workspace
+
+20. `20261111170000_nextway_knowledge_base.sql` — tabelle documenti/chunk, ricerca e policy.
+21. `20261111180000_nextway_knowledge_storage.sql` — policy e integrazione con `storage.buckets` / `storage.objects`.
+22. `20261111190000_nextway_multi_workspace_foundation.sql` — workspace, prompt e criteri prospect.
+23. `20261111200000_nextway_workspace_activation_rpc.sql` — RPC di attivazione prompt e criteri.
+24. `20261111210000_nextway_workspace_data_association.sql` — associazione workspace ai dati esistenti.
+25. `20261111220000_nextway_workspace_memberships.sql` — membership, accesso e gestione workspace.
+26. `20261111230000_nextway_workspace_scoped_rls.sql` — policy RLS workspace-scoped, audit e ricerca knowledge.
+27. `20261111240000_nextway_setter_generation_workspace.sql` — prima versione generazione Setter con ambito workspace.
+28. `20261112000000_nextway_lead_creation_workspace.sql` — RPC creazione Lead consapevoli del workspace.
+29. `20261112010000_nextway_lead_creation_legacy_idempotency_guard.sql` — protezione compatibilità idempotenza legacy.
+30. `20261112020000_nextway_setter_generation_table_isolation.sql` — separazione tabella generazione Setter per workspace.
+31. `20261112030000_nextway_setter_governance_read_rpc.sql` — RPC di sola lettura governance Setter.
+
+## 4. Dipendenze esterne da ricostruire
+
+Le migrazioni non costituiscono uno schema autonomo. La baseline locale deve comprendere, nella versione coerente con il dump:
+
+- oggetti preesistenti `public.profiles`, `public.clients`, `public.partner_details`, `public.nextway_leads`, conversazioni e messaggi Setter;
+- RPC e trigger preesistenti usati da creazione Lead, qualificazione e flussi Setter;
+- schemi e funzioni gestite Supabase, in particolare `auth.users`, `auth.uid()`, `auth.role()`;
+- oggetti Storage `storage.buckets` e `storage.objects`, oltre al bucket locale e alle policy necessarie alla Knowledge Base;
+- ruoli, grant, tipi, sequenze, vincoli, indici, trigger e policy necessari alle funzioni `SECURITY DEFINER` e a RLS.
+
+Il dump dello schema `public` non include le definizioni degli schemi gestiti `auth` e `storage`, né i ruoli personalizzati. Queste parti devono essere fornite/configurate dallo stack locale, non ricreate alla cieca nel dump applicativo.
+
+## 5. Riconciliazione: cosa è noto e cosa manca
+
+| Verifica | Stato |
+|---|---|
+| Recupero schema-only remoto | **COMPLETATO** |
+| Assenza di righe `INSERT` / `COPY` | **CONTROLLATA** |
+| Conteggi principali di tabelle, funzioni, policy, trigger e indici | **RILEVATI** |
+| Inventario statico delle 31 migrazioni | **COMPLETATO** |
+| Identificazione delle dipendenze Auth e Storage | **COMPLETATA a livello statico** |
+| Confronto puntuale di ogni tabella/funzione/trigger/policy del dump con ogni migrazione | **DA COMPLETARE** |
+| Verifica di tipi, sequenze, ownership, grant, FK e dipendenze esterne | **DA COMPLETARE** |
+| Baseline locale importabile e riproducibile | **NON ANCORA CERTIFICATA** |
+| Seed sintetici | **NON CREATI** |
+| Test PostgreSQL o test runtime | **NON ESEGUITI** |
+
+Non assumere che una migrazione sia già inclusa nel dump solo perché il suo oggetto compare nel database live: serve verificare definizione e versione. Non riapplicare in produzione `20261112020000_nextway_setter_generation_table_isolation.sql`, che il registro operativo indica come già applicata live.
+
+## 6. Sequenza di costruzione sicura
+
+1. Estrarre dal dump locale, senza esporre corpi funzione o segreti, l'elenco dei nomi di tabelle, viste, tipi, sequenze, funzioni, trigger, policy, vincoli e grant.
+2. Confrontare tali elenchi con le 31 migrazioni e con gli oggetti prerequisito legacy.
+3. Definire una baseline SQL revisionata; mantenere il dump originale in `/tmp` e fuori dal repository.
+4. Preparare `config.toml` e seed esclusivamente sintetici in un percorso isolato, preservando `supabase/.temp/`.
+5. Avviare soltanto un profilo locale compatibile con le risorse del Mac, dopo revisione della configurazione.
+6. Applicare le migrazioni selezionate esclusivamente al database locale isolato, registrando una per una dipendenze ed esiti.
+
+## 7. Divieti e stato operativo
+
+- Nessun `supabase link`, `db push`, `migration up` remoto o deploy.
+- Nessun avvio dello stack locale finché configurazione, baseline e seed non sono revisionati.
+- Nessun dato personale, utente, Lead, conversazione o documento di produzione copiato nei test.
+- Nessun workspace, membership o record creato in produzione.
+- Nessuna modifica a `main`, nessun merge della PR.
+- Nessun deploy Netlify produzione prima del 4 dicembre 2026.
+- Nessuna spesa o creazione di un nuovo progetto cloud.
+
+**Conclusione:** è stato costruito l'inventario documentato e recuperata una baseline schema-only reale. Il passaggio successivo non è avviare Supabase né applicare migrazioni: è completare la riconciliazione degli oggetti del dump con i prerequisiti delle migrazioni, così da produrre una baseline locale riproducibile senza supposizioni.
