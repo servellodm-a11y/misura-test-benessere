@@ -39,6 +39,20 @@ const archiveHtml = fs.readFileSync('nextway-ai.html', 'utf8');
 assert.ok(searchHtml.includes('<script src="/nextway-company-config.js"></script>'));
 assert.ok(searchHtml.includes('const activeCompany=companyConfig?.active||null'));
 assert.ok(searchHtml.includes('const companyTerms=activeCompany?.searchModifiers?.[seg]||[]'));
+assert.ok(searchHtml.includes('function createMessageDraftPanel('));
+assert.ok(searchHtml.includes('Sito da proporre (facoltativo)'));
+assert.ok(searchHtml.includes('Nessun link — consigliato per il primo contatto'));
+assert.ok(searchHtml.includes('Misura Test Benessere') || searchHtml.includes('generalWellnessWebsite'));
+assert.ok(searchHtml.includes('Per approfondire, qui trova il mio riferimento:'));
+assert.ok(searchHtml.includes('linkSelect.value=recommended'));
+assert.ok(searchHtml.includes("segment==='customers'||segment==='wellness_pro'?'general'"));
+assert.ok(searchHtml.includes("explicitZinzinoInterest?'replica':'none'"));
+// Compile the browser script without executing DOM/network actions.
+const inlineScripts = [...searchHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
+const messageScript = inlineScripts.find(source => source.includes('function createMessageDraftPanel('));
+assert.ok(messageScript, 'Inline search script with message drafts must exist');
+new vm.Script(messageScript, { filename: 'nextway-motore-ricerca.inline.js' });
+
 assert.ok(searchHtml.includes('company_id:activeCompany?.id||null'));
 assert.ok(searchHtml.includes('company_id:activeCompany?.id||\\'zinzino\\''));
 assert.ok(archiveHtml.includes('partner_company_id:String(record.company_id||\\'zinzino\\')'));
