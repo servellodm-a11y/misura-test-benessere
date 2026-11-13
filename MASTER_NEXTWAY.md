@@ -2969,3 +2969,11 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Priorità: P0 rate limit; P0 governance workspace; P1 cleanup staged output/trigger; P2 retention legacy. Le prime due RPC sono dipendenze del codice Edge Function presente nel branch, ma il risultato SQL non prova quale versione Edge Function sia distribuita.
 - Prossimo passo tecnico: identificare in modo read-only il registro corretto prima di consultarne le righe e verificare la versione Edge Function distribuita. Non eseguire migrazioni, DDL/DML o deploy in produzione.
 - **Nessuna modifica remota:** nessuna migrazione, scrittura, deploy, import, seed o test runtime è stato eseguito.
+
+
+### Identificazione registri migrazioni: prossimo controllo read-only — 13 novembre 2026
+
+- La ricerca cataloghi ha individuato tre relazioni candidate: `auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`. Non è ancora noto se una di esse contenga la cronologia delle migrazioni applicative.
+- Aggiunto `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql` sul branch di lavoro. La query verifica esistenza e struttura delle sole tre relazioni usando `pg_catalog`; restituisce nomi/tipi delle colonne e non legge righe applicative.
+- L'utente dovrà eseguire questa query read-only nel SQL Editor e condividere il risultato. Solo dopo aver identificato una struttura pertinente si valuterà un'eventuale lettura mirata delle versioni migrazione.
+- Nessuna modifica al database, migrazione, deploy, merge, import, seed o test runtime.
