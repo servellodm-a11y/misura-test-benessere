@@ -180,7 +180,7 @@ if(x.archived_at){const archiveInfo=document.createElement('p');archiveInfo.clas
   const evidenceText=String(x.evidence||'').replace(/\s+/g,' ').trim();
   const evidenceExcerpt=evidenceText.length>180?evidenceText.slice(0,177).trimEnd()+'…':evidenceText;
   const personalization=profession
-    ? 'Ho notato la sua attività come '+profession+(company?' presso '+company:'')+(location?' a '+location)+'. '
+    ? 'Ho notato la sua attività come '+profession+(company?' presso '+company:'')+(location?' a '+location:'')+'. '
     : company
       ? 'Ho notato la sua attività collegata a '+company+(location?' a '+location:'')+'. '
       : evidenceExcerpt
