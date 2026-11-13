@@ -258,7 +258,7 @@
     async function loadSelectedWorkspace() {
       const workspace = selectedWorkspace();
       const moduleInput = $("knowledge-upload").elements.namedItem("module_key");
-      if (workspace && moduleInput && !moduleInput.value.trim()) moduleInput.value = workspace.workspace_key;
+      if (workspace && moduleInput && !moduleInput.value.trim()) moduleInput.value = workspace.workspace_key.slice(0, 64);
       await Promise.all([loadMemberships(), loadDocuments(), loadGovernance()]);
     }
 
@@ -468,7 +468,7 @@
           : "Documento caricato e indicizzato. Stato pending: richiede approvazione.");
         form.reset();
         const activeWorkspace = selectedWorkspace();
-        if (activeWorkspace) form.elements.namedItem("module_key").value = activeWorkspace.workspace_key;
+        if (activeWorkspace) form.elements.namedItem("module_key").value = activeWorkspace.workspace_key.slice(0, 64);
       } catch (error) {
         status("Caricamento non completato: " + error.message);
       } finally {
@@ -487,7 +487,7 @@
         const { data, error } = await c.rpc("nextway_search_knowledge", {
           p_workspace_id: workspace.id,
           p_query: query,
-          p_module_key: $("knowledge-upload").elements.namedItem("module_key").value.trim() || workspace.workspace_key,
+          p_module_key: $("knowledge-upload").elements.namedItem("module_key").value.trim() || workspace.workspace_key.slice(0, 64),
           p_language_code: "it",
           p_limit: 5
         });
