@@ -60,12 +60,12 @@ window.NEXTWAY_LOCAL_ARCHIVE={
    id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
    name:title,profession:'',company_brand:'',location:'',
    category:['potential_partner','final_customer','wellness_professional'].includes(record.category)?record.category:'potential_partner',
-   partner_type:record.partner_type||'',mode:'Affinità professionale',signal_type:'Altro segnale documentato',
+   partner_type:record.partner_type||'',networker_stage:String(record.networker_stage||'').slice(0,100),mode:'Affinità professionale',signal_type:'Altro segnale documentato',
    source:new URL(url).hostname,url,evidence,public_contacts:publicContacts,
    verified_at:'',identity_check:'pending',qualification:'Da approfondire',
    fit:0,activity:0,presence:0,interest:0,approach:0,
    status:'Da verificare',
-   notes:'Acquisito dalla Ricerca NEXTWAY. Il titolo è un identificativo provvisorio. I recapiti e i profili elencati sono stati rilevati nel testo pubblico della pagina, non verificati come appartenenti al soggetto: controllare fonte, titolarità, ruolo, località e pertinenza prima di contattare.'+(contactNotes.length?'\n'+contactNotes.join('\n'):' Nessun recapito pubblico rilevato.'),
+   notes:'Acquisito dalla Ricerca NEXTWAY. Il titolo è un identificativo provvisorio. I recapiti e i profili elencati sono stati rilevati nel testo pubblico della pagina, non verificati come appartenenti al soggetto: controllare fonte, titolarità, ruolo, località e pertinenza prima di contattare.'+(record.networker_stage?'\nClassificazione networker provvisoria: '+String(record.networker_stage).slice(0,100)+'.':'')+(contactNotes.length?'\n'+contactNotes.join('\n'):' Nessun recapito pubblico rilevato.'),
    created:new Date().toISOString(),local_dirty:true
   };
   data.unshift(lead);persist();return {duplicate:false,lead};
