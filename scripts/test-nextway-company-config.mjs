@@ -342,7 +342,7 @@ assert.ok([direct,highlyRelevant,interesting,deepen,discard].every(result=>resul
 
 assert.ok(searchHtml.includes('function assessCommercialFit('));
 assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit_score'));
-assert.ok(searchHtml.includes('Tipo prospect: '+commercialFit.prospect_type));
+assert.ok(searchHtml.includes("fitTitle.textContent='Valore commerciale · '+commercialFit.prospect_type"));
 assert.ok(searchHtml.includes('punteggio_pertinenza_commerciale'));
 assert.ok(searchHtml.includes('commercial_fit:value.commercial_fit'));
 const fitStart=searchHtml.indexOf('function assessCommercialFit(');
