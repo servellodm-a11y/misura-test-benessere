@@ -58,6 +58,18 @@ assert.ok(searchHtml.includes('company_id:activeCompany?.id||\\'zinzino\\''));
 assert.ok(archiveHtml.includes('partner_company_id:String(record.company_id||\\'zinzino\\')'));
 assert.ok(archiveHtml.includes('partner_company_name:String(record.company_name||\\'Zinzino\\')'));
 assert.ok(archiveHtml.includes("'partner_company_id','partner_company_name'"));
+assert.ok(archiveHtml.includes('<script src="/nextway-company-config.js"></script>'));
+assert.ok(archiveHtml.includes('Prepara un messaggio per questo Lead'));
+assert.ok(archiveHtml.includes('Sito da proporre (facoltativo)'));
+assert.ok(archiveHtml.includes('BOZZA DA INVIARE MANUALMENTE'));
+assert.ok(archiveHtml.includes('Nessun link aggiunto'));
+assert.ok(archiveHtml.includes('websites.generalWellnessWebsite'));
+assert.ok(archiveHtml.includes('websites.zinzinoReplicaWebsite'));
+const archiveScripts = [...archiveHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
+const crmScript = archiveScripts.find(source => source.includes('Prepara un messaggio per questo Lead'));
+assert.ok(crmScript, 'CRM inline script with message drafts must exist');
+new vm.Script(crmScript, { filename: 'nextway-ai.inline.js' });
+
 
 const docs = fs.readFileSync('docs/companies/zinzino/README.md', 'utf8');
 assert.ok(docs.includes('Piano compensi'));
