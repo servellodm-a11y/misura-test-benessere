@@ -3390,3 +3390,14 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Creata diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`: controlla presenza di tabelle/colonne core e stato RLS interrogando solo cataloghi; non legge dati applicativi o righe Auth. Non eseguita.
 - Corretta la ricostruzione storica del trigger Setter: il trigger 007 era coerente con la tabella legacy dopo che la migrazione 005 aveva aggiunto `generated_output`; la migrazione 1315 lo riallinea dopo la separazione delle tabelle. Test statico corretto e CI `43412838823` SUCCESS.
 - Baseline SQL schema-only completa ancora da produrre e confrontare. Nessun progetto staging creato; nessuna migrazione applicata; nessun collegamento remote; nessun database reale modificato.
+
+## 13 novembre 2026 — Esito CI configurazione staging
+
+- Aggiornato `supabase/config.toml` per usare `[local_smtp]` con Mailpit sandbox, sezione corrente della CLI; non usare più `[inbucket]` nelle nuove configurazioni perché deprecata nelle versioni recenti.
+- Test `scripts/test-nextway-staging-config.py` aggiornato per verificare la sezione `local_smtp`, le porte SMTP e l'assenza di remotes/credenziali/URL produzione.
+- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43413398397`, commit `9288b3b0d5e93bb1e01592e8a86cda25a4e02978`, SUCCESS; 45 step, nessun fallimento, test staging config superato.
+- Parsing TOML e controlli essenziali verificati anche separatamente con Python `tomllib`.
+- La configurazione resta un file CLI locale: non crea un progetto cloud, non collega alcun remote e non è stata eseguita alcuna operazione Supabase. La documentazione CLI descrive `config.toml` come configurazione del progetto locale e `local_smtp` come server email locale di test; le email locali vengono intercettate e non inviate. Riferimento: https://supabase.com/docs/guides/local-development/cli/config
+- Preparata diagnostica `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql` per verificare metadati e RLS della baseline core, senza leggere righe applicative. Non eseguita.
+- Restano aperti: baseline schema-only core completa, confronto con migrazioni, creazione progetto cloud staging (solo dopo autorizzazione esplicita), migrazioni PostgreSQL e test Auth/concorrenza.
+- Nessuna modifica a `nextway-platform`; nessun deploy, invito/email, account di test o migrazione applicata.
