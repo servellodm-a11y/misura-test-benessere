@@ -339,4 +339,35 @@ const discard=qualify('Elenco professionisti','Directory nutrizionisti','Elenco 
 assert.equal(discard.status,'Non adatto · da scartare');
 assert.ok([direct,highlyRelevant,interesting,deepen,discard].every(result=>result.action&&result.reasons.length));
 
+
+assert.ok(searchHtml.includes('function assessCommercialFit('));
+assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit_score'));
+assert.ok(searchHtml.includes('Tipo prospect: '+commercialFit.prospect_type));
+assert.ok(searchHtml.includes('punteggio_pertinenza_commerciale'));
+assert.ok(searchHtml.includes('commercial_fit:value.commercial_fit'));
+const fitStart=searchHtml.indexOf('function assessCommercialFit(');
+const fitEnd=searchHtml.indexOf('function buildProspectProfile(',fitStart);
+assert.ok(fitStart>=0&&fitEnd>fitStart,'Commercial fit helper must be present');
+const fitContext={};
+vm.runInNewContext(searchHtml.slice(fitStart,fitEnd)+';this.assessCommercialFit=assessCommercialFit;',fitContext);
+const assessFit=fitContext.assessCommercialFit;
+const customerFit=assessFit('Profilo personale','Cerco un nutrizionista per una consulenza','', 'customers',{kind:'customer',segment:'customers',confidence:'media'}, {score:70},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(customerFit.prospect_type,'cliente');
+assert.equal(customerFit.signal_strength,'forte');
+assert.equal(customerFit.explicit_intent,'dichiarato');
+assert.ok(customerFit.commercial_fit_score>customerFit.documentary_score);
+const professionalFit=assessFit('Mario Rossi - Nutrizionista','Sono nutrizionista','Consulenze nutrizionali','wellness_pro',{kind:'partner',segment:'wellness_pro',confidence:'media'}, {score:85},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(professionalFit.prospect_type,'partner');
+assert.equal(professionalFit.signal_strength,'debole');
+assert.equal(professionalFit.explicit_intent,'non dichiarato');
+assert.ok(professionalFit.reasons.some(reason=>reason.includes('non prova interesse')));
+const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-time','', 'side_income',{kind:'partner',segment:'side_income',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(opportunityFit.signal_strength,'forte');
+assert.equal(opportunityFit.explicit_intent,'dichiarato');
+const genericFit=assessFit('Profilo personale','Benessere e stile di vita','', 'customers',{kind:'unknown',segment:'unclassified',confidence:'bassa'}, {score:25},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(genericFit.prospect_type,'da qualificare');
+assert.equal(genericFit.commercial_fit_score,0);
+assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
+assert.ok(archiveHtml.includes('Prossima azione: '+ '(fit.suggested_next_step'));
+
 console.log('NEXTWAY company configuration contract: PASS');
