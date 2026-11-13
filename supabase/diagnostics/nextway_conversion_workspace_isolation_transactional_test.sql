@@ -84,6 +84,12 @@ begin
     (v_ws_a,v_users[2],'workspace_member','active',now()),
     (v_ws_b,v_users[1],'workspace_member','active',now());
 
+  -- Le modifiche di workspace ai Lead sono eseguite nel contesto admin,
+  -- così i trigger di assegnazione applicano la stessa regola dell'applicazione.
+  perform set_config('request.jwt.claim.sub',v_admin::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',v_admin::text,'role','authenticated')::text,true);
+
   update public.nextway_leads
   set workspace_id=v_ws_a
   where id=v_leads[1] and owner_profile_id=v_users[1]
@@ -239,6 +245,11 @@ reset role;
 
 -- Trasferimento amministrativo successivo del Lead A: la richiesta resta nello
 -- snapshot workspace A e non segue il workspace corrente del Lead.
+perform set_config('request.jwt.claim.sub',current_setting('nextway.test.admin'),true);
+perform set_config('request.jwt.claim.role','authenticated',true);
+perform set_config('request.jwt.claims',jsonb_build_object(
+  'sub',current_setting('nextway.test.admin'),'role','authenticated'
+)::text,true);
 update public.nextway_leads
 set workspace_id=current_setting('nextway.test.workspace_b')::uuid
 where id=current_setting('nextway.test.lead_a')::uuid;
