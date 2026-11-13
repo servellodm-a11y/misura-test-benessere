@@ -140,6 +140,29 @@ triggers_data as (
   join pg_proc p on p.oid = t.tgfoid
   join pg_namespace pn on pn.oid = p.pronamespace
 ),
+policies_data as (
+  select tablename,
+         jsonb_agg(jsonb_build_object(
+           'name', policyname, 'permissive', permissive, 'roles', roles,
+           'command', cmd, 'using', qual, 'with_check', with_check
+         ) order by policyname) as items
+  from pg_policies
+  where schemaname = 'public'
+  group by tablename
+),
+schema_grants as (
+  select n.nspname,
+         jsonb_agg(jsonb_build_object(
+           'grantee', case x.grantee when 0 then 'PUBLIC' else pg_get_userbyid(x.grantee) end,
+           'grantor', pg_get_userbyid(x.grantor),
+           'privilege', x.privilege_type,
+           'grantable', x.is_grantable
+         ) order by x.grantee, x.privilege_type) as items
+  from pg_namespace n
+  cross join lateral aclexplode(coalesce(n.nspacl, acldefault('n'::"char", n.nspowner))) x
+  where n.nspname = 'public'
+  group by n.nspname
+),
 schemas_data as (
   select jsonb_agg(jsonb_build_object(
     'schema', n.nspname,
@@ -147,7 +170,8 @@ schemas_data as (
     'usage_authenticated', has_schema_privilege('authenticated', n.oid, 'USAGE'),
     'create_authenticated', has_schema_privilege('authenticated', n.oid, 'CREATE'),
     'usage_anon', has_schema_privilege('anon', n.oid, 'USAGE'),
-    'create_anon', has_schema_privilege('anon', n.oid, 'CREATE')
+    'create_anon', has_schema_privilege('anon', n.oid, 'CREATE'),
+    'grants', coalesce((select sg.items from schema_grants sg where sg.nspname = n.nspname), '[]'::jsonb)
   ) order by n.nspname) as items
   from pg_namespace n
   where n.nspname in ('public')
@@ -160,10 +184,12 @@ select jsonb_pretty(jsonb_build_object(
     'name', r.object_name, 'details', r.details,
     'columns', coalesce(cd.items, '[]'::jsonb),
     'constraints', coalesce(kd.items, '[]'::jsonb),
+    'policies', coalesce(pd.items, '[]'::jsonb),
     'grants', coalesce(tg.items, '[]'::jsonb)
   ) order by r.object_name) from relations_data r
     left join columns_data cd on cd.table_name = r.object_name
     left join constraints_data kd on kd.table_name = r.object_name
+    left join policies_data pd on pd.tablename = r.object_name
     left join table_grants tg on tg.object_name = r.object_name), '[]'::jsonb),
   'sequences', coalesce((select jsonb_agg(jsonb_build_object(
     'name', sequence_name, 'details', details) order by sequence_name)
