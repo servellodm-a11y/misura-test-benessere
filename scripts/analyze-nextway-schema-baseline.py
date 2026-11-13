@@ -101,8 +101,10 @@ def main() -> int:
     print("\n[Controlli lessicali sulle migrazioni]")
     print(f"SECURITY DEFINER: {migration_security_definer}")
     print(f"SET search_path: {migration_search_path}")
-    print(f"Policy RLS dichiarate: {sum(len(re.findall(r'\\bCREATE\\s+POLICY\\b', sql, re.I)) for _, sql in migration_sql)}")
-    print(f"Trigger dichiarati: {sum(len(re.findall(r'\\bCREATE\\s+(?:OR\\s+REPLACE\\s+)?TRIGGER\\b', sql, re.I)) for _, sql in migration_sql)}")
+    policy_count = sum(len(re.findall(r"\\bCREATE\\s+POLICY\\b", sql, re.I)) for _, sql in migration_sql)
+    trigger_count = sum(len(re.findall(r"\\bCREATE\\s+(?:OR\\s+REPLACE\\s+)?TRIGGER\\b", sql, re.I)) for _, sql in migration_sql)
+    print(f"Policy RLS dichiarate: {policy_count}")
+    print(f"Trigger dichiarati: {trigger_count}")
     print("\nATTENZIONE: un oggetto non trovato può essere creato da una migrazione successiva o usare SQL dinamico.")
     print("Prima dell'import verificare manualmente prerequisiti, FK, ownership, grant, ruoli e schemi managed.")
     return 0
