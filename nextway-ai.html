@@ -217,7 +217,10 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const details=document.createElement('textarea');details.maxLength=4000;details.rows=3;details.placeholder='Esito, contenuto essenziale e prossimi passi (max 4.000 caratteri)';
   const occurred=document.createElement('input');occurred.type='datetime-local';occurred.value=new Date().toISOString().slice(0,16);
   const next=document.createElement('input');next.type='datetime-local';
-  form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next));
+  const outcome=document.createElement('select');
+  const outcomeOptions=[['not_classified','Non classificato'],['no_answer','Nessuna risposta'],['information_requested','Ha chiesto informazioni'],['interested','Ha manifestato interesse'],['not_interested','Non interessato'],['meeting_scheduled','Appuntamento fissato'],['followup_needed','Ricontatto necessario']];
+  outcomeOptions.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;outcome.append(option);});
+  form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next),field('Esito del contatto',outcome));
   const detailsWrap=field('Dettagli',details);detailsWrap.style.gridColumn='1 / -1';form.append(detailsWrap);
   const draftPanel=document.createElement('section');draftPanel.style.cssText='grid-column:1 / -1;border:1px solid #dfe5ef;border-radius:10px;padding:12px;background:#f8faff';
   const draftTitle=document.createElement('strong');draftTitle.textContent='Prepara un messaggio per questo Lead';
@@ -297,7 +300,7 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(!subject.value.trim()){feedback.textContent='Inserisci l’oggetto dell’attività.';return;}
    save.disabled=true;feedback.textContent='Salvataggio nel cloud…';
-   try{await window.NEXTWAY_CLOUD.addLeadActivity(x.cloud_id,{activity_type:type.value,subject:subject.value,details:details.value,occurred_at:occurred.value,next_action_at:next.value});form.reset();occurred.value=new Date().toISOString().slice(0,16);feedback.textContent='Attività registrata nel cloud.';await loadEvents();}
+   try{const outcomeLabel=outcomeOptions.find(([value])=>value===outcome.value)?.[1]||'Non classificato';const activityDetails=(outcome.value!=='not_classified'?'Esito NEXTWAY: '+outcomeLabel+'\n':'')+details.value;if(activityDetails.length>4000)throw new Error('Riduci i dettagli: il limite complessivo è 4.000 caratteri.');await window.NEXTWAY_CLOUD.addLeadActivity(x.cloud_id,{activity_type:type.value,subject:subject.value,details:activityDetails,occurred_at:occurred.value,next_action_at:next.value});form.reset();occurred.value=new Date().toISOString().slice(0,16);feedback.textContent='Attività registrata nel cloud.';await loadEvents();}
    catch(err){feedback.textContent='Salvataggio non riuscito: '+err.message;}
    finally{save.disabled=false;}
   });
