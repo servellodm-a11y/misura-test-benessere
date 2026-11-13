@@ -167,7 +167,9 @@ Deno.serve(async (req: Request) => {
           search_depth: "basic",
           max_results: maxResults,
           include_answer: false,
-          include_raw_content: false,
+          // Recupera il testo pubblico della pagina per consentire l'estrazione
+          // locale e verificabile di recapiti e profili professionali.
+          include_raw_content: "markdown",
         }),
       });
     } catch (error) {
@@ -216,6 +218,7 @@ Deno.serve(async (req: Request) => {
         title: String(record.title ?? "").slice(0, 300),
         url: sourceUrl.toString(),
         snippet: String(record.content ?? "").slice(0, 1200),
+        page_content: String(record.raw_content ?? "").slice(0, 5000),
         score: Number.isFinite(rawScore) ? rawScore : 0,
         published_date: record.published_date ? String(record.published_date).slice(0, 40) : null,
       }];
