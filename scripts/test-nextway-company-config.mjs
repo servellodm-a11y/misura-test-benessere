@@ -77,6 +77,14 @@ assert.ok(archiveHtml.includes('prospect_evidence_score:evidenceQuality.evidence
 assert.ok(archiveHtml.includes('function getProspectQuality(x)'));
 assert.ok(archiveHtml.includes('PUNTEGGIO DOCUMENTALE:'));
 assert.ok(archiveHtml.includes('Qualità ricerca:'));
+assert.ok(archiveHtml.includes('id="prospectQualityFilter"'));
+assert.ok(archiveHtml.includes('id="entityTypeFilter"'));
+assert.ok(archiveHtml.includes('value="prospect_quality"'));
+assert.ok(archiveHtml.includes('Qualità ricerca più alta'));
+assert.ok(archiveHtml.includes('Punteggio commerciale più alto'));
+assert.ok(archiveHtml.includes("qualityFilter==='high'"));
+assert.ok(archiveHtml.includes("qualityFilter==='medium'"));
+assert.ok(archiveHtml.includes('entityFilter'));
 assert.ok(archiveHtml.includes("'prospect_score','prospect_identity_score','prospect_relevance_score','prospect_evidence_score'"));
 assert.ok(archiveHtml.includes('Sito da proporre (facoltativo)'));
 assert.ok(archiveHtml.includes('BOZZA DA INVIARE MANUALMENTE'));
