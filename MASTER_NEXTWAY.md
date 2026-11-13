@@ -2938,3 +2938,13 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Limite: il dump e il codice sorgente del branch non provano quale versione Edge Function sia distribuita né lo stato del registro migrazioni remoto. Nessuna chiamata RPC remota, lettura del registro migrazioni, migrazione o modifica al database è stata eseguita in questa fase.
 - Aggiornata `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con la classificazione per impatto. Prossimo controllo: acquisire evidenza read-only sul registro migrazioni e sullo stato delle funzioni distribuite, solo con procedura che non comporti scritture o deploy; in alternativa predisporre una richiesta mirata di verifica SQL da eseguire in sola lettura nel dashboard Supabase.
 - Nessun import locale, seed, test runtime, deploy, merge, modifica a `main` o deploy Netlify.
+
+
+### Verifica SQL read-only preparata — 13 novembre 2026
+
+- Creato `docs/NEXTWAY-READONLY-RECONCILIATION-CHECK.sql`.
+- La query controlla il registro `supabase_migrations.schema_migrations` per sei migrazioni selezionate e verifica via cataloghi PostgreSQL la presenza delle tabelle/RPC/trigger Setter rilevanti.
+- La query è racchiusa in `BEGIN TRANSACTION READ ONLY` / `COMMIT` e contiene esclusivamente SELECT e letture dei cataloghi. Nessuna DDL/DML.
+- È destinata al SQL Editor del progetto `nextway-platform` (ref `obqwbtlltxjfeirstsya`); se il registro migrazioni non è accessibile, fermarsi e riportare l'errore, senza tentare query alternative non documentate.
+- Prossimo passo operativo: eseguire questa sola query nel SQL Editor e riportare la tabella dei risultati. Non inviare password, token o chiavi.
+- Nessuna query è stata eseguita sul database remoto da questo passaggio; nessuna migrazione, deploy, merge, import locale o modifica a `main`.
