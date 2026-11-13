@@ -365,7 +365,13 @@ el('loadFollowups').addEventListener('click',async()=>{
    else if(next){code='planned';label='Follow-up programmato';action='Attendere la scadenza del promemoria.';priority=4;}
    else if(outcome.includes('Nessuna risposta')||outcome.includes('Ricontatto necessario')){code='retry';label='Ricontatto da pianificare';action='Valutare un ricontatto appropriato, senza invii automatici.';priority=3;}
    return {lead,ev,next,outcome,code,label,action,priority};
-  }).filter(Boolean).sort((a,b)=>a.priority-b.priority||new Date(b.ev.occurred_at)-new Date(a.ev.occurred_at));
+  }).filter(Boolean);
+  data.filter(lead=>!lead.is_test&&!lead.archived_at&&lead.cloud_id&&!latestContact.has(lead.cloud_id)).forEach(lead=>{
+   const next=events.find(item=>item.lead_id===lead.cloud_id)||null;
+   const excluded=['non interessato','escluso'].includes(String(lead.status||'').toLocaleLowerCase('it'));
+   agendaRows.push({lead,ev:null,next,outcome:'',code:excluded?'stop':next&&new Date(next.next_action_at)<=nowForAgenda?'due':next?'planned':'research',label:excluded?'Non ricontattare':next&&new Date(next.next_action_at)<=nowForAgenda?'Follow-up scaduto / oggi':next?'Follow-up programmato':'Da approfondire',action:excluded?'Interrompere i contatti e rispettare la scelta espressa.':next&&new Date(next.next_action_at)<=nowForAgenda?'Eseguire il ricontatto previsto e registrare l’esito.':next?'Attendere la scadenza del promemoria.':'Verificare il profilo e la fonte prima di un eventuale primo contatto.',priority:excluded?99:next&&new Date(next.next_action_at)<=nowForAgenda?0:next?4:6});
+  });
+  agendaRows.sort((a,b)=>a.priority-b.priority||(new Date(b.ev?.occurred_at||b.next?.next_action_at||0)-new Date(a.ev?.occurred_at||a.next?.next_action_at||0)));
   panel.replaceChildren();
   const heading=document.createElement('strong');heading.textContent='Agenda commerciale generale · '+agendaRows.length+' Lead con attività recenti';panel.append(heading);
   const agendaNote=document.createElement('p');agendaNote.className='small';agendaNote.textContent='Basata sui Lead sincronizzati e caricati in questo archivio (massimo 100) e sulle ultime attività disponibili. Le azioni restano manuali.';panel.append(agendaNote);
@@ -373,7 +379,7 @@ el('loadFollowups').addEventListener('click',async()=>{
   agendaRows.forEach(item=>{
    const row=document.createElement('div');row.style.cssText='border-top:1px solid #e5eaf1;padding:10px 0';
    const title=document.createElement('strong');title.textContent=item.lead.name+' · '+item.label;
-   const detail=document.createElement('p');detail.className='small';detail.textContent='Ultimo contatto: '+new Date(item.ev.occurred_at).toLocaleString('it-IT')+' · '+(item.ev.subject||'senza oggetto')+(item.outcome?' · Esito: '+item.outcome:'');
+   const detail=document.createElement('p');detail.className='small';detail.textContent=item.ev?'Ultimo contatto: '+new Date(item.ev.occurred_at).toLocaleString('it-IT')+' · '+(item.ev.subject||'senza oggetto')+(item.outcome?' · Esito: '+item.outcome:''):item.next?'Nessun contatto registrato · Promemoria: '+new Date(item.next.next_action_at).toLocaleString('it-IT'):'Nessuna attività di contatto registrata nel CRM.';
    const action=document.createElement('p');action.textContent='Prossima azione: '+item.action;
    const controls=document.createElement('div');controls.className='actions';
    const open=document.createElement('button');open.type='button';open.className='btn alt';open.textContent='Apri Lead';open.addEventListener('click',()=>{el('query').value=item.lead.name;el('archiveFilter').value='all';draw();const card=Array.from(el('records').children).find(node=>node.dataset.cloudId===item.lead.cloud_id);card?.scrollIntoView({behavior:'smooth',block:'center'});});
