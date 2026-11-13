@@ -2925,3 +2925,16 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - La precedente segnalazione di assenza della tabella legacy era un falso negativo dello script lessicale; ritirata e corretta in `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`. Non ricreare la tabella.
 - Il medesimo controllo non ha trovato nel dump riferimenti a `nextway_api_rate_limits`, `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output`, `nextway_prune_setter_generation_requests` e `nextway_get_active_setter_governance`. Queste restano differenze da incrociare con le migrazioni e la cronologia, senza dedurre dal solo dump che siano state rimosse o mai applicate.
 - Nessuna modifica al database, nessuna migrazione, import locale, seed, test runtime o deploy.
+
+
+### Riconciliazione codice runtime / RPC Setter — 13 novembre 2026
+
+- Corretto il precedente falso negativo: `public.nextway_setter_generation_requests` è presente nel dump, con PK, indice conversazione, FK, RLS e grant a `service_role`. Lo store `nextway_setter_workspace_generation_requests` è separato. La vecchia riga del rapporto che ne dichiarava l'assenza è superata dalla correzione nella sezione precedente e nel documento di riconciliazione.
+- Lettura statica di `supabase/functions/nextway-ai-setter/index.ts`: prima di procedere la Edge Function chiama `nextway_consume_api_rate_limit` con `p_scope` e `p_units`. Se la RPC non è disponibile, restituisce HTTP 503 e interrompe la generazione.
+- La stessa Edge Function chiama `nextway_get_active_setter_governance` quando la conversazione ha `workspace_id`; se la RPC non è disponibile, restituisce HTTP 503 e non procede con governance workspace.
+- Il dump schema `public` non contiene la tabella `nextway_api_rate_limits`, la RPC rate limit a due argomenti né la RPC governance. Sono quindi **priorità P0 da chiarire** rispetto al codice del branch.
+- `nextway_clear_stale_setter_output` e il relativo trigger sono una protezione di correttezza per la riassegnazione di lease con output staged: assenza classificata P1.
+- `nextway_prune_setter_generation_requests()` è manutenzione manuale admin-only, non nel percorso ordinario di generazione: assenza classificata P2.
+- Limite: il dump e il codice sorgente del branch non provano quale versione Edge Function sia distribuita né lo stato del registro migrazioni remoto. Nessuna chiamata RPC remota, lettura del registro migrazioni, migrazione o modifica al database è stata eseguita in questa fase.
+- Aggiornata `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con la classificazione per impatto. Prossimo controllo: acquisire evidenza read-only sul registro migrazioni e sullo stato delle funzioni distribuite, solo con procedura che non comporti scritture o deploy; in alternativa predisporre una richiesta mirata di verifica SQL da eseguire in sola lettura nel dashboard Supabase.
+- Nessun import locale, seed, test runtime, deploy, merge, modifica a `main` o deploy Netlify.
