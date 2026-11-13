@@ -135,6 +135,7 @@ assert.ok(archiveHtml.includes("['interested','Ha manifestato interesse']"),'CRM
 assert.ok(archiveHtml.includes("['not_interested','Non interessato']"),'CRM activity form must classify negative responses');
 assert.ok(archiveHtml.includes("['no_answer','Nessuna risposta']"),'CRM activity form must classify no-answer outcomes');
 assert.ok(archiveHtml.includes("Esito NEXTWAY: '+outcomeLabel"),'CRM must persist the selected outcome with the activity without a schema migration');
+assert.ok(archiveHtml.includes("outcomeLine.textContent='Esito: '+outcomeMatch[1]"),'CRM activity history must render the outcome as a distinct field');
 assert.ok(searchHtml.includes('last_contact_outcome:outcomeMatch?.[1]||'),'Prospect agenda must read the last recorded contact outcome');
 assert.ok(searchHtml.includes('Esito ultimo contatto: '),'Prospect agenda must display the latest response classification');
 assert.ok(searchHtml.includes('getOpenLeadActivities(100)'),'Daily agenda must include all CRM open follow-ups');
