@@ -3242,3 +3242,16 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Test richiesti: isolamento A/B, membership invited/suspended, workspace sospeso, inviti e retry, concorrenza/idempotenza, richieste legacy e RLS.
 - Stato: **PROGETTAZIONE IN CORSO — non pronta per migrazione**. Nessuna modifica DB, SQL, Edge Function, UI, deploy, merge o modifica a `main`.
 - Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Progettazione correzione conversione multi-workspace”.
+
+
+## 13 novembre 2026 — Dipendenze CRM e preflight conversione
+
+- Ispezionate migrazioni, UI CRM, provisioning, finalizzazione, membership e policy workspace.
+- La migration di provisioning usa campi esistenti di `clients` e `partner_details`, ma il repository non contiene le definizioni originarie né le policy RLS di queste due tabelle.
+- Confermato che l'INSERT UI non legge/invia workspace; la coda admin non lo visualizza. Le policy workspace attuali ereditano l'accesso dalla relazione Lead, ma la richiesta non conserva uno snapshot immutabile.
+- Membership partner proposta: `invited` al momento della conversione, poi attivazione amministrativa esplicita dopo accettazione Auth; lo stato invited non concede accesso.
+- Cliente: mantenere record CRM senza Auth; attribuzione workspace in relazione NEXTWAY dedicata, da confermare dopo audit schema/RLS.
+- Aggiunto `supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql`: una sola riga JSON con metadati di tabelle, colonne, vincoli, indici, RLS/policy, trigger e funzioni; non legge record CRM e non modifica nulla.
+- **DA VERIFICARE:** schema e policy effettive `clients`/`partner_details`. Non preparare/applicare la migrazione finale prima di questo dato.
+- Nessuna query live, migrazione, DDL/DML, deploy, merge o modifica a `main`.
+- Dettagli in `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Approfondimento dipendenze CRM e preflight schema”.
