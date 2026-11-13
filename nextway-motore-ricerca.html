@@ -193,7 +193,7 @@ async function runSearch(){
    const rankedResults=(group.results||[]).map(item=>({...item,_assessment:assessSearchEvidence(item.title,item.snippet,String(item.page_content||'').slice(0,5000),safeUrl(item.url),extractPublicContacts(String(item.page_content||'').slice(0,5000)),$('segment').value)})).sort((a,b)=>b._assessment.score-a._assessment.score);
    rankedResults.forEach(item=>{
     const url=safeUrl(item.url);if(!url)return;
-    const card=document.createElement('article');card.className='query';
+    const card=document.createElement('article');card.className='query';card.dataset.priorityScore=String(assessment.score||0);card.dataset.identityScore=String(assessment.identityScore||0);
     const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
     const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
     const pageContent=String(item.page_content||'').slice(0,5000);
@@ -248,6 +248,9 @@ async function runSearch(){
     card.append(title,snippet,targetSummary,quality,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
+  const sortedCards=[...list.querySelectorAll('article.query')].sort((a,b)=>(Number(b.dataset.priorityScore)||0)-(Number(a.dataset.priorityScore)||0)||(Number(b.dataset.identityScore)||0)-(Number(a.dataset.identityScore)||0));
+  const rankingHeading=document.createElement('h3');rankingHeading.textContent='Lista unica · ordinata per qualità delle evidenze';
+  const rankingContainer=document.createElement('div');sortedCards.forEach(card=>rankingContainer.append(card));list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>b.evidence_score-a.evidence_score||b.identity_score-a.identity_score||b.relevance_score-a.relevance_score);
   const duplicateTotal=dailyProspects.reduce((sum,p)=>sum+p.duplicate_count,0);
   const partnerCount=dailyProspects.filter(p=>p.classification==='Potenziale partner').length,customerCount=dailyProspects.filter(p=>p.classification.includes('cliente')).length,reviewCount=dailyProspects.filter(p=>p.classification==='Da qualificare').length;$('daily-summary').textContent='Lista del '+new Date().toLocaleDateString('it-IT')+' · '+dailyProspects.length+' prospect unici · '+duplicateTotal+' duplicati consolidati · '+partnerCount+' potenziali partner · '+customerCount+' potenziali clienti / da verificare · '+reviewCount+' da qualificare. Ogni riga esportata include fonte, recapiti pubblici rilevati, motivazione e bozza del primo messaggio.';$('exportDaily').disabled=!dailyProspects.length;status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. La lista può essere esportata in CSV. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
