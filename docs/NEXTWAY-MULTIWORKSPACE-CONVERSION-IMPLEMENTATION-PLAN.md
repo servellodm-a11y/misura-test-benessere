@@ -212,3 +212,38 @@ La diagnostica restituita contiene definizioni RPC e policy, ma non l'elenco dei
 4. La policy INSERT va riprogettata per consentire a ruoli workspace autorizzati di proporre conversioni di Lead condivisi, verificando membership attiva e ruolo, mantenendo owner/sponsor come proprietario effettivo del Lead.
 5. L'accesso clienti dei collaboratori deve essere progettato e testato separatamente; la membership non deve diventare un bypass generalizzato di RLS.
 6. Prima di finalizzare la migrazione, acquisire i GRANT EXECUTE live e confermare le firme/grants di `nextway_has_workspace_access` e `nextway_is_platform_admin`, oltre a eseguire test statici e transazionali su fixture controllate.
+
+
+## Verifica GRANT EXECUTE live — 13 novembre 2026
+
+È stato ricevuto il report unificato della diagnostica read-only dei privilegi. Le sette funzioni risultano:
+
+| Funzione | EXECUTE live |
+|---|---|
+| nextway_claim_conversion_activation(uuid, uuid) | postgres, service_role |
+| nextway_finalize_conversion_activation(uuid, uuid, uuid) | postgres, service_role |
+| nextway_release_conversion_activation(uuid, uuid) | postgres, service_role |
+| nextway_guard_conversion_request_review() | postgres, service_role |
+| nextway_set_conversion_request_updated_at() | postgres, service_role |
+| nextway_has_workspace_access(uuid, text[]) | postgres, authenticated, service_role |
+| nextway_is_platform_admin() | postgres, authenticated, service_role |
+
+Non risultano grant EXECUTE a PUBLIC o anon nel report. I grant delle tre RPC di provisioning sono coerenti con il contratto Edge Function: il browser non invoca direttamente claim/finalize/release. Le due helper workspace/governance sono invocabili da authenticated, coerentemente con l'uso nelle policy RLS.
+
+Le due funzioni senza argomenti sono trigger function: l'assenza di argomenti è attesa. I privilegi diretti non vanno interpretati come un requisito di invocazione dal browser; l'esecuzione avviene tramite i trigger installati.
+
+### Hardening da verificare prima di proporre una modifica
+
+- `nextway_has_workspace_access(uuid, text[])`: SECURITY DEFINER, search_path `pg_catalog, public`; impostazione coerente con le altre funzioni protette.
+- `nextway_is_platform_admin()`: SECURITY DEFINER, search_path `public`; non è ancora possibile classificare questa impostazione come vulnerabilità senza leggere il corpo e controllare i riferimenti non qualificati. Non modificarla alla cieca.
+- Le funzioni trigger `nextway_guard_conversion_request_review()` e `nextway_set_conversion_request_updated_at()` hanno search_path `pg_catalog`, come atteso per funzioni che non devono dipendere da risoluzione implicita in schemi applicativi.
+
+È stato aggiunto il file read-only `supabase/diagnostics/nextway_workspace_helper_definitions_readonly.sql`, che restituisce in un'unica cella il corpo, le impostazioni e i privilegi delle due helper. Il suo scopo è chiudere il controllo di sicurezza di `nextway_is_platform_admin` prima di qualsiasi proposta di hardening.
+
+### Stato aggiornato
+
+- GRANT EXECUTE live delle sette funzioni: **COMPLETATO E VERIFICATO** sulla base dell'output fornito.
+- Assenza di EXECUTE a PUBLIC/anon: **COMPLETATO E VERIFICATO** sulla base dell'output fornito.
+- Corpo e dipendenze di `nextway_is_platform_admin()`: **DA COMPLETARE**.
+- Correzione multi-workspace della conversione: **DA IMPLEMENTARE** dopo chiusura del controllo helper e delle dipendenze.
+- Nessuna modifica al database remoto, nessun deploy e nessun merge effettuati.
