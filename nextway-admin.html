@@ -33,9 +33,10 @@
     <p class="muted">La creazione registra un nuovo workspace nel database. I campi partono vuoti: compila e invia solo dopo aver verificato i dati e deciso di procedere.</p>
     <form id="workspace-create">
       <div class="grid">
-        <label>Nome workspace *<input name="name" required maxlength="160" placeholder="Es. Zinzino Italia"></label>
-        <label>Chiave univoca *<input name="workspace_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="Es. zinzino-italia"></label>
-        <label>Partner / organizzazione<input name="partner_name" maxlength="160"></label>
+        <label>Nome workspace *<input name="name" required maxlength="160" placeholder="Es. Azienda partner Italia"></label>
+        <label>Chiave univoca *<input name="workspace_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="Es. azienda-partner-italia"></label>
+        <label>Partner / organizzazione<input name="partner_name" maxlength="160" placeholder="Nome dell’azienda partner"></label>
+        <label>Sito ufficiale<input name="website_url" type="url" maxlength="500" placeholder="https://www.azienda.it"></label>
         <label>Settore<input name="sector" maxlength="120"></label>
         <label>Paese mercato<input name="market_country" maxlength="120" placeholder="Es. Italia"></label>
         <label>Lingua<select name="language_code"><option value="it">Italiano</option></select></label>
@@ -66,7 +67,7 @@
     <p class="muted">Carica PDF, DOCX o TXT. I documenti vengono indicizzati come pending e non sono utilizzabili dall'assistente finché non vengono approvati.</p>
     <form id="knowledge-upload">
       <div class="grid">
-        <label>Modulo<input name="module_key" value="zinzino" required maxlength="64"></label>
+        <label>Modulo / area documentale<input name="module_key" required maxlength="64" placeholder="Si propone la chiave del workspace selezionato"></label>
         <label>Titolo documento<input name="title" required maxlength="240"></label>
         <label>Tipo fonte<select name="source_type"><option value="official_document">Documento ufficiale</option><option value="scientific_publication">Pubblicazione scientifica</option><option value="training_material">Materiale formativo</option><option value="faq">FAQ</option><option value="policy">Policy</option><option value="other">Altro</option></select></label>
         <label>Versione<input name="version_label" maxlength="80" placeholder="Es. 2026-11"></label>
@@ -93,7 +94,7 @@
     <div class="row"><h3>Istruzioni dell'assistente</h3><button class="btn alt" id="governance-refresh" type="button">Aggiorna istruzioni e criteri</button></div>
     <form id="prompt-create">
       <div class="grid">
-        <label>Chiave istruzione *<input name="prompt_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. ai_setter_italia"></label>
+        <label>Chiave istruzione *<input name="prompt_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. ai_setter_base"></label>
         <label>Versione *<input name="version" type="number" min="1" step="1" value="1" required></label>
       </div>
       <label>Scopo dell'istruzione *<input name="purpose" required maxlength="240" placeholder="es. Qualificazione iniziale dei potenziali partner"></label>
