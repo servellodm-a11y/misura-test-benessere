@@ -3127,3 +3127,17 @@ La pipeline `.github/workflows/nextway-static-validation.yml` è stata aggiornat
 Documentazione: `docs/NEXTWAY-STAGING-SETUP-PLAN.md` aggiornata con istruzioni e limiti. Il pre-flight va eseguito sul Mac solo dopo aver aggiornato il branch locale con i nuovi file. Comando previsto: `bash scripts/nextway-local-preflight.sh` dalla cartella repository.
 
 **Stato:** script e workflow configurati; run CI dopo le modifiche non ancora osservato; script non ancora eseguito sul Mac. Il suo esito non autorizza `supabase start` o import del dump. La baseline deve ancora superare la revisione strutturale prima di qualsiasi avvio.
+
+
+### Correzione pre-flight: scanner SQL consapevole del contesto — 13 novembre 2026
+
+La prima esecuzione locale del pre-flight ha segnalato 17 occorrenze COPY/INSERT. L'analisi delle righe indicate ha dimostrato che le occorrenze erano istruzioni INSERT INTO contenute nei corpi di funzioni SQL delimitati da dollar-quote (AS $$ ... $$), non statement di primo livello del dump. In particolare, le righe 31, 1325 e 1418 sono state ricondotte a corpi di funzione. Il conteggio basato su grep era quindi un falso positivo e non costituiva prova della presenza di dati.
+
+Correzione applicata sul branch fix/nextway-password-recovery:
+- aggiunto scripts/check-nextway-schema-dump.py, scanner lessicale che ignora stringhe, identificatori quotati, commenti e corpi dollar-quoted e segnala soltanto statement SQL di primo livello COPY / INSERT INTO;
+- aggiornato scripts/nextway-local-preflight.sh per usare lo scanner e bloccare in modo prudenziale in caso di errore di analisi o scanner mancante;
+- aggiunto un self-test sintetico dello scanner al workflow statico e incluso il file nei filtri push/PR.
+
+Commit: scanner 1e804c7, correzione quoting PostgreSQL 9b0fe4c, pre-flight cbcc707, test CI 4b9727b. La verifica GitHub conferma la presenza delle modifiche sul branch. SELF-TEST LOCALE E NUOVO PRE-FLIGHT ANCORA DA ESEGUIRE SUL MAC; ESITO CI DEL NUOVO CONTROLLO NON ANCORA CONFERMATO.
+
+Il dump originale non è stato modificato; nessun import, migrazione, avvio container, deploy o modifica al database remoto è stato eseguito. Prossimo passo: aggiornare il branch locale e lanciare il self-test, lo scanner sul dump esistente e il pre-flight corretto. Anche un esito positivo non autorizza import o avvio dello stack Supabase.
