@@ -3380,3 +3380,13 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Corretto `scripts/test-nextway-setter-stale-output-trigger.mjs`: ora verifica la sequenza reale legacy (aggiunta di `generated_output` in 00500) e la separazione workspace in 120200. La precedente asserzione che la tabella legacy non avesse mai `generated_output` era errata.
 - Il test statico va nuovamente eseguito in GitHub Actions; il precedente CI SUCCESS del test antecedente non certifica la versione corretta del contratto.
 - Nessuna migrazione applicata; nessun database o progetto staging creato o modificato.
+
+## 13 novembre 2026 — Configurazione e baseline staging preparate
+
+- Creato `supabase/config.toml` con project label locale `nextway-staging-prepared`, nessun remote/project ref, redirect localhost, signup e accesso anonimo disabilitati, Studio e Analytics disabilitati. Non contiene URL produzione o segreti. Non eseguire `supabase start` sul Mac Intel 8 GB.
+- Aggiunto `scripts/test-nextway-staging-config.py` e integrato nel workflow statico. Primo CI run `43413092105` fallito solo per un controllo troppo ampio che intercettava la stringa legittima `reset-password.html`; il controllo è stato ristretto a possibili assegnazioni di credenziali.
+- CI di retry `43413154410` (commit `488c97a8f9c8cadddc8eb358602f2c3a40bcd766`) in corso al momento dell'aggiornamento. Il parsing TOML e i controlli essenziali sono stati verificati separatamente con Python `tomllib`.
+- Creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md`: distingue tabelle core preesistenti dagli oggetti generati dalle migrazioni e definisce esclusioni assolute per dati/utenti/segreti.
+- Creata diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`: controlla presenza di tabelle/colonne core e stato RLS interrogando solo cataloghi; non legge dati applicativi o righe Auth. Non eseguita.
+- Corretta la ricostruzione storica del trigger Setter: il trigger 007 era coerente con la tabella legacy dopo che la migrazione 005 aveva aggiunto `generated_output`; la migrazione 1315 lo riallinea dopo la separazione delle tabelle. Test statico corretto e CI `43412838823` SUCCESS.
+- Baseline SQL schema-only completa ancora da produrre e confrontare. Nessun progetto staging creato; nessuna migrazione applicata; nessun collegamento remote; nessun database reale modificato.
