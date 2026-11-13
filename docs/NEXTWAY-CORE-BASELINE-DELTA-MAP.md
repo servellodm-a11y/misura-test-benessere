@@ -16,6 +16,8 @@ Questa mappa documenta ciò che le migrazioni hanno aggiunto alle tabelle preesi
 | `public.nextway_leads` | Colonne `archived_at`, `archived_by`, `archive_reason`; vincolo `nextway_leads_archive_state_check`; indici per Lead attivi/archiviati; trigger e funzione `nextway_set_lead_archive_metadata`; ridefinizione del check di `status`; trigger audit; `workspace_id`, FK e indice; trigger di protezione assegnazione workspace; policy SELECT e scope workspace | `20261110000800`, `20261110000900`, `20261110001000`, `20261110001300`, `20261111210000`, `20261111230000` |
 | `public.nextway_setter_conversations` | `workspace_id`, FK e indice; policy di lettura/scope workspace; policy aggiornate per l'accesso dei membri attivi | `20261111210000`, `20261111240000` |
 | `public.nextway_knowledge_documents` | `workspace_id`, FK e indice; sostituzione dell'indice unique globale con indici distinti per documenti globali e workspace; policy di scope workspace e aggiornamento RPC di ricerca | `20261111210000`, `20261111230000` |
+| `public.partner_details` | Colonna `nextway_conversion_request_id` con FK RESTRICT e indice unique parziale | `20261111001500` |
+| `public.clients` | Colonna `nextway_conversion_request_id` con FK RESTRICT e indice unique parziale | `20261111001500` |
 
 ## Tabelle core senza ALTER TABLE diretto individuato
 
@@ -50,7 +52,7 @@ Di conseguenza non è tecnicamente corretto inventare una baseline eseguibile a 
 
 ## Procedura sicura per completare la baseline
 
-1. Recuperare la DDL core originaria da un backup/schema dump precedente alle migrazioni, se esiste.
+1. Recuperare la DDL core originaria da un backup/schema dump precedente alle migrazioni, se esiste. In particolare, la migrazione `20261111001500` aggiunge una colonna e un indice a `partner_details` e `clients`, quindi anche queste due tabelle non possono essere copiate dallo snapshot corrente senza riconciliazione.
 2. In assenza di tale backup, usare il dump schema-only corrente e questa mappa per una ricostruzione controllata, con revisione statement per statement. Ogni oggetto rimosso deve essere ricondotto a una migrazione specifica; nessuna cancellazione automatica.
 3. Separare le definizioni core originarie dalle tabelle/funzioni/policy create dalle migrazioni.
 4. Eseguire la baseline in un database PostgreSQL isolato e vuoto, non in `nextway-platform`.
