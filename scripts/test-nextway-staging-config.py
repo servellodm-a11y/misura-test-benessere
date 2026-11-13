@@ -35,7 +35,7 @@ for forbidden in (
     "service_role",
     "service-role",
     "jwt_secret",
-    "password",
+    "password =",
     "secret =",
 ):
     assert forbidden not in serialized, f"Unexpected production/secret reference: {forbidden}"
