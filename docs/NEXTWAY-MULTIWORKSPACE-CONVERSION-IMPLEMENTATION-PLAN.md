@@ -415,3 +415,16 @@ Data: 13 novembre 2026
 ### Nota sullo stato anagrafico Partner
 
 Il finalizer assegna `partner_details.status = 'active'` nella stessa transazione in cui crea la membership workspace `invited`. L'accesso al workspace resta comunque negato finché `nextway_workspace_memberships.membership_status` non diventa `active`, perché il controllo di accesso richiede entrambi gli stati: workspace attivo e membership attiva. Nel codice applicativo revisionato non è emerso un controllo che usi `partner_details.status` come sostituto della membership. Il significato di `partner_details.status` resta quello di stato anagrafico del Partner, non di autorizzazione workspace.
+
+
+## Audit ciclo Partner — 13 novembre 2026
+
+È stato aggiunto il piano dettagliato `docs/NEXTWAY-PARTNER-CONVERSION-LIFECYCLE-TEST-PLAN.md`.
+
+L'audit statico conferma i controlli già implementati su identità Auth/email/metadata, protezione dei profili preesistenti, membership iniziale `invited`, retry dell'invito recuperato, cleanup del solo invito creato dal tentativo corrente e gate amministrativo basato su email confermata e coerenza richiesta/utente/workspace.
+
+Restano due gap bloccanti prima di considerare chiuso il ciclo: (1) un invito scaduto/non confermato può essere recuperato senza un percorso verificato di reinvio; (2) non è definita una transizione di annullamento/rifiuto dopo che l'invito è stato inviato o la richiesta è entrata in provisioning. La richiesta `rejected` copre la revisione pre-provisioning e non equivale a rifiuto dell'invito.
+
+Il test transazionale multi-workspace esistente copre la conversione cliente e non costituisce prova del percorso Partner. Il collaudo Partner richiede un ambiente Supabase isolato/disposable: l'utente Auth sintetico creato via Admin API non viene annullato dal rollback SQL, quindi va eliminato esplicitamente nel cleanup. Nessun utente sintetico va creato nel progetto reale.
+
+**Stato:** audit statico parziale completato; ciclo Partner non chiuso; nessuna migrazione applicata, nessun deploy, nessun invio email, nessuna modifica a `main`, PR #1 resta draft.
