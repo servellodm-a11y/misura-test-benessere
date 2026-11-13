@@ -344,6 +344,12 @@ assert.ok(searchHtml.includes('function assessCommercialFit('));
 assert.ok(searchHtml.includes('commercial_fit_score:commercialFit.commercial_fit_score'));
 assert.ok(searchHtml.includes('priority_score:priorityScore'));
 assert.ok(searchHtml.includes('function assessSourceQuality('));
+assert.ok(searchHtml.includes("Agenda commerciale · priorità operative"));
+assert.ok(searchHtml.includes("Copia messaggio"));
+assert.ok(searchHtml.includes("Verifica fonte"));
+assert.ok(searchHtml.includes("dailyProspects.slice(0,15)"));
+assert.ok(searchHtml.includes("priorità indica chi verificare prima"));
+
 assert.ok(searchHtml.includes('source_quality_score=sourceQuality.quality_score'));
 assert.ok(searchHtml.includes('sourceQuality.quality_score>duplicateEntry.daily.source_quality.quality_score'));
 assert.ok(searchHtml.includes('affidabilita_fonte'));
