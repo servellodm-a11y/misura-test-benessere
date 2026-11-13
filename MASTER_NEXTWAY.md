@@ -3290,3 +3290,14 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Il test è statico: non sostituisce le prove con PostgreSQL concorrente né il test API Auth in staging.
 - **Da verificare:** GitHub Actions non ha ancora restituito un run associato all'ultimo commit; non dichiarare CI superata finché il workflow non termina con successo.
 - Ultimo intervento su branch: commit `0d71dbcc5d471ed57db1746eed0764cf5a17a30b`; PR #1 ancora draft e non mergeata. Nessuna modifica a `main`, DB remoto, Edge Function remota o Netlify.
+
+
+## 13 novembre 2026 — Correzione CI e superamento workflow statico
+
+- I run precedenti hanno individuato due problemi reali nei test statici: filtro `pull_request` incompleto per il preflight conversione e asserzioni obsolete nel test snapshot che cercavano il vecchio ramo `existingInvite`, mentre l'Edge Function usa il classificatore `inviteAction`.
+- Corretti i path filter PR per preflight e test cancellazione; aggiornate le due asserzioni per distinguere `resend` e `reuse_confirmed`.
+- Corretto anche il workflow dopo aver rilevato una sezione `pull_request.paths` malformata introdotta durante l'aggiornamento: la struttura è stata ripristinata da una versione valida e ricontrollata.
+- **COMPLETATO E VERIFICATO:** GitHub Actions run `43409311679` — `NEXTWAY static validation`, conclusione **success**. Tutti gli step statici, i test Partner invite, il nuovo test di specifica cancellazione e i type-check Deno delle Edge Functions sono passati.
+- Il successo è riferito a test statici/unitari e type-check: non dimostra runtime PostgreSQL, concorrenza DB, invio/reinvio Auth o flusso email end-to-end.
+- Nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato. PR #1 resta draft e non mergeata.
+- Ultimo commit codice/workflow verificato: `9485a5cdcab0898489c7deeb7ddc49fa8a2f3603`; successivo aggiornamento di questo MASTER solo documentale.
