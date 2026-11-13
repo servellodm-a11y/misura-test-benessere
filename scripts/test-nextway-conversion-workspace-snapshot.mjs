@@ -37,6 +37,7 @@ const checks = [
   ["Edge Function binds Auth invite to request", /nextway_conversion_request_id: requestId/i.test(edge)],
   ["Edge Function tracks invites created by the current attempt", /let inviteCreatedByThisAttempt = false/i.test(edge) && /inviteCreatedByThisAttempt = true/i.test(edge)],
   ["Edge Function preserves recovered invites after finalization failure", /if \(invitedUserId && inviteCreatedByThisAttempt\)/i.test(edge) && /recovered invite may[\s\S]*remain available for retry/i.test(edge)],
+  ["Edge Function never deletes an invite accepted during finalization", /getUserById\(invitedUserId\)[\s\S]*!cleanupUser\.user\.email_confirmed_at[\s\S]*deleteUser\(invitedUserId\)/i.test(edge)],
   ["Partner finalizer validates Auth email and request metadata", /lower\(u\.email\) = lower\(r\.email\)[\s\S]*raw_user_meta_data ->> 'nextway_conversion_request_id' = r\.id::text/i.test(finalize)],
   ["Partner finalizer refuses incompatible pre-existing profiles and details", /v_profile\.role::text <> 'partner'[\s\S]*profilo incompatibile[\s\S]*v_partner\.nextway_conversion_request_id is distinct from r\.id/i.test(finalize)],
   ["Partner membership is created as invited, never active by finalizer", /workspace_role, membership_status, invited_by\)[\s\S]*'workspace_member', 'invited'/i.test(finalize) && !/membership_status\s*=\s*'active'/i.test(finalize)],
