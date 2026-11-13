@@ -276,3 +276,21 @@ Sono stati acquisiti i corpi live di `nextway_has_workspace_access` e `nextway_i
 - Corpo e logica di `nextway_has_workspace_access`: COMPLETATO E VERIFICATO sulla definizione live ricevuta.
 - Corpo e logica di `nextway_is_platform_admin`: COMPLETATO E VERIFICATO; hardening search_path PREPARATO MA NON APPLICATO.
 - Conversione multi-workspace: ancora DA IMPLEMENTARE; resta prioritario correggere la finalizzazione live non atomica e coordinare snapshot workspace, membership partner e attribuzione cliente.
+
+
+## Implementazione preparatoria — snapshot workspace richiesta (13 novembre 2026)
+
+È stata aggiunta sul branch la migrazione `20261113120000_nextway_conversion_request_workspace_snapshot.sql`.
+
+Contenuto:
+- Aggiunge `workspace_id` nullable alla richiesta, FK RESTRICT e indice.
+- Introduce `nextway_create_lead_conversion_request` SECURITY DEFINER: blocca il Lead, deriva owner e workspace dal record DB, verifica stato/archiviazione e autorizzazione; per workspace richiede membership active con ruolo owner/admin/manager/member (viewer escluso). Per Lead legacy NULL mantiene owner/platform_admin.
+- Revoca INSERT diretto ad authenticated: il client deve passare dalla RPC e non può scegliere lo snapshot.
+- Estende il guard per rendere immutabile `workspace_id`.
+- Il percorso legacy NULL non viene backfillato.
+
+Aggiornato `nextway-cloud.js`: la creazione usa la nuova RPC e le letture di dettaglio/coda includono `workspace_id`; nessun valore workspace viene inviato dal browser.
+
+Aggiunto `scripts/test-nextway-conversion-workspace-snapshot.mjs` per controlli statici. Revisione statica dei file sul branch: 8/9 controlli superati.
+
+**Limite attuale:** questa tranche non implementa ancora la membership invited del partner, l'attribuzione cliente, la nuova finalizzazione atomica e le policy RLS di lettura clienti. La migrazione è preparatoria e NON applicata; il database remoto non è stato modificato. Prima di proseguire con la finalizzazione va completato il disegno RLS/attribuzione clienti e verificata la compatibilità della policy restrictive live.
