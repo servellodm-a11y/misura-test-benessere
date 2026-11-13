@@ -276,7 +276,7 @@ function render(){
 }
 $('generate').addEventListener('click',build);
 $('runsearch').addEventListener('click',runSearch);
-$('exportDaily').addEventListener('click',()=>{if(!dailyProspects.length)return;const headers=['data_ricerca','nome','titolo_fonte','professione','azienda','localita','classificazione','segmento','affidabilita','priorita_verifica','motivazione_priorita','ruolo_rilevato','motivazione_classificazione','fonti_correlate','dominio_fonte','recapiti_rilevati','punteggio_evidenze','identita','pertinenza','email_pubbliche','telefoni_pubblici','whatsapp_pubblici','profili_social','messaggio_primo_contatto'];const quote=v=>'\"'+String(v??'').replace(/\"/g,'\"\"')+'\"';const rows=[headers,...dailyProspects.map(p=>[p.date,p.profile?.name,p.title,p.profile?.profession,p.profile?.organization,p.profile?.location,p.classification,p.segment,p.confidence,p.profile?.priority,p.profile?.priority_reason,p.role,p.reason,(p.sources||[p.url]).join(' | '),p.profile?.source_domain,p.profile?.public_contact_count,p.evidence_score,p.identity_score,p.relevance_score,p.emails.join(' | '),p.phones.join(' | '),p.whatsapp.join(' | '),p.socials.join(' | '),p.message])];const csv='\ufeff'+rows.map(row=>row.map(quote).join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-lista-prospect-'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);});
+$('exportDaily').addEventListener('click',()=>{if(!dailyProspects.length)return;const headers=['data_ricerca','nome','titolo_fonte','professione','azienda','localita','classificazione','segmento','affidabilita','priorita_verifica','motivazione_priorita','qualificazione_commerciale','azione_suggerita','motivazione_qualificazione','ruolo_rilevato','motivazione_classificazione','fonti_correlate','dominio_fonte','recapiti_rilevati','punteggio_evidenze','identita','pertinenza','email_pubbliche','telefoni_pubblici','whatsapp_pubblici','profili_social','messaggio_primo_contatto'];const quote=v=>'\"'+String(v??'').replace(/\"/g,'\"\"')+'\"';const rows=[headers,...dailyProspects.map(p=>[p.date,p.profile?.name,p.title,p.profile?.profession,p.profile?.organization,p.profile?.location,p.classification,p.segment,p.confidence,p.profile?.priority,p.profile?.priority_reason,p.qualification_status,p.qualification_action,(p.qualification_reasons||[]).join(' | '),p.role,p.reason,(p.sources||[p.url]).join(' | '),p.profile?.source_domain,p.profile?.public_contact_count,p.evidence_score,p.identity_score,p.relevance_score,p.emails.join(' | '),p.phones.join(' | '),p.whatsapp.join(' | '),p.socials.join(' | '),p.message])];const csv='\ufeff'+rows.map(row=>row.map(quote).join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-lista-prospect-'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);});
 async function runSearch(){
  if(!generated.length)build();
  const status=$('searchstatus'),button=$('runsearch'),list=$('live-list');
@@ -328,15 +328,21 @@ async function runSearch(){
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · '+(assessment.individual?'PERSONA IDENTIFICABILE · verifica ruolo e attualità':'IDENTITÀ PERSONALE NON CONFERMATA · da approfondire')+' · non misura l’interesse commerciale';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
     const profile=buildProspectProfile(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment);
+    const qualification=qualifyCommercialProspect(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment,profile);
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
     const profileCard=document.createElement('div');profileCard.className='prospect-profile';profileCard.style.cssText='margin:10px 0;padding:10px;border:1px solid var(--border,#ddd);border-radius:10px;';
     const profileTitle=document.createElement('strong');profileTitle.textContent='Scheda prospect · '+profile.name;
     const profileDetails=document.createElement('p');profileDetails.className='muted';profileDetails.textContent='Professione: '+profile.profession+' · Azienda: '+profile.organization+' · Località: '+profile.location+' · Recapiti pubblici rilevati: '+profile.public_contact_count;
     const profilePriority=document.createElement('p');profilePriority.className='tag';profilePriority.textContent='Priorità di verifica: '+profile.priority+'. '+profile.priority_reason+' Non equivale a interesse commerciale.';
     profileCard.append(profileTitle,profileDetails,profilePriority);
+    const qualificationCard=document.createElement('div');qualificationCard.className='commercial-qualification';qualificationCard.style.cssText='margin:10px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;background:#f8faff;';
+    const qualificationTitle=document.createElement('strong');qualificationTitle.textContent='Qualificazione commerciale: '+qualification.status;
+    const qualificationAction=document.createElement('p');qualificationAction.textContent='Azione suggerita: '+qualification.action;
+    const qualificationReasons=document.createElement('ul');qualification.reasons.forEach(reason=>{const li=document.createElement('li');li.textContent=reason;qualificationReasons.append(li);});
+    qualificationCard.append(qualificationTitle,qualificationAction,qualificationReasons);
     const messageSegment=targetAssessment.segment==='unclassified'?$('segment').value:targetAssessment.segment;
     const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,messageSegment,url,publicContacts);
-    const dailyEntry={date:new Date().toISOString().slice(0,10),title:item.title||'Risultato senza titolo',profile,classification:targetAssessment.primary,segment:targetAssessment.segment,confidence:targetAssessment.confidence,role:targetAssessment.role,reason:targetAssessment.reason,person_confirmed:assessment.individual,url,sources:[url],source_evidence:[{url,title:item.title||'',snippet:String(item.snippet||'').slice(0,1200),evidence:pageContent.slice(0,4000),collected_at:new Date().toISOString(),public_contacts:publicContacts}],duplicate_count:0,emails:publicContacts.emails,phones:publicContacts.phones,whatsapp:publicContacts.whatsapp,socials:publicContacts.socials,message:messagePanel.querySelector('textarea')?.value||'',evidence_score:assessment.score,identity_score:assessment.identityScore,relevance_score:assessment.relevanceScore};dailyProspects.push(dailyEntry);const prospectEntry={sources:[url],daily:dailyEntry,contactSummary};dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry));
+    const dailyEntry={date:new Date().toISOString().slice(0,10),title:item.title||'Risultato senza titolo',profile,qualification,qualification_status:qualification.status,qualification_action:qualification.action,qualification_reasons:qualification.reasons,classification:targetAssessment.primary,segment:targetAssessment.segment,confidence:targetAssessment.confidence,role:targetAssessment.role,reason:targetAssessment.reason,person_confirmed:assessment.individual,url,sources:[url],source_evidence:[{url,title:item.title||'',snippet:String(item.snippet||'').slice(0,1200),evidence:pageContent.slice(0,4000),collected_at:new Date().toISOString(),public_contacts:publicContacts}],duplicate_count:0,emails:publicContacts.emails,phones:publicContacts.phones,whatsapp:publicContacts.whatsapp,socials:publicContacts.socials,message:messagePanel.querySelector('textarea')?.value||'',evidence_score:assessment.score,identity_score:assessment.identityScore,relevance_score:assessment.relevanceScore};dailyProspects.push(dailyEntry);const prospectEntry={sources:[url],daily:dailyEntry,contactSummary};dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry));
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Nome: '+profile.name+'\\nProfessione: '+profile.profession+'\\nAzienda: '+profile.organization+'\\nLocalità: '+profile.location+'\\nCategoria: '+targetAssessment.primary+'\\nSegmento: '+targetAssessment.segment+'\\nPriorità verifica: '+profile.priority+'\\nMotivazione: '+targetAssessment.reason+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
@@ -357,7 +363,7 @@ async function runSearch(){
       capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
-    card.append(title,snippet,targetSummary,quality,profileCard,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
+    card.append(title,snippet,targetSummary,quality,profileCard,qualificationCard,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
   const sortedCards=[...list.querySelectorAll('article.query')].sort((a,b)=>(Number(b.dataset.personPriority)||0)-(Number(a.dataset.personPriority)||0)||(Number(b.dataset.identityScore)||0)-(Number(a.dataset.identityScore)||0)||(Number(b.dataset.priorityScore)||0)-(Number(a.dataset.priorityScore)||0));
@@ -477,6 +483,42 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  if(organizationEvidence&&!individual)reasons.push('prevalenza di segnali aziendali, non di identità personale');
  if(!individual)reasons.push('persona fisica non identificata con sufficiente evidenza');
  return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual};
+}
+function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assessment,targetAssessment,profile){
+ const directContacts=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
+ const socialContacts=contacts?.socials?.length||0;
+ const hasPerson=!!assessment?.individual;
+ const hasSegmentSignal=!!targetAssessment?.kind&&targetAssessment.kind!=='unknown'&&targetAssessment.confidence!=='bassa';
+ const isDirectory=/Directory \/ articolo \/ annuncio/.test(assessment?.entityType||'');
+ const isOrganization=/Azienda o organizzazione/.test(assessment?.entityType||'')&&!hasPerson;
+ let status='Da approfondire',action='Aprire la fonte originale e verificare identità, ruolo, attualità e corrispondenza con il segmento.';
+ let reasons=[];
+ if(isDirectory||isOrganization||(!hasPerson&&!hasSegmentSignal&&!directContacts&&!socialContacts)){
+  status='Non adatto · da scartare';
+  action='Non acquisire nel CRM. Scartare il risultato oppure conservarlo solo come fonte di ricerca, se contiene un collegamento utile.';
+  reasons.push(isDirectory?'La fonte sembra una directory, un articolo o un annuncio, non un prospect individuale.':isOrganization?'Il risultato descrive un’organizzazione e non identifica una persona.':'Non emergono identità, segnali di segmento o canali di contatto sufficienti.');
+ }else if(hasPerson&&hasSegmentSignal&&directContacts>0){
+  status='Prospect con recapiti utilizzabili';
+  action='Verificare titolarità e attualità del recapito; controllare le regole applicabili al canale prima di un eventuale contatto individuale.';
+  reasons.push('Persona identificabile e segnali coerenti con il segmento cercato.');
+  reasons.push(directContacts+' recapito/i diretto/i pubblico/i rilevato/i (email, telefono o WhatsApp), non ancora verificati.');
+ }else if(hasPerson&&hasSegmentSignal&&Number(assessment?.score||0)>=65){
+  status='Prospect molto pertinente';
+  action='Aprire la fonte, confermare ruolo e attività attuale, quindi preparare un messaggio personalizzato e pertinente.';
+  reasons.push('Identità individuale e segnali specifici del segmento supportati dalle evidenze.');
+ }else if(hasPerson&&(hasSegmentSignal||Number(assessment?.score||0)>=45)){
+  status='Prospect interessante · da verificare';
+  action='Verificare che il profilo sia attivo e che il ruolo sia attuale; poi decidere se acquisirlo nel CRM.';
+  reasons.push('Esistono segnali utili, ma la corrispondenza commerciale non è ancora sufficientemente documentata.');
+ }else{
+  status='Da approfondire';
+  action='Leggere la pagina completa e cercare una dichiarazione professionale o un segnale esplicito pertinente prima di contattare o acquisire.';
+  reasons.push('Le informazioni disponibili non bastano per una valutazione commerciale affidabile.');
+ }
+ if(!directContacts)reasons.push('Nessun recapito diretto pubblico rilevato.');
+ if(socialContacts&&!directContacts)reasons.push('È disponibile solo un profilo social: non equivale a un recapito diretto verificato.');
+ if(targetAssessment?.reason)reasons.push(targetAssessment.reason);
+ return {status,action,reasons,direct_contact_count:directContacts,social_profile_count:socialContacts,person_identified:hasPerson,segment_signal:hasSegmentSignal,source_url:safeUrl(url),confidence:hasPerson&&hasSegmentSignal?'media':'bassa'};
 }
 function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,targetAssessment){
  const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
