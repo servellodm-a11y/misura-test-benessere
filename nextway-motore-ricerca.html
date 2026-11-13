@@ -38,10 +38,10 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <div class="field"><label for="extra">Parole chiave aggiuntive</label><input id="extra" placeholder="es. MONAT, team leader, consulente"></div>
 <div class="field"><label for="language">Lingua dei risultati</label><select id="language"><option value="it">Italiano</option><option value="en">Inglese</option><option value="both">Italiano + inglese</option></select></div>
 </div>
-<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div>
+<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui le 5 ricerche sul web</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
 </section>
 <section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
-<section class="panel"><h2>Metodo di lavoro consigliato</h2>
+<section class="panel" id="live-results"><h2>Risultati trovati</h2><p class="muted">Qui compariranno i risultati reali restituiti dal motore di ricerca. Ogni risultato resta da verificare prima di acquisirlo come Lead.</p><div id="live-list"></div></section>\n<section class="panel"><h2>Metodo di lavoro consigliato</h2>
 <ol>
 <li>Apri una ricerca alla volta e seleziona solo risultati con un segnale professionale chiaro.</li>
 <li>Apri la fonte originale: snippet e titoli dei motori di ricerca non bastano.</li>
@@ -111,6 +111,35 @@ function render(){
  generated.forEach((x,i)=>{const card=document.createElement('article');card.className='query';const head=document.createElement('div');head.className='queryhead';const title=document.createElement('strong');title.textContent=(i+1)+'. '+x.label;const tag=document.createElement('span');tag.className='tag';tag.textContent='Query '+(i+1);head.append(title,tag);const pre=document.createElement('pre');pre.textContent=x.query;const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='btn';open.href=x.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Apri ricerca';const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia';copy.addEventListener('click',()=>navigator.clipboard?.writeText(x.query));actions.append(open,copy);card.append(head,pre,actions);root.append(card)});
 }
 $('generate').addEventListener('click',build);
+$('runsearch').addEventListener('click',runSearch);
+async function runSearch(){
+ if(!generated.length)build();
+ const status=$('searchstatus'),button=$('runsearch'),list=$('live-list');
+ try{
+  if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
+  button.disabled=true;status.textContent='Connessione a NEXTWAY e avvio delle 5 ricerche…';list.replaceChildren();
+  const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();
+  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({queries:generated.map(x=>x.query),max_results:10})});
+  const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
+  const groups=payload.results||[];let total=0;
+  groups.forEach((group,index)=>{
+   const heading=document.createElement('h3');heading.textContent=generated[index]?.label||('Ricerca '+(index+1));list.append(heading);
+   (group.results||[]).forEach(item=>{
+    const url=safeUrl(item.url);if(!url)return;total++;
+    const card=document.createElement('article');card.className='query';
+    const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
+    const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
+    const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
+    const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
+    card.append(title,snippet,document.createElement('br'),link,copy);list.append(card);
+   });
+  });
+  status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. Nessun contatto è stato creato o contattato automaticamente.';
+  if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
+ }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
+ finally{button.disabled=false;}
+}
+function safeUrl(value){try{const u=new URL(String(value||''));return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}}
 $('copyall').addEventListener('click',()=>{if(!generated.length)build();navigator.clipboard?.writeText(generated.map((x,i)=>(i+1)+'. '+x.label+'\n'+x.query).join('\n\n'))});
 $('download').addEventListener('click',()=>{if(!generated.length)build();const rows=[['numero','categoria','query','url'],...generated.map((x,i)=>[i+1,x.label,x.query,x.url])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-batteria-ricerche.csv';a.click();URL.revokeObjectURL(a.href)});
 build();
