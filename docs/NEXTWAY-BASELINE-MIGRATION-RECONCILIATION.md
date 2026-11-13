@@ -397,3 +397,15 @@ La query pre-flight è stata corretta per mostrare i nomi espliciti delle tabell
 Non si deve applicare alcuna migrazione se il pre-flight segnala dipendenze mancanti o oggetti target già presenti. Non riapplicare la migrazione workspace table isolation già dichiarata applicata. Non eseguire in blocco tutte le migrazioni.
 
 **Stato:** piano e query pre-flight preparati; nessuna query ancora eseguita; nessuna migrazione, DDL/DML, deploy, merge o modifica a `main`.
+
+## 14. Esito pre-flight ripristino — 13 novembre 2026
+
+Report ricevuto dall'utente:
+- presenti: `auth.users`, `public.profiles`, `nextway_leads`, `nextway_setter_conversations`, `nextway_setter_generation_requests`, tabelle workspace e helper accesso workspace;
+- RLS attiva sulle tabelle controllate;
+- assenti: tabella/RPC rate limit, RPC governance, cleanup staged, retention legacy;
+- colonne legacy `user_id` e `lease_expires_at` assenti.
+
+La verifica statica delle migrazioni ha chiarito che le ultime due colonne non sono prerequisiti da ripristinare: la tabella legacy corrente usa `owner_profile_id` e `claimed_at`, secondo `20261111240000_nextway_setter_generation_workspace.sql`; lo store workspace è distinto. Le migrazioni cleanup e retention del vecchio schema `user_id/lease_expires_at` sono obsolete e incompatibili con il modello attuale. Non applicarle e non aggiungere le colonne mancanti.
+
+Preparato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` come draft non applicato per i due componenti P0: Rate Limit (firma finale `(text, integer)`) e Governance RPC. Il file include guardie strutturali e non scrive dati applicativi. Non è stata eseguita alcuna modifica DB.
