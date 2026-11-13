@@ -408,3 +408,11 @@ assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
 assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
 console.log('NEXTWAY company configuration contract: PASS');
+
+assert.ok(archiveHtml.includes('getIndex(){'));
+assert.ok(archiveHtml.includes('identity_keys:[...new Set(identityKeys)]'));
+assert.ok(searchHtml.includes('const SEARCH_HISTORY_LIMIT=10'));
+assert.ok(searchHtml.includes('function saveSearchHistory(prospects)'));
+assert.ok(searchHtml.includes('function renderSearchHistory()'));
+assert.ok(searchHtml.includes('archive_status:alreadyAcquired?\'acquired\':\'new\''));
+assert.ok(searchHtml.includes('Già presente nel CRM'));
