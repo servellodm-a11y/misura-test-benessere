@@ -322,7 +322,7 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   const renderEvents=events=>{
    list.replaceChildren();const sub=document.createElement('p');sub.className='small';sub.textContent=events.length+' attività registrate · massimo 100';list.append(sub);
    const latest=events.find(ev=>ev&&['call','message','email','meeting'].includes(ev.activity_type));
-   latestConversationContext=latest?[String(latest.subject||'').trim(),String(latest.details||'').replace(/^Esito NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').replace(/\\s+/g,' ').trim()].filter(Boolean).join(' — ').slice(0,220):'';
+   latestConversationContext=latest?[String(latest.subject||'').trim(),String(latest.details||'').replace(/^Esito(?: Zoom)? NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').replace(/\\s+/g,' ').trim()].filter(Boolean).join(' — ').slice(0,220):'';
    refreshZoomProposal();
    if(!events.length){const empty=document.createElement('p');empty.className='small';empty.textContent='Nessuna attività registrata per questo Lead.';list.append(empty);return;}
    events.forEach(ev=>{
@@ -330,9 +330,9 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
     const title=document.createElement('strong');title.textContent=(activityTypes[ev.activity_type]||'Attività')+' · '+ev.subject;item.append(title);
     const date=document.createElement('p');date.className='small';date.textContent='Registrata: '+new Date(ev.occurred_at).toLocaleString('it-IT');item.append(date);
     if(ev.details){
-     const outcomeMatch=String(ev.details).match(/^Esito NEXTWAY: ([^\\r\\n]+)\\r?\\n?/);
+     const outcomeMatch=String(ev.details).match(/^Esito(?: Zoom)? NEXTWAY: ([^\\r\\n]+)\\r?\\n?/);
      if(outcomeMatch){const outcomeLine=document.createElement('p');outcomeLine.className='small';outcomeLine.textContent='Esito: '+outcomeMatch[1];item.append(outcomeLine);}
-     const visibleDetails=String(ev.details).replace(/^Esito NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').trim();
+     const visibleDetails=String(ev.details).replace(/^Esito(?: Zoom)? NEXTWAY: [^\\r\\n]+\\r?\\n?/,'').trim();
      if(visibleDetails){const body=document.createElement('p');body.className='small';body.style.whiteSpace='pre-wrap';body.textContent=visibleDetails;item.append(body);}
     }
     if(ev.next_action_at){const due=document.createElement('p');due.className='small';due.textContent='Follow-up: '+new Date(ev.next_action_at).toLocaleString('it-IT')+' · '+(ev.next_action_status==='open'?'Aperto':ev.next_action_status==='done'?'Completato':'Annullato');if(ev.next_action_status==='open'&&new Date(ev.next_action_at)<new Date())due.style.fontWeight='700';item.append(due);
