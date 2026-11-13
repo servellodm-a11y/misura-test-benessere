@@ -192,7 +192,7 @@ async function getLeadForConflict(cloudId){
    .order('next_action_at',{ascending:true}).order('id',{ascending:true}).limit(safeLimit);
   if(error)throw error;
   return data||[];
- 
+ }
  async function getLeadActivitySummary(cloudIds){
   const ids=[...new Set((Array.isArray(cloudIds)?cloudIds:[]).filter(id=>typeof id==='string'&&id.length>0))].slice(0,100);
   if(!ids.length)return [];
