@@ -64,7 +64,7 @@ const checks = [
 ];
 
 for (const [name, passed] of checks) {
-  console.log(\`\${passed ? "PASS" : "FAIL"} | \${name}\`);
+  console.log(`${passed ? "PASS" : "FAIL"} | ${name}`);
 }
 assert.ok(checks.every(([, passed]) => passed), "NEXTWAY conversion workspace static checks failed");
-console.log(\`\nNEXTWAY conversion workspace: \${checks.filter(([, passed]) => passed).length}/\${checks.length} static checks passed.\`);
+console.log(`\nNEXTWAY conversion workspace: ${checks.filter(([, passed]) => passed).length}/${checks.length} static checks passed.`);
