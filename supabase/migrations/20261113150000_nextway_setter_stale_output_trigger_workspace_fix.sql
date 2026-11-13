@@ -39,10 +39,15 @@ $$;
 drop trigger if exists nextway_clear_stale_setter_output_trg
   on public.nextway_setter_generation_requests;
 
--- La funzione storica resta disponibile per compatibilità, ma non è più
--- collegata alla tabella legacy. Revoca l'esecuzione diretta dei client.
-revoke all on function public.nextway_clear_stale_setter_output()
-  from public, anon, authenticated;
+-- La funzione storica può non esistere se la relativa migrazione legacy
+-- non è mai stata applicata: la revoca è quindi condizionale.
+do $$
+begin
+  if to_regprocedure('public.nextway_clear_stale_setter_output()') is not null then
+    execute 'revoke all on function public.nextway_clear_stale_setter_output() from public, anon, authenticated';
+  end if;
+end;
+$$;
 
 create or replace function public.nextway_clear_stale_workspace_setter_output()
 returns trigger
