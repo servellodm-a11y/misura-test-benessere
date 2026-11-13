@@ -67,3 +67,14 @@ La baseline diventa eseguibile solo dopo che la DDL originaria è stata recupera
 - l'inventario strutturale atteso prima e dopo la sequenza.
 
 Nessuna operazione è stata eseguita sul progetto `nextway-platform`.
+
+## Esito ricerca storico Git — 13 novembre 2026
+
+È stata controllata anche la cronologia GitHub del repository:
+- il commit iniziale del repository è `ee6e6ab707a1af658b05d999643c89f08ee9480a`, datato 5 novembre 2026;
+- il commit iniziale contiene soltanto `supabase/migrations/20261105000100_nextway_ai_assistant_foundation.sql`;
+- non ha commit parent;
+- questa migrazione iniziale crea il nuovo gruppo di tabelle `nw_*` e dichiara esplicitamente di non alterare tabelle esistenti;
+- non contiene la DDL originaria di `profiles`, `nextway_leads`, `nextway_setter_conversations`, `nextway_setter_messages`, `partner_details` o `clients`.
+
+**Conclusione:** la cronologia Git del repository non conserva una baseline precedente del database core. Non è stato trovato un dump SQL pre-migrazioni nei percorsi storici controllati. Questo non dimostra che non esista un backup esterno in Supabase o sul Mac; dimostra soltanto che non è presente nella storia Git esaminata.
