@@ -374,3 +374,32 @@ La suite statica ricostruita contiene 51 asserzioni e ora è collegata al workfl
 Durante la revisione è emerso un dettaglio importante: le policy workspace delle richieste conversione ereditate dalla precedente migrazione usavano il workspace corrente del Lead. Questo avrebbe potuto spostare la visibilità di una richiesta quando un amministratore trasferiva il Lead, nonostante lo snapshot immutabile.
 
 La migrazione `20261113120000_nextway_conversion_request_workspace_snapshot.sql` ora sostituisce quelle policy: la SELECT e lo scope restrittivo usano `nextway_lead_conversion_requests.workspace_id`. Le richieste legacy con snapshot NULL restano sul percorso owner/admin. Il test transazionale include il trasferimento del Lead dopo la richiesta e verifica che la visibilità della richiesta resti legata allo snapshot.
+
+
+## Audit aggiuntivo — ciclo di invito Partner e attivazione membership
+
+Data: 13 novembre 2026
+
+### Esiti della revisione statica
+
+- L'Edge Function di provisioning cerca prima un invito Auth già associato alla stessa email e allo stesso `nextway_conversion_request_id`; non riutilizza un account con la sola email corrispondente.
+- Il finalizer verifica email e metadata dell'utente Auth, controlla che un eventuale profilo esistente sia già compatibile con il ruolo partner e non sovrascrive dettagli partner incompatibili.
+- La creazione della membership avviene nella stessa transazione della finalizzazione, con ruolo `workspace_member` e stato `invited`. Un record membership preesistente blocca la finalizzazione: non viene aggiornato in modo cieco.
+- L'audit ha rilevato una compensazione troppo aggressiva: dopo un errore di finalizzazione l'Edge Function poteva cancellare anche un invito recuperato da un tentativo precedente. Ora la cancellazione è limitata agli inviti creati dall'esecuzione corrente.
+- È stato rilevato anche un rischio di race: l'utente potrebbe accettare l'invito mentre la finalizzazione è in corso. Prima di una cancellazione compensativa, il codice ora ricontrolla l'utente Auth e non elimina un account con email già confermata. Se la lettura di controllo fallisce, non cancella l'account.
+- La console amministrativa poteva attivare una membership verificando soltanto l'esistenza dell'utente Auth. Ora rifiuta lo stato `active` finché `email_confirmed_at` non risulta valorizzato; l'attivazione richiede quindi prima l'accettazione/conferma dell'invito e poi l'azione amministrativa.
+
+### Limiti non ancora certificati
+
+- Non è stato eseguito un test runtime del ciclo Auth reale: nessuna email è stata inviata e nessun utente Auth è stato creato.
+- Il test SQL transazionale multi-workspace esistente copre il ramo customer, non crea utenti in `auth.users` e non dimostra il ramo partner. Non va considerato prova E2E del provisioning Partner.
+- Il campo `partner_details.status` viene creato come `active` mentre la membership workspace è `invited`. I due stati hanno significati distinti nel modello attuale (stato anagrafico Partner vs accesso al workspace), ma questa distinzione va mantenuta esplicita e verificata nei futuri consumatori applicativi.
+- La conferma Auth è verificata nell'azione amministrativa che attiva la membership; non esiste ancora un test d'integrazione che eserciti accettazione email, callback/login e attivazione amministrativa in sequenza.
+
+### Stato
+
+- Correzione recupero invito e protezione account già accettato: **PREPARATA SUL BRANCH**.
+- Gate email confermata prima di membership active: **PREPARATO SUL BRANCH**.
+- Controlli statici aggiunti alla suite di conversione e al workflow pull_request: **INTEGRATI NEL CODICE, NON ANCORA ESEGUITI**.
+- Test Auth/Partner runtime: **DA COMPLETARE IN AMBIENTE DI TEST**.
+- Database remoto, inviti, utenti, migrazioni, deploy e merge: **NON TOCCATI**.
