@@ -32,7 +32,7 @@ begin
     raise exception 'Autenticazione richiesta.';
   end if;
 
-  if p_conversion_type not in ('customer', 'partner') then
+  if p_conversion_type is null or p_conversion_type not in ('customer', 'partner') then
     raise exception 'Tipo di conversione non valido.';
   end if;
   if p_full_name is null or char_length(btrim(p_full_name)) not between 2 and 160 then
@@ -91,6 +91,8 @@ begin
 end;
 $function$;
 
+-- Impedisce INSERT diretti: tutte le nuove richieste passano dalla RPC che calcola lo snapshot.
+revoke insert on table public.nextway_lead_conversion_requests from authenticated;
 revoke all on function public.nextway_create_lead_conversion_request(uuid,text,text,text,text)
   from public, anon;
 grant execute on function public.nextway_create_lead_conversion_request(uuid,text,text,text,text)
