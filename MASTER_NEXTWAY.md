@@ -3301,3 +3301,18 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Il successo è riferito a test statici/unitari e type-check: non dimostra runtime PostgreSQL, concorrenza DB, invio/reinvio Auth o flusso email end-to-end.
 - Nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato. PR #1 resta draft e non mergeata.
 - Ultimo commit codice/workflow verificato: `9485a5cdcab0898489c7deeb7ddc49fa8a2f3603`; successivo aggiornamento di questo MASTER solo documentale.
+
+
+## 13 novembre 2026 — Implementazione SQL annullamento Partner sul branch
+
+- Preparata la migrazione `supabase/migrations/20261113140000_nextway_partner_conversion_cancellation.sql`.
+- Aggiunti `cancelled_at`, `cancelled_by`, `cancellation_reason`; aggiornati check di stato e revisione; aggiunto check di coerenza dei metadati cancellation.
+- Aggiornata `nextway_guard_conversion_request_review()`: permette annullamento soltanto da `pending`, `ready_for_activation`, `provisioning`, con platform_admin autenticato; conserva i dati di origine e revisione, richiede claim e activation fields null e rende immutabili i metadati di annullamento.
+- Aggiunta RPC `nextway_cancel_conversion_activation(uuid,text)`: SECURITY DEFINER, search_path fisso, platform_admin obbligatorio, motivo 1–1.000 caratteri, lock `FOR UPDATE`, retry idempotente, rifiuto di `activated` e `rejected`, invalidazione del claim, EXECUTE solo authenticated.
+- Il lock è sulla stessa riga usata da claim e finalizer. Il finalizer continua a richiedere stato `provisioning` e claim token valido; il release resta limitato a stato/token corrispondenti.
+- Aggiunto `scripts/test-nextway-partner-cancellation-sql.mjs`; integrato nei filtri push/PR e nel workflow.
+- **COMPLETATO E VERIFICATO:** controllo statico dei contratti SQL eseguito sui file branch: 15/15 asserzioni superate.
+- **COMPLETATO E VERIFICATO:** GitHub Actions run `43409635317`, commit `354baa76613dbf8d52e01211da60baf9b97e7852`: success. Sia `Validate Partner cancellation lifecycle specification` sia `Validate Partner cancellation SQL contract` sono passati; nessuno step fallito.
+- Migrazione e RPC sono soltanto nel branch. Non sono state applicate al progetto `nextway-platform`.
+- **DA COMPLETARE:** revisione SQL indipendente, test rollback-only con fixture di staging, prove concorrenti con due sessioni PostgreSQL, test API Auth e invito su progetto Supabase separato.
+- Nessuna modifica DB remoto, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
