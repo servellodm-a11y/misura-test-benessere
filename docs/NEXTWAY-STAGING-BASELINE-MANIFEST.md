@@ -64,3 +64,14 @@ La baseline è accettabile soltanto dopo confronto automatico tra:
 - schema risultante atteso dopo l'intera sequenza.
 
 Il test deve essere eseguito su PostgreSQL/Supabase staging pulito. Il Mac Intel da 8 GB non è il target per avviare l'intero stack Supabase locale.
+
+## Mappa delle modifiche introdotte dalle migrazioni
+
+La ricostruzione delle differenze è documentata in `docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md`. In sintesi, le migrazioni hanno modificato direttamente:
+- `nextway_leads`: archiviazione logica, vincolo stato, audit e associazione workspace/RLS;
+- `nextway_setter_conversations`: associazione workspace e policy di accesso;
+- `nextway_knowledge_documents`: associazione workspace, indici di deduplicazione e policy.
+
+Le tabelle `profiles`, `nextway_setter_messages`, `partner_details` e `clients` non risultano oggetto di ALTER TABLE diretto nelle migrazioni attualmente versionate; devono comunque essere incluse nella baseline con tutte le loro dipendenze originarie.
+
+**Test statico:** `scripts/test-nextway-core-baseline-delta.mjs` controlla che la mappa resti coerente con la sequenza delle migrazioni. Il test non produce una baseline SQL e non certifica l'esecuzione PostgreSQL.
