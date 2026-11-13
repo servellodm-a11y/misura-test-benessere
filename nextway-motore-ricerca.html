@@ -198,6 +198,7 @@ async function runSearch(){
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Qualità evidenze: '+assessment.score+'/100 · '+assessment.identity+' · Compatibilità commerciale: non valutata';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Elementi rilevati: '+assessment.reasons.join(' · ')+'. Il punteggio misura solo la completezza delle evidenze, non l’interesse della persona né la sua idoneità commerciale.';
+    const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,$('segment').value,url,publicContacts);
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
@@ -216,13 +217,38 @@ async function runSearch(){
       capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
-    card.append(title,snippet,quality,contactSummary,reasons,document.createElement('br'),link,copy,capture);list.append(card);
+    card.append(title,snippet,quality,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
   status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
+}
+function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts){
+ const box=document.createElement('section');box.className='message-draft-panel';box.style.cssText='margin:14px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:12px;';
+ const heading=document.createElement('strong');heading.textContent='Messaggi personalizzati per canale';
+ const note=document.createElement('p');note.className='muted';note.textContent='Bozze da controllare prima dell’uso. Nessun messaggio viene inviato. Usa WhatsApp o email solo quando il recapito è pubblicato per contatti professionali e il contatto è lecito; rispetta sempre consenso, regole della piattaforma e richieste di non essere ricontattati.';
+ const select=document.createElement('select');select.className='input';select.style.cssText='display:block;width:100%;margin:8px 0;padding:9px;';
+ const output=document.createElement('textarea');output.className='input';output.rows=7;output.style.cssText='display:block;width:100%;min-height:150px;margin:8px 0;padding:10px;white-space:pre-wrap;';
+ const copy=document.createElement('button');copy.type='button';copy.className='btn alt';copy.textContent='Copia bozza';
+ const segmentLabels={customers:'un possibile cliente interessato al benessere',wellness_pro:'un professionista della salute e del benessere',wellness_networker:'un professionista del network marketing nel wellness',new_networker:'una persona agli inizi nel network marketing',other_networker:'un professionista del network marketing',exnetworker:'una persona con precedente esperienza nel network marketing',entrepreneur:'un imprenditore',side_income:'una persona che potrebbe valutare un’attività aggiuntiva',business_seeking:'una persona che potrebbe valutare un progetto imprenditoriale'};
+ const audience=segmentLabels[segment]||'un potenziale contatto';
+ const evidence=(String(snippet||'')+' '+String(pageContent||'')).replace(/\\s+/g,' ').trim();
+ const topic=segment==='customers'?'un approccio basato sulla misurazione e sulla personalizzazione del benessere':segment==='wellness_pro'?'un confronto professionale su prevenzione, benessere e strumenti di misurazione':segment.includes('networker')||segment==='exnetworker'?'un confronto tra professionisti sulle opportunità e sugli strumenti di sviluppo nel wellness':'un confronto su un progetto professionale nel settore del benessere';
+ const drafts={
+  whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere': 'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
+  facebook:'Buongiorno! Ho visto la sua pagina e mi ha colpito il lavoro che comunica. Sto approfondendo un progetto legato al benessere e '+topic+'. Mi piacerebbe presentarglielo in modo semplice, senza impegno, e capire se può esserci un punto di interesse comune. Le va di parlarne?',
+  linkedin:'Buongiorno, ho consultato il suo profilo professionale e le scrivo perché sto sviluppando relazioni con '+audience+'. Mi interessa confrontarmi su '+topic+'. Se lo ritiene pertinente, mi farebbe piacere entrare in contatto e scambiare qualche informazione.',
+  instagram:'Ciao! Ho scoperto il tuo profilo attraverso i contenuti che condividi sul benessere. Sto conoscendo persone e professionisti con cui confrontarmi su '+topic+'. Se ti fa piacere, posso raccontarti in breve di cosa si tratta. Nessun problema se non è un tema in linea con i tuoi interessi.',
+  email:'Oggetto: Un possibile confronto sul settore benessere\n\nBuongiorno,\n\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\n\nSe l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\n\nLa ringrazio per l’attenzione e le auguro una buona giornata.'
+ };
+ const channels=[['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email']];
+ channels.forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;select.append(opt);});
+ function refresh(){output.value=drafts[select.value]||'';}
+ select.addEventListener('change',refresh);
+ copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(output.value);copy.textContent='Copiato';}catch(e){output.focus();output.select();copy.textContent='Seleziona e copia';}});
+ box.append(heading,note,select,output,copy);refresh();return box;
 }
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const t=String(title||''),body=String(snippet||'')+' '+String(pageContent||'');
