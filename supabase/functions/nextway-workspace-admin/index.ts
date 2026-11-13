@@ -187,6 +187,40 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (existingError) throw existingError;
 
+      if (body.membership_status === "active") {
+        if (!existing || !["invited", "active"].includes(existing.membership_status)) {
+          return respond({
+            error: "Per attivare l'accesso deve esistere una membership invited. Crea prima l'invito."
+          }, 409, origin);
+        }
+
+        // For conversion-created Partners, bind activation to the exact completed
+        // conversion and workspace. Manual memberships remain manageable by admins.
+        const { data: partnerDetails, error: partnerDetailsError } = await admin
+          .from("partner_details")
+          .select("nextway_conversion_request_id")
+          .eq("profile_id", body.user_id)
+          .maybeSingle();
+        if (partnerDetailsError) throw partnerDetailsError;
+
+        if (partnerDetails?.nextway_conversion_request_id) {
+          const { data: conversionRequest, error: conversionRequestError } = await admin
+            .from("nextway_lead_conversion_requests")
+            .select("id,workspace_id,status,activation_user_id")
+            .eq("id", partnerDetails.nextway_conversion_request_id)
+            .maybeSingle();
+          if (conversionRequestError) throw conversionRequestError;
+          if (!conversionRequest ||
+              conversionRequest.status !== "activated" ||
+              conversionRequest.activation_user_id !== body.user_id ||
+              conversionRequest.workspace_id !== body.workspace_id) {
+            return respond({
+              error: "La conversione Partner non risulta completata per questo utente e workspace."
+            }, 409, origin);
+          }
+        }
+      }
+
       const membershipStatus = String(body.membership_status);
       const activatedAt = membershipStatus === "active"
         ? (existing?.membership_status === "active" && existing.activated_at
