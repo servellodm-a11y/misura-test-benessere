@@ -30,7 +30,34 @@ function activateLocalAccount(userId){
  draw();
 }
 function clearLocalAccount(){activeOwnerId=null;data=[];draw()}
-window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount,getOwner:()=>activeOwnerId};
+window.NEXTWAY_LOCAL_ARCHIVE={
+ activate:activateLocalAccount,
+ clear:clearLocalAccount,
+ getOwner:()=>activeOwnerId,
+ addFromSearch(record){
+  if(!activeOwnerId)throw new Error('Accedi a NEXTWAY prima di acquisire un risultato.');
+  const url=safeHttpUrl(record?.url);
+  if(!url)throw new Error('URL della fonte non valido.');
+  const duplicate=data.find(x=>!x.is_test&&x.url&&safeHttpUrl(x.url)?.toLowerCase()===url.toLowerCase());
+  if(duplicate)return {duplicate:true,lead:duplicate};
+  const title=String(record?.title||'').trim().slice(0,120);
+  const evidence=String(record?.evidence||'').trim().slice(0,4000);
+  if(!title||!evidence)throw new Error('Il risultato non contiene titolo o evidenza sufficienti.');
+  const lead={
+   id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+   name:title,profession:'',company_brand:'',location:'',
+   category:['potential_partner','final_customer','wellness_professional'].includes(record.category)?record.category:'potential_partner',
+   partner_type:record.partner_type||'',mode:'Affinità professionale',signal_type:'Altro segnale documentato',
+   source:new URL(url).hostname,url,evidence,
+   verified_at:'',identity_check:'pending',qualification:'Da approfondire',
+   fit:0,activity:0,presence:0,interest:0,approach:0,
+   status:'Da verificare',
+   notes:'Acquisito dalla Ricerca NEXTWAY. Il titolo è un identificativo provvisorio: verificare la fonte originale e completare nome, ruolo, località e pertinenza prima di contattare.',
+   created:new Date().toISOString(),local_dirty:true
+  };
+  data.unshift(lead);persist();return {duplicate:false,lead};
+ }
+};
 const el=id=>document.getElementById(id),labels={potential_partner:'Potenziale Partner',final_customer:'Cliente finale',wellness_professional:'Professionista wellness'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());return ['http:','https:'].includes(u.protocol)&&u.hostname&&!u.username&&!u.password?u.href:''}catch{return ''}};
