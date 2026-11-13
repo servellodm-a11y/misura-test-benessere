@@ -128,21 +128,24 @@ La cancellazione SQL non può annullare un'email già consegnata né revocare in
 
 I test di concorrenza devono essere eseguiti con due sessioni PostgreSQL indipendenti in staging. Un test unitario puro non prova i lock del database.
 
-## 9. Sequenza d'implementazione futura
+## 9. Implementazione sul branch
 
-1. Riconciliare i vincoli e la guard effettivamente presenti sul database staging.
-2. Preparare una sola migrazione transazionale per colonne, check constraints, guard e RPC.
-3. Aggiungere test statici per firma, privilegi, transizioni e immutabilità.
-4. Aggiungere test SQL rollback-only per i casi 1–9 e 13–15.
-5. Eseguire gare concorrenti con due sessioni in staging.
-6. Integrare l'azione di annullamento nella console admin solo dopo il superamento dei test SQL.
-7. Collaudare l'Edge Function con account Auth sintetici in staging, senza destinatari reali.
+È stata preparata la migrazione `supabase/migrations/20261113140000_nextway_partner_conversion_cancellation.sql`. Include i tre metadati di annullamento, i vincoli di stato/revisione/coerenza, la guard aggiornata e la RPC `nextway_cancel_conversion_activation(uuid,text)`.
+
+È stato aggiunto `scripts/test-nextway-partner-cancellation-sql.mjs`, che controlla staticamente vincoli, privilegi, transizioni, immutabilità, invalidazione claim e compatibilità con claim/release/finalizer esistenti. Il controllo equivalente è stato eseguito sui contenuti recuperati dal branch: 15/15 asserzioni superate. La suite deve comunque essere eseguita da GitHub Actions sul commit che include questa migrazione.
+
+Restano necessari:
+1. Revisione SQL indipendente e confronto con lo schema live/staging.
+2. Test SQL rollback-only per i casi 1–9 e 13–15.
+3. Gare concorrenti con due sessioni PostgreSQL indipendenti in staging.
+4. Collaudo Auth con account sintetici in staging, senza destinatari reali.
+5. Integrazione UI admin solo dopo i test runtime e la revisione dei permessi.
 
 ## 10. Stato operativo
 
 - Specifica tecnica: completata sul branch.
-- Migrazione di annullamento: non creata e non applicata.
-- RPC e guard: non modificate.
+- Migrazione di annullamento: preparata sul branch, NON applicata.
+- RPC e guard: implementate nel file di migrazione sul branch, non installate sul database.
 - Test runtime Auth e PostgreSQL concorrente: bloccati finché non esiste un progetto staging separato.
 - Database `nextway-platform`: non modificato.
 - Edge Function remota: non distribuita.
