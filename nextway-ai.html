@@ -279,7 +279,36 @@ const commercial=getCommercialQualification(x);if(commercial){const panel=docume
   insertDraft.addEventListener('click',()=>{type.value=draftChannel.value==='email'?'email':'message';subject.value='Bozza '+draftChannel.options[draftChannel.selectedIndex].text+' — '+(leadName||'Lead');details.value='BOZZA DA INVIARE MANUALMENTE — non ancora inviata.\\n\\n'+draftText.value;feedback.textContent='Bozza inserita nel modulo. Dopo averla inviata personalmente, torna qui e registra l’attività.';});
   draftActions.append(generateDraft,copyDraft,insertDraft);
   draftPanel.append(draftTitle,draftNote,field('Canale',draftChannel),field('Sito da proporre (facoltativo)',draftWebsite),draftText,draftActions,draftHint);
+
   form.append(draftPanel);refreshLeadDraft();
+
+  // Proposta Zoom: si attiva solo dopo una manifestazione esplicita di interesse.
+  const zoomPanel=document.createElement('section');zoomPanel.style.cssText='grid-column:1 / -1;border:1px solid #dfe5ef;border-radius:10px;padding:12px;background:#f8faff';zoomPanel.hidden=true;
+  const zoomTitle=document.createElement('strong');zoomTitle.textContent='Proposta di incontro Zoom';
+  const zoomNote=document.createElement('p');zoomNote.className='small';zoomNote.textContent='Bozza personalizzata sulla base dei dati presenti nel Lead. Il link Calendly compare solo per un interesse esplicito. Nessun invio o appuntamento automatico.';
+  const zoomText=document.createElement('textarea');zoomText.rows=7;zoomText.maxLength=4000;zoomText.style.cssText='width:100%;padding:9px;margin:8px 0;font:inherit';
+  const zoomActions=document.createElement('div');zoomActions.className='actions';
+  const copyZoom=document.createElement('button');copyZoom.type='button';copyZoom.className='btn';copyZoom.textContent='Copia proposta Zoom';
+  const zoomHint=document.createElement('p');zoomHint.className='small';zoomHint.setAttribute('aria-live','polite');
+  function refreshZoomProposal(){
+   const selectedOutcome=outcome.value;
+   zoomPanel.hidden=!['interested','meeting_scheduled'].includes(selectedOutcome);
+   if(zoomPanel.hidden){zoomText.value='';zoomHint.textContent='La proposta Zoom si attiva solo per interesse espresso o appuntamento già fissato.';return;}
+   const greeting='Buongiorno'+(leadName?' '+leadName:'')+',';
+   const profile=[profession,company,location].filter(Boolean).join(' · ');
+   const context=profile?'Mi farebbe piacere approfondire con lei alcuni spunti collegati alla sua attività ('+profile+'). ':'';
+   if(selectedOutcome==='interested'){
+    zoomText.value=greeting+'\n\nGrazie per avermi manifestato il suo interesse. '+context+'Le propongo una breve videochiamata su Zoom, così posso illustrarle il progetto con chiarezza e rispondere alle sue domande.\n\nSe le fa piacere, può scegliere direttamente il giorno e l’orario più comodi qui:\n'+NEXTWAY_CALENDLY_URL+'\n\nA presto!';
+    zoomHint.textContent='Interesse esplicito selezionato: link Calendly incluso. Verifica che la proposta sia coerente con quanto vi siete detti prima di inviarla.';
+   }else{
+    zoomText.value=greeting+'\n\nConfermo con piacere il nostro appuntamento. Sarà l’occasione per approfondire con calma i temi di cui abbiamo parlato e rispondere alle sue domande.\n\nA presto!';
+    zoomHint.textContent='Appuntamento già fissato: testo di conferma senza nuovo link di prenotazione. Aggiungi manualmente data, ora e modalità Zoom se necessario.';
+   }
+  }
+  outcome.addEventListener('change',refreshZoomProposal);
+  copyZoom.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(zoomText.value);copyZoom.textContent='Copiato';}catch(err){zoomText.focus();zoomText.select();copyZoom.textContent='Seleziona e copia';}});
+  zoomActions.append(copyZoom);zoomPanel.append(zoomTitle,zoomNote,zoomText,zoomActions,zoomHint);form.append(zoomPanel);refreshZoomProposal();
+
 
   const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Registra attività';const feedback=document.createElement('p');feedback.className='small';feedback.setAttribute('aria-live','polite');feedback.style.gridColumn='1 / -1';form.append(save,feedback);if(x.archived_at){save.disabled=true;feedback.textContent='Lead archiviato: puoi consultare la cronologia, ma non registrare nuove attività.';}activityBox.append(form);
   const list=document.createElement('div');activityBox.append(list);
