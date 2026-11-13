@@ -294,13 +294,14 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const t=String(title||'').trim(),body=(String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
  const text=(t+' '+body).toLocaleLowerCase('it');
  const host=(()=>{try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch{return '';}})();
- const socialProfile=/linkedin\.com\/in\/|instagram\.com\/[^/]+\/?$|facebook\.com\/[^/]+\/?$|tiktok\.com\/@|youtube\.com\/@/i.test(url||'');
+ const linkedinPersonProfile=/linkedin\.com\/in\//i.test(url||'');
+ const socialProfile=/instagram\.com\/[^/]+\/?$|facebook\.com\/[^/]+\/?$|tiktok\.com\/@|youtube\.com\/@/i.test(url||'');
  const personTitle=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,3}(?:\s*[|–-]\s*[^|–-]{2,70})?$/.test(t);
  const selfIdentification=/\b(mi chiamo|sono\s+(?:un[oa]?\s+)?(?:nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|coach|imprenditor|consulent|networker|titolare))\b/i.test(body);
  const roleEvidence=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|consulent|imprenditor|titolare|founder|team leader|networker|distributore|brand partner|vendita diretta/i.test(text);
  const organizationEvidence=/\b(srl|s\.r\.l|spa|s\.p\.a|azienda|società|company|centro|studio associato|team ufficiale|contatti|chi siamo)\b/i.test(t+' '+body);
  const directoryEvidence=/directory|elenco professionisti|trova un professionista|portale|catalogo|annuario|pagine gialle|job board|offerte di lavoro|annunci di lavoro|articolo|blog|news|magazine/i.test(t+' '+host);
- const individual=!!(socialProfile||selfIdentification||(personTitle&&roleEvidence));
+ const individual=!!(linkedinPersonProfile||selfIdentification||(personTitle&&roleEvidence));
  const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
  const segmentSignals={
   wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|studio.*benessere/i,
@@ -316,7 +317,7 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text);
  const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
  const contactCount=['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0);
- let identityScore=(socialProfile?24:0)+(selfIdentification?16:0)+(personTitle&&roleEvidence?14:0)+(roleEvidence?6:0);
+ let identityScore=(linkedinPersonProfile?24:0)+(selfIdentification?16:0)+(personTitle&&roleEvidence?14:0)+(socialProfile&&personTitle&&roleEvidence?5:0)+(roleEvidence?6:0);
  identityScore=Math.min(40,identityScore);
  let relevanceScore=(explicitSegmentSignal?30:0)+(broadIndustrySignal?10:0);
  relevanceScore=Math.min(40,relevanceScore);
