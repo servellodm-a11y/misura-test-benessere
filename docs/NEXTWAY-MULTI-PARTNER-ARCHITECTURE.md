@@ -76,7 +76,9 @@ La prima release continua ad avere un solo titolare e un archivio personale. Non
 - L'AI Setter legge istruzioni e criteri approvati associati al workspace della conversazione tramite RPC.
 - Il motore di ricerca ha già segmenti generali e non deve essere convertito in un motore specifico Zinzino.
 - La presenza di tabelle e RPC workspace non dimostra da sola che l'intero flusso di ricerca, CRM, knowledge base e conversazioni sia isolato e selezionabile dall'interfaccia.
-- Le funzioni di configurazione e l'esperienza amministrativa completa restano da implementare.
+- Il pannello amministrativo ora crea workspace con profilo commerciale iniziale (offerta, pubblici, parole chiave e posizionamento) salvato nel campo settings già previsto dal modello dati.
+- I moduli della Knowledge Base vengono proposti a partire dalla chiave del workspace; il fallback server è neutro (general), non Zinzino.
+- I campi del profilo sono attualmente acquisiti in creazione. La modifica successiva del profilo, la selezione del workspace nel motore di ricerca e il consumo effettivo dei settings da parte delle query restano da implementare.
 - Non è stata eseguita alcuna migrazione o modifica al database remoto per questa specifica.
 
 ## Sequenza di implementazione
