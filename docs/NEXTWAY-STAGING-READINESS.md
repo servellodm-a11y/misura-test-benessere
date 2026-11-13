@@ -45,13 +45,15 @@ La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea
 
 ### B3 — trigger Setter: riallineamento dopo la separazione delle tabelle
 
-La migrazione `20261110000700_nextway_clear_stale_staged_output.sql` installa un trigger su `public.nextway_setter_generation_requests` e assegna `NEW.generated_output := null`.
+Le migrazioni `20261110000200` e `20261110000500` creano prima la tabella legacy con `user_id`, `response` e poi aggiungono `generated_output`. In quel contesto storico, il trigger della migrazione `20261110000700` che azzera `NEW.generated_output` quando cambia `user_id`, chiave o conversazione è coerente con la tabella legacy.
 
-La tabella creata dalla migrazione `20261110000200_nextway_setter_idempotency.sql` non dichiara la colonna `generated_output`; dichiara invece `response`. La successiva migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` crea una tabella distinta, `nextway_setter_workspace_generation_requests`, che contiene `generated_output`, e dichiara esplicitamente di preservare la tabella legacy.
+Successivamente `20261111240000` introduce una versione workspace-aware con `owner_profile_id`, `claimed_at` e `cached_response` usando `CREATE TABLE IF NOT EXISTS` sul nome legacy; su una catena pulita la tabella legacy esiste già, quindi la creazione non la trasforma. La migrazione `20261112020000` risolve la separazione creando `nextway_setter_workspace_generation_requests` e ricollegando le RPC correnti alla nuova tabella, preservando la tabella legacy.
 
-**Riallineamento preparato sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger non più necessario dalla tabella legacy e installa la protezione sulla tabella workspace, usando `owner_profile_id`, `idempotency_key` e `conversation_id`. La migrazione è forward-only e verifica preventivamente la presenza della tabella/colonne richieste. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
+**Riallineamento preparato sul branch:** `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` rimuove il trigger legacy non più necessario al percorso RPC corrente e installa la protezione sulla tabella workspace, usando `owner_profile_id`, `idempotency_key` e `conversation_id`. È una migrazione forward-only; non riscrive la storia. Il test statico dedicato è `scripts/test-nextway-setter-stale-output-trigger.mjs`.
 
-**Stato:** preparata; CI superata (run `43412386590`). Il contratto statico è stato corretto per riflettere la cronologia reale delle colonne legacy; la migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
+**Precisazione:** il trigger 007 non era errato nel suo contesto storico; la modifica 1315 è un riallineamento successivo alla separazione delle tabelle.
+
+**Stato:** preparata; CI del contratto storico superata (run `43412838823`). La migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
 
 ### B4 — migrazioni Setter: transizione da eseguire senza traffico intermedio
 
@@ -72,8 +74,8 @@ La sequenza effettiva è:
 
 1. Ottenere una baseline schema-only completa e sanitizzata del database core, senza righe applicative, utenti Auth, storage objects, segreti o dati personali.
 2. Confrontare la baseline con le migrazioni versionate e definire quali oggetti sono baseline preesistenti e quali sono creati dalle migrazioni.
-3. Verificare CI e sottoporre a revisione SQL il riallineamento forward-only del trigger Setter; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
-4. Definire e revisionare `supabase/config.toml` per staging, senza collegare il progetto reale.
+3. Completare la verifica CI e la revisione SQL del riallineamento forward-only del trigger Setter; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
+4. Completare la revisione della configurazione `supabase/config.toml` già predisposta, senza collegare il progetto reale.
 5. Preparare secret manifest con soli nomi e descrizioni, mai valori; distinguere chiavi pubbliche, service role e secret Edge Function.
 6. Creare il progetto Supabase staging solo dopo autorizzazione esplicita e controllo di eventuali costi/limiti del piano.
 7. Applicare schema e migrazioni soltanto allo staging, in ambiente controllato.
@@ -94,7 +96,7 @@ La sequenza effettiva è:
 |---|---|
 | Protocollo di collaudo Partner | COMPLETATO |
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
-| Configurazione CLI staging | PREPARATA, CI IN CORSO |
+| Configurazione CLI staging | PREPARATA, test CI IN CORSO |
 | Manifest baseline core | COMPLETATO |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
 | Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
