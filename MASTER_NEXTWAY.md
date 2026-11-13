@@ -3041,3 +3041,16 @@ L'utente ha autorizzato il ripristino Rate Limit + Governance. Draft confrontato
 
 ### Esecuzione SQL P0 — esito comunicato dall'utente, 13 novembre 2026
 L'utente ha eseguito `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` nel SQL Editor Supabase e ha riportato `Success. No rows returned`. Questo conferma l'esecuzione senza errori segnalati; resta in attesa una verifica read-only post-esecuzione della tabella Rate Limit, delle due RPC e dei relativi privilegi/RLS. Non considerare ancora il ripristino verificato.
+
+
+### Verifica finale ripristino P0 — 13 novembre 2026
+L'utente ha eseguito la query di verifica read-only dopo l'applicazione dello script P0 e ha riportato tutti gli esiti positivi:
+- Tabella Rate Limit: OK.
+- RPC Rate Limit: OK.
+- RPC Governance: OK.
+- RLS Rate Limit: ATTIVA.
+- Accesso RPC Rate Limit: OK.
+- Accesso RPC Governance: OK.
+
+**STATO: COMPLETATO E VERIFICATO** per tabella/RPC Rate Limit, RPC Governance, RLS e accesso alle due RPC secondo la verifica SQL riportata dall'utente. Il ripristino P0 è quindi concluso; non ripetere questi controlli salvo necessità concreta.
+Nessun deploy Edge Function, deploy Netlify, merge o altra migrazione è implicato da questo risultato. Restano invariati i vincoli di produzione e il blocco Netlify fino al 4 dicembre 2026. Branch di lavoro: `fix/nextway-password-recovery`; `main` e PR draft non modificati.
