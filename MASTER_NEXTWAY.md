@@ -3054,3 +3054,43 @@ L'utente ha eseguito la query di verifica read-only dopo l'applicazione dello sc
 
 **STATO: COMPLETATO E VERIFICATO** per tabella/RPC Rate Limit, RPC Governance, RLS e accesso alle due RPC secondo la verifica SQL riportata dall'utente. Il ripristino P0 è quindi concluso; non ripetere questi controlli salvo necessità concreta.
 Nessun deploy Edge Function, deploy Netlify, merge o altra migrazione è implicato da questo risultato. Restano invariati i vincoli di produzione e il blocco Netlify fino al 4 dicembre 2026. Branch di lavoro: `fix/nextway-password-recovery`; `main` e PR draft non modificati.
+
+## AVANZAMENTO OPERATIVO — 13 NOVEMBRE 2026, ORE 08:40 (Europe/Rome)
+
+### Ripristino P0 Rate Limit + Governance
+
+L'utente ha eseguito il draft P0 nel SQL Editor Supabase e ha riportato `Success. No rows returned`. La query read-only finale ha confermato:
+- tabella Rate Limit: OK;
+- RPC Rate Limit: OK;
+- RPC Governance: OK;
+- RLS Rate Limit: ATTIVA;
+- accesso alle due RPC: OK.
+
+**STATO: COMPLETATO E VERIFICATO** secondo il report SQL dell'utente. Non ripetere questi controlli senza una nuova evidenza tecnica.
+
+### Correzione documentale per evitare attività duplicate
+
+Aggiornati sul branch di lavoro:
+- `docs/NEXTWAY-PRODUCTION-REPAIR-PLAN.md` — commit `f26f1f0b739797e666527e92884a21ca45b4b9e3`;
+- `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` — commit `2151d19986b1a125cde5166d72e9100ea4e569a4`.
+
+I documenti ora registrano P0 concluso e chiariscono che le vecchie migrazioni cleanup/retention (`20261110000700`, `20261110000400`) sono incompatibili con il modello Setter corrente. Non aggiungere `user_id` o `lease_expires_at`, non riapplicare quelle migrazioni e non ricreare il vecchio schema. Un'eventuale protezione sostitutiva va progettata soltanto se un test runtime workspace-aware dimostra una necessità reale.
+
+### Stato GitHub / PR
+
+- Branch di lavoro: `fix/nextway-password-recovery`.
+- PR #1 resta aperta in draft e non merged.
+- Confronto GitHub aggiornato dopo i due commit documentali: branch feature **128 commit avanti e 4 dietro** rispetto a `main`; i rami sono divergenti.
+- Non eseguire merge, rebase o aggiornamento di `main` in questa fase. Prima di preparare il rilascio servirà una riconciliazione controllata dei quattro commit di `main` non ancora presenti nel branch.
+
+### Prossimo lavoro effettivo — senza ripetere P0
+
+1. Completare la riconciliazione della baseline schema-only (tipi, sequenze, ownership, grant, FK, funzioni, trigger e policy); lo script lessicale attuale non certifica l'importabilità PostgreSQL.
+2. Preparare una baseline locale riproducibile e seed solo sintetici, preservando `supabase/.temp/`.
+3. Avviare soltanto il profilo PostgreSQL locale dopo revisione di baseline/configurazione e misurazione risorse; non avviare full stack Supabase sul Mac da 8 GiB.
+4. Eseguire test SQL/concorrenza in isolamento; solo successivamente valutare Auth/API/Storage/Edge Runtime ridotto.
+5. Verificare separatamente le versioni Edge Functions effettivamente distribuite prima di un rilascio autorizzato.
+
+### Vincoli invariati
+
+Nessuna modifica a `main`, nessun merge/rebase PR, nessun deploy Supabase, nessun nuovo DDL/DML, nessun workspace o dato reale creato. Nessun deploy Netlify di produzione prima del 4 dicembre 2026. Nessuna spesa o nuovo progetto cloud senza autorizzazione esplicita.
