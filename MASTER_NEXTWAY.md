@@ -3418,3 +3418,5 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Nessuna operazione DB eseguita; nessuna migrazione applicata; staging non creato; progetto reale invariato.
 
 - Esito successivo: CI run `43414160598` sul commit `3faa66e517f0caf40988ebb581545c72355be5ce` **SUCCESS**, 46 step, zero fallimenti; il test `Validate NEXTWAY core baseline migration deltas` è SUCCESS. Gli aggiornamenti successivi sono documentazione soltanto.
+
+- Ricerca storico Git: il repository nasce il 5 novembre 2026 con commit root `ee6e6ab707a1af658b05d999643c89f08ee9480a`, contenente solo la migrazione `20261105000100_nextway_ai_assistant_foundation.sql` (tabelle `nw_*`, dichiarata additiva e senza ALTER delle tabelle esistenti). Nessuna DDL pre-migrazioni per il core NEXTWAY è conservata nella cronologia Git esaminata. L'assenza nel repository non prova l'assenza di backup esterni o locali.
