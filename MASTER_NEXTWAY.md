@@ -2948,3 +2948,13 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - È destinata al SQL Editor del progetto `nextway-platform` (ref `obqwbtlltxjfeirstsya`); se il registro migrazioni non è accessibile, fermarsi e riportare l'errore, senza tentare query alternative non documentate.
 - Prossimo passo operativo: eseguire questa sola query nel SQL Editor e riportare la tabella dei risultati. Non inviare password, token o chiavi.
 - Nessuna query è stata eseguita sul database remoto da questo passaggio; nessuna migrazione, deploy, merge, import locale o modifica a `main`.
+
+
+### Correzione query read-only: registro migrazioni non presente — 13 novembre 2026
+
+- Prima esecuzione di `docs/NEXTWAY-READONLY-RECONCILIATION-CHECK.sql` interrotta con PostgreSQL `42P01`: la relazione `supabase_migrations.schema_migrations` non esiste nel progetto.
+- Nessuna modifica al database: la query era in sola lettura e si è fermata al riferimento alla relazione inesistente.
+- Non dedurre da questo errore che le migrazioni non siano state applicate. Il registro potrebbe avere un altro nome/schema o non essere disponibile nel progetto.
+- Aggiornata la query sul branch: prima ricerca tabelle candidate al registro nei cataloghi PostgreSQL senza presumere un nome; poi verifica in sola lettura la presenza effettiva di tabelle, RPC e trigger Setter.
+- La nuova versione non interroga direttamente `supabase_migrations.schema_migrations` e non contiene DDL/DML.
+- L'utente deve eseguire nuovamente la versione aggiornata dal branch e riportare entrambi i risultati. Nessuna migrazione, deploy, merge, modifica a `main` o scrittura remota.
