@@ -47,8 +47,8 @@ column_results AS (
 rls_results AS (
   SELECT
     'RLS'::text AS priority,
-    c.relname::text AS object_name,
-    c.relrowsecurity AS present
+    v.table_name::text AS object_name,
+    COALESCE(c.relrowsecurity, false) AS present
   FROM (VALUES
     ('nextway_setter_generation_requests'),
     ('nextway_setter_conversations'),
