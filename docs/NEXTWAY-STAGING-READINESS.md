@@ -39,7 +39,7 @@ Le migrazioni versionate non costituiscono, da sole, una ricostruzione completa 
 
 La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea le tabelle del modulo AI Assistant (`nw_*`), non una baseline completa di queste tabelle core.
 
-**Preparazione completata:** creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md` con gli oggetti core preesistenti, le colonne minime note, le strutture create dalle migrazioni e le esclusioni sui dati.
+**Preparazione completata:** creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md` con gli oggetti core preesistenti, le colonne minime note, le strutture create dalle migrazioni e le esclusioni sui dati. Aggiunta anche la diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`, che controlla soltanto cataloghi e metadati delle colonne/RLS, senza leggere righe applicative o dati Auth.
 
 **Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve ancora la baseline SQL schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
 
@@ -98,6 +98,7 @@ La sequenza effettiva è:
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | PREPARATA, test CI IN CORSO |
 | Manifest baseline core | COMPLETATO |
+| Preflight baseline read-only | PREPARATO, NON ESEGUITO |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
 | Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
