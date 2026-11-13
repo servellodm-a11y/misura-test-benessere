@@ -355,7 +355,7 @@ Il test si interrompe prima di scrivere se mancano due partner con dettagli, cia
 
 ### Esito aggiornato dei controlli
 
-La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transazionale è stata ripetuta dopo le modifiche: 36 asserzioni previste nello script. I test PostgreSQL/runtime restano non eseguiti. La precedente verifica CRM 6/6 resta valida per il suo ambito e non viene conteggiata come test della nuova conversione multi-workspace.
+La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transazionale è stata ripetuta dopo le modifiche: 37 asserzioni previste nello script. I test PostgreSQL/runtime restano non eseguiti. La precedente verifica CRM 6/6 resta valida per il suo ambito e non viene conteggiata come test della nuova conversione multi-workspace.
 
 La finalizzazione ora azzera anche `activation_claimed_at` al completamento e la RPC di lettura clienti è eseguibile solo da `authenticated`, non da `service_role`. Il test transazionale esercita inoltre la creazione RPC, la revisione amministrativa e il claim service_role prima della finalizzazione.
 
