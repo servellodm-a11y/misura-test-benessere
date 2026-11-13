@@ -3371,3 +3371,12 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Mac Intel 8 GB: resta escluso l'avvio Supabase full stack locale per insufficienza di RAM.
 - `main` invariato; PR #1 resta aperta, draft e non mergeata; nessun deploy Netlify prima del 4 dicembre 2026.
 - Prossimo passo: completare revisione della catena migrazioni Setter e definire la baseline schema-only. Solo dopo, e con autorizzazione esplicita, creare il progetto staging separato.
+
+## 13 novembre 2026 — Precisazione audit migrazioni Setter
+
+- Approfondita la cronologia delle migrazioni legacy AI Setter: `20261110000200` crea la tabella con `user_id` e `response`; `20261110000500` aggiunge `generated_output`; il trigger in `20261110000700` era quindi coerente con lo schema legacy al momento della sua introduzione. La precedente descrizione che lo definiva incompatibile con la tabella legacy era imprecisa ed è stata corretta.
+- `20261111240000` usa `CREATE TABLE IF NOT EXISTS` sul nome della tabella legacy, ma su una catena pulita la tabella esiste già. La successiva `20261112020000` crea la tabella separata `nextway_setter_workspace_generation_requests` e ricollega le RPC correnti a essa.
+- La migrazione forward-only `20261113150000` è ora descritta correttamente come riallineamento post-separazione: disattiva il trigger legacy non più necessario al percorso RPC corrente e installa la protezione sulla tabella workspace. Non riscrive le migrazioni storiche.
+- Corretto `scripts/test-nextway-setter-stale-output-trigger.mjs`: ora verifica la sequenza reale legacy (aggiunta di `generated_output` in 00500) e la separazione workspace in 120200. La precedente asserzione che la tabella legacy non avesse mai `generated_output` era errata.
+- Il test statico va nuovamente eseguito in GitHub Actions; il precedente CI SUCCESS del test antecedente non certifica la versione corretta del contratto.
+- Nessuna migrazione applicata; nessun database o progetto staging creato o modificato.
