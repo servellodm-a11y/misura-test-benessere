@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
     }
 
     let invitedUserId: string | null = null;
+    let inviteCreatedByThisAttempt = false;
     try {
       if (claim.conversion_type === "partner") {
         const email = String(claim.email);
@@ -124,6 +125,7 @@ Deno.serve(async (req) => {
           );
           if (inviteError || !invite.user) throw inviteError ?? new Error("Invito Auth non creato");
           invitedUserId = invite.user.id;
+          inviteCreatedByThisAttempt = true;
         }
       } else if (claim.conversion_type !== "customer") {
         throw new Error("Tipo conversione non supportato");
@@ -145,7 +147,9 @@ Deno.serve(async (req) => {
           return response({ success: true, already_activated: true,
             conversion_type: claim.conversion_type, request_id: requestId }, 200, origin);
         }
-        if (invitedUserId) {
+        // Delete only an invite created by this execution. A recovered invite may
+        // belong to an earlier timed-out attempt and must remain available for retry.
+        if (invitedUserId && inviteCreatedByThisAttempt) {
           const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
           if (deleteError) {
             console.error("Compensating Auth cleanup failed", {
