@@ -304,3 +304,39 @@ File: `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql`.
 Commit: `cddb4d3`.
 
 Nessuna migrazione, deploy, merge, import, seed o modifica al database è stata eseguita.
+
+
+## 11. Esito report tecnico unico — 13 novembre 2026
+
+L'utente ha eseguito correttamente una query diagnostica consolidata nel SQL Editor. Il risultato è stato restituito in una sola riga/colonna testuale, senza errori. La query è esclusivamente read-only e non ha modificato il database.
+
+### Esito sintetico
+
+| Categoria | Oggetto | Risultato |
+|---|---|---|
+| Registro candidato | `auth.schema_migrations` | **INDIVIDUATO, NON ANCORA ESAMINATO** |
+| Registro candidato | `realtime.schema_migrations` | **INDIVIDUATO, NON ANCORA ESAMINATO** |
+| Registro candidato | `storage.migrations` | **INDIVIDUATO, NON ANCORA ESAMINATO** |
+| Tabella | `public.nextway_setter_generation_requests` | **PRESENTE** |
+| Tabella | `public.nextway_setter_workspace_generation_requests` | **PRESENTE** |
+| Tabella | `public.nextway_api_rate_limits` | **NON TROVATA** |
+| RPC | `public.nextway_consume_api_rate_limit(text,integer)` | **NON TROVATA** |
+| RPC | `public.nextway_get_active_setter_governance(uuid)` | **NON TROVATA** |
+| RPC | `public.nextway_clear_stale_setter_output()` | **NON TROVATA** |
+| RPC | `public.nextway_prune_setter_generation_requests()` | **NON TROVATA** |
+| Trigger | `nextway_clear_stale_setter_output_trg` | **NON TROVATO** |
+
+### Interpretazione
+
+- Le due tabelle Setter sono confermate presenti nel database interrogato. Devono essere preservate e non ricreate.
+- Rate limit (tabella e RPC) e governance RPC restano anomalie **P0** da chiarire rispetto al codice Edge Function nel branch. L'assenza può bloccare la generazione standard o il percorso workspace se la versione distribuita invoca tali RPC.
+- Cleanup staged output e trigger sono **P1**: proteggono dalla persistenza di output staged obsoleti in caso di riassegnazione lease.
+- Retention legacy è **P2**: manutenzione, non percorso ordinario di generazione.
+- I tre nomi di registro sono soltanto candidati. La query non ha letto colonne o righe dei registri; non è possibile identificare da questo risultato la cronologia delle migrazioni applicative NEXTWAY.
+- Non si può dedurre che le migrazioni siano state saltate o che le funzioni siano state rimosse. Restano da confrontare cronologia, definizioni SQL e versione effettivamente distribuita della Edge Function.
+
+### Decisione e prossimo passo
+
+Il report unico consolida e conferma il precedente controllo degli oggetti. Il passo successivo è un controllo read-only mirato della struttura dei tre registri candidati, limitato ai metadati delle colonne; soltanto dopo si potrà scegliere con evidenza quale registro eventualmente consultare. Non eseguire SELECT sulle righe dei registri, migrazioni, DDL/DML, deploy o modifiche in produzione in questa fase.
+
+**Stato:** report unico completato; cronologia migrazioni non ancora identificata; nessuna modifica al database, nessun deploy, nessun merge e nessuna modifica a `main`.
