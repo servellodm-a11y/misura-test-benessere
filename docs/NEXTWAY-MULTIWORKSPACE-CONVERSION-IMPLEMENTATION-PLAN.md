@@ -428,3 +428,16 @@ Restano due gap bloccanti prima di considerare chiuso il ciclo: (1) un invito sc
 Il test transazionale multi-workspace esistente copre la conversione cliente e non costituisce prova del percorso Partner. Il collaudo Partner richiede un ambiente Supabase isolato/disposable: l'utente Auth sintetico creato via Admin API non viene annullato dal rollback SQL, quindi va eliminato esplicitamente nel cleanup. Nessun utente sintetico va creato nel progetto reale.
 
 **Stato:** audit statico parziale completato; ciclo Partner non chiuso; nessuna migrazione applicata, nessun deploy, nessun invio email, nessuna modifica a `main`, PR #1 resta draft.
+
+
+## Aggiornamento successivo — retry inviti Partner
+
+- Aggiunto `invite-lifecycle.mjs`, classificatore puro condiviso dall'Edge Function.
+- Gli account non confermati già associati alla stessa richiesta passano ora dal reinvio Auth; la risposta viene controllata contro lo stesso user ID e l'utente viene riletto per verificare email e metadata.
+- Gli account con email confermata vengono riutilizzati senza reinvio.
+- Aggiunto `scripts/test-nextway-partner-invite-lifecycle.mjs`; eseguito in ambiente locale isolato: **6/6 unit test superati**. Questi test verificano la classificazione e il fail-closed, non il servizio Supabase Auth reale.
+- La suite statica conversion workspace è stata estesa con tre controlli sul classificatore e sulla copertura dei test.
+- Workflow CI aggiornato per eseguire il test Node e includere i relativi percorsi nei filtri push/PR.
+- La semantica di annullamento post-invito è stata documentata come proposta non applicata: stato `cancelled`, invalidazione atomica del claim e offboarding separato dopo una conversione già attivata.
+
+**Limiti:** il comportamento reale di `inviteUserByEmail` su un utente già invitato ma non confermato, la consegna email, la scadenza e l'accettazione devono essere testati in un progetto staging isolato. GitHub non restituisce ancora run CI per l'HEAD corrente. Nessuna modifica al database remoto, nessun invio email, nessun deploy, nessun merge e nessuna modifica a `main`.
