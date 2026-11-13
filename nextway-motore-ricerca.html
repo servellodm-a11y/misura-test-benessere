@@ -239,11 +239,11 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  const drafts={
   whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere': 'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
   facebook:'Buongiorno! Ho visto la sua pagina e mi ha colpito il lavoro che comunica. Sto approfondendo un progetto legato al benessere e '+topic+'. Mi piacerebbe presentarglielo in modo semplice, senza impegno, e capire se può esserci un punto di interesse comune. Le va di parlarne?',
-  linkedin:'Buongiorno, ho consultato il suo profilo professionale e le scrivo perché sto sviluppando relazioni con '+audience+'. Mi interessa confrontarmi su '+topic+'. Se lo ritiene pertinente, mi farebbe piacere entrare in contatto e scambiare qualche informazione.',
+  linkedin:'Buongiorno, sto entrando in contatto con '+audience+' per un confronto su '+topic+'. Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
   instagram:'Ciao! Ho scoperto il tuo profilo attraverso i contenuti che condividi sul benessere. Sto conoscendo persone e professionisti con cui confrontarmi su '+topic+'. Se ti fa piacere, posso raccontarti in breve di cosa si tratta. Nessun problema se non è un tema in linea con i tuoi interessi.',
   email:'Oggetto: Un possibile confronto sul settore benessere\n\nBuongiorno,\n\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\n\nSe l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\n\nLa ringrazio per l’attenzione e le auguro una buona giornata.'
  };
- const channels=[['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email']];
+ const channels=[['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email'],['sms','SMS']];
  channels.forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;select.append(opt);});
  function refresh(){output.value=drafts[select.value]||'';}
  select.addEventListener('change',refresh);
