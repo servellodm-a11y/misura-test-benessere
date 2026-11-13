@@ -70,6 +70,14 @@ assert.ok(archiveHtml.includes(`partner_company_name:String(record.company_name|
 assert.ok(archiveHtml.includes("'partner_company_id','partner_company_name'"));
 assert.ok(archiveHtml.includes('<script src="/nextway-company-config.js"></script>'));
 assert.ok(archiveHtml.includes('Prepara un messaggio per questo Lead'));
+assert.ok(archiveHtml.includes('prospect_score:evidenceQuality.score'));
+assert.ok(archiveHtml.includes('prospect_identity_score:evidenceQuality.identityScore'));
+assert.ok(archiveHtml.includes('prospect_relevance_score:evidenceQuality.relevanceScore'));
+assert.ok(archiveHtml.includes('prospect_evidence_score:evidenceQuality.evidenceScore'));
+assert.ok(archiveHtml.includes('function getProspectQuality(x)'));
+assert.ok(archiveHtml.includes('PUNTEGGIO DOCUMENTALE:'));
+assert.ok(archiveHtml.includes('Qualità ricerca:'));
+assert.ok(archiveHtml.includes("'prospect_score','prospect_identity_score','prospect_relevance_score','prospect_evidence_score'"));
 assert.ok(archiveHtml.includes('Sito da proporre (facoltativo)'));
 assert.ok(archiveHtml.includes('BOZZA DA INVIARE MANUALMENTE'));
 assert.ok(archiveHtml.includes('Nessun link aggiunto'));
