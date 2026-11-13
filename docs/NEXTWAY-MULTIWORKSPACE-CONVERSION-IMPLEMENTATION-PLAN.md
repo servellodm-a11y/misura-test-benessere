@@ -353,9 +353,16 @@ Per non duplicare queste verifiche è stato aggiunto `supabase/diagnostics/nextw
 
 Il test si interrompe prima di scrivere se mancano due partner con dettagli, ciascuno con un Lead convertibile libero, oppure il platform_admin. Nell'attuale ambiente, dai controlli precedenti, questi prerequisiti non risultavano disponibili: **non eseguire adesso** e non creare utenti fittizi nel database reale.
 
+La revisione delle fixture ha confrontato gli INSERT con le migrazioni effettive:
+- nextway_workspaces: workspace_key rispetta formato e lunghezza 2–63; i nomi rispettano 2–160; active è uno stato ammesso; created_by è nullable e i timestamp hanno default.
+- nextway_workspace_memberships: il test usa workspace_member e active, valorizza activated_at, rispetta l'unicità (workspace_id,user_id) e i riferimenti FK a workspace/Auth. Lo stato invited ammette activated_at = NULL.
+- Le fixture non usano workspace_owner, quindi non entrano in conflitto con l'indice univoco che ammette un solo owner invitato/attivo per workspace.
+
+È stata inoltre ricostruita la suite statica perché la versione precedente aveva una riga fuori dal blocco checks e alcune asserzioni non allineate ai messaggi del test SQL. La nuova suite legge anche le due migrazioni di fondazione Workspace/Membership.
+
 ### Esito aggiornato dei controlli
 
-La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transazionale è stata ripetuta dopo le modifiche: 40 asserzioni previste nello script. I test PostgreSQL/runtime restano non eseguiti. La precedente verifica CRM 6/6 resta valida per il suo ambito e non viene conteggiata come test della nuova conversione multi-workspace.
+La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transazionale è stata ripetuta dopo le modifiche: 51 asserzioni statiche previste nello script, incluse le verifiche dei vincoli effettivi Workspace/Membership e della coerenza delle fixture.. I test PostgreSQL/runtime restano non eseguiti. La precedente verifica CRM 6/6 resta valida per il suo ambito e non viene conteggiata come test della nuova conversione multi-workspace.
 
 La finalizzazione ora azzera anche `activation_claimed_at` al completamento e la RPC di lettura clienti è eseguibile solo da `authenticated`, non da `service_role`. Il test transazionale esercita inoltre la creazione RPC, la revisione amministrativa e il claim service_role prima della finalizzazione.
 
