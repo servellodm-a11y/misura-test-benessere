@@ -2860,3 +2860,12 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - La baseline deve includere tutte le dipendenze reali, incluse Auth/Storage ove richieste. Il profilo PostgreSQL-only non può certificare test Auth, API, Storage o Edge Functions.
 - La migrazione draft `20261105000100_nextway_ai_assistant_foundation.sql` resta separata. La migrazione Setter workspace isolation già applicata live non va riapplicata in produzione.
 - Nessun dato sintetico ancora creato; nessuna migrazione locale/live applicata; nessuna connessione remota, deploy, merge, spesa o modifica a `main`/Netlify produzione.
+
+
+## Recupero baseline schema-only — 13 novembre 2026
+
+- Confermato che nel repository non è presente una baseline completa dello schema applicativo originario; i file diagnostici sono read-only e descrivono soltanto porzioni di metadati, non costituiscono un dump ricostruibile.
+- Creato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con procedura per un dump schema-only del solo `public`, da salvare in `/tmp`, usando la Supabase CLI v3 e senza dati/ruoli custom. La sintassi va prima verificata con `supabase db dump --help`; target `obqwbtlltxjfeirstsya` da controllare prima di procedere.
+- Nessun dump remoto eseguito, nessuna password richiesta o acquisita, nessun dato applicativo esportato. Nessuna connessione remota aperta in questo passaggio.
+- Il dump `public` non contiene le strutture gestite `auth`/`storage`: devono essere fornite dallo stack locale; i ruoli standard devono essere confrontati separatamente.
+- Il dump non va versionato prima della revisione per assenza di righe dati, segreti hard-coded e oggetti specifici della produzione. Occorre riconciliarlo con le 31 migrazioni del branch prima di importarlo.
