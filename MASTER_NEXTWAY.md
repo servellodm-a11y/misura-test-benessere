@@ -2977,3 +2977,29 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Aggiunto `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql` sul branch di lavoro. La query verifica esistenza e struttura delle sole tre relazioni usando `pg_catalog`; restituisce nomi/tipi delle colonne e non legge righe applicative.
 - L'utente dovrà eseguire questa query read-only nel SQL Editor e condividere il risultato. Solo dopo aver identificato una struttura pertinente si valuterà un'eventuale lettura mirata delle versioni migrazione.
 - Nessuna modifica al database, migrazione, deploy, merge, import, seed o test runtime.
+
+
+---
+
+## CONTINUITÀ NEXTWAY — REPORT TECNICO UNICO SQL — 13 NOVEMBRE 2026
+
+L'utente ha eseguito correttamente una query diagnostica consolidata in Supabase SQL Editor. L'output è stato restituito in una sola cella testuale; query read-only, nessuna modifica al database.
+
+### Risultati confermati
+- **PRESENTI:** `public.nextway_setter_generation_requests` (legacy) e `public.nextway_setter_workspace_generation_requests` (workspace). Preservare entrambe; non ricrearle.
+- **NON TROVATI:** tabella `public.nextway_api_rate_limits`; RPC `nextway_consume_api_rate_limit(text,integer)`; RPC `nextway_get_active_setter_governance(uuid)`; RPC `nextway_clear_stale_setter_output()`; RPC `nextway_prune_setter_generation_requests()`; trigger `nextway_clear_stale_setter_output_trg`.
+- **REGISTRI CANDIDATI:** `auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`. Sono stati individuati soltanto per nome; non sono state lette colonne o righe e non è noto quale contenga la cronologia migrazioni applicative.
+
+### Priorità
+- **P0:** rate limit (tabella + RPC), dipendenza potenzialmente bloccante del percorso AI Setter.
+- **P0 workspace:** RPC governance, dipendenza potenzialmente bloccante per conversazioni workspace.
+- **P1:** funzione e trigger cleanup staged output, protezione della correttezza durante riassegnazione lease.
+- **P2:** RPC retention legacy, funzione di manutenzione e non percorso ordinario.
+
+Le assenze non dimostrano che le migrazioni siano state saltate o che gli oggetti siano stati rimossi. Il controllo non prova quale versione della Edge Function sia distribuita. Il successivo passo read-only è identificare la struttura dei tre registri tramite soli metadati di colonna; non leggere ancora le righe dei registri.
+
+### Stato operativo
+- **COMPLETATO:** report SQL unico eseguito; due tabelle Setter confermate; sei oggetti non trovati documentati.
+- **DA COMPLETARE:** identificare il registro migrazioni pertinente e ricostruire la cronologia; verificare la versione Edge Function effettivamente distribuita.
+- **NON ESEGUITO:** migrazioni, DDL/DML, deploy, merge, import locale, seed, test runtime o modifiche al database.
+- Branch di lavoro: `fix/nextway-password-recovery`. `main` invariato. PR #1 resta draft. Nessun deploy Netlify in produzione prima del 4 dicembre 2026.
