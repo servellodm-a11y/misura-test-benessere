@@ -145,3 +145,27 @@ La CLI documenta l'opzione `supabase start -x` per escludere servizi; la lista e
 ## Baseline schema-only — procedura di recupero — 13 novembre 2026
 
 La baseline applicativa completa non è presente nel repository. Creato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con procedura controllata per ottenere un dump del solo schema `public`, senza righe di dati, tramite Supabase CLI. Il comando va prima confrontato con `supabase db dump --help` della CLI 3.1.0 e il target remoto va verificato; output in `/tmp`, revisione obbligatoria per assenza di dati/secret prima di importarlo o versionarlo. Gli schemi gestiti `auth` e `storage` sono esclusi dal dump e devono essere forniti dallo stack locale. Nessun dump è stato eseguito e nessuna connessione remota è stata aperta in questo passaggio.
+
+
+## Aggiornamento — baseline schema-only recuperata — 13 novembre 2026
+
+La verifica locale del Mac e la CLI 3.1.0 hanno consentito di recuperare in sola lettura lo schema `public` del progetto di produzione. Il file è rimasto in `/tmp/nextway-public-schema.sql`, non nel repository. I controlli eseguiti hanno rilevato circa 154 KB / 3.615 righe, zero istruzioni `COPY` / `INSERT INTO`, 21 tabelle, 22 funzioni `SECURITY DEFINER`, 53 policy RLS, 11 trigger e 48 indici. SHA-256: `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
+
+È stato aggiunto `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`, che inventaria le 31 migrazioni e distingue la fondazione AI Assistant draft dalla sequenza CRM/Setter/Knowledge Base/workspace. La riconciliazione oggetto-per-oggetto resta aperta: i conteggi non certificano la baseline né autorizzano l'import.
+
+### Decisione operativa aggiornata
+
+- Non avviare ancora `supabase start` e non eseguire `supabase init`.
+- Non applicare migrazioni, nemmeno localmente, finché non sono stati verificati oggetti, tipi, sequenze, grant, ownership, FK e dipendenze managed.
+- Il dump originale resta fuori dal repository; usare una baseline revisionata e depurata.
+- Mantenere il profilo SQL come primo obiettivo; il profilo integrazione Auth/API/Storage/Edge resta successivo e subordinato alle risorse disponibili.
+- Nessun dato reale viene usato per fixture; seed sintetici non ancora creati.
+
+### Stato effettivo al 13 novembre
+
+- Docker/CLI e risorse Mac: **VERIFICATI**.
+- Dump schema-only remoto: **RECUPERATO IN SOLA LETTURA**.
+- Inventario statico delle 31 migrazioni: **COMPLETATO**.
+- Riconciliazione completa della baseline: **IN CORSO**.
+- Configurazione locale, import, seed, avvio container e test runtime: **NON ESEGUITI**.
+- Produzione, `main`, PR e Netlify: **NON MODIFICATI**.
