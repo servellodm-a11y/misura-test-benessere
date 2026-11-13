@@ -2850,3 +2850,13 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Non eseguire `supabase init` nella directory esistente prima di aver definito una procedura che preservi `supabase/` e `supabase/.temp/`.
 - Nessun container avviato, nessuna immagine rimossa, nessun file locale modificato, nessuna connessione remota, nessuna migrazione o test runtime eseguito.
 - Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`, nessun progetto cloud creato e nessuna spesa.
+
+
+## Matrice servizi Supabase locale — 13 novembre 2026
+
+- Inventariate staticamente le 31 migrazioni del branch `fix/nextway-password-recovery` e le dipendenze principali verso schema applicativo (`profiles`, `clients`, `partner_details`, `nextway_leads`, conversazioni Setter), schemi gestiti Supabase (`auth`, `storage`) e RPC/trigger preesistenti.
+- Creato `docs/NEXTWAY-LOCAL-SERVICE-MATRIX.md`: separa il Profilo A SQL/concorrenza dal Profilo B d'integrazione Auth/API/Storage/Edge Runtime; identifica i servizi non necessari ai test esaminati e i limiti di ciascun profilo.
+- La lista `supabase start -x` resta da verificare sulla CLI 3.1.0. Nessun container avviato e nessun comando CLI di inizializzazione/esecuzione lanciato.
+- La baseline deve includere tutte le dipendenze reali, incluse Auth/Storage ove richieste. Il profilo PostgreSQL-only non può certificare test Auth, API, Storage o Edge Functions.
+- La migrazione draft `20261105000100_nextway_ai_assistant_foundation.sql` resta separata. La migrazione Setter workspace isolation già applicata live non va riapplicata in produzione.
+- Nessun dato sintetico ancora creato; nessuna migrazione locale/live applicata; nessuna connessione remota, deploy, merge, spesa o modifica a `main`/Netlify produzione.
