@@ -72,6 +72,10 @@ assert.ok(searchHtml.includes('Lista unica · ordinata per qualità delle eviden
 assert.ok(searchHtml.includes('duplicateEntry.daily.sources=duplicateEntry.sources'));
 assert.ok(searchHtml.includes('duplicateEntry.daily.duplicate_count++'));
 assert.ok(searchHtml.includes('dailyProspects.sort('));
+assert.ok(searchHtml.includes('generated.find(entry=>entry.query===group.query)'));
+assert.ok(searchHtml.includes('payload.queries_completed??groups.length'));
+assert.ok(searchHtml.includes('Ricerche non completate:'));
+assert.ok(searchHtml.includes('Ricerca parziale:'));
 assert.ok(searchHtml.includes('duplicati consolidati'));
 assert.ok(searchHtml.includes('punteggio_evidenze'));
 assert.ok(archiveHtml.includes('canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url)'));
