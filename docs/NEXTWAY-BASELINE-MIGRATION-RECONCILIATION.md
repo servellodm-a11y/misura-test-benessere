@@ -193,23 +193,39 @@ ha trovato `public.nextway_setter_generation_requests` alle righe 2071 e seguent
 
 La tabella `nextway_setter_workspace_generation_requests` è distinta e il relativo commento conferma la separazione. La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` richiede la tabella legacy e crea lo store workspace separato. **La precedente segnalazione di assenza della tabella legacy era un falso negativo del rilevatore e viene ritirata.** Non è necessario ricreare la tabella.
 
-### Differenze ancora da chiarire
+### Riconciliazione con il codice runtime e priorità
 
-Il controllo mirato non ha trovato nel dump riferimenti a:
+Le assenze confermate nel dump `public` sono:
 
-1. `nextway_api_rate_limits` e `nextway_consume_api_rate_limit`;
+1. `nextway_api_rate_limits` e `nextway_consume_api_rate_limit(text, integer)`;
 2. `nextway_clear_stale_setter_output` e trigger `nextway_clear_stale_setter_output_trg`;
-3. `nextway_prune_setter_generation_requests`;
-4. `nextway_get_active_setter_governance`.
+3. `nextway_prune_setter_generation_requests()`;
+4. `nextway_get_active_setter_governance(uuid)`.
 
-Queste assenze sono evidenza limitata al contenuto del dump `public`: non dimostrano da sole se le migrazioni relative siano state applicate, successivamente modificate o se le funzioni siano state sostituite. Il prossimo controllo dovrà incrociare definizioni SQL e cronologia delle migrazioni, senza scrivere sul database.
+La lettura delle migrazioni e di `supabase/functions/nextway-ai-setter/index.ts` consente di classificarle:
+
+| Oggetto assente | Dipendenza nel codice | Impatto potenziale |
+|---|---|---|
+| `nextway_api_rate_limits` + RPC rate limit | L'Edge Function AI Setter chiama `nextway_consume_api_rate_limit` con `p_scope` e `p_units` prima di proseguire | **Bloccante:** se la RPC o la tabella non esistono nel database effettivo, la funzione restituisce HTTP 503 ("Controllo di sicurezza temporaneamente non disponibile") e non genera la bozza |
+| `nextway_get_active_setter_governance(uuid)` | L'Edge Function la chiama quando `conversation.workspace_id` è valorizzato | **Bloccante per conversazioni workspace:** se la RPC manca, restituisce HTTP 503 e non procede con istruzioni/criteri workspace |
+| `nextway_clear_stale_setter_output()` + trigger | Trigger di sicurezza sulla tabella legacy, definito dalla migrazione 100007 | **Protezione di correttezza:** la sua assenza può lasciare un output staged precedente quando una lease viene riassegnata; non è una dipendenza di chiamata diretta dell'Edge Function |
+| `nextway_prune_setter_generation_requests()` | Funzione di manutenzione manuale admin-only, definita dalla migrazione 100004 | **Manutenzione non disponibile:** non è nel percorso ordinario di generazione; la retention legacy non può essere eseguita tramite questa RPC |
+
+La migrazione `20261110000300_nextway_rate_limit_units.sql` elimina la precedente firma `nextway_consume_api_rate_limit(text)` e crea quella a due argomenti con `p_units` predefinito. La tabella `nextway_api_rate_limits` viene creata dalla migrazione `20261110000100_nextway_distributed_rate_limit.sql` e non viene eliminata dalla migrazione successiva: la sua assenza nel dump non è spiegata da quel semplice cambio di firma.
+
+La migrazione `20261112030000_nextway_setter_governance_read_rpc.sql` definisce la RPC governance, ma il nome non compare nel dump. Il codice runtime attuale la usa per conversazioni con workspace valorizzato.
+
+**Limite probatorio:** queste sono conclusioni sul contenuto del dump e sul codice del branch, non una verifica runtime della produzione. Non abbiamo ancora interrogato il registro `supabase_migrations.schema_migrations` né eseguito chiamate RPC remote. Non possiamo quindi stabilire se le migrazioni siano state saltate, se oggetti siano stati rimossi successivamente o se il codice Edge Function distribuito corrisponda esattamente al branch.
 
 ### Decisione tecnica aggiornata
 
 - Le 12 tabelle draft `nw_*` restano fuori dalla baseline corrente.
 - La tabella Setter legacy è confermata presente e va preservata; lo store workspace è separato.
+- **Priorità P0:** chiarire la presenza effettiva della tabella e RPC rate limit, perché il codice AI Setter le richiede.
+- **Priorità P0 per workspace:** chiarire la presenza effettiva della RPC governance.
+- **Priorità P1:** chiarire trigger/funzione di pulizia output staged, protezione necessaria per la riassegnazione delle lease.
+- **Priorità P2:** chiarire la RPC di retention legacy, manutenzione manuale non necessaria per ogni generazione.
 - Le policy Storage restano da trattare attraverso lo schema/servizio managed locale.
-- Le quattro differenze elencate sopra restano aperte.
 - La baseline non è ancora certificata come riproducibile: restano da verificare tipi, sequenze, FK, ownership, grant, funzioni, dipendenze e completezza delle strutture managed.
 - Non creare oggetti sulla base del solo confronto lessicale e non riapplicare migrazioni in produzione.
 
