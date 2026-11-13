@@ -111,3 +111,58 @@ La lettura diretta di `nextway-cloud.js` sul branch ha confermato:
 - In `nextway-cloud.js` non è presente una lettura diretta da `clients`; il pannello CRM corrente non espone ancora una vista clienti workspace-scoped in questo file. Le letture di `partner_details` individuate servono alla risoluzione dei nomi nell'audit attività, non alla gestione membership.
 
 Conseguenza: l'aggiornamento UI dovrà essere atomico con la migrazione che introduce il campo e/o la RPC. Non pubblicare una UI che selezioni `workspace_id` prima che la migrazione sia stata approvata e applicata in un rilascio coordinato.
+
+
+## Lettura del codice SQL e della Edge Function sul branch
+
+Sono stati letti integralmente:
+- `20261110001400_nextway_lead_conversion_requests.sql`;
+- `20261111001500_nextway_conversion_provisioning.sql`;
+- `20261112170000_nextway_conversion_activation_integrity.sql`;
+- `supabase/functions/nextway-conversion-provisioning/index.ts`.
+
+### Comportamento RPC attuale ricostruito dalle migrazioni
+
+**Claim**
+- Richiede `auth.role() = service_role`.
+- Blocca la richiesta con `FOR UPDATE`.
+- Accetta `ready_for_activation` o un claim scaduto dopo 10 minuti.
+- Restituisce dati richiesta, owner, sponsor e claim token.
+- Non restituisce workspace perché la richiesta non ne conserva uno.
+
+**Finalizzazione**
+- Richiede service_role, blocca la richiesta e controlla il claim token.
+- L'ultima migrazione di integrità blocca il Lead e ricontrolla owner, stato e archiviazione.
+- Aggiorna lo stato Lead e crea il record partner/cliente nella stessa transazione SQL: un errore successivo annulla anche l'aggiornamento Lead.
+- Non confronta workspace della richiesta e workspace corrente del Lead.
+- Per il partner, usa UPSERT su `profiles(id)` aggiornando email, nome, ruolo e sponsor; usa UPSERT su `partner_details(profile_id)` aggiornando nome, telefono, sponsor, stato e riferimento richiesta.
+- Per il cliente, usa UPSERT idempotente su `clients(nextway_conversion_request_id)`.
+- Non crea membership workspace per il partner e non crea attribuzione workspace per il cliente.
+
+**Release**
+- Richiede service_role.
+- Riporta la richiesta a `ready_for_activation` solo se request ID, stato provisioning e claim token corrispondono.
+- Non modifica dati Lead o destinazione.
+
+### Rischi concreti da correggere
+
+1. **Workspace non vincolato:** claim, finalize e provisioning non trasportano né validano lo snapshot workspace.
+2. **Sovrascrittura profilo:** il ramo `ON CONFLICT (id) DO UPDATE` può modificare ruolo e sponsor di un profilo Auth già presente. La nuova logica deve distinguere un profilo già associato alla stessa richiesta (retry legittimo) da un profilo preesistente o associato ad altra richiesta (conflitto da bloccare).
+3. **Sovrascrittura partner_details:** l'UPSERT può riattivare un record sospeso o cambiare sponsor e dati personali. Il retry deve essere no-op soltanto se il record è già legato alla stessa richiesta e i riferimenti essenziali coincidono; altrimenti rollback e revisione.
+4. **Cliente senza accesso workspace:** creare una tabella di attribuzione non basta; l'accesso alla riga `clients` resta filtrato dalla sua RLS attuale. Serve una policy esplicita e testata.
+5. **Compensazione Auth:** la Edge Function invita l'utente prima della finalizzazione e cancella l'utente invitato se la finalizzazione fallisce. La nuova membership invited e le nuove attribuzioni dovranno essere create nella transazione SQL, mantenendo la logica di compensazione solo quando si è certi che la finalizzazione non sia stata committata.
+6. **Stato Lead:** la migrazione di integrità più recente corregge un difetto della versione precedente: ora il Lead è bloccato e aggiornato nella transazione di finalizzazione. Questo comportamento va preservato.
+
+### Contratto Edge Function da preservare
+
+- La Edge Function autentica il chiamante e richiede ruolo `platform_admin`.
+- Il browser invia soltanto `request_id`; claim token viene generato lato server.
+- La Edge Function usa service_role esclusivamente server-side.
+- La nuova versione non deve accettare `workspace_id` dal browser né dal payload di provisioning: il workspace deve provenire dalla richiesta persistita e verificata in SQL.
+- Mantenere origin allowlist, validazione UUID, limiti dimensione body, recupero idempotente dell'invito e log senza dati sensibili.
+
+## Gate prima della migrazione
+
+Le migrazioni nel repository descrivono il corpo atteso delle RPC, ma non dimostrano da sole che il database live abbia esattamente quelle definizioni, grants e dipendenze. Il file `supabase/diagnostics/nextway_conversion_function_definitions_readonly.sql` è stato preparato per acquisire il DDL effettivo e le policy live.
+
+Non preparare una sostituzione SQL definitiva finché il DDL live non è stato confrontato con le migrazioni e non sono state verificate le dipendenze RLS. Questo gate evita di rimpiazzare accidentalmente modifiche live non presenti nel branch.
