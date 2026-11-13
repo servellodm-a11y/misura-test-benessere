@@ -66,7 +66,7 @@ assert.equal(dedupeContext.canonicalProspectUrl('https://example.com/person'),'h
 assert.equal(dedupeContext.buildProspectDedupeKey('https://www.linkedin.com/in/mario-rossi/?trk=public','Mario Rossi',{individual:true,identityScore:35},{role:'Professionista salute e benessere'}),dedupeContext.buildProspectDedupeKey('https://linkedin.com/in/mario-rossi','Mario Rossi',{individual:true,identityScore:35},{role:'Professionista salute e benessere'}));
 assert.notEqual(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}),dedupeContext.buildProspectDedupeKey('https://site-b.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}),'Name and role alone must never merge people across different URLs');
 assert.equal(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}, {emails:['mario@example.it']}),dedupeContext.buildProspectDedupeKey('https://site-b.example/profilo','M. Rossi',{individual:false,identityScore:10},{role:'Nutrizionista'}, {emails:['MARIO@example.it']}),'Matching public email must identify the same prospect across URLs');
-assert.equal(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}, {phones:['+39 333 123 4567']}),dedupeContext.buildProspectDedupeKey('https://site-b.example/profilo','Mario Rossi',{individual:false,identityScore:10},{role:'Nutrizionista'}, {phones:['+39 333 123 4567']}),'Matching normalized phone must identify the same prospect across URLs');
+assert.equal(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}, {phones:['+39 333 123 4567']}),dedupeContext.buildProspectDedupeKey('https://site-b.example/profilo','Mario Rossi',{individual:false,identityScore:10},{role:'Nutrizionista'}, {phones:['0039 333 123 4567']}),'Matching normalized phone must identify the same prospect across URLs');
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://linkedin.com/in/mario-rossi',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('linkedin:mario-rossi'));
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://site.example/mario',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('email:mario@example.it'));
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://site.example/mario',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('phone:393331234567'));
@@ -82,7 +82,7 @@ assert.ok(searchHtml.includes('Ricerche non completate:'));
 assert.ok(searchHtml.includes('Ricerca parziale:'));
 assert.ok(searchHtml.includes('duplicati consolidati'));
 assert.ok(searchHtml.includes('punteggio_evidenze'));
-assert.ok(archiveHtml.includes('canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url)') || archiveHtml.includes('canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url)'));
+assert.ok(archiveHtml.includes('const sameUrl=x.url&&canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url);'));
 assert.ok(archiveHtml.includes('incomingIdentityKeys'));
 assert.ok(archiveHtml.includes('existingKeys.includes(key)'));
 assert.ok(archiveHtml.includes('meta.identity_keys=[...new Set'));
