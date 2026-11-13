@@ -3113,3 +3113,17 @@ Commit: `6eeae4c6486d7ad762de16823ab4a9c1a0a358f5` (seconda modifica della stess
 **STATO: MODIFICA CODICE CI COMPLETATA; ESECUZIONE DEL NUOVO WORKFLOW ANCORA DA CONFERMARE.** Non dichiarare il nuovo controllo superato finché GitHub Actions non mostra un run successivo a questo commit.
 
 Nessun deploy, migrazione, merge o modifica a `main` eseguiti.
+
+### Preparazione pre-flight locale riproducibile — 13 novembre 2026
+
+Creato `scripts/nextway-local-preflight.sh` (commit `682897c19f6945b3f3a154be9bd8e35086798c0a`). Lo script produce un report testuale unico e di sola lettura: versione Supabase CLI, Docker Engine/memoria/container attivi, presenza e SHA-256 del dump `/tmp/nextway-public-schema.sql`, assenza di `COPY`/`INSERT`, stato di `supabase/config.toml`, presenza di `supabase/.temp/` e spazio disco. Non esegue init/start/link, connessioni remote, migrazioni, import, deploy o modifiche locali.
+
+La pipeline `.github/workflows/nextway-static-validation.yml` è stata aggiornata per:
+- includere `nextway-search` nei filtri push e pull request e sottoporla a `deno check`;
+- verificare la sintassi del pre-flight con `bash -n`;
+- includere lo script nei filtri push/PR;
+- attivarsi sui push a `main` e `fix/nextway-password-recovery`.
+
+Documentazione: `docs/NEXTWAY-STAGING-SETUP-PLAN.md` aggiornata con istruzioni e limiti. Il pre-flight va eseguito sul Mac solo dopo aver aggiornato il branch locale con i nuovi file. Comando previsto: `bash scripts/nextway-local-preflight.sh` dalla cartella repository.
+
+**Stato:** script e workflow configurati; run CI dopo le modifiche non ancora osservato; script non ancora eseguito sul Mac. Il suo esito non autorizza `supabase start` o import del dump. La baseline deve ancora superare la revisione strutturale prima di qualsiasi avvio.
