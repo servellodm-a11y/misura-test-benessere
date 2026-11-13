@@ -66,9 +66,20 @@ if [ -f "$DUMP_PATH" ]; then
   else
     stop "SHA-256 dump diverso da quello atteso; non usare/importare il file"
   fi
-  DATA_STATEMENTS="$(grep -Eic '^[[:space:]]*(COPY|INSERT[[:space:]]+INTO)[[:space:]]' "$DUMP_PATH" || true)"
-  printf 'Istruzioni dati COPY/INSERT: %s\n' "$DATA_STATEMENTS"
-  if [ "$DATA_STATEMENTS" = "0" ]; then pass "Nessuna istruzione COPY/INSERT rilevata"; else stop "Il dump contiene istruzioni dati: non importare"; fi
+  if [ -f "$ROOT/scripts/check-nextway-schema-dump.py" ] && command -v python3 >/dev/null 2>&1; then
+    if python3 "$ROOT/scripts/check-nextway-schema-dump.py" "$DUMP_PATH"; then
+      pass "Nessuna istruzione COPY/INSERT di primo livello rilevata"
+    else
+      SCAN_STATUS=$?
+      if [ "$SCAN_STATUS" -eq 1 ]; then
+        stop "Rilevate istruzioni COPY/INSERT di primo livello: non importare"
+      else
+        stop "Analisi lessicale del dump non completata: non importare"
+      fi
+    fi
+  else
+    stop "Scanner SQL o Python 3 non disponibile: impossibile classificare il dump"
+  fi
 else
   stop "Dump schema-only non trovato in $DUMP_PATH"
 fi
