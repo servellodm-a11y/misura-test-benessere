@@ -3356,3 +3356,18 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 
 - Chiarita nella fixture Partner la gestione dell'errore: il percorso riuscito termina con `ROLLBACK`; se un'asserzione fallisce, la transazione è abortita e occorre eseguire `ROLLBACK` prima di riutilizzare la sessione.
 - **CI riconfermato dopo la modifica della fixture:** run `43411999773`, commit `a88310dd5a2658f826f4fa8c9850073dccfdce05`, conclusione **success**. Test statici/contrattuali e type-check Deno completati.
+
+## 13 novembre 2026 — Preparazione staging e correzione Setter legacy
+
+- Preparazione staging avviata sul branch, senza creare un progetto remoto né collegarsi al database reale.
+- Inventario GitHub del branch: non è presente `supabase/config.toml`; le migrazioni versionate non ricostruiscono da sole tutte le tabelle core preesistenti (`profiles`, `nextway_leads`, `nextway_setter_conversations`, `nextway_setter_messages`, `partner_details`, `clients`). Serve una baseline schema-only completa e sanitizzata prima di una nuova installazione.
+- Individuato un difetto storico nella migrazione `20261110000700_nextway_clear_stale_staged_output.sql`: il trigger è installato sulla tabella legacy `nextway_setter_generation_requests` ma scrive `NEW.generated_output`, colonna non presente nella tabella legacy (che usa `response`). La tabella workspace separata creata da `20261112020000` contiene invece `generated_output`.
+- Preparata migrazione forward-only `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql`: rimuove il trigger dalla tabella legacy e installa il reset `generated_output` sulla tabella workspace corretta. Le migrazioni storiche non sono state riscritte.
+- Aggiunto test statico `scripts/test-nextway-setter-stale-output-trigger.mjs`, integrato nel workflow CI.
+- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43412386590`, commit `12d05030ae772b2ab36ae259be6c3eb49d81741d`, SUCCESS; 44 step, nessun fallimento, nuovo test trigger superato. La CI non esegue la migrazione su PostgreSQL.
+- Creato `docs/NEXTWAY-STAGING-READINESS.md`, che elenca i blocchi residui e la sequenza sicura per lo staging.
+- Blocchi ancora aperti: (B1) preparare e revisionare `supabase/config.toml`; (B2) ottenere/creare una baseline schema-only core completa e sanitizzata; (B4) completare la riconciliazione delle migrazioni legacy Setter e verificarle su PostgreSQL pulito.
+- Nessun progetto staging creato, nessuna migrazione applicata, nessun deploy, nessun secret o chiave copiato, nessuna email/account di test creato. `nextway-platform` non modificato.
+- Mac Intel 8 GB: resta escluso l'avvio Supabase full stack locale per insufficienza di RAM.
+- `main` invariato; PR #1 resta aperta, draft e non mergeata; nessun deploy Netlify prima del 4 dicembre 2026.
+- Prossimo passo: completare revisione della catena migrazioni Setter e definire la baseline schema-only. Solo dopo, e con autorizzazione esplicita, creare il progetto staging separato.
