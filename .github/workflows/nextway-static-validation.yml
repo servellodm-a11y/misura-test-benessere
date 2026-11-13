@@ -37,6 +37,7 @@ on:
       - "scripts/test-nextway-local-cors.mjs"
       - "scripts/test-nextway-local-static.py"
       - "scripts/nextway-local-preflight.sh"
+      - "scripts/check-nextway-schema-dump.py"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
@@ -108,6 +109,8 @@ jobs:
         run: node scripts/test-nextway-local-cors.mjs
       - name: Validate NEXTWAY local preflight shell syntax
         run: bash -n scripts/nextway-local-preflight.sh
+      - name: Test NEXTWAY schema dump SQL scanner
+        run: python3 scripts/check-nextway-schema-dump.py --self-test
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
