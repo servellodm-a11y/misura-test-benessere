@@ -31,6 +31,8 @@ on:
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
@@ -123,6 +125,8 @@ jobs:
         run: node scripts/test-nextway-setter-generation-table-isolation.mjs
       - name: Validate NEXTWAY workspace-aware Lead creation contract
         run: node scripts/test-nextway-lead-creation-workspace.mjs
+      - name: Validate conversion workspace preflight is read-only
+        run: node scripts/test-nextway-conversion-workspace-preflight.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
