@@ -69,3 +69,9 @@ L'ordine preciso tra funzioni di supporto dovrà seguire le dipendenze live effe
 - Versioni remote correnti, presenza effettiva di tutti i secrets e stato live del bucket/policy Storage: **NON VERIFICATI in questo documento**.
 - Nessun deploy Supabase/Netlify è stato eseguito da questa attività.
 - Il blocco Netlify produzione fino al 4 dicembre 2026 resta invariato.
+
+## Aggiornamento CI — 13 novembre 2026
+
+La revisione della pipeline ha trovato e corretto una lacuna di copertura per `nextway-search`: il percorso della funzione è stato aggiunto ai filtri di attivazione sia per `push` sia per `pull_request`, e ora la pipeline include `deno check supabase/functions/nextway-search/index.ts`.
+
+Commit di correzione PR path: `6eeae4c6486d7ad762de16823ab4a9c1a0a358f5`. La configurazione aggiornata è stata riletta dal branch e contiene entrambi i filtri e lo step Deno. **Il workflow successivo alla modifica non risulta ancora disponibile** al momento dell'aggiornamento; il controllo è quindi configurato ma non ancora attestato come superato.
