@@ -576,13 +576,13 @@ function assessCommercialFit(title,snippet,pageContent,selectedSegment,targetAss
 }
 
 function assessSourceQuality(item,url,pageContent){
- const host=(()=>{try{return new URL(url).hostname.toLowerCase().replace(/^www\\./,'')}catch{return ''}})();
+ const host=(()=>{try{return new URL(url).hostname.toLowerCase().replace(/^www\./,'')}catch{return ''}})();
  const content=String(pageContent||'').slice(0,5000);
  const dateCandidates=[item?.published_at,item?.publishedAt,item?.date_published,item?.datePublished,item?.updated_at,item?.updatedAt,item?.date].filter(Boolean);
  let sourceDate=null,dateSource='';
  for(const candidate of dateCandidates){const parsed=Date.parse(candidate);if(Number.isFinite(parsed)){sourceDate=new Date(parsed);dateSource='metadato fornito dalla fonte';break;}}
  if(!sourceDate){
-  const match=content.match(/(?:datePublished|dateModified|published_time|article:published_time|aggiornato il|pubblicato il|data pubblicazione)\\s*["':=\\s>]+(\\d{4}-\\d{2}-\\d{2}(?:T[\\d:.+-]+Z?)?|\\d{1,2}[\\/-]\\d{1,2}[\\/-]\\d{4})/i);
+  const match=content.match(/(?:datePublished|dateModified|published_time|article:published_time|aggiornato il|pubblicato il|data pubblicazione)\s*["':=\s>]+(\d{4}-\d{2}-\d{2}(?:T[\d:.+-]+Z?)?|\d{1,2}[\/-]\d{1,2}[\/-]\d{4})/i);
   if(match){const parsed=Date.parse(match[1]);if(Number.isFinite(parsed)){sourceDate=new Date(parsed);dateSource='data rilevata nel contenuto';}}
  }
  const now=new Date(),ageDays=sourceDate?Math.floor((now-sourceDate)/86400000):null;
@@ -590,11 +590,11 @@ function assessSourceQuality(item,url,pageContent){
  if(ageDays!==null&&ageDays>=0){if(ageDays<=180){freshnessScore=100;freshnessLabel='Recente · entro 6 mesi';}else if(ageDays<=365){freshnessScore=80;freshnessLabel='Abbastanza recente · entro 12 mesi';}else if(ageDays<=730){freshnessScore=55;freshnessLabel='Da aggiornare · 1–2 anni';}else{freshnessScore=20;freshnessLabel='Datato · oltre 2 anni';}}
  else if(ageDays!==null&&ageDays<0){sourceDate=null;freshnessScore=35;freshnessLabel='Data futura o non coerente · da verificare';}
  let sourceType='Sito non classificato',reliabilityScore=45,reliabilityLabel='Affidabilità non determinabile automaticamente';
- if(/\\.(gov|gov\\.it|gouv|gov\\.uk)$/.test(host)||/\\.(edu|ac\\.uk)$/.test(host)||/(ordine|albo|fnomceo|fnob|fnopi|fncf|tsrm|cnoas|istat|iss\\.it|salute\\.gov\\.it)/.test(host)){sourceType='Istituzione o registro professionale';reliabilityScore=90;reliabilityLabel='Fonte istituzionale/professionale · verificare il dato originale';}
- else if(/linkedin\\.com$/.test(host)){sourceType='Profilo o pagina LinkedIn';reliabilityScore=75;reliabilityLabel='Profilo professionale dichiarato · ruolo e attualità da verificare';}
- else if(/instagram\\.com$|facebook\\.com$|tiktok\\.com$|youtube\\.com$/.test(host)){sourceType='Social network';reliabilityScore=45;reliabilityLabel='Contenuto social · identità e informazioni da verificare';}
- else if(/google\\.|paginegialle|miodottore|doctoralia|trovaprofessionisti|prontopro/.test(host)){sourceType='Directory o piattaforma professionale';reliabilityScore=60;reliabilityLabel='Scheda di terzi · verificare aggiornamento e titolarità';}
- else if(/ansa\\.|repubblica\\.|corriere\\.|sole24ore\\.|ilfattoquotidiano\\.|adnkronos\\.|rainews\\./.test(host)){sourceType='Testata editoriale';reliabilityScore=70;reliabilityLabel='Fonte editoriale · distinguere notizia da profilo personale';}
+ if(/\.(gov|gov\.it|gouv|gov\.uk)$/.test(host)||/\.(edu|ac\.uk)$/.test(host)||/(ordine|albo|fnomceo|fnob|fnopi|fncf|tsrm|cnoas|istat|iss\.it|salute\.gov\.it)/.test(host)){sourceType='Istituzione o registro professionale';reliabilityScore=90;reliabilityLabel='Fonte istituzionale/professionale · verificare il dato originale';}
+ else if(/linkedin\.com$/.test(host)){sourceType='Profilo o pagina LinkedIn';reliabilityScore=75;reliabilityLabel='Profilo professionale dichiarato · ruolo e attualità da verificare';}
+ else if(/instagram\.com$|facebook\.com$|tiktok\.com$|youtube\.com$/.test(host)){sourceType='Social network';reliabilityScore=45;reliabilityLabel='Contenuto social · identità e informazioni da verificare';}
+ else if(/google\.|paginegialle|miodottore|doctoralia|trovaprofessionisti|prontopro/.test(host)){sourceType='Directory o piattaforma professionale';reliabilityScore=60;reliabilityLabel='Scheda di terzi · verificare aggiornamento e titolarità';}
+ else if(/ansa\.|repubblica\.|corriere\.|sole24ore\.|ilfattoquotidiano\.|adnkronos\.|rainews\./.test(host)){sourceType='Testata editoriale';reliabilityScore=70;reliabilityLabel='Fonte editoriale · distinguere notizia da profilo personale';}
  else if(host){sourceType='Sito web';reliabilityScore=55;reliabilityLabel='Fonte diretta non classificata · verificare autore e data';}
  return {host,source_type:sourceType,reliability_score:reliabilityScore,reliability_label:reliabilityLabel,freshness_score:freshnessScore,freshness_label:freshnessLabel,published_at:sourceDate?sourceDate.toISOString():null,age_days:ageDays,date_source:dateSource||'non rilevata',quality_score:Math.round(reliabilityScore*.4+freshnessScore*.6),verification_note:'La classificazione automatica orienta la verifica: non certifica veridicità, identità o attualità del recapito.'};
 }
