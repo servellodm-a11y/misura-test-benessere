@@ -90,3 +90,9 @@ Creato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql`, non applicato. Contiene:
 - grant/revoke e search_path fisso, in linea con le migrazioni sorgenti.
 
 Il draft è una proposta tecnica da revisionare, non un'autorizzazione all'esecuzione. Prima dell'applicazione servono controllo finale delle colonne workspace, privilegi effettivi, backup e autorizzazione esplicita.
+
+
+## Autorizzazione ricevuta e limite operativo — 13 novembre 2026
+L'utente ha autorizzato il ripristino P0. Il draft è stato confrontato con le migrazioni sorgenti e il codice Edge Function: la firma RPC richiesta dal Setter è `(p_scope text, p_units integer)`; la governance viene chiamata quando la conversazione ha `workspace_id`. Aggiunta al draft una guardia che interrompe la transazione se la RPC governance esiste già, evitando una sostituzione accidentale.
+
+L'ambiente di questa conversazione non dispone di un connettore Supabase/SQL Editor né di una sessione database autenticata: non è possibile eseguire direttamente il DDL sul progetto. Il consenso è registrato, ma non va dichiarata l'applicazione completata. Per eseguire il ripristino, il draft aggiornato deve essere lanciato dall'utente nel SQL Editor autenticato del progetto corretto; dopo il risultato si potrà verificare lo stato con una query read-only. Nessun DDL è stato eseguito.
