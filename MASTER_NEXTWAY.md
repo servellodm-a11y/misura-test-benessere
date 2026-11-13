@@ -2567,3 +2567,104 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 - Stato: MASTER e correzione documentale **COMPLETATO E VERIFICATO**; PR e test statici **ESEGUITO MA NON VERIFICATO** rispetto al runtime; diagnostica prerequisiti CRM **DA COMPLETARE**; applicazione migrazioni **BLOCCATO** fino a preflight, backup e staging.
 - Prossimo passo invariato: eseguire supabase/diagnostics/nextway_crm_prerequisites_readonly.sql in Supabase SQL Editor e acquisire il JSON completo; non applicare ancora le migrazioni CRM.
 - Registro MASTER: nota aggiunta dopo il commit e744661 per documentare la correzione testuale e confermare che non sono intervenute modifiche applicative o live.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:21 (Europe/Rome)
+
+### Fonti e revisioni GitHub
+
+- MASTER recuperato da `main` prima della scrittura: blob SHA `3ddd44ca69b79b9c875f35bc60732fef2d6bffcd`. HEAD `main`: `4344bd2a181667ec6e80a704d298625e1321bb85` (12 novembre, commit documentale).
+- Commit recenti esaminati: `4344bd2`, `e744661`, `9133d4d`, `dbeb994`, `a3fbec0`, `b2ce72e`, `cd813d8`, `c46a789`, `9dcf333`, `18b38e1`. L'ultimo push CI su main è #251, sul precedente commit di codice `b2ce72e`.
+- Albero ricorsivo main: 140 elementi, senza troncamento; presenti sei Edge Functions e migrazioni fino a `20261112020000_nextway_setter_generation_table_isolation.sql`. Non risultano in main `nextway-company-config.js) né le migrazioni `20261113110000`–`20261113150000`.
+- PR #1 / branch `fix/nextway-password-recovery`: HEAD remoto `e0b5098f88417597010e5845a61d0c16d65c2689`, albero 208 elementi; PR OPEN, DRAFT, NOT MERGED, 84 file modificati, 534 commit dichiarati dai metadati, `mergeable=false`. Base SHA restituito dalla PR: `a3fbec076221f0f043d60373e2864d7d07db30d7`. Nessun merge.
+- Ultimo pull locale confermato dall'utente il 13 novembre alle 13:42: `955cf9d..f2b00a0`, fast-forward, solo `nextway-motore-ricerca.html` (+83/-7). Il branch remoto è poi avanzato a `e0b5098`; sincronizzazione locale successiva non confermata.
+- In questo aggiornamento sono stati letti file, migrazioni, documenti, albero Git e CI. Nessun accesso diretto a Supabase/Netlify.
+
+### Requisito funzionale e ricerca prospect
+
+- Requisito esplicito dell'utente del 13 novembre: NEXTWAY deve ricercare potenziali clienti e partner. Segmenti partner richiesti: professionisti salute/benessere, professionisti network marketing wellness, networker di altri settori, imprenditori, persone interessate a un'attività o reddito aggiuntivo.
+- Decisione: NEXTWAY CORE indipendente dal marchio; Zinzino è la prima azienda da predisporre. Cambiare azienda deve avvenire tramite configurazione, documenti, prompt e criteri, senza riscrivere il motore.
+- Sul branch PR `nextway-company-config.js` definisce Zinzino come unica azienda attiva e nove segmenti: `customers`, `wellness_pro`, `wellness_networker`, `new_networker`, `other_networker`, `exnetworker`, `entrepreneur`, `side_income`, `business_seeking`.
+- Sul branch PR `nextway-motore-ricerca.html` genera cinque query per ricerca, con area, fonte e lingua; usa il backend di ricerca, estrae profili/prove pubbliche, deduplica e prepara l'acquisizione manuale nel CRM. La versione branch è circa 114 KB; la versione main è circa 13 KB.
+- Punteggio documentale 0–100: identità 0–40, coerenza segmento 0–40, prove pubbliche 0–20. Non misura interesse, disponibilità o idoneità commerciale. Il modulo richiede verifica umana; non fa scraping automatico, non invia messaggi automaticamente e vieta profilazione di dati sanitari.
+- `nextway-search` usa Tavily, autenticazione Supabase e RPC `nextway_consume_api_rate_limit`; il sorgente impone da 1 a 5 query, body massimo 16 KB, massimo 10 risultati per query e rate limit per utente. Richiede il secret `TAVILY_API_KEY` (valore non documentato). Il branch consente CORS locale `http://localhost:8000` senza wildcard.
+- I due canali del consulente restano distinti: Misura Test Benessere come sito generale a branding neutro, non sito ufficiale Zinzino; sito replica personale Zinzino solo quando c'è interesse specifico. Nessun link commerciale automatico nel primo contatto.
+- Documentazione ufficiale Zinzino ancora da caricare: presentazione, catalogo, schede prodotto, BalanceTest, piano compensi Italia, policy/compliance, formazione, claim e listini. I relativi stati in configurazione sono `da_caricare`; la Knowledge Base aziendale non è completa.
+- Correzioni branch recenti: esito Zoom esplicito e stop post-incontro; ripristino e cronologia del modulo attività; stato CRM allineato all'esito Zoom; riduzione punteggi senza persona/segmento verificabili; correzione falsi positivi imprenditore/regex. HEAD `e0b5098` considera prima `published_date` Tavily per la freschezza delle fonti. Modifiche di sorgente, non prove runtime.
+
+### CI
+
+- Main: run #251, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Validazione statica/type-check del codice di quel commit; non è un test runtime Supabase. I commit main successivi osservati sono documentali.
+- Branch PR: run #520, ID `43460040655`, FAILURE sul HEAD `e0b5098` (13 novembre, 16:10:35 UTC). Fallisce lo step `Validate NEXTWAY audit`: `scripts/validate-nextway-audit.mjs` cerca la forma compatta `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount`, mentre il sorgente presenta l'oggetto su più righe. L'asserzione non corrisponde alla formattazione e il processo termina con exit code 1.
+- Il log prova il fallimento del test di contratto, non un difetto runtime dell'archivio. Gli step successivi sono SKIPPED, inclusi test Zinzino, controlli locali, `node --check` e `deno check`. Le run PR #510–#519 nell'elenco recente risultano FAILURE; #520 è la più recente esaminata.
+- Il test `scripts/test-nextway-company-config.mjs` è presente e copre i nove segmenti e il flusso ricerca/CRM, ma non è stato raggiunto nella run #520. Correggere il test audit senza indebolire l'isolamento e rieseguire la CI completa.
+
+### Supabase — evidenze utente del 12–13 novembre
+
+- Progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`. Gli esiti seguenti sono output riferiti dall'utente, non una nuova lettura live dell'assistente.
+- **P0 Rate Limit e Governance — COMPLETATO E VERIFICATO:** il 13 novembre alle 07:37 l'utente ha eseguito il draft SQL nel Supabase SQL Editor (`Success. No rows returned`). Verifica: Tabella Rate Limit OK; RPC Rate Limit OK; RPC Governance OK; RLS Rate Limit ATTIVA; Accesso RPC Rate Limit OK; Accesso RPC Governance OK. Dal sorgente del draft: `nextway_api_rate_limits`, `nextway_consume_api_rate_limit(text,integer)`, `nextway_get_active_setter_governance(uuid)`.
+- **Workspace — COMPLETATO E VERIFICATO per gli output disponibili:** il 13 novembre alle 07:25 l'utente ha confermato workspaces, prompts e prospect criteria presenti con RLS/accesso; il 12 novembre aveva verificato `nextway_workspace_memberships` con RLS attiva, 0 righe, FK a `auth.users` e `nextway_workspaces`, UNIQUE `(workspace_id,user_id)) e vincoli ruolo/stato. Il 13 novembre alle 09:29 ha confermato le policy `nextway_workspace_memberships_admin_all` e `nextway_workspace_memberships_self_read`.
+- Le RPC `nextway_activate_workspace_prompt/criteria(uuid,uuid)` erano state verificate il 12 novembre come SECURITY DEFINER, `search_path=pg_catalog, public`, EXECUTE solo `service_role`. `workspace_id` presente su leads, knowledge documents e setter conversations con FK RESTRICT; FK anche su prompts e prospect criteria.
+- **Privilegi RPC conversione — COMPLETATO E VERIFICATO per la diagnostica utente del 13 novembre alle 09:36:** claim/finalize/release/guard/set_updated_at EXECUTE solo a `postgres, service_role`; `nextway_has_workspace_access` e `nextway_is_platform_admin` anche ad `authenticated`; nessun EXECUTE a anon/PUBLIC. Anomalia live: `nextway_is_platform_admin()` aveva `search_path=public`. La migrazione branch `20261113110000` fissa `pg_catalog, public`, ma non risulta applicata.
+- **Storage — COMPLETATO E VERIFICATO all'ultima lettura utente dell'11 novembre:** `nextway-knowledge` privato, 12 MiB, MIME PDF/DOCX/TXT, 0 oggetti e quattro policy admin authenticated SELECT/INSERT/UPDATE/DELETE. Non ricontrollato il 13 novembre.
+- **CRM core:** l'ultima diagnostica registrata (11 novembre) mostrava `nextway_leads` presente con RLS e policy owner/platform_admin; attività e conversion requests assenti in quel momento. Il dump schema-only del 13 novembre fotografa uno stato successivo con 21 tabelle, ma la riconciliazione oggetto-per-oggetto non è finita: non dedurre lo stato corrente di ogni tabella CRM.
+- **AI Setter generation:** il preflight utente del 13 novembre alle 07:25 ha trovato la tabella legacy `nextway_setter_generation_requests`, ma senza le colonne legacy attese `user_id` e `lease_expires_at`. La catena successiva usa uno store workspace separato: non applicare cleanup/retention legacy senza riconciliare tabella e firme effettive.
+
+### Conversione Lead → cliente/partner
+
+- La diagnostica live del 13 novembre ha evidenziato che la finalizzazione precedente non bloccava il Lead con `FOR UPDATE` e non verificava l'UPDATE: rischio di conversione non atomica. Nessuna riga di test è stata modificata sul progetto reale.
+- Solo sul branch PR, non applicate: `20261113110000` hardening search_path admin; `20261113120000` snapshot immutabile workspace sulla richiesta; `20261113130000` finalizzazione transazionale con partner + membership `invited` oppure cliente + attribuzione workspace; `20261113140000` cancellazione amministrativa controllata; `20261113150000` riallineamento trigger stale-output alla tabella Setter workspace.
+- Il piano di concorrenza conversione A–F è preparato ma non eseguito. Richiede staging separato, due sessioni PostgreSQL, fixture sintetiche e nessuna email/account reale. Staging, test runtime, inviti e membership di prova non sono confermati.
+
+### Dump schema-only, baseline e staging
+
+- Il 13 novembre l'utente ha riferito `/tmp/nextway-public-schema.sql`, prodotto con Supabase CLI 3.1.0 dal solo schema `public`: circa 154 KB, 3.615 righe, 0 INSERT/COPY, SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`. Conteggi riportati: 21 tabelle, 22 SECURITY DEFINER, 53 policy RLS, 11 trigger, 48 indici. È schema-only, non backup completo dei dati; nessun restore è stato provato.
+- Inventario statico: 31 migrazioni. La DDL originaria delle tabelle core non è nella cronologia Git iniziale; lo snapshot corrente include già modifiche delle migrazioni. Riconciliazione oggetto-per-oggetto, tipi, sequenze, ownership, grant e dipendenze Auth/Storage DA COMPLETARE.
+- Il 13 novembre alle 12:08 l'utente ha eseguito `python3 scripts/extract-nextway-core-ddl.py`: "Formato non riconosciuto"; nessun file modificato. Nessun estratto DDL core riuscito confermato.
+- Sul branch è presente `scripts/check-nextway-schema-dump.py`, scanner che ignora commenti, stringhe e corpi dollar-quoted e rileva INSERT/COPY a livello statement; il self-test è nel workflow, ma non è stato raggiunto nella run #520.
+- Sul branch è presente `supabase/config.toml` con label locale `nextway-staging-prepared`, redirect localhost, signup/anon disabilitati, SMTP locale `local_smtp`, nessun remote e nessun segreto. Non crea uno staging. Il documento readiness sconsiglia `supabase start` sul Mac Intel da 8 GB.
+- Staging non creato, nessuna baseline importabile certificata, nessun seed sintetico e nessun test PostgreSQL runtime. Backup completo e restore DA COMPLETARE.
+
+### Mac Intel, Edge Functions e vincoli
+
+- Output utente del 13 novembre alle 07:53: Supabase CLI 3.1.0, Docker 29.9.3, circa 8 GB RAM, architettura Intel; dump schema-only prodotto.
+- Output utente serale successivo: `supabase --version` e `brew --version` → `command not found`; installer Homebrew standard rifiutato perché richiede Apple Silicon; `uname -m` → `x86_64`. Discrepanza di PATH/sessione non risolta. `node -v` e `npm -v` non ancora riportati.
+- Sei sorgenti nel repository: `nextway-ai-setter`, `nextway-search`, `nextway-workspace-admin`, `nextway-knowledge-upload`, `nextway-knowledge-ingest`, `nextway-conversion-provisioning`. La matrice branch documenta dipendenze e nomi secrets (senza valori): OpenAI per AI Setter, Tavily per search, service-role per funzioni amministrative/Knowledge/conversion.
+- Il branch include CORS locale `http://localhost:8000` senza wildcard; il sorgente aggiornato non modifica automaticamente le funzioni remote. Versioni remote, secrets live e CORS remoto non verificati in questo controllo. Nessun deploy effettuato.
+- Vincolo utente invariato: nessuna azione Netlify produzione e nessun test con utenti o conversioni reali prima del 4 dicembre 2026. Staging futuro solo con dati sintetici e email sandbox.
+
+### Matrice di stato aggiornata
+
+- MASTER/main, HEAD/blob e inventario GitHub: **COMPLETATO E VERIFICATO**.
+- CI main #251: **COMPLETATO E VERIFICATO** per quella run statica/type-check.
+- CI PR #520: **BLOCCATO** dall'asserzione audit; gli step successivi sono stati saltati.
+- Motore prospect e configurazione Zinzino nel branch: **ESEGUITO MA NON VERIFICATO**; browser e CI sul commit corrente non superati.
+- Materiali ufficiali Zinzino/Knowledge Base: **DA COMPLETARE**.
+- P0 Rate Limit/Governance: **COMPLETATO E VERIFICATO** sugli output Supabase utente del 13 novembre.
+- Workspace/membership/RLS/RPC: **COMPLETATO E VERIFICATO** per gli output utente del 12–13 novembre.
+- Bucket Knowledge: **COMPLETATO E VERIFICATO** all'ultima lettura utente dell'11 novembre; 0 oggetti, non ricontrollato oggi.
+- Fix live search_path platform admin: **DA COMPLETARE**; migrazione solo branch.
+- Migrazioni conversione/cancellazione/Setter del 13 novembre: **ESEGUITO MA NON VERIFICATO** sul branch; nessun runtime.
+- Schema CRM live e riconciliazione delle 31 migrazioni: **DA COMPLETARE**.
+- Dump schema-only: **COMPLETATO E VERIFICATO** come file locale riferito dall'utente; backup completo/restore: **DA COMPLETARE**.
+- Estrazione DDL core: **BLOCCATO** dall'errore di formato.
+- Configurazione staging: **ESEGUITO MA NON VERIFICATO** come file branch; progetto e baseline: **DA COMPLETARE**.
+- CLI nel Terminale serale: **BLOCCATO** fino a chiarimento della discrepanza con l'output mattutino.
+- Deploy Edge Functions: **DA COMPLETARE/VERIFICARE**.
+- Merge PR #1: **BLOCCATO** fino a CI verde, staging e test.
+- Netlify produzione/test reali prima del 4 dicembre: **BLOCCATO** per decisione utente.
+
+### Prossimi passi prioritari
+
+1. Correggere il test audit #520 mantenendo i controlli di isolamento e rieseguire la CI completa, inclusi test Zinzino e Deno.
+2. Aggiornare la copia locale solo dopo aver verificato lo stato Git; il pull delle 13:42 non prova che sia presente il HEAD remoto delle 16:10 UTC.
+3. Acquisire i materiali ufficiali Zinzino e collegare configurazione, criteri e prompt al motore/AI Setter senza inventare dati commerciali.
+4. Risolvere l'estrazione DDL core e completare la riconciliazione; non usare lo snapshot corrente come baseline storica senza revisione.
+5. Preparare staging isolato con dati sintetici, email sandbox e baseline coerente; eseguire lì i test conversione A–F e multi-workspace.
+6. Prima di interventi sul progetto reale, acquisire backup completo e prova restore, preflight aggiornato e autorizzazione specifica. Mantenere il blocco Netlify e test reali fino al 4 dicembre.
+
+### Registro cronologico del MASTER
+
+- 13-11-2026, 19:21 Europe/Rome — aggiornati HEAD/blob main, commit recenti, inventario main/PR, PR #1, CI main #251 e CI PR #520 con causa del fallimento; registrati requisito prospect, nove segmenti Zinzino, P0 Rate Limit/Governance, workspace/membership, audit conversione, dump schema-only, staging e discrepanza CLI Intel. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni o deploy.
