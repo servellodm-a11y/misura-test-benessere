@@ -49,11 +49,20 @@ La tabella creata dalla migrazione `20261110000200_nextway_setter_idempotency.sq
 
 **Stato:** preparata; CI superata (run `43412386590`). Il contratto statico è stato corretto per riflettere la cronologia reale delle colonne legacy; la migrazione non è stata eseguita su PostgreSQL e resta da sottoporre a test runtime in staging.
 
-### B4 — migrazioni Setter legacy non certificate per una nuova installazione
+### B4 — migrazioni Setter: transizione da eseguire senza traffico intermedio
 
-Le migrazioni `20261110000400_nextway_idempotency_retention.sql` e `20261110000700_nextway_clear_stale_staged_output.sql` devono essere riconciliate con il modello legacy e con la successiva separazione della tabella workspace. La 004 opera sulla tabella legacy e va verificata rispetto alla baseline effettiva; la 007 presenta il mismatch di colonna descritto sopra.
+La sequenza effettiva è:
 
-Non classificare l'intera catena come applicabile finché la revisione non è completata.
+1. `20261110000200`: crea la tabella legacy `nextway_setter_generation_requests` con `user_id`, `response` e chiave idempotenza.
+2. `20261110000500`: aggiunge `generated_output` alla tabella legacy.
+3. `20261110000700`: installa il trigger coerente con quello schema legacy.
+4. `20261111240000`: introduce una definizione workspace-aware usando `CREATE TABLE IF NOT EXISTS` sullo stesso nome legacy e ridefinisce le RPC correnti per il nuovo modello. Su una catena pulita, la tabella esiste già con la forma legacy; la migrazione è quindi uno stato intermedio e non deve ricevere traffico applicativo.
+5. `20261112020000`: crea `nextway_setter_workspace_generation_requests`, sposta le RPC correnti sulla tabella dedicata e preserva la tabella legacy per la retention storica.
+6. `20261113150000`: disattiva il trigger legacy non più necessario al percorso RPC corrente e installa la protezione sulla tabella workspace.
+
+**Conseguenza operativa:** in staging, completare l'intera sequenza di migrazioni prima di avviare l'applicazione o eseguire test AI Setter. Non eseguire prove intermedie tra `20261111240000` e `20261112020000`. Il test statico di isolamento controlla che le quattro RPC correnti usino esclusivamente la tabella workspace.
+
+**Precisazione:** il commento storico in testa alla migrazione 120200 parla di tabella legacy conservata per le RPC originali; in realtà le RPC con le stesse firme vengono sostituite e reindirizzate alla tabella workspace. La tabella legacy resta per compatibilità strutturale e retention, non per il percorso RPC corrente.
 
 ## 3. Ordine di preparazione richiesto
 
@@ -83,7 +92,7 @@ Non classificare l'intera catena come applicabile finché la revisione non è co
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | DA PREPARARE |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
-| Correzione forward-only trigger Setter 007 | PREPARATA, CI SUPERATA; runtime DA ESEGUIRE |
+| Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA; runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
 | Test PostgreSQL/Auth/concorrenza | NON ESEGUITI |
 | Progetto reale | NON MODIFICATO |
