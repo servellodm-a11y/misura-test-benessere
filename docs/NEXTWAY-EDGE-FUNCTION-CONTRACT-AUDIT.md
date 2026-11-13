@@ -205,3 +205,37 @@ Nessuna migrazione, modifica DB, deploy, merge, seed, creazione membership o con
 Le definizioni originarie e le policy live di `clients` e `partner_details` non sono presenti nelle migrazioni del repository; la ricerca statica non può ricostruirle. Non si può quindi produrre in sicurezza una migrazione finale per quelle tabelle senza i metadati read-only del progetto. Il nuovo preflight è stato aggiunto per raccoglierli in un solo risultato, senza esportare dati personali.
 
 **Stato:** dipendenze applicative e disegno precisati; schema effettivo di `clients`/`partner_details` e RLS ancora **DA VERIFICARE**. Nessuna query è stata eseguita sul database remoto; nessuna migrazione, DDL/DML, deploy o modifica UI è stata eseguita.
+
+
+## Ulteriore verifica — autorizzazione avvio conversione da membri workspace
+
+Lettura diretta della policy INSERT `nextway_conversion_insert_owner_or_admin` e del flusso UI `createLeadConversionRequest()` ha evidenziato un gap distinto dalla persistenza del workspace:
+
+- La UI consente di selezionare un Lead accessibile e invia `created_by = auth.uid()`, `owner_profile_id = lead.owner_profile_id`, `sponsor_profile_id = lead.owner_profile_id`.
+- La policy SQL attuale autorizza l'INSERT soltanto se l'attore è il proprietario del Lead oppure `platform_admin`.
+- La policy workspace aggiunta successivamente concede lettura ai membri attivi del workspace, ma non amplia la policy INSERT della richiesta. Un membro attivo che può legittimamente leggere un Lead condiviso può quindi ricevere un rifiuto RLS quando prova a proporne la conversione.
+- La coda, revisione e finalizzazione sono invece deliberatamente riservate a `platform_admin` nella UI/Edge Function. Questo è un modello di approvazione centrale, non un'autorizzazione per workspace manager.
+
+### Regola di autorizzazione proposta
+
+Per Lead con `workspace_id IS NOT NULL`:
+- consentire la creazione della richiesta a un utente autenticato con membership attiva nel workspace e ruolo `workspace_owner`, `workspace_admin`, `workspace_manager` o `workspace_member`;
+- escludere `workspace_viewer`;
+- conservare `owner_profile_id` e `sponsor_profile_id` uguali al proprietario reale del Lead;
+- registrare l'attore in `created_by`;
+- derivare `workspace_id` dal Lead lato database e renderlo immutabile nella richiesta.
+
+Per Lead legacy con `workspace_id IS NULL`:
+- mantenere la regola attuale: proprietario del Lead o `platform_admin`;
+- nessuna assegnazione automatica a un workspace.
+
+La policy deve inoltre verificare che il Lead sia ancora non archiviato e in stato `In valutazione`. L'assegnazione del workspace alla richiesta deve essere atomica con la lettura/verifica del Lead, preferibilmente mediante RPC di creazione o trigger controllato, per evitare una race tra autorizzazione e modifica del Lead.
+
+### Impatto UI e governance
+
+- La UI deve leggere `workspace_id` del Lead per mostrare il contesto, ma non deve poterlo scegliere o sovrascrivere.
+- La coda conversioni rimane per ora una coda centrale `platform_admin`; se si vorrà delegare la revisione ai manager dei singoli workspace, servirà un'autorizzazione separata e auditata, non un'estensione implicita della policy INSERT.
+- La finalizzazione deve verificare che workspace snapshot e workspace del Lead coincidano ancora. Se un amministratore trasferisce il Lead dopo la richiesta, la conversione deve fermarsi per revisione esplicita, non spostarsi silenziosamente.
+- Il preflight SQL è stato corretto per usare il campo JSON `table_exists`, evitando un alias SQL ambiguo.
+
+**Esito:** individuato e documentato un ulteriore blocco funzionale per collaboratori non proprietari del Lead. Nessuna policy o interfaccia è stata modificata; nessun test live è stato eseguito.
