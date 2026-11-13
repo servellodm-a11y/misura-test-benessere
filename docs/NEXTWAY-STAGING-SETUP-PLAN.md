@@ -140,3 +140,8 @@ La CLI documenta l'opzione `supabase start -x` per escludere servizi; la lista e
 ## Riferimento alla matrice servizi — 13 novembre 2026
 
 È stato aggiunto `docs/NEXTWAY-LOCAL-SERVICE-MATRIX.md`, che classifica le dipendenze delle migrazioni e separa il profilo SQL/concorrenza dal profilo di integrazione Auth/API/Storage/Edge Functions. La lista dei servizi da escludere resta candidata e deve essere verificata sulla CLI 3.1.0 prima di qualsiasi avvio. La baseline deve ricostruire anche le dipendenze `auth` e `storage`; non si deve dichiarare un test Auth/Storage superato con il solo PostgreSQL.
+
+
+## Baseline schema-only — procedura di recupero — 13 novembre 2026
+
+La baseline applicativa completa non è presente nel repository. Creato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con procedura controllata per ottenere un dump del solo schema `public`, senza righe di dati, tramite Supabase CLI. Il comando va prima confrontato con `supabase db dump --help` della CLI 3.1.0 e il target remoto va verificato; output in `/tmp`, revisione obbligatoria per assenza di dati/secret prima di importarlo o versionarlo. Gli schemi gestiti `auth` e `storage` sono esclusi dal dump e devono essere forniti dallo stack locale. Nessun dump è stato eseguito e nessuna connessione remota è stata aperta in questo passaggio.
