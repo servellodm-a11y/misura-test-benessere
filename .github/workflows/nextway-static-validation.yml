@@ -38,6 +38,8 @@ on:
       - "scripts/test-nextway-setter-stale-output-trigger.mjs"
       - "supabase/config.toml"
       - "scripts/test-nextway-staging-config.py"
+      - "scripts/test-nextway-core-baseline-delta.mjs"
+      - "docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-conversion-workspace-preflight.mjs"
       - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
@@ -133,6 +135,8 @@ jobs:
         run: python3 scripts/check-nextway-schema-dump.py --self-test
       - name: Validate isolated NEXTWAY staging CLI config
         run: python3 scripts/test-nextway-staging-config.py
+      - name: Validate NEXTWAY core baseline migration deltas
+        run: node scripts/test-nextway-core-baseline-delta.mjs
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
