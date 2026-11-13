@@ -43,32 +43,28 @@ const checks = [
   ["transactional test avoids direct request inserts", !/insert into public\.nextway_lead_conversion_requests/i.test(isolation)],
   ["transactional test checks request visibility after Lead transfer", /Trasferimento amministrativo successivo del Lead A[\s\S]*nextway_lead_conversion_requests where id=v_req_a/i.test(isolation)],
   ["transactional test performs Lead workspace changes under admin JWT", /Le modifiche di workspace ai Lead[\s\S]*request\.jwt\.claim\.sub',v_admin[\s\S]*Trasferimento amministrativo successivo del Lead A[\s\S]*request\.jwt\.claim\.sub',current_setting\('nextway\.test\.admin'/i.test(isolation)],
-  ["transactional A/B test requires two partner profiles and one eligible Lead each", /servono due partner con partner_details e un Lead convertibile libero ciascuno/i.test(isolation)],
-  ["transactional A/B test rolls back all fixtures", /begin;[\s\S]*rollback;/i.test(isolation)],
-  ["cross-workspace members are denied the opposite workspace", /Membro B accede al workspace B senza membership[\\s\\S]*Membro A accede al workspace A senza membership/i.test(isolation)],
+  ["transactional test requires two partner profiles and one eligible Lead each", /servono due partner con partner_details e un Lead convertibile libero ciascuno/i.test(isolation)],
+  ["transactional test rolls back all fixtures", /begin;[\s\S]*rollback;/i.test(isolation)],
+  ["cross-workspace members are denied the opposite workspace", /Membro B accede al workspace B senza membership[\s\S]*Membro A accede al workspace A senza membership/i.test(isolation)],
   ["viewer and invited membership are denied", /workspace_viewer[\s\S]*membership_status='invited'[\s\S]*Membership invited ha letto/i.test(isolation)],
   ["attribution table direct access is denied", /nextway_client_workspace_attributions[\s\S]*insufficient_privilege/i.test(isolation)],
-  ["workspace RPC uses only active non-viewer membership", /nextway_list_workspace_clients\(v_ws_a\)[\s\S]*nextway_list_workspace_clients\(v_ws_b\)/i.test(isolation)],
-  ["workspace key fixture satisfies the schema regex and length", /workspace_key text not null unique[\s\S]*workspace_key ~ '\^\[a-z0-9\]\[a-z0-9_-\]\{1,62\}\ {
-  console.log(`${passed ? "PASS" : "FAIL"} | ${name}`);
-}
-assert.ok(checks.every(([, passed]) => passed), "NEXTWAY conversion workspace static checks failed");
-console.log(`\nNEXTWAY conversion workspace: ${checks.filter(([, passed]) => passed).length}/${checks.length} static checks passed.`);
-/i.test(workspaceSchema) && /'zztesta_' \|\| replace\(gen_random_uuid\(\)::text,'-',''\)/i.test(isolation)],
-  ["workspace name fixture satisfies 2-160 character constraint", /name text not null check \(length\(btrim\(name\)\) between 2 and 160\)/i.test(workspaceSchema) && /'NEXTWAY TEST Workspace A'/i.test(isolation)],
-  ["workspace status fixture uses an allowed status", /status text not null default 'draft'[\s\S]*'draft', 'active', 'archived'/i.test(workspaceSchema) && /'active'\)/i.test(isolation)],
-  ["membership fixture uses an allowed role and status", /workspace_role text not null default 'workspace_member'[\s\S]*'workspace_member'[\s\S]*membership_status text not null default 'invited'[\s\S]*'invited', 'active', 'suspended'/i.test(membershipSchema) && /'workspace_member','active',now\(\)/i.test(isolation)],
-  ["active membership fixture supplies activated_at", /membership_status = 'active' and activated_at is not null/i.test(membershipSchema) && /'workspace_member','active',now\(\)/i.test(isolation)],
-  ["membership schema enforces one row per workspace and user", /unique \(workspace_id, user_id\)/i.test(membershipSchema)],
-  ["membership foreign keys target Auth users and workspaces", /workspace_id uuid not null[\s\S]*references public\.nextway_workspaces\(id\) on delete restrict[\s\S]*user_id uuid not null[\s\S]*references auth\.users\(id\) on delete restrict/i.test(membershipSchema)],
-  ["workspace fixture relies only on nullable/defaulted omitted columns", /created_by uuid references auth\.users\(id\) on delete set null[\s\S]*created_at timestamptz not null default now\(\)[\s\S]*updated_at timestamptz not null default now\(\)/i.test(workspaceSchema) && /insert into public\.nextway_workspaces\(workspace_key,name,partner_name,status\)/i.test(isolation)],
-  ["membership fixture supplies every non-default required column", /workspace_id uuid not null[\s\S]*user_id uuid not null[\s\S]*workspace_role text not null default[\s\S]*membership_status text not null default/i.test(membershipSchema) && /insert into public\.nextway_workspace_memberships\s*\(workspace_id,user_id,workspace_role,membership_status,activated_at\)/i.test(isolation)],
-  ["membership invited state is compatible with NULL activated_at", /membership_status = 'active' and activated_at is not null[\s\S]*or membership_status <> 'active'/i.test(membershipSchema) && /membership_status='invited',activated_at=null/i.test(isolation)],
-  ["workspace key fixtures are unique per generated UUID", /'zztesta_' \|\| replace\(gen_random_uuid\(\)::text,'-',''\)[\s\S]*'zztestb_' \|\| replace\(gen_random_uuid\(\)::text,'-',''\)/i.test(isolation)],
+  ["workspace RPC checks both workspace directions", /nextway_list_workspace_clients\(v_ws_a\)[\s\S]*nextway_list_workspace_clients\(v_ws_b\)/i.test(isolation)],
+  ["workspace key schema enforces lowercase key length and format", /workspace_key text not null unique[\s\S]*workspace_key ~ '\^\[a-z0-9\]\[a-z0-9_-\]\{1,62\}\$'/i.test(workspaceSchema)],
+  ["workspace key fixtures use independent UUID suffixes", /'zztesta_' \|\| replace\(gen_random_uuid\(\)::text,'-',''\)[\s\S]*'zztestb_' \|\| replace\(gen_random_uuid\(\)::text,'-',''\)/i.test(isolation)],
+  ["workspace name schema accepts the test names", /name text not null check \(length\(btrim\(name\)\) between 2 and 160\)/i.test(workspaceSchema) && /'NEXTWAY TEST Workspace A'[\s\S]*'NEXTWAY TEST Workspace B'/i.test(isolation)],
+  ["workspace status active is an allowed value", /status text not null default 'draft'[\s\S]*'draft', 'active', 'archived'/i.test(workspaceSchema) && /'Test Partner A','active'\)/i.test(isolation)],
+  ["workspace omitted columns are nullable or defaulted", /created_by uuid references auth\.users\(id\) on delete set null[\s\S]*created_at timestamptz not null default now\(\)[\s\S]*updated_at timestamptz not null default now\(\)/i.test(workspaceSchema) && /insert into public\.nextway_workspaces\(workspace_key,name,partner_name,status\)/i.test(isolation)],
+  ["membership role and status values accept the fixture", /workspace_role text not null default 'workspace_member'[\s\S]*'workspace_owner'[\s\S]*'workspace_member'[\s\S]*membership_status text not null default 'invited'[\s\S]*'invited', 'active', 'suspended'/i.test(membershipSchema) && /'workspace_member','active',now\(\)/i.test(isolation)],
+  ["active membership requires a non-null activation timestamp", /membership_status = 'active' and activated_at is not null/i.test(membershipSchema) && /'workspace_member','active',now\(\)/i.test(isolation)],
+  ["membership uniqueness is scoped to workspace and user", /unique \(workspace_id, user_id\)/i.test(membershipSchema)],
+  ["membership foreign keys target workspace and Auth user", /workspace_id uuid not null[\s\S]*references public\.nextway_workspaces\(id\) on delete restrict[\s\S]*user_id uuid not null[\s\S]*references auth\.users\(id\) on delete restrict/i.test(membershipSchema)],
+  ["membership fixture supplies all non-default required columns", /workspace_id uuid not null[\s\S]*user_id uuid not null[\s\S]*workspace_role text not null default[\s\S]*membership_status text not null default/i.test(membershipSchema) && /insert into public\.nextway_workspace_memberships\s*\(workspace_id,user_id,workspace_role,membership_status,activated_at\)/i.test(isolation)],
+  ["invited membership may have a null activation timestamp", /membership_status = 'active' and activated_at is not null[\s\S]*or membership_status <> 'active'/i.test(membershipSchema) && /membership_status='invited',activated_at=null/i.test(isolation)],
+  ["membership fixture uses an allowed role and active status", /'workspace_member','active',now\(\)/i.test(isolation)],
 ];
 
 for (const [name, passed] of checks) {
-  console.log(`${passed ? "PASS" : "FAIL"} | ${name}`);
+  console.log(\`\${passed ? "PASS" : "FAIL"} | \${name}\`);
 }
 assert.ok(checks.every(([, passed]) => passed), "NEXTWAY conversion workspace static checks failed");
-console.log(`\nNEXTWAY conversion workspace: ${checks.filter(([, passed]) => passed).length}/${checks.length} static checks passed.`);
+console.log(\`\nNEXTWAY conversion workspace: \${checks.filter(([, passed]) => passed).length}/\${checks.length} static checks passed.\`);
