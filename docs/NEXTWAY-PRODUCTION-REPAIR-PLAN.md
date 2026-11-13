@@ -96,3 +96,31 @@ Il draft è una proposta tecnica da revisionare, non un'autorizzazione all'esecu
 L'utente ha autorizzato il ripristino P0. Il draft è stato confrontato con le migrazioni sorgenti e il codice Edge Function: la firma RPC richiesta dal Setter è `(p_scope text, p_units integer)`; la governance viene chiamata quando la conversazione ha `workspace_id`. Aggiunta al draft una guardia che interrompe la transazione se la RPC governance esiste già, evitando una sostituzione accidentale.
 
 L'ambiente di questa conversazione non dispone di un connettore Supabase/SQL Editor né di una sessione database autenticata: non è possibile eseguire direttamente il DDL sul progetto. Il consenso è registrato, ma non va dichiarata l'applicazione completata. Per eseguire il ripristino, il draft aggiornato deve essere lanciato dall'utente nel SQL Editor autenticato del progetto corretto; dopo il risultato si potrà verificare lo stato con una query read-only. Nessun DDL è stato eseguito.
+
+## Aggiornamento stato reale — 13 novembre 2026, dopo verifica P0
+
+L'utente ha eseguito il draft P0 nel SQL Editor del progetto `nextway-platform` e ha riportato `Success. No rows returned`. La query read-only successiva ha confermato tutti i seguenti esiti:
+
+- Tabella `public.nextway_api_rate_limits`: OK.
+- RPC `nextway_consume_api_rate_limit(text, integer)`: OK.
+- RPC `nextway_get_active_setter_governance(uuid)`: OK.
+- RLS sulla tabella Rate Limit: ATTIVA.
+- Accesso RPC Rate Limit: OK.
+- Accesso RPC Governance: OK.
+
+**P0 RATE LIMIT E GOVERNANCE: COMPLETATO E VERIFICATO secondo il report SQL dell'utente.** Non ripetere il pre-flight o la verifica di questi oggetti senza una nuova evidenza concreta.
+
+### Chiusura delle vecchie attività P1/P2
+
+Le migrazioni `20261110000700_nextway_clear_stale_staged_output.sql` e `20261110000400_nextway_idempotency_retention.sql` appartengono al precedente modello legacy (`user_id`, `lease_expires_at`, stati `pending`). La tabella legacy corrente usa invece `owner_profile_id` e `claimed_at`, e lo store workspace è separato. Queste migrazioni non sono compatibili e NON devono essere applicate né adattate aggiungendo colonne obsolete.
+
+Non esiste quindi un'attività P1/P2 pronta da eseguire usando quelle migrazioni. Qualsiasi futura manutenzione degli output dovrà essere progettata per il modello workspace-aware effettivo e solo dopo aver dimostrato un difetto runtime o un requisito operativo mancante. Non invocare funzioni di retention o cancellazione su dati reali.
+
+### Prossimo lavoro utile per la piattaforma
+
+1. Completare la riconciliazione della baseline schema-only e delle dipendenze, senza ripetere controlli SQL già conclusi.
+2. Preparare una baseline locale riproducibile e un seed esclusivamente sintetico, preservando `supabase/.temp/`.
+3. Eseguire prima test PostgreSQL isolati; solo se le risorse lo consentono, valutare i test d'integrazione Auth/API/Storage/Edge Runtime.
+4. Tenere separati i test CI/statici dai test runtime e dalle verifiche delle funzioni effettivamente distribuite.
+
+Vincoli invariati: nessuna migrazione ulteriore, deploy Supabase o Netlify, merge PR o modifica a `main` senza autorizzazione specifica; Netlify produzione resta bloccato fino al 4 dicembre 2026.
