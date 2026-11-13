@@ -3330,3 +3330,13 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Stato Git: PR #1 open/draft, non mergeata; branch `fix/nextway-password-recovery`. `main` invariato. Nessun rebase/merge.
 - Stato operativo invariato: nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email, nessun utente o dato di prova creato; nessuna modifica al database `nextway-platform`.
 - Prossimo lavoro: preparare un protocollo staging Auth + PostgreSQL con fixture sintetiche e test concorrenti a due sessioni; mantenere il progetto reale intatto fino ad autorizzazione esplicita.
+
+## 13 novembre 2026 — Correzione audit trail membership
+
+- Durante la revisione del passaggio `invited` → `active` è stato rilevato che `nextway-workspace-admin` sovrascriveva `invited_by` con l'ID dell'amministratore che attivava la membership, perdendo l'informazione sull'invitante originario.
+- Corretto `supabase/functions/nextway-workspace-admin/index.ts`: la lettura della membership recupera anche `invited_by`; l'upsert conserva il valore esistente e usa l'amministratore corrente soltanto quando si crea una membership senza invitante preesistente.
+- Aggiornato `scripts/test-nextway-workspace-admin-security.mjs` per verificare la conservazione dell'invitante.
+- **COMPLETATO E VERIFICATO:** GitHub Actions run `43410329154`, commit `6b24979df271df59b19b6c6e624e85f9dc769800`, conclusione **success**. Test membership, test Partner invite/cancellation, controlli statici e tutti i type-check Deno passati.
+- Nessun cambiamento alla regola di attivazione: workspace attivo, utente Auth con email confermata, membership `invited` preesistente; per Partner convertiti, richiesta `activated` e corrispondenza esatta tra utente e workspace.
+- La membership continua a essere attivata dall'amministratore tramite Edge Function; non esiste un'automatica attivazione al solo click del link email. `partner_details.status = active` non conferisce accesso workspace.
+- Nessun DB remoto modificato, nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
