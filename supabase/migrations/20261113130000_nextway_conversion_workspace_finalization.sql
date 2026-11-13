@@ -63,7 +63,7 @@ end;
 $function$;
 
 revoke all on function public.nextway_list_workspace_clients(uuid) from public, anon;
-grant execute on function public.nextway_list_workspace_clients(uuid) to authenticated, service_role;
+grant execute on function public.nextway_list_workspace_clients(uuid) to authenticated;
 
 create or replace function public.nextway_finalize_conversion_activation(
   p_request_id uuid,
@@ -258,7 +258,8 @@ begin
   set status = 'activated',
       activation_user_id = p_auth_user_id,
       activated_at = now(),
-      activation_claim_token = null
+      activation_claim_token = null,
+      activation_claimed_at = null
   where id = r.id;
 
   return jsonb_build_object(
