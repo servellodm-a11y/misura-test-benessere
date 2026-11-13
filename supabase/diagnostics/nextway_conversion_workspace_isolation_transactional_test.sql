@@ -233,9 +233,16 @@ end;
 $$;
 
 reset role;
+
+-- Trasferimento amministrativo successivo del Lead A: la richiesta resta nello
+-- snapshot workspace A e non segue il workspace corrente del Lead.
+update public.nextway_leads
+set workspace_id=current_setting('nextway.test.workspace_b')::uuid
+where id=current_setting('nextway.test.lead_a')::uuid;
+
 set local role authenticated;
 
-do $$
+do $
 declare
   v_user_a uuid := current_setting('nextway.test.user_a')::uuid;
   v_user_b uuid := current_setting('nextway.test.user_b')::uuid;
@@ -249,6 +256,10 @@ begin
   -- Partner B è membro A: può leggere il cliente A tramite RPC, non con SELECT diretta.
   perform set_config('request.jwt.claim.sub',v_user_b::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_user_b::text,'role','authenticated')::text,true);
+
+  select count(*) into v_count from public.nextway_lead_conversion_requests where id=v_req_a;
+  if v_count<>1 then raise exception 'La visibilità della richiesta A segue il Lead invece dello snapshot workspace.'; end if;
+
   select count(*) into v_count from public.nextway_list_workspace_clients(v_ws_a);
   if v_count<>1 then raise exception 'Membro B non legge il cliente condiviso nel workspace A.'; end if;
 
