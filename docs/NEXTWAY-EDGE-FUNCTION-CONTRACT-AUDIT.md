@@ -131,3 +131,50 @@ Questo non dimostra un errore nell'attuale conversione centralizzata, ma impedis
 - La revisione resta statica: non prova che il database remoto abbia tutte le versioni attese né che le Edge Function distribuite coincidano con Git.
 
 Nessuna migrazione, modifica DB, deploy, merge, seed, creazione membership o conversione è stata eseguita durante questo audit.
+
+
+## Progettazione correzione conversione multi-workspace — 13 novembre 2026
+
+### Dipendenze verificate nel branch
+
+- La UI CRM in `nextway-cloud.js` crea la richiesta leggendo il Lead, ma seleziona soltanto `id, owner_profile_id, status, archived_at`; non legge né invia `workspace_id`.
+- L'INSERT in `nextway_lead_conversion_requests` invia owner/sponsor/creator e dati di conversione, ma nessuna associazione workspace.
+- La migration `20261110001400` non definisce `workspace_id`; la policy INSERT controlla proprietario e stato del Lead, ma non conserva un vincolo workspace sulla richiesta.
+- Le RPC `nextway_claim_conversion_activation` e `nextway_finalize_conversion_activation` non restituiscono né usano il workspace.
+- L'Edge Function `nextway-conversion-provisioning` invia alla finalizzazione soltanto request ID, claim token e Auth user ID.
+- La membership ammette gli stati `invited`, `active`, `suspended`; l'accesso effettivo richiede membership `active` e workspace `active`.
+- L'admin API può impostare membership e verifica che l'utente Auth esista. Lo stato `invited` non attiva accesso e non invia da solo un invito.
+- La migrazione di associazione workspace collega esplicitamente Lead, Knowledge Documents e conversazioni Setter, ma non `clients` o `partner_details`.
+- Nel repository esaminato non è stata trovata la definizione originaria completa di `clients`, `partner_details` e delle relative policy RLS. Non è quindi corretto assumere tipi, vincoli o semantica di quelle tabelle oltre alle colonne già usate dal provisioning.
+
+### Disegno raccomandato (da implementare solo dopo verifica schema/RLS)
+
+1. **Richiesta:** aggiungere `workspace_id uuid null` a `nextway_lead_conversion_requests`, con FK RESTRICT. Il valore deve essere copiato dal Lead lato database, non accettato come autorità dal browser. Un trigger/guard deve bloccare richieste con workspace diverso da quello del Lead e rendere immutabile anche il workspace dopo la creazione. `NULL` resta valido esclusivamente per il percorso legacy centrale.
+2. **Autorizzazione richiesta:** la policy/RPC di creazione deve verificare insieme proprietario, stato, archiviazione e `nextway_has_workspace_access(lead.workspace_id, ruoli ammessi)`. I Lead legacy senza workspace restano riservati a `platform_admin`.
+3. **Claim:** la RPC deve restituire il workspace salvato sulla richiesta, insieme a Lead, owner e sponsor; il claim resta service-role-only e serializzato con `FOR UPDATE`.
+4. **Partner:** la finalizzazione deve creare il profilo e `partner_details` come oggi, quindi inserire una membership nel workspace della richiesta con ruolo iniziale `workspace_member` e stato `invited`. Non impostare `active` prima che l'invito sia stato accettato/verificato. Non sovrascrivere una membership esistente e non cambiare ruoli o stati preesistenti con un upsert cieco. L'attivazione resta un passaggio amministrativo esplicito tramite il flusso membership già esistente, finché non sarà progettato e testato un meccanismo sicuro di accettazione automatica.
+5. **Cliente:** non aggiungere subito `workspace_id` a `clients` e non modificare una tabella CRM condivisa senza conoscerne schema e RLS. Preferire in prima valutazione una tabella di attribuzione NEXTWAY (ad esempio `nextway_client_workspace_attributions`) con FK a cliente, workspace, richiesta e proprietario; unicità per richiesta e vincoli di coerenza. La scelta finale dipende dalla verifica della tabella `clients`, delle sue policy e delle query di lettura. Il cliente resta senza account Auth.
+6. **Finalizzazione:** mantenere una sola transazione SQL che blocca richiesta e Lead, ricontrolla stato/owner/workspace, crea il record cliente o partner, crea la membership/attribuzione, marca richiesta e Lead come convertiti. In caso di errore, rollback completo. Il provisioning Auth esterno continua a usare claim token e recupero idempotente dell'invito.
+7. **UI:** mostrare workspace e proprietario nella coda admin; la schermata di richiesta mostra il workspace ereditato dal Lead e non consente di modificarlo. Le query devono includere il workspace nelle letture e non dedurlo dal solo sponsor, che può operare in più workspace.
+
+### Compatibilità e protezioni
+
+- Le richieste storiche con `workspace_id IS NULL` devono continuare a seguire il percorso centralizzato attuale: nessun backfill automatico verso un workspace arbitrario.
+- La chiave univoca attiva su Lead e quella su email richiedono una decisione esplicita sul perimetro: oggi l'email è globale. Non restringerla a workspace senza aver definito se la stessa persona possa avere richieste in workspace differenti.
+- Il vincolo `sponsor_profile_id = owner_profile_id` resta coerente con l'attuale modello; non sostituire lo sponsor con un amministratore o con il workspace owner.
+- La compensazione dell'invito Auth in caso di errore va mantenuta, ma i test devono coprire timeout dopo invito, retry, claim scaduto, finalizzazione già completata e membership già esistente.
+- La presenza di una membership `invited` non deve concedere accesso a Lead, Knowledge Base, Setter o CRM.
+- Non si deve considerare completata la separazione multi-tenant finché le policy RLS delle tabelle di destinazione e tutte le query UI non sono state verificate con due utenti appartenenti a workspace distinti.
+
+### Test obbligatori prima del rilascio
+
+1. Conversione partner e cliente da Lead in workspace A: destinazione attribuita solo ad A.
+2. Conversione da workspace B dello stesso sponsor: nessuna contaminazione A/B.
+3. Tentativo di alterare workspace nella richiesta o di collegare un Lead di altro proprietario: rifiuto DB.
+4. Utente senza membership, membership `invited` o `suspended`, workspace sospeso/archiviato: nessun accesso.
+5. Invito partner accettato, membership attivata e accesso limitato al workspace corretto.
+6. Replay, richieste concorrenti, claim scaduto e retry dopo timeout: un solo profilo/partner/cliente/membership/attribuzione.
+7. Richieste legacy `NULL`: comportamento centrale invariato.
+8. RLS e query UI: utente A non legge né modifica dati attribuiti a B.
+
+**Esito progettuale:** percorso di correzione identificato. Non è ancora una migrazione pronta: mancano la definizione originaria di `clients`/`partner_details`, l'audit delle loro policy RLS e la verifica completa delle query che consumano i record cliente. Nessuna modifica SQL, database, Edge Function, UI o deploy è stata eseguita in questo passaggio.
