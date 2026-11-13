@@ -340,3 +340,12 @@ L'utente ha eseguito correttamente una query diagnostica consolidata nel SQL Edi
 Il report unico consolida e conferma il precedente controllo degli oggetti. Il passo successivo è un controllo read-only mirato della struttura dei tre registri candidati, limitato ai metadati delle colonne; soltanto dopo si potrà scegliere con evidenza quale registro eventualmente consultare. Non eseguire SELECT sulle righe dei registri, migrazioni, DDL/DML, deploy o modifiche in produzione in questa fase.
 
 **Stato:** report unico completato; cronologia migrazioni non ancora identificata; nessuna modifica al database, nessun deploy, nessun merge e nessuna modifica a `main`.
+
+
+### Query successiva preparata: struttura registri in un'unica cella — 13 novembre 2026
+
+- Creato `docs/NEXTWAY-REGISTRY-COLUMNS-REPORT.sql`.
+- La query restituisce un solo campo testuale `report`, con una riga descrittiva per ciascuno dei tre registri candidati.
+- Legge esclusivamente i metadati delle colonne tramite `pg_catalog` e `to_regclass`; non legge righe delle tabelle candidate e non contiene DDL/DML.
+- Serve a stabilire se uno dei registri abbia una struttura compatibile con un registro di versioni migrazione. Non presume che i registri Auth/Realtime/Storage siano il registro delle migrazioni applicative.
+- File pronto sul branch `fix/nextway-password-recovery`. Nessuna query ancora eseguita con questo file; nessuna modifica remota.
