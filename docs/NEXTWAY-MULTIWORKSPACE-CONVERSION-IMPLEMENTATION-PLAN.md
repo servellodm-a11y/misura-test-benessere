@@ -325,7 +325,7 @@ Sono state aggiunte sul branch due migrazioni ulteriori:
 - `scripts/test-nextway-conversion-workspace-snapshot.mjs` contiene 24 asserzioni statiche su migrazioni, RPC, RLS, UI ed Edge Function.
 
 ### Limiti e gate residui
-- La revisione statica manuale dei contenuti recuperati ha superato 24/24 controlli logici. Lo script contiene le stesse 24 asserzioni; l'esecuzione Node end-to-end resta da effettuare sul branch.
+- La revisione statica manuale dei contenuti recuperati ha superato 24/24 controlli logici. Lo script contiene 24 asserzioni; la sintassi JavaScript dello script è stata controllata con Node 22. L'esecuzione delle asserzioni sul checkout completo e i test PostgreSQL/runtime restano da effettuare.
 - Non è stato eseguito un parser PostgreSQL, un test transazionale, un test RLS runtime o un test Edge Function.
 - Il profilo Auth creato da eventuali trigger deve avere ruolo partner e dati compatibili; la finalizzazione rifiuta profili non compatibili senza sovrascriverli.
 - La RPC clienti è predisposta, ma non è stata aggiunta una schermata CRM clienti workspace: l'interfaccia va costruita separatamente usando la sola RPC e non una SELECT diretta.
