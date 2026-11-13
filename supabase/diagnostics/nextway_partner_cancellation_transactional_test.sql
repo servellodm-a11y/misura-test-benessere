@@ -3,7 +3,8 @@
 -- Prerequisiti: un profilo partner con partner_details, un Lead legacy (workspace_id NULL)
 -- "In valutazione", non archiviato, e un profilo platform_admin.
 -- Crea tre richieste temporanee tramite la RPC applicativa; non crea Auth users,
--- non invia inviti/email, non chiama Edge Functions e termina sempre con ROLLBACK.
+-- non invia inviti/email e non chiama Edge Functions. Sul percorso riuscito termina con ROLLBACK.
+-- In caso di errore SQL, la transazione resta abortita: eseguire ROLLBACK prima di riutilizzare la sessione.
 -- Se i prerequisiti o le migrazioni non sono presenti, si interrompe prima delle modifiche.
 
 begin;
@@ -260,3 +261,4 @@ reset role;
 rollback;
 
 -- Esito atteso: tutte le asserzioni superate e nessun dato persistente.
+-- Se un'asserzione fallisce, interrompere, eseguire ROLLBACK e conservare l'errore per l'analisi.
