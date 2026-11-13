@@ -1,3 +1,4 @@
+  ["conversion request RLS uses immutable workspace snapshot", /workspace_id is not null\s+and public\.nextway_has_workspace_access\(workspace_id\)/i.test(snapshot) && /workspace_id is null\s+or public\.nextway_has_workspace_access\(workspace_id\)/i.test(snapshot)],
 import fs from "node:fs";
 import assert from "node:assert/strict";
 
@@ -36,6 +37,7 @@ const checks = [
   ["transactional test includes admin review", /status='ready_for_activation'[\s\S]*reviewed_by=v_admin[\s\S]*reviewed_at=now\(\)/i.test(isolation)],
   ["transactional test claims both requests as service_role", /nextway_claim_conversion_activation\([\s\S]*nextway\.test\.request_a[\s\S]*nextway_claim_conversion_activation\([\s\S]*nextway\.test\.request_b/i.test(isolation)],
   ["transactional test avoids direct request inserts", !/insert into public\.nextway_lead_conversion_requests/i.test(isolation)],
+  ["transactional test checks request visibility after Lead transfer", /Trasferimento amministrativo successivo del Lead A[\s\S]*nextway_lead_conversion_requests where id=v_req_a/i.test(isolation)],
   ["transactional A/B test requires two partners and two Leads", /servono almeno due profili partner[\s\S]*servono almeno due Lead/i.test(isolation)],
   ["transactional A/B test rolls back all fixtures", /begin;[\s\S]*rollback;/i.test(isolation)],
   ["A cannot read workspace B and vice versa", /A ha ottenuto accesso al workspace B[\s\S]*B ha ottenuto accesso al workspace A/i.test(isolation)],
