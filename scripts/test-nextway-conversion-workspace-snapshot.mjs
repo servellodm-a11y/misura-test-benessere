@@ -7,6 +7,8 @@ const snapshot = fs.readFileSync("supabase/migrations/20261113120000_nextway_con
 const finalize = fs.readFileSync("supabase/migrations/20261113130000_nextway_conversion_workspace_finalization.sql", "utf8");
 const cloud = fs.readFileSync("nextway-cloud.js", "utf8");
 const edge = fs.readFileSync("supabase/functions/nextway-conversion-provisioning/index.ts", "utf8");
+const inviteLifecycle = fs.readFileSync("supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs", "utf8");
+const inviteUnitTest = fs.readFileSync("scripts/test-nextway-partner-invite-lifecycle.mjs", "utf8");
 const workspaceAdmin = fs.readFileSync("supabase/functions/nextway-workspace-admin/index.ts", "utf8");
 const isolation = fs.readFileSync("supabase/diagnostics/nextway_conversion_workspace_isolation_transactional_test.sql", "utf8");
 
@@ -49,6 +51,9 @@ const checks = [
   ["Workspace activation requires a pre-existing invited membership", /if \(body\.membership_status === "active"\)[\s\S]*!existing \|\| !\["invited", "active"\]\.includes\(existing\.membership_status\)/i.test(workspaceAdmin)],
   ["Conversion-created Partner activation is bound to its request and workspace", /partner_details[\s\S]*nextway_conversion_request_id[\s\S]*nextway_lead_conversion_requests[\s\S]*status !== "activated"[\s\S]*activation_user_id !== body\.user_id[\s\S]*workspace_id !== body\.workspace_id/i.test(workspaceAdmin)],
   ["Edge Function does not accept workspace_id", !/body\.workspace_id/i.test(edge)],
+  ["Edge Function uses the shared Partner invite lifecycle classifier", /classifyPartnerInvite\(existingInvite, email, requestId\)/i.test(edge) && /from "\.\/invite-lifecycle\.mjs"/i.test(edge)],
+  ["Partner invite classifier fails closed on email and request metadata mismatch", /actualEmail !== email/i.test(inviteLifecycle) && /nextway_conversion_request_id !== requestId/i.test(inviteLifecycle)],
+  ["Partner invite unit tests cover create, resend, accepted, email mismatch and request mismatch", /"create"/i.test(inviteUnitTest) && /"resend"/i.test(inviteUnitTest) && /"reuse_confirmed"/i.test(inviteUnitTest) && /different email/i.test(inviteUnitTest) && /another conversion/i.test(inviteUnitTest)],
   ["transactional test creates requests through authenticated RPC", /nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_a[\s\S]*nextway_create_lead_conversion_request\([\s\S]*nextway\.test\.lead_b/i.test(isolation)],
   ["transactional test includes admin review", /status='ready_for_activation'[\s\S]*reviewed_by=v_admin[\s\S]*reviewed_at=now\(\)/i.test(isolation)],
   ["transactional test sets authenticated JWT role explicitly", /request\.jwt\.claim\.role','authenticated'/i.test(isolation)],
