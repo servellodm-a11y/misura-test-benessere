@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
       }
 
       const { data: existing, error: existingError } = await admin.from("nextway_workspace_memberships")
-        .select("id,membership_status,activated_at")
+        .select("id,membership_status,activated_at,invited_by")
         .eq("workspace_id", body.workspace_id)
         .eq("user_id", body.user_id)
         .maybeSingle();
@@ -233,7 +233,8 @@ Deno.serve(async (req) => {
         user_id: body.user_id,
         workspace_role: body.workspace_role,
         membership_status: membershipStatus,
-        invited_by: authData.user.id,
+        // Preserve the original inviter when activating or changing an existing membership.
+        invited_by: existing?.invited_by ?? authData.user.id,
         activated_at: activatedAt,
         updated_at: new Date().toISOString(),
       }, { onConflict: "workspace_id,user_id" })
