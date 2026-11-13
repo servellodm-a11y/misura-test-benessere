@@ -3267,3 +3267,17 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Corretto il preflight read-only: campo JSON `table_exists`.
 - Nessuna policy, UI o Edge Function modificata; nessun test live, DDL/DML o deploy.
 - Dettaglio nell'audit Edge Functions, sezione “Ulteriore verifica — autorizzazione avvio conversione da membri workspace”.
+
+
+## 13 novembre 2026 — Audit conversione Partner e annullamento post-invito
+
+- Audit aggiornato del branch: PR #1 open/draft, non mergeata; ultimo commit `fe5f116ef2cd1f65bb5803aad38ff49cf0a5e1ce`. Branch divergente da main: 264 commit avanti e 4 indietro. Nessun rebase o merge eseguito.
+- Edge Function Partner ora classifica l'invito come `create`, `resend` o `reuse_confirmed`; il reinvio verifica ID Auth, email e metadata request ID. Il classificatore puro ha superato 6/6 unit test già eseguiti. API Auth reale, email e retry restano da provare in staging.
+- Completata la specifica tecnica per annullare una richiesta da `pending`, `ready_for_activation` o `provisioning`, con motivo obbligatorio, autore/data, invalidazione claim e protezione dalla finalizzazione concorrente.
+- La specifica chiarisce che `activated` non è annullabile: richiede offboarding distinto. L'account Auth già confermato non deve essere eliminato automaticamente; una richiesta annullata non deve generare profilo o membership.
+- Individuati i punti DB da aggiornare in un'unica migrazione futura: status CHECK, review-state CHECK, activation-state CHECK, trigger `nextway_guard_conversion_request_review()` e nuova RPC amministrativa con lock `FOR UPDATE`. Aggiungere soltanto il valore `cancelled` al check status sarebbe incompleto.
+- Documenti aggiornati: `docs/NEXTWAY-PARTNER-CANCELLATION-TECHNICAL-SPEC.md` e `docs/NEXTWAY-PARTNER-CONVERSION-LIFECYCLE-TEST-PLAN.md`.
+- **DA COMPLETARE:** migrazione/RPC/guard non implementate; test SQL concorrenza, API Auth e flusso email bloccati finché non è disponibile un progetto staging separato.
+- GitHub Actions: nessun workflow run associato all'ultimo commit. L'ultimo commit è documentale e non ha attivato il workflow attraverso i path filter.
+- Nessuna modifica al database `nextway-platform`, nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email inviata, nessun utente o dato di prova creato. `main` invariato.
+- Vincoli confermati: PR #1 resta draft; niente merge; nessun deploy Netlify produzione prima del 4 dicembre 2026.
