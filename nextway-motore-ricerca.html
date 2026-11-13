@@ -189,7 +189,8 @@ async function runSearch(){
   const groups=payload.results||[];let total=0;
   const seenProspects=new Map();
   groups.forEach((group,index)=>{
-   const heading=document.createElement('h3');heading.textContent=generated[index]?.label||('Ricerca '+(index+1));list.append(heading);
+   const matchingQuery=generated.find(entry=>entry.query===group.query);
+   const heading=document.createElement('h3');heading.textContent=matchingQuery?.label||('Ricerca '+(index+1));list.append(heading);
    const rankedResults=(group.results||[]).map(item=>({...item,_assessment:assessSearchEvidence(item.title,item.snippet,String(item.page_content||'').slice(0,5000),safeUrl(item.url),extractPublicContacts(String(item.page_content||'').slice(0,5000)),$('segment').value)})).sort((a,b)=>b._assessment.score-a._assessment.score);
    rankedResults.forEach(item=>{
     const url=safeUrl(item.url);if(!url)return;
@@ -256,7 +257,12 @@ async function runSearch(){
   const rankingContainer=document.createElement('div');sortedCards.forEach(card=>rankingContainer.append(card));list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>b.evidence_score-a.evidence_score||b.identity_score-a.identity_score||b.relevance_score-a.relevance_score);
   const duplicateTotal=dailyProspects.reduce((sum,p)=>sum+p.duplicate_count,0);
-  const partnerCount=dailyProspects.filter(p=>p.classification==='Potenziale partner').length,customerCount=dailyProspects.filter(p=>p.classification.includes('cliente')).length,reviewCount=dailyProspects.filter(p=>p.classification==='Da qualificare').length;$('daily-summary').textContent='Lista del '+new Date().toLocaleDateString('it-IT')+' · '+dailyProspects.length+' prospect unici · '+duplicateTotal+' duplicati consolidati · '+partnerCount+' potenziali partner · '+customerCount+' potenziali clienti / da verificare · '+reviewCount+' da qualificare. Ogni riga esportata include fonte, recapiti pubblici rilevati, motivazione e bozza del primo messaggio.';$('exportDaily').disabled=!dailyProspects.length;status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. La lista può essere esportata in CSV. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
+  const partnerCount=dailyProspects.filter(p=>p.classification==='Potenziale partner').length,customerCount=dailyProspects.filter(p=>p.classification.includes('cliente')).length,reviewCount=dailyProspects.filter(p=>p.classification==='Da qualificare').length;
+  const completedQueries=Number(payload.queries_completed??groups.length),failedQueries=Array.isArray(payload.failures)?payload.failures:[];
+  $('daily-summary').textContent='Lista del '+new Date().toLocaleDateString('it-IT')+' · '+dailyProspects.length+' prospect unici · '+duplicateTotal+' duplicati consolidati · '+partnerCount+' potenziali partner · '+customerCount+' potenziali clienti / da verificare · '+reviewCount+' da qualificare · '+completedQueries+' query completate · '+failedQueries.length+' non completate. Ogni riga esportata include fonte, recapiti pubblici rilevati, motivazione e bozza del primo messaggio.';
+  $('exportDaily').disabled=!dailyProspects.length;
+  if(failedQueries.length){const failureNotice=document.createElement('p');failureNotice.className='notice';failureNotice.textContent='Ricerche non completate: '+failedQueries.map(failure=>{const match=generated.find(entry=>entry.query===failure.query);return (match?.label||'Query')+' ('+String(failure.reason||'errore')+')';}).join(' · ')+'. I risultati mostrati provengono solo dalle query completate.';list.append(failureNotice);}
+  status.textContent=failedQueries.length?'Ricerca parziale: '+completedQueries+' query completate e '+failedQueries.length+' non riuscite. '+total+' risultati con URL utilizzabili. Controlla l’elenco delle query non completate prima di considerare completa la lista.':'Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+completedQueries+' query. La lista può essere esportata in CSV. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
