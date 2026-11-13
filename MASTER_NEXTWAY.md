@@ -3141,3 +3141,31 @@ Correzione applicata sul branch fix/nextway-password-recovery:
 Commit: scanner 1e804c7, correzione quoting PostgreSQL 9b0fe4c, pre-flight cbcc707, test CI 4b9727b. La verifica GitHub conferma la presenza delle modifiche sul branch. SELF-TEST LOCALE E NUOVO PRE-FLIGHT ANCORA DA ESEGUIRE SUL MAC; ESITO CI DEL NUOVO CONTROLLO NON ANCORA CONFERMATO.
 
 Il dump originale non è stato modificato; nessun import, migrazione, avvio container, deploy o modifica al database remoto è stato eseguito. Prossimo passo: aggiornare il branch locale e lanciare il self-test, lo scanner sul dump esistente e il pre-flight corretto. Anche un esito positivo non autorizza import o avvio dello stack Supabase.
+
+
+---
+
+## AVANZAMENTO OPERATIVO — 13 NOVEMBRE 2026, ORE 09:10 (Europe/Rome)
+
+### Riconciliazione strutturale schema — report cataloghi preparato
+
+Sul branch `fix/nextway-password-recovery` è stato aggiunto `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql`.
+
+Il report read-only restituisce una singola cella JSON con:
+- tabelle/relazioni, proprietari e stato RLS;
+- colonne, tipi effettivi, default, identity/generated e nullability;
+- PK, FK, UNIQUE, CHECK ed EXCLUDE;
+- sequenze, parametri, proprietari e associazione alla colonna;
+- funzioni, firme, ritorni, proprietari, SECURITY DEFINER, impostazioni e ACL;
+- trigger e funzioni richiamate;
+- policy RLS e privilegi/ACL di schema, tabelle, sequenze e funzioni.
+
+La query legge solo metadati di catalogo. Non legge dati applicativi o corpi funzione, non esegue DDL/DML e non modifica il database. Commit del file e documentazione: `eae7875`, `dc2bd8c` (più commit di preparazione precedente `78e05a9`).
+
+**STATO: PREPARATO, NON ANCORA ESEGUITO.** La riconciliazione oggetto-per-oggetto resta aperta finché non sarà disponibile il report effettivo del database. Non dichiarare verificati tipi, ownership, FK, sequenze, funzioni, trigger o privilegi sulla sola base dei file Git.
+
+### Prossimo passaggio
+
+Eseguire una sola volta `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` nel SQL Editor Supabase e riportare la cella `report`. Con quel risultato si potrà completare il confronto con dump e migrazioni e classificare le differenze prima del bootstrap PostgreSQL locale.
+
+Nessuna migrazione, modifica DB, deploy, merge, import o seed eseguito. `main` invariato; PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato. P0 Rate Limit/Governance resta COMPLETATO E VERIFICATO secondo il report SQL già fornito dall'utente; non ripetere quei controlli.
