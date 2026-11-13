@@ -147,6 +147,51 @@ if(x.archived_at){const archiveInfo=document.createElement('p');archiveInfo.clas
   const next=document.createElement('input');next.type='datetime-local';
   form.append(field('Tipo di attività',type),field('Oggetto *',subject),field('Data e ora',occurred),field('Prossimo follow-up (facoltativo)',next));
   const detailsWrap=field('Dettagli',details);detailsWrap.style.gridColumn='1 / -1';form.append(detailsWrap);
+  const draftPanel=document.createElement('section');draftPanel.style.cssText='grid-column:1 / -1;border:1px solid #dfe5ef;border-radius:10px;padding:12px;background:#f8faff';
+  const draftTitle=document.createElement('strong');draftTitle.textContent='Prepara un messaggio per questo Lead';
+  const draftNote=document.createElement('p');draftNote.className='small';draftNote.textContent='Genera e copia una bozza. Non viene inviata e non viene registrata come contatto effettuato. Registra l’attività solo dopo aver inviato personalmente il messaggio.';
+  const draftChannel=document.createElement('select');
+  [['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email'],['sms','SMS']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;draftChannel.append(o);});
+  const draftWebsite=document.createElement('select');
+  const noLink=document.createElement('option');noLink.value='none';noLink.textContent='Nessun link — consigliato per il primo contatto';draftWebsite.append(noLink);
+  const companyConfig=window.NEXTWAY_COMPANY_CONFIG?.active;
+  const websites=companyConfig?.consultantChannels||{};
+  if(websites.generalWellnessWebsite){const o=document.createElement('option');o.value='general';o.textContent=websites.generalWellnessWebsite.label+' — sito generale';draftWebsite.append(o);}
+  if(websites.zinzinoReplicaWebsite){const o=document.createElement('option');o.value='replica';o.textContent=websites.zinzinoReplicaWebsite.label+' — approfondimento Zinzino';draftWebsite.append(o);}
+  const leadEvidence=[x.name,x.profession,x.company_brand,x.evidence,x.notes].filter(Boolean).join(' ').toLocaleLowerCase('it');
+  const hasZinzinoSignal=/zinzino|balancetest|balance test|balance oil/.test(leadEvidence);
+  draftWebsite.value=(x.category==='final_customer'||x.category==='wellness_professional')?'general':hasZinzinoSignal?'replica':'none';
+  const draftText=document.createElement('textarea');draftText.rows=6;draftText.maxLength=4000;draftText.style.cssText='width:100%;padding:9px;margin:8px 0;font:inherit';
+  const draftActions=document.createElement('div');draftActions.className='actions';
+  const generateDraft=document.createElement('button');generateDraft.type='button';generateDraft.className='btn alt';generateDraft.textContent='Aggiorna bozza';
+  const copyDraft=document.createElement('button');copyDraft.type='button';copyDraft.className='btn alt';copyDraft.textContent='Copia bozza';
+  const insertDraft=document.createElement('button');insertDraft.type='button';insertDraft.className='btn alt';insertDraft.textContent='Inserisci nel registro attività';
+  const draftHint=document.createElement('p');draftHint.className='small';draftHint.setAttribute('aria-live','polite');
+  const leadName=String(x.name||'').trim();
+  const isCustomer=x.category==='final_customer';
+  const isProfessional=x.category==='wellness_professional';
+  const audience=isCustomer?'persona interessata al benessere':isProfessional?'professionista del settore benessere':x.partner_type||'potenziale partner';
+  const topic=isCustomer?'un percorso basato sulla misurazione e sulla consapevolezza del benessere':isProfessional?'un confronto professionale su benessere e strumenti di misurazione':'un confronto su un progetto professionale nel settore del benessere';
+  const channelDrafts={
+   whatsapp:'Buongiorno'+(leadName?' '+leadName:'')+', mi farebbe piacere condividere con lei un’idea su '+topic+'. Se l’argomento è pertinente ai suoi interessi, posso inviarle qualche informazione qui. Nessun impegno.',
+   facebook:'Buongiorno'+(leadName?' '+leadName:'')+'! Sto approfondendo un progetto legato al benessere e mi farebbe piacere un confronto, anche breve, su '+topic+'. Se può interessarle, le racconto volentieri di cosa si tratta.',
+   linkedin:'Buongiorno'+(leadName?' '+leadName:'')+', sto entrando in contatto con '+audience+' per un confronto su '+topic+'. Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
+   instagram:'Ciao'+(leadName?' '+leadName:'')+'! Sto conoscendo persone interessate al benessere e mi farebbe piacere confrontarmi su '+topic+'. Se ti va, posso raccontarti brevemente di cosa si tratta.',
+   email:'Oggetto: Un possibile confronto sul benessere\\n\\nBuongiorno'+(leadName?' '+leadName:'')+',\\n\\nmi farebbe piacere proporle un breve confronto su '+topic+'. Se l’argomento è di suo interesse, posso inviarle qualche informazione o concordare una breve telefonata, senza impegno.\\n\\nCordiali saluti',
+   sms:'Buongiorno'+(leadName?' '+leadName:'')+', sto approfondendo un progetto sul benessere. Se il tema le interessa, mi farebbe piacere un breve confronto. Nessun impegno.'
+  };
+  function refreshLeadDraft(){
+   const selected=draftWebsite.value==='general'?websites.generalWellnessWebsite:draftWebsite.value==='replica'?websites.zinzinoReplicaWebsite:null;
+   draftText.value=(channelDrafts[draftChannel.value]||'')+(selected?'\\n\\nPer approfondire, qui trova il mio riferimento: '+selected.url:'');
+   draftHint.textContent=draftWebsite.value==='general'?'Sito generale: comunicazione sul benessere, senza presentarlo come sito ufficiale Zinzino.':draftWebsite.value==='replica'?'Sito replica: usarlo quando esiste già interesse specifico per Zinzino.':'Nessun link aggiunto. È l’impostazione consigliata per il primo contatto con un potenziale partner.';
+  }
+  generateDraft.addEventListener('click',refreshLeadDraft);draftChannel.addEventListener('change',refreshLeadDraft);draftWebsite.addEventListener('change',refreshLeadDraft);
+  copyDraft.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(draftText.value);copyDraft.textContent='Copiato';}catch(err){draftText.focus();draftText.select();copyDraft.textContent='Seleziona e copia';}});
+  insertDraft.addEventListener('click',()=>{type.value=draftChannel.value==='email'?'email':'message';subject.value='Bozza '+draftChannel.options[draftChannel.selectedIndex].text+' — '+(leadName||'Lead');details.value='BOZZA DA INVIARE MANUALMENTE — non ancora inviata.\\n\\n'+draftText.value;feedback.textContent='Bozza inserita nel modulo. Dopo averla inviata personalmente, torna qui e registra l’attività.';});
+  draftActions.append(generateDraft,copyDraft,insertDraft);
+  draftPanel.append(draftTitle,draftNote,field('Canale',draftChannel),field('Sito da proporre (facoltativo)',draftWebsite),draftText,draftActions,draftHint);
+  form.append(draftPanel);refreshLeadDraft();
+
   const save=document.createElement('button');save.type='submit';save.className='btn';save.textContent='Registra attività';const feedback=document.createElement('p');feedback.className='small';feedback.setAttribute('aria-live','polite');feedback.style.gridColumn='1 / -1';form.append(save,feedback);if(x.archived_at){save.disabled=true;feedback.textContent='Lead archiviato: puoi consultare la cronologia, ma non registrare nuove attività.';}activityBox.append(form);
   const list=document.createElement('div');activityBox.append(list);
   const renderEvents=events=>{
