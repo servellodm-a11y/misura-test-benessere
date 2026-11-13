@@ -82,6 +82,18 @@ assert.ok(archiveHtml.includes('id="entityTypeFilter"'));
 assert.ok(archiveHtml.includes('value="prospect_quality"'));
 assert.ok(archiveHtml.includes('Qualità ricerca più alta'));
 assert.ok(archiveHtml.includes('Punteggio commerciale più alto'));
+assert.ok(archiveHtml.includes('id="verifyHigh"'));
+assert.ok(archiveHtml.includes('id="verifyMedium"'));
+assert.ok(archiveHtml.includes('id="verifyLow"'));
+assert.ok(archiveHtml.includes('id="verifyMissing"'));
+assert.ok(archiveHtml.includes('function getVerificationPriority(x)'));
+assert.ok(archiveHtml.includes("score>=80&&type==='Possibile profilo individuale'"));
+assert.ok(archiveHtml.includes("score>=50&&['Possibile profilo individuale','Identità individuale non confermata'].includes(type)"));
+assert.ok(archiveHtml.includes("el('showVerifyHigh').addEventListener('click'"));
+assert.ok(archiveHtml.includes("'prospectQualityFilter','entityTypeFilter'"));
+assert.ok(archiveHtml.includes('Riepilogo di tutti i Lead attivi'));
+assert.ok(archiveHtml.includes('non misura interesse, intenzione d’acquisto o disponibilità a collaborare'));
+
 assert.ok(archiveHtml.includes("qualityFilter==='high'"));
 assert.ok(archiveHtml.includes("qualityFilter==='medium'"));
 assert.ok(archiveHtml.includes('entityFilter'));
