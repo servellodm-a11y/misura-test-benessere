@@ -11,6 +11,34 @@ alter table public.nextway_lead_conversion_requests
 create index if not exists nextway_conversion_workspace_created_idx
   on public.nextway_lead_conversion_requests (workspace_id, created_at desc);
 
+-- Le richieste devono seguire lo snapshot immutabile, non il workspace corrente
+-- del Lead: un trasferimento amministrativo del Lead non trasferisce la richiesta.
+drop policy if exists nextway_conversion_workspace_select
+  on public.nextway_lead_conversion_requests;
+create policy nextway_conversion_workspace_select
+  on public.nextway_lead_conversion_requests
+  as permissive
+  for select to authenticated
+  using (
+    workspace_id is not null
+    and public.nextway_has_workspace_access(workspace_id)
+  );
+
+drop policy if exists nextway_conversion_workspace_scope
+  on public.nextway_lead_conversion_requests;
+create policy nextway_conversion_workspace_scope
+  on public.nextway_lead_conversion_requests
+  as restrictive
+  for all to authenticated
+  using (
+    workspace_id is null
+    or public.nextway_has_workspace_access(workspace_id)
+  )
+  with check (
+    workspace_id is null
+    or public.nextway_has_workspace_access(workspace_id)
+  );
+
 create or replace function public.nextway_create_lead_conversion_request(
   p_lead_id uuid,
   p_conversion_type text,
