@@ -479,22 +479,22 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual};
 }
 function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,targetAssessment){
- const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\\s+/g,' ').trim();
+ const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
  const clean=value=>String(value||'').replace(/[|,;:.]+$/,'').trim();
  let name='';
- const named=raw.match(/\\b(?:mi chiamo|sono)\\s+([A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2})/);
+ const named=raw.match(/\b(?:mi chiamo|sono)\s+([A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2})/);
  if(named)name=clean(named[1]);
- if(!name){const head=String(title||'').split(/[|–—]/)[0].trim();if(/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(head))name=head;}
+ if(!name){const head=String(title||'').split(/[|–—]/)[0].trim();if(/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,2}$/.test(head))name=head;}
  const roleRules=[['Biologo/a nutrizionista',/biolog[oa] nutrizionist[ai]?/i],['Nutrizionista',/nutrizionist[ai]?/i],['Dietista',/dietist[ai]?/i],['Naturopata',/naturopat[ai]?/i],['Osteopata',/osteopat[ai]?/i],['Fisioterapista',/fisioterapist[ai]?/i],['Personal trainer',/personal trainer/i],['Farmacista',/farmacist[ai]?/i],['Medico',/medic[io]/i],['Imprenditore / titolare',/imprenditor[ei]|titolare|founder|business owner/i],['Networker',/network marketing|networker|vendita diretta|distributore indipendente|brand partner/i]];
  const profession=clean(assessment?.role||targetAssessment?.role||roleRules.find(([,re])=>re.test(raw))?.[0]||'');
  let organization='';
- const orgPatterns=[/(?:founder|fondatore|fondatrice|titolare|amministratore(?: delegato)?|CEO)\\s+(?:di|presso)\\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i,/(?:presso|lavora per|collabora con)\\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i,/(?:studio|azienda|società)\\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i];
+ const orgPatterns=[/(?:founder|fondatore|fondatrice|titolare|amministratore(?: delegato)?|CEO)\s+(?:di|presso)\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i,/(?:presso|lavora per|collabora con)\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i,/(?:studio|azienda|società)\s+([A-ZÀ-ÖØ-Þ][^,.;|]{2,65})/i];
  for(const re of orgPatterns){const m=raw.match(re);if(m){organization=clean(m[1]);break;}}
  let location='';
- const loc=raw.match(/(?:sede|studio|riceve|lavora|opera)\\s+(?:a|in|presso)\\s+([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’ -]{2,55})/i);
- if(loc)location=clean(loc[1].split(/\\b(?:per|con|e|dal|da)\\b/i)[0]).slice(0,55);
+ const loc=raw.match(/(?:sede|studio|riceve|lavora|opera)\s+(?:a|in|presso)\s+([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’ -]{2,55})/i);
+ if(loc)location=clean(loc[1].split(/\b(?:per|con|e|dal|da)\b/i)[0]).slice(0,55);
  const priority=assessment?.individual&&assessment?.score>=80?'Alta · verifica prioritaria':assessment?.individual&&assessment?.score>=50?'Media · verifica necessaria':'Da approfondire';
- return {name:name||'Non rilevato con certezza',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:assessment?.individual?'Profilo personale identificabile e prove documentali disponibili.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',evidence_summary:String(snippet||'').slice(0,500)};
+ return {name:name||'Non rilevato con certezza',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:assessment?.individual?'Profilo personale identificabile e prove documentali disponibili.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',evidence_summary:String(snippet||'').slice(0,500)};
 }
 function canonicalProspectUrl(value){
  try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'');}
