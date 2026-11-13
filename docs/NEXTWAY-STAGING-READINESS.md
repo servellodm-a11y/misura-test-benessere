@@ -39,9 +39,9 @@ Le migrazioni versionate non costituiscono, da sole, una ricostruzione completa 
 
 La migrazione iniziale `20261105000100_nextway_ai_assistant_foundation.sql` crea le tabelle del modulo AI Assistant (`nw_*`), non una baseline completa di queste tabelle core.
 
-**Preparazione completata:** creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md` con gli oggetti core preesistenti, le colonne minime note, le strutture create dalle migrazioni e le esclusioni sui dati. Aggiunta anche la diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`, che controlla soltanto cataloghi e metadati delle colonne/RLS, senza leggere righe applicative o dati Auth.
+**Preparazione completata:** creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md` e la mappa `docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md`. La mappa identifica le modifiche delle migrazioni a `nextway_leads`, `nextway_setter_conversations` e `nextway_knowledge_documents`, distinguendole dalle tabelle create dalle migrazioni. Aggiunto il test statico `scripts/test-nextway-core-baseline-delta.mjs` al workflow CI. È inoltre disponibile la diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`, che controlla soltanto cataloghi e metadati delle colonne/RLS, senza leggere righe applicative o dati Auth.
 
-**Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve ancora la baseline SQL schema-only, sanitizzata e revisionata, oppure un processo documentato che ricostruisca in modo ripetibile lo schema core senza importare dati personali o dati di produzione.
+**Conseguenza:** non si deve creare uno staging vuoto e lanciare tutte le migrazioni alla cieca. Serve ancora la baseline SQL schema-only, sanitizzata e revisionata. Non è corretto generarla automaticamente dallo snapshot corrente: mancano nel repository le definizioni originarie complete delle tabelle e delle dipendenze core, e lo snapshot include già modifiche introdotte dalle migrazioni. La mappa delle differenze riduce il lavoro, ma non sostituisce la DDL originaria.
 
 ### B3 — trigger Setter: riallineamento dopo la separazione delle tabelle
 
@@ -72,8 +72,8 @@ La sequenza effettiva è:
 
 ## 3. Ordine di preparazione richiesto
 
-1. Ottenere una baseline schema-only completa e sanitizzata del database core, senza righe applicative, utenti Auth, storage objects, segreti o dati personali.
-2. Confrontare la baseline con le migrazioni versionate e definire quali oggetti sono baseline preesistenti e quali sono creati dalle migrazioni.
+1. Recuperare la DDL schema-only originaria del database core precedente alle migrazioni, oppure ricostruirla statement per statement dallo snapshot corrente usando la mappa `docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md`, senza automatismi distruttivi.
+2. Confrontare la baseline ricostruita con le migrazioni versionate e verificare che nessuna modifica venga duplicata o persa.
 3. Completare la verifica CI e la revisione SQL del riallineamento forward-only del trigger Setter; preservare la compatibilità senza riscrivere migrazioni storiche già applicate.
 4. Completare la revisione della configurazione `supabase/config.toml` già predisposta, senza collegare il progetto reale.
 5. Preparare secret manifest con soli nomi e descrizioni, mai valori; distinguere chiavi pubbliche, service role e secret Edge Function.
@@ -98,8 +98,10 @@ La sequenza effettiva è:
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | PREPARATA, CI SUPERATA (run 43413398397) |
 | Manifest baseline core | COMPLETATO |
+| Mappa delta migrazioni core | PREPARATA, CI IN CORSO |
+| Test statico mappa delta | PREPARATO, CI IN CORSO |
 | Preflight baseline read-only | PREPARATO, NON ESEGUITO |
-| Baseline schema-only core | DA PREPARARE/REVISIONARE |
+| Baseline schema-only core | BLOCCATA: DDL originaria completa non disponibile nel repository |
 | Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
 | Progetto Supabase staging | NON CREATO |
 | Test PostgreSQL/Auth/concorrenza | NON ESEGUITI |
