@@ -62,7 +62,7 @@ begin
 end;
 $function$;
 
-revoke all on function public.nextway_list_workspace_clients(uuid) from public, anon;
+revoke all on function public.nextway_list_workspace_clients(uuid) from public, anon, service_role;
 grant execute on function public.nextway_list_workspace_clients(uuid) to authenticated;
 
 create or replace function public.nextway_finalize_conversion_activation(
