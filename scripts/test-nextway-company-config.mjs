@@ -66,6 +66,11 @@ assert.equal(dedupeContext.canonicalProspectUrl('https://example.com/person'),'h
 assert.equal(dedupeContext.buildProspectDedupeKey('https://www.linkedin.com/in/mario-rossi/?trk=public','Mario Rossi',{individual:true,identityScore:35},{role:'Professionista salute e benessere'}),dedupeContext.buildProspectDedupeKey('https://linkedin.com/in/mario-rossi','Mario Rossi',{individual:true,identityScore:35},{role:'Professionista salute e benessere'}));
 assert.equal(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}),dedupeContext.buildProspectDedupeKey('https://site-b.example/mario','Mario Rossi',{individual:true,identityScore:35},{role:'Nutrizionista'}));
 assert.notEqual(dedupeContext.buildProspectDedupeKey('https://site-a.example/page','Mario Rossi',{individual:false,identityScore:10},{role:'Nutrizionista'}),dedupeContext.buildProspectDedupeKey('https://site-b.example/page','Mario Rossi',{individual:false,identityScore:10},{role:'Nutrizionista'}));
+assert.ok(searchHtml.includes('card.dataset.priorityScore=String(assessment.score||0)'));
+assert.ok(searchHtml.includes('sortedCards=[...list.querySelectorAll'));
+assert.ok(searchHtml.includes('Lista unica · ordinata per qualità delle evidenze'));
+assert.ok(searchHtml.includes('duplicateEntry.daily.sources=duplicateEntry.sources'));
+assert.ok(searchHtml.includes('duplicateEntry.daily.duplicate_count++'));
 assert.ok(searchHtml.includes('dailyProspects.sort('));
 assert.ok(searchHtml.includes('duplicati consolidati'));
 assert.ok(searchHtml.includes('punteggio_evidenze'));
