@@ -23,7 +23,7 @@ Il progetto reale resta fuori dal perimetro di tutte le prove.
 
 ### B1 — configurazione Supabase CLI preparata, non collegata
 
-Creato `supabase/config.toml` con project label locale `nextway-staging-prepared`, redirect esclusivamente localhost, signup e accesso anonimo disabilitati, Studio/Analytics disabilitati, SMTP locale sandbox tramite sezione CLI corrente `local_smtp` e nessun remote project configurato. Il file non contiene project ref, URL di produzione o segreti. Aggiunto `scripts/test-nextway-staging-config.py` al workflow CI.
+Creato `supabase/config.toml` con project label locale `nextway-staging-prepared`, redirect esclusivamente localhost, signup e accesso anonimo disabilitati, Studio/Analytics disabilitati, SMTP locale sandbox tramite sezione CLI corrente `local_smtp` e nessun remote project configurato. Il file non contiene project ref, URL di produzione o segreti. Aggiunto `scripts/test-nextway-staging-config.py` al workflow CI. La sezione SMTP è `local_smtp` (CLI corrente); `inbucket` è una sezione deprecata nelle versioni CLI recenti.
 
 La configurazione non crea un progetto Supabase e non collega alcun remote. Non eseguire `supabase init`, `supabase link` o `supabase start`; il Mac Intel da 8 GB non è adatto allo stack locale completo. Prima di un collegamento remoto andranno acquisiti il project ref staging e la versione PostgreSQL effettiva, senza copiarli dal progetto produzione.
 
@@ -96,7 +96,7 @@ La sequenza effettiva è:
 |---|---|
 | Protocollo di collaudo Partner | COMPLETATO |
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
-| Configurazione CLI staging | PREPARATA, test CI IN CORSO |
+| Configurazione CLI staging | PREPARATA, CI SUPERATA (run 43413398397) |
 | Manifest baseline core | COMPLETATO |
 | Preflight baseline read-only | PREPARATO, NON ESEGUITO |
 | Baseline schema-only core | DA PREPARARE/REVISIONARE |
