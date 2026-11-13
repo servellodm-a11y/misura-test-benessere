@@ -3037,3 +3037,7 @@ Preparato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` (non applicato) per ripristinare so
 
 ### Autorizzazione ripristino P0 — 13 novembre 2026
 L'utente ha autorizzato il ripristino Rate Limit + Governance. Draft confrontato con migrazioni sorgenti e chiamate Edge Function; aggiunta guardia che impedisce la sostituzione della RPC governance se già presente. Esecuzione DB non effettuata: questa sessione non dispone di connessione Supabase/SQL Editor autenticata. Non dichiarare il ripristino applicato; l'esecuzione richiede il SQL Editor autenticato e successiva verifica read-only. Nessuna modifica al database.
+
+
+### Esecuzione SQL P0 — esito comunicato dall'utente, 13 novembre 2026
+L'utente ha eseguito `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` nel SQL Editor Supabase e ha riportato `Success. No rows returned`. Questo conferma l'esecuzione senza errori segnalati; resta in attesa una verifica read-only post-esecuzione della tabella Rate Limit, delle due RPC e dei relativi privilegi/RLS. Non considerare ancora il ripristino verificato.
