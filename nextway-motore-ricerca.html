@@ -72,10 +72,12 @@ function classifyNextBestAction(activity,crmStatus,now=new Date()){
  const due=activity?.next_followup_at?new Date(activity.next_followup_at):null;
  const validDue=due&&!Number.isNaN(due.getTime());
  const dueNow=validDue&&due.getTime()<=now.getTime();
- const dayEnd=new Date(now);dayEnd.setHours(23,59,59,999);
- const dueToday=validDue&&due.getTime()<=dayEnd.getTime();
+ const todayStart=new Date(now);todayStart.setHours(0,0,0,0);
  if(status==='non interessato'||status==='escluso'||outcome.includes('non interessato')){
   return {code:'stop_contact',label:'Non ricontattare',action:'Interrompere i contatti e rispettare la scelta espressa.',priority:99,reason:'Il CRM registra un esito di non interesse o un’esclusione.'};
+ }
+ if(dueNow){
+  return {code:'followup_due',label:due.getTime()<todayStart.getTime()?'Follow-up scaduto':'Follow-up previsto oggi',action:'Eseguire il ricontatto previsto, verificare il contesto e registrare l’esito.',priority:0,reason:'Esiste un promemoria aperto con scadenza raggiunta.'};
  }
  if(outcome.includes('appuntamento fissato')){
   return {code:'meeting_scheduled',label:'Appuntamento fissato',action:'Preparare l’incontro: rileggere le note, definire l’obiettivo e confermare data e modalità.',priority:1,reason:'È stato registrato un appuntamento.'};
@@ -85,9 +87,6 @@ function classifyNextBestAction(activity,crmStatus,now=new Date()){
  }
  if(outcome.includes('chiesto informazioni')){
   return {code:'information_requested',label:'Informazioni richieste',action:'Preparare e inviare manualmente le informazioni richieste, poi registrare l’esito e l’eventuale prossimo passo.',priority:3,reason:'La persona ha chiesto informazioni.'};
- }
- if(dueNow){
-  return {code:'followup_due',label:due.getTime()<new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()?'Follow-up scaduto':'Follow-up previsto oggi',action:'Eseguire il ricontatto previsto, verificare il contesto e registrare l’esito.',priority:0,reason:'Esiste un promemoria aperto con scadenza raggiunta.'};
  }
  if(outcome.includes('nessuna risposta')||outcome.includes('ricontatto necessario')){
   if(validDue)return {code:'followup_planned',label:'Ricontatto programmato',action:'Attendere la data del promemoria; non anticipare il contatto.',priority:4,reason:'È stato registrato un ricontatto con scadenza futura.'};
