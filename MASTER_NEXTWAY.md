@@ -2915,3 +2915,13 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Altre differenze da chiarire: assenza di `nextway_api_rate_limits` / `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output` e relativo trigger, `nextway_prune_setter_generation_requests`, `nextway_get_active_setter_governance`.
 - Aggiornato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con classificazione e decisione. Baseline ancora non certificata/importabile.
 - Prossimo passo: controlli mirati read-only sul dump locale per confermare la tabella legacy, i nomi esatti e i riferimenti; migliorare il parser. Nessuna migrazione, import, seed, test runtime, modifica remota, deploy, merge o modifica a `main`.
+
+
+### Correzione mirata baseline Setter — 13 novembre 2026
+
+- L'utente ha eseguito un `grep` mirato sul dump locale `/tmp/nextway-public-schema.sql`.
+- Confermata la presenza di `public.nextway_setter_generation_requests` (definizione intorno alla riga 2071), con PK, indice conversazione, FK verso `nextway_setter_conversations` e `profiles`, RLS abilitata e grant a `service_role`.
+- Confermata anche la distinta tabella `nextway_setter_workspace_generation_requests`; il commento SQL dichiara esplicitamente che è separata dallo store legacy.
+- La precedente segnalazione di assenza della tabella legacy era un falso negativo dello script lessicale; ritirata e corretta in `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`. Non ricreare la tabella.
+- Il medesimo controllo non ha trovato nel dump riferimenti a `nextway_api_rate_limits`, `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output`, `nextway_prune_setter_generation_requests` e `nextway_get_active_setter_governance`. Queste restano differenze da incrociare con le migrazioni e la cronologia, senza dedurre dal solo dump che siano state rimosse o mai applicate.
+- Nessuna modifica al database, nessuna migrazione, import locale, seed, test runtime o deploy.
