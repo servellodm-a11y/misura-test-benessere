@@ -2895,3 +2895,10 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - **NON ESEGUITO:** `supabase init`, `supabase start`, import locale, seed sintetici, test runtime, migrazioni.
 - Non tentare il full stack sul Mac Intel da 8 GB RAM; non aumentare la memoria Docker. Prima profilo SQL ridotto, poi eventuale profilo integrazione soltanto se sostenibile.
 - Nessun `supabase link`, `db push`, deploy, merge, modifica a `main`, progetto cloud o spesa. Il blocco Netlify produzione fino al 4 dicembre 2026 resta invariato.
+
+
+### Strumento preparatorio aggiunto — confronto baseline
+- Creato `scripts/analyze-nextway-schema-baseline.py`, script Python 3 che confronta lessicalmente i nomi degli oggetti dichiarati nelle migrazioni con quelli trovati nel dump schema-only.
+- Lo script stampa conteggi, nomi, riferimenti agli schemi managed e SHA-256; non stampa corpi funzione/valori, non apre connessioni e non esegue SQL.
+- Esecuzione prevista dal repository locale: `python3 scripts/analyze-nextway-schema-baseline.py`. Il dump predefinito atteso è `/tmp/nextway-public-schema.sql`.
+- Script non ancora eseguito sul Mac. Il suo output sarà un ausilio per la riconciliazione, non una certificazione PostgreSQL.
