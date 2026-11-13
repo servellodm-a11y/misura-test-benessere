@@ -439,3 +439,29 @@ L'assenza delle vecchie funzioni/trigger non costituisce, da sola, una lacuna da
 - Verifica della versione delle Edge Functions effettivamente distribuite: distinta dalla validazione statica del branch; non dedurla dal solo sorgente GitHub.
 
 Non ripetere le query già concluse su registri managed Auth/Realtime/Storage: non identificano il registro delle migrazioni applicative NEXTWAY. Non eseguire migrazioni o deploy per colmare questi gate documentali.
+
+
+## 16. Riconciliazione strutturale puntuale — report cataloghi read-only — 13 novembre 2026
+
+È stato preparato `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` per acquisire in un'unica esecuzione i metadati effettivi del database e confrontarli con la baseline e le migrazioni del branch.
+
+Il report restituisce una sola riga/colonna JSON e comprende:
+
+- relazioni `public`: nome, tipo, proprietario, stato RLS/FORCE RLS;
+- colonne: posizione, tipo PostgreSQL effettivo, NOT NULL, identity/generated e default;
+- vincoli: PK, FK, UNIQUE, CHECK ed EXCLUDE, definizione e stato di validazione/differibilità;
+- sequenze: tipo, start/incremento/min/max/cache/cycle, proprietario e colonna a cui sono associate;
+- funzioni: firma completa, argomenti, tipo di ritorno, linguaggio, proprietario, SECURITY DEFINER, volatilità, parallelismo, impostazioni e ACL/EXECUTE;
+- trigger: tabella, definizione, stato, funzione richiamata, proprietario e SECURITY DEFINER della funzione;
+- policy RLS e privilegi/ACL di schema, relazioni, sequenze e funzioni.
+
+La query legge esclusivamente cataloghi e viste di metadati; non legge righe applicative, corpi delle funzioni, segreti o contenuti utente. Non contiene DDL/DML e non modifica il database. La query non prova la cronologia delle migrazioni e non sostituisce un parser PostgreSQL.
+
+### Stato e prossima azione
+
+- **PREPARATO SUL BRANCH:** query diagnostica strutturale completa.
+- **NON ANCORA ESEGUITA:** manca il report reale del database da confrontare.
+- **NON ANCORA CERTIFICATO:** compatibilità/importabilità della baseline locale.
+- **NESSUNA MODIFICA LIVE:** nessuna migrazione, DDL/DML, deploy, import, seed o modifica ai privilegi.
+
+Dopo l'esecuzione read-only nel SQL Editor, il report dovrà essere confrontato con le 31 migrazioni e con il dump schema-only già acquisito. Il confronto dovrà classificare ogni differenza come: presente e coerente; presente ma difforme; attesa perché gestita da Supabase; superata/obsoleta; assente da approfondire. Non applicare automaticamente alcuna migrazione sulla base delle differenze.
