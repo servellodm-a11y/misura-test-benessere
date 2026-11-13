@@ -3230,3 +3230,15 @@ La catena conversione non è ancora workspace-aware: `nextway_lead_conversion_re
 Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit gap conversione: `bbd1ad3`.
 
 Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/partner/cliente. `main` invariato; PR #1 draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
+
+
+## 13 novembre 2026 — Progettazione conversione multi-workspace
+
+- Verificato il flusso UI → richiesta CRM → claim → Edge provisioning → finalizzazione SQL.
+- Confermato il gap: la richiesta non conserva `workspace_id`; la finalizzazione non assegna membership al partner né attribuzione workspace al cliente.
+- Disegno raccomandato: workspace derivato dal Lead lato database; richiesta e claim immutabili/coerenti; partner con membership iniziale `invited` (nessun accesso fino ad attivazione); cliente senza Auth e con attribuzione workspace NEXTWAY dedicata, previa verifica schema/RLS legacy.
+- Le richieste storiche con workspace NULL devono mantenere il percorso centralizzato. Nessun backfill automatico.
+- Restano da verificare definizione e RLS di `clients` e `partner_details`, perimetro unicità email e query di lettura CRM.
+- Test richiesti: isolamento A/B, membership invited/suspended, workspace sospeso, inviti e retry, concorrenza/idempotenza, richieste legacy e RLS.
+- Stato: **PROGETTAZIONE IN CORSO — non pronta per migrazione**. Nessuna modifica DB, SQL, Edge Function, UI, deploy, merge o modifica a `main`.
+- Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Progettazione correzione conversione multi-workspace”.
