@@ -77,6 +77,26 @@ begin
     end if;
   end if;
 
+  -- Serializza le richieste concorrenti con la stessa email e include lo stato
+  -- provisioning, che gli indici legacy pending/ready non coprono.
+  perform pg_advisory_xact_lock(hashtextextended(lower(btrim(p_email)), 0));
+
+  if exists (
+    select 1 from public.nextway_lead_conversion_requests q
+    where q.lead_id = v_lead.id
+      and q.status in ('pending','ready_for_activation','provisioning')
+  ) then
+    raise exception 'Esiste già una richiesta attiva per questo Lead.';
+  end if;
+
+  if exists (
+    select 1 from public.nextway_lead_conversion_requests q
+    where lower(btrim(q.email)) = lower(btrim(p_email))
+      and q.status in ('pending','ready_for_activation','provisioning')
+  ) then
+    raise exception 'Esiste già una richiesta attiva per questo indirizzo email.';
+  end if;
+
   insert into public.nextway_lead_conversion_requests (
     lead_id, owner_profile_id, sponsor_profile_id, created_by,
     conversion_type, full_name, email, phone, workspace_id
