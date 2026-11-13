@@ -332,3 +332,29 @@ Sono state aggiunte sul branch due migrazioni ulteriori:
 - Prima di qualsiasi applicazione remota occorre confrontare i nomi/tipi delle colonne e i trigger effettivi live, applicare in ambiente controllato e testare i casi A/B, legacy NULL, viewer, membership invited/suspended/esistente, workspace archiviato, retry e rollback.
 
 **Stato:** implementazione preparatoria sul branch completata per snapshot, finalizzazione, membership invited, attribuzione cliente, RPC di lettura limitata e contesto workspace in coda. Non certificata runtime e NON applicata al database remoto. Nessun deploy.
+
+
+## Riconciliazione con le verifiche già eseguite (13 novembre 2026)
+
+L'utente ricorda correttamente verifiche precedenti. Non vanno ripetute senza necessità:
+
+- **CRM smoke test 6/6 con ROLLBACK:** già eseguito e riportato come superato. Copre il precedente flusso CRM, non la nuova finalizzazione workspace.
+- **Preflight conversione workspace:** già eseguito; ha verificato metadati di tabelle, colonne, vincoli, indici, RLS/policy, trigger, firme e proprietà delle RPC. Non ha verificato i corpi runtime della nuova migrazione.
+- **Test statici workspace:** esistono script separati per RLS scoped, membership e associazione dati; sono contratti statici sulle migrazioni, non test di isolamento runtime A/B.
+- **Test SQL partner A/B legacy:** `nextway_crm_partner_isolation_transactional_test.sql` verifica isolamento owner-based su Lead e attività, non l'accesso multi-workspace ai clienti. Richiede due partner con `partner_details` e un platform_admin; non risulta confermato come eseguito.
+
+Per non duplicare queste verifiche è stato aggiunto `supabase/diagnostics/nextway_conversion_workspace_isolation_transactional_test.sql`, un test distinto e mirato:
+- finalizza due conversioni customer in workspace A e B usando service_role simulato nella transazione;
+- verifica la creazione di client e attribuzioni, lo stato activated e l'aggiornamento dei Lead;
+- verifica che un membro legga il cliente condiviso solo tramite RPC, non con SELECT diretta su `clients`;
+- verifica il diniego tra workspace, per ruolo viewer e per membership invited;
+- verifica che la tabella attribuzioni non sia direttamente leggibile;
+- annulla tutti i dati con ROLLBACK e non invia inviti/email.
+
+Il test si interrompe prima di scrivere se mancano due partner con dettagli, ciascuno con un Lead convertibile libero, oppure il platform_admin. Nell'attuale ambiente, dai controlli precedenti, questi prerequisiti non risultavano disponibili: **non eseguire adesso** e non creare utenti fittizi nel database reale.
+
+### Esito aggiornato dei controlli
+
+La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transazionale è stata ripetuta dopo le modifiche: 30 asserzioni previste nello script. I test PostgreSQL/runtime restano non eseguiti. La precedente verifica CRM 6/6 resta valida per il suo ambito e non viene conteggiata come test della nuova conversione multi-workspace.
+
+La finalizzazione ora azzera anche `activation_claimed_at` al completamento e la RPC di lettura clienti è eseguibile solo da `authenticated`, non da `service_role`.
