@@ -131,3 +131,13 @@ La gara annullamento/finalizzazione deve essere risolta dal lock della stessa ri
 - Aggiunto `scripts/test-nextway-partner-cancellation-sql.mjs` e integrato nel workflow GitHub Actions.
 - Controllo statico locale dei 15 contratti SQL eseguito sui file del branch: tutti superati. Non è un test PostgreSQL e non certifica la correttezza runtime.
 - **Non applicato:** nessun DDL/DML sul progetto `nextway-platform`; nessun deploy.
+
+## 13 novembre 2026 — Estensione del piano staging
+
+- Protocollo operativo dettagliato: `docs/NEXTWAY-PARTNER-STAGING-TEST-PROTOCOL.md`.
+- Fixture rollback-only per cancellazione Partner: `supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql`.
+- La fixture copre gli stati pending, ready_for_activation e provisioning; verifica retry idempotente, preservazione review, invalidazione claim e rifiuto delle operazioni tardive.
+- La fixture non esegue Auth, non crea utenti e non invia email. Non è stata eseguita: richiede staging e fixture partner/Lead.
+- La fixture workspace A/B è stata corretta per usare `SELECT set_config` fuori dai blocchi PL/pgSQL. La sua esecuzione resta subordinata a due partner di test e ai rispettivi Lead.
+- CI statico aggiornato e superato: run `43411870118` (commit `0aece2a527894176bcccd517f807552409a17631`). Questo risultato non equivale a test runtime PostgreSQL o Auth.
+- Caso Auth da trattare esplicitamente: invito accettato mentre vince l'annullamento. L'account confermato non viene eliminato automaticamente; va registrato e riconciliato amministrativamente.
