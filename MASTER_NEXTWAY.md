@@ -3094,3 +3094,9 @@ I documenti ora registrano P0 concluso e chiariscono che le vecchie migrazioni c
 ### Vincoli invariati
 
 Nessuna modifica a `main`, nessun merge/rebase PR, nessun deploy Supabase, nessun nuovo DDL/DML, nessun workspace o dato reale creato. Nessun deploy Netlify di produzione prima del 4 dicembre 2026. Nessuna spesa o nuovo progetto cloud senza autorizzazione esplicita.
+
+### Matrice di rilascio Edge Functions — 13 novembre 2026
+
+Creato `docs/NEXTWAY-EDGE-DEPLOYMENT-MATRIX.md` (commit `755da66e3e8920fb13b723de41e24873e40a9b11`). Il documento mappa staticamente le sei Edge Functions, le tabelle/RPC dipendenti e i nomi delle variabili/secrets richiesti, senza riportare valori segreti. Evidenzia i gate ancora da verificare: schema/Storage/Knowledge, presenza secrets, CORS produzione, versione remota delle funzioni e test runtime isolati. Il workflow #269 sul commit `774bdf55a49e0eee69b625bc2571aa84189f8215` è SUCCESS (static validation/type-check), ma non certifica il runtime.
+
+Confronto GitHub dopo gli aggiornamenti documentali: branch `fix/nextway-password-recovery` **130 commit avanti e 4 dietro** `main`. I quattro commit non ancora presenti nel branch sono stati esaminati: i diff disponibili modificano soltanto `MASTER_NEXTWAY.md`, senza cambiamenti applicativi o SQL. La divergenza resta da riconciliare in modo controllato prima del rilascio; nessun merge/rebase eseguito.
