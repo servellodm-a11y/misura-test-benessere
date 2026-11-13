@@ -708,7 +708,7 @@ function assessCommercialFit(title,snippet,pageContent,selectedSegment,targetAss
 function assessSourceQuality(item,url,pageContent){
  const host=(()=>{try{return new URL(url).hostname.toLowerCase().replace(/^www\./,'')}catch{return ''}})();
  const content=String(pageContent||'').slice(0,5000);
- const dateCandidates=[item?.published_at,item?.publishedAt,item?.date_published,item?.datePublished,item?.updated_at,item?.updatedAt,item?.date].filter(Boolean);
+ const dateCandidates=[item?.published_date,item?.publishedDate,item?.published_at,item?.publishedAt,item?.date_published,item?.datePublished,item?.updated_at,item?.updatedAt,item?.date].filter(Boolean);
  let sourceDate=null,dateSource='';
  for(const candidate of dateCandidates){const parsed=Date.parse(candidate);if(Number.isFinite(parsed)){sourceDate=new Date(parsed);dateSource='metadato fornito dalla fonte';break;}}
  if(!sourceDate){
