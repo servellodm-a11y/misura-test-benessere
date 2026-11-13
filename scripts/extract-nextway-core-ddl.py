@@ -1,112 +1,139 @@
 #!/usr/bin/env python3
-"""Extract a small, schema-only subset from a plain-text pg_dump file.
-
-No database connection is made. The script never reads table data from COPY
-sections and never exports auth.users, storage.objects, secrets, or app rows.
-"""
+"""Extract an allowlisted schema-only subset from a plain SQL schema dump."""
 from pathlib import Path
 import re
 import sys
 
 SOURCE = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/nextway-public-schema.sql")
 DEST = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("/tmp/nextway-core-ddl-extract.sql")
-
 TABLES = {
-    "profiles",
-    "partner_details",
-    "clients",
-    "nextway_leads",
-    "nextway_setter_conversations",
-    "nextway_setter_messages",
-    "nextway_lead_conversion_requests",
-    "nextway_lead_creation_requests",
+    "profiles", "partner_details", "clients", "nextway_leads",
+    "nextway_setter_conversations", "nextway_setter_messages",
+    "nextway_lead_conversion_requests", "nextway_lead_creation_requests",
     "nextway_lead_audit_logs",
 }
 FUNCTIONS = {
-    "nextway_is_platform_admin",
-    "nextway_capture_lead_audit",
+    "nextway_is_platform_admin", "nextway_capture_lead_audit",
     "nextway_guard_conversion_request_review",
     "nextway_finalize_conversion_activation",
     "nextway_create_lead_conversion_request",
     "nextway_cancel_conversion_activation",
 }
 
-if not SOURCE.is_file():
-    raise SystemExit(
-        f"File non trovato: {SOURCE}\n"
-        "Controlla che il dump esista e riprova indicando il percorso corretto."
-    )
+def split_sql(sql):
+    """Split on semicolons outside SQL strings, comments and dollar bodies."""
+    out, buf = [], []
+    i, n = 0, len(sql)
+    single = double = line_comment = False
+    block_depth = 0
+    dollar_tag = None
+    while i < n:
+        if line_comment:
+            ch = sql[i]; buf.append(ch); i += 1
+            if ch == "\n": line_comment = False
+            continue
+        if block_depth:
+            if sql.startswith("/*", i):
+                buf.extend("/*"); block_depth += 1; i += 2
+            elif sql.startswith("*/", i):
+                buf.extend("*/"); block_depth -= 1; i += 2
+            else:
+                buf.append(sql[i]); i += 1
+            continue
+        if dollar_tag is not None:
+            if sql.startswith(dollar_tag, i):
+                buf.extend(dollar_tag); i += len(dollar_tag); dollar_tag = None
+            else:
+                buf.append(sql[i]); i += 1
+            continue
+        if single:
+            ch = sql[i]; buf.append(ch); i += 1
+            if ch == "'" and i < n and sql[i] == "'":
+                buf.append(sql[i]); i += 1
+            elif ch == "'": single = False
+            elif ch == "\\" and i < n:
+                buf.append(sql[i]); i += 1
+            continue
+        if double:
+            ch = sql[i]; buf.append(ch); i += 1
+            if ch == '"' and i < n and sql[i] == '"':
+                buf.append(sql[i]); i += 1
+            elif ch == '"': double = False
+            continue
+        if sql.startswith("--", i):
+            buf.extend("--"); i += 2; line_comment = True; continue
+        if sql.startswith("/*", i):
+            buf.extend("/*"); i += 2; block_depth = 1; continue
+        if sql[i] == "'":
+            buf.append(sql[i]); i += 1; single = True; continue
+        if sql[i] == '"':
+            buf.append(sql[i]); i += 1; double = True; continue
+        if sql[i] == "$":
+            match = re.match(r"\$[A-Za-z_0-9]*\$", sql[i:])
+            if match:
+                dollar_tag = match.group(0)
+                buf.extend(dollar_tag); i += len(dollar_tag); continue
+        ch = sql[i]; buf.append(ch); i += 1
+        if ch == ";":
+            statement = "".join(buf).strip()
+            if statement: out.append(statement)
+            buf = []
+    tail = "".join(buf).strip()
+    if tail: out.append(tail)
+    return out
 
-raw = SOURCE.read_text(encoding="utf-8", errors="replace")
-marker_re = re.compile(r"(?m)^-- Name: .*?; Type: .*?$")
-matches = list(marker_re.finditer(raw))
-if not matches:
-    raise SystemExit(
-        "Formato non riconosciuto: serve un dump pg_dump in formato testo/SQL, "
-        "non un file custom (.dump/.backup). Nessun file è stato modificato."
-    )
-
-sections = []
-for i, match in enumerate(matches):
-    end = matches[i + 1].start() if i + 1 < len(matches) else len(raw)
-    section = raw[match.start():end].strip()
-    marker = section.splitlines()[0]
-    sections.append((marker, section))
-
-def selected(marker: str, section: str) -> bool:
-    # Hard exclusion: pg_dump data sections must never enter the extract.
-    if re.search(r"; Type: [^;]*\\bDATA\\b", marker, re.IGNORECASE):
+def selected(statement):
+    # Dump identifiers are quoted; remove identifier quotes for matching.
+    s = statement.replace('"', '').strip()
+    low = s.lower()
+    if re.match(r"^(copy|insert|update|delete|truncate|set|select)\b", low):
         return False
-    if re.search(r"(?m)^COPY\\s", section, re.IGNORECASE):
-        return False
-
-    # Keep only objects explicitly in public schema; do not include auth/storage.
-    if "Schema: public;" not in marker and "Type: ACL;" not in marker:
-        return False
-
-    marker_lower = marker.lower()
-    body_lower = section.lower()
-
-    # Explicit allowlist of function definitions, not arbitrary functions.
-    if "type: function;" in marker_lower:
-        return any(re.search(rf"\b{re.escape(name)}\s*\(", body_lower)
-                   for name in FUNCTIONS)
-
-    # Table definitions and all related DDL (constraints, indexes, policies,
-    # triggers, comments, grants/revokes) that reference one of the core tables.
-    for table in TABLES:
-        if re.search(rf"\bpublic\.{re.escape(table)}\b", body_lower):
-            return True
-        # Some pg_dump object markers identify constraints by their parent table.
-        if table in marker_lower and any(
-            kind in marker_lower for kind in
-            ("type: table;", "type: constraint;", "type: index;",
-             "type: trigger;", "type: policy;", "type: rule;",
-             "type: row security;", "type: default;", "type: comment;")
-        ):
-            return True
+    table_names = "|".join(map(re.escape, sorted(TABLES)))
+    function_names = "|".join(map(re.escape, sorted(FUNCTIONS)))
+    table_ref = r"(?:only\s+)?public\.(" + table_names + r")\b"
+    function_ref = r"public\.(" + function_names + r")\s*\("
+    if re.match(r"^create\s+table\s+(?:if\s+not\s+exists\s+)?" + table_ref, low):
+        return True
+    if re.match(r"^alter\s+table\s+" + table_ref, low):
+        return True
+    if re.match(r"^create\s+(?:unique\s+)?index\b", low) and re.search(r"\bon\s+" + table_ref, low):
+        return True
+    if re.match(r"^create\s+(?:or\s+replace\s+)?function\b", low) and re.search(function_ref, low):
+        return True
+    if re.match(r"^alter\s+function\b", low) and re.search(function_ref, low):
+        return True
+    if re.match(r"^comment\s+on\s+(?:table|column)\b", low) and re.search(table_ref, low):
+        return True
+    if re.match(r"^comment\s+on\s+function\b", low) and re.search(function_ref, low):
+        return True
+    if re.match(r"^create\s+(?:policy|trigger|rule)\b", low) and re.search(r"\bon\s+" + table_ref, low):
+        return True
+    if re.match(r"^(?:grant|revoke)\b", low) and (
+        re.search(r"\bon\s+(?:table\s+)?" + table_ref, low)
+        or re.search(r"\bon\s+function\s+" + function_ref, low)
+    ):
+        return True
     return False
 
-chosen = [(m, s) for m, s in sections if selected(m, s)]
+if not SOURCE.is_file():
+    raise SystemExit(f"File non trovato: {SOURCE}\nNessun file è stato modificato.")
+raw = SOURCE.read_text(encoding="utf-8", errors="replace")
+statements = split_sql(raw)
+chosen = [statement for statement in statements if selected(statement)]
 if not chosen:
-    raise SystemExit(
-        "Nessuna definizione corrispondente trovata. "
-        "Il dump potrebbe non essere uno schema public in formato pg_dump testo."
-    )
-
+    raise SystemExit("Nessun DDL core trovato. Nessun file di output creato.")
 header = [
     "-- NEXTWAY CORE DDL EXTRACT",
-    "-- Generated locally from an existing plain-text pg_dump.",
-    "-- Schema definitions only: no COPY/INSERT data sections are selected.",
-    "-- Review against migrations; this is a current snapshot, not a baseline.",
+    "-- Estratto locale da dump SQL testuale; non eseguire direttamente.",
+    "-- Solo DDL allowlist per tabelle/funzioni core.",
+    "-- Nessuna istruzione COPY/INSERT o riga applicativa selezionata.",
+    "-- Snapshot corrente, non baseline storica: confrontare con le migrazioni.",
     "",
 ]
-DEST.write_text("\n\n".join(header + [s for _, s in chosen]) + "\n",
-                encoding="utf-8")
-
+DEST.write_text("\n\n".join(header + chosen) + "\n", encoding="utf-8")
 print(f"ESTRATTO CREATO: {DEST}")
-print(f"SEZIONI DDL INCLUSE: {len(chosen)}")
+print(f"ISTRUZIONI DDL INCLUSE: {len(chosen)}")
 print(f"RIGHE: {len(DEST.read_text(encoding='utf-8').splitlines())}")
-print("TABELLE CORE RICERCATE: " + ", ".join(sorted(TABLES)))
-print("FUNZIONI INCLUSE: " + ", ".join(sorted(FUNCTIONS)))
-print("NESSUNA CONNESSIONE AL DATABASE; NESSUN DATO DI TABELLA ESPORTATO.")
+print("TABELLE CORE: " + ", ".join(sorted(TABLES)))
+print("FUNZIONI CORE: " + ", ".join(sorted(FUNCTIONS)))
+print("NESSUNA CONNESSIONE AL DATABASE; NESSUN DATO APPLICATIVO ESPORTATO.")
