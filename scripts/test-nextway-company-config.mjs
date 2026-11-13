@@ -87,6 +87,18 @@ assert.ok(archiveHtml.includes('id="verifyMedium"'));
 assert.ok(archiveHtml.includes('id="verifyLow"'));
 assert.ok(archiveHtml.includes('id="verifyMissing"'));
 assert.ok(archiveHtml.includes('function getVerificationPriority(x)'));
+assert.ok(archiveHtml.includes('function getLeadPublicContacts(lead)'));
+assert.ok(archiveHtml.includes('function renderLeadPublicContacts(lead)'));
+assert.ok(archiveHtml.includes('const publicContactsPanel=renderLeadPublicContacts(x)'));
+assert.ok(archiveHtml.includes('Email pubblicata'));
+assert.ok(archiveHtml.includes('Telefono pubblicato'));
+assert.ok(archiveHtml.includes('Link WhatsApp pubblicato'));
+assert.ok(archiveHtml.includes('Profilo social pubblicato'));
+assert.ok(archiveHtml.includes('mailto:'));
+assert.ok(archiveHtml.includes('tel:'));
+assert.ok(archiveHtml.includes('Apri WhatsApp'));
+assert.ok(archiveHtml.includes('La titolarità e l’attualità dei recapiti non sono verificate'));
+
 assert.ok(archiveHtml.includes("score>=80&&type==='Possibile profilo individuale'"));
 assert.ok(archiveHtml.includes("score>=50&&['Possibile profilo individuale','Identità individuale non confermata'].includes(type)"));
 assert.ok(archiveHtml.includes("el('showVerifyHigh').addEventListener('click'"));
