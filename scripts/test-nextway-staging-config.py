@@ -23,6 +23,9 @@ assert auth.get("email", {}).get("enable_signup") is False
 assert auth.get("email", {}).get("enable_confirmations") is True
 
 assert config.get("studio", {}).get("enabled") is False
+assert config.get("local_smtp", {}).get("enabled") is True
+assert config.get("local_smtp", {}).get("smtp_port") == 54325
+assert "inbucket" not in config, "Use current local_smtp section, not deprecated inbucket."
 assert config.get("analytics", {}).get("enabled") is False
 assert config.get("db", {}).get("major_version") is None, (
     "Do not guess the hosted PostgreSQL major version before read-only discovery."
