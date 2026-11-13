@@ -1,4 +1,11 @@
 -- NEXTWAY: riconciliazione strutturale completa, sola lettura.
+-- OUTPUT DIVISO IN BLOCCHI: eseguire una sola volta e copiare tutte le righe
+-- in ordine (parte 1/N, 2/N, ...). Non eseguire query aggiuntive.
+-- La query legge esclusivamente metadati di catalogo; non legge dati applicativi
+-- né corpi funzione e non modifica schema, dati o privilegi.
+-- Ogni blocco contiene al massimo 6000 caratteri del report JSON.
+
+-- NEXTWAY: riconciliazione strutturale completa, sola lettura.
 -- Eseguire nel SQL Editor del progetto Supabase corretto.
 -- Restituisce una sola riga/cella JSON con metadati dello schema public.
 -- Non legge righe applicative, corpi delle funzioni, segreti o contenuti utente.
@@ -176,6 +183,8 @@ schemas_data as (
   from pg_namespace n
   where n.nspname in ('public')
 )
+
+with report_data as (
 select jsonb_pretty(jsonb_build_object(
   'report_version', 1,
   'scope', 'public schema metadata only',
@@ -200,4 +209,20 @@ select jsonb_pretty(jsonb_build_object(
   'triggers', coalesce((select jsonb_agg(jsonb_build_object(
     'name', trigger_name, 'details', details)
     order by table_name, trigger_name) from triggers_data), '[]'::jsonb)
-)) as report;
+)) as report
+),
+serialized as (
+  select report::text as content from report_data
+),
+chunks as (
+  select
+    generate_series(1, greatest(1, ceil(length(content)::numeric / 6000)::integer)) as part,
+    content
+  from serialized
+)
+select
+  part as parte,
+  (select count(*) from chunks) as totale_parti,
+  substr(content, ((part - 1) * 6000) + 1, 6000) as report_parziale
+from chunks
+order by part;
