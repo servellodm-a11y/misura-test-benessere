@@ -12,6 +12,7 @@ on:
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "scripts/test-nextway-partner-cancellation-spec.mjs"
       - "scripts/test-nextway-partner-cancellation-sql.mjs"
+      - "supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql"
       - "scripts/test-nextway-partner-invite-lifecycle.mjs"
       - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
