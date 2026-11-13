@@ -70,6 +70,8 @@ assert.equal(dedupeContext.buildProspectDedupeKey('https://site-a.example/mario'
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://linkedin.com/in/mario-rossi',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('linkedin:mario-rossi'));
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://site.example/mario',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('email:mario@example.it'));
 assert.ok(dedupeContext.buildProspectIdentityKeys('https://site.example/mario',{emails:['mario@example.it'],phones:['+39 333 123 4567']}).includes('phone:393331234567'));
+assert.ok(!dedupeContext.buildProspectIdentityKeys('https://site.example/studio',{emails:['info@example.it']}).some(key=>key.startsWith('email:')),'Generic office emails must not merge different people');
+assert.ok(!dedupeContext.buildProspectIdentityKeys('https://site.example/studio',{phones:['02 1234 5678']}).some(key=>key.startsWith('phone:')),'Landline numbers must not merge different people');
 assert.ok(searchHtml.includes('card.dataset.priorityScore=String(assessment.score||0)'));assert.ok(searchHtml.includes('card.dataset.priorityScore=String(assessment.score||0)'));
 assert.ok(searchHtml.includes('sortedCards=[...list.querySelectorAll'));
 assert.ok(searchHtml.includes('Lista unica · ordinata per qualità delle evidenze'));
