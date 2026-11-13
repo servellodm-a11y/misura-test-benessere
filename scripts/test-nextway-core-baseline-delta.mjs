@@ -11,6 +11,12 @@ const get = (prefix) => {
 };
 const all = [...migrations.values()].join("\n");
 
+const conversion = get("20261111001500");
+assert.match(conversion, /alter table public\\.partner_details[\\s\\S]*add column if not exists nextway_conversion_request_id/i);
+assert.match(conversion, /alter table public\\.clients[\\s\\S]*add column if not exists nextway_conversion_request_id/i);
+assert.match(conversion, /partner_details_nextway_conversion_request_uidx/i);
+assert.match(conversion, /clients_nextway_conversion_request_uidx/i);
+
 const archive = get("20261110000800");
 assert.match(archive, /alter table public\.nextway_leads[\s\S]*add column if not exists archived_at/i);
 assert.match(archive, /add column if not exists archived_by/i);
@@ -43,13 +49,13 @@ assert.match(isolation, /create or replace function public\.nextway_begin_setter
 const createdCore = [...all.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.(profiles|nextway_leads|nextway_setter_conversations|nextway_setter_messages|partner_details|clients)\b/gi)];
 assert.equal(createdCore.length, 0, "A versioned migration unexpectedly creates a table classified as pre-existing core.");
 
-for (const table of ["profiles", "nextway_setter_messages", "partner_details", "clients"]) {
+for (const table of ["profiles", "nextway_setter_messages"]) {
   const directAlter = new RegExp(`alter\\s+table\\s+(?:only\\s+)?public\\.${table}\\b`, "i");
   assert.doesNotMatch(all, directAlter, `Unexpected direct ALTER TABLE on core table ${table}; update the delta map.`);
 }
 
 console.log("NEXTWAY core baseline migration-delta contract: PASS");
 console.log(`Inspected ${files.length} versioned migration files.`);
-console.log("Confirmed known additions to nextway_leads, nextway_setter_conversations and nextway_knowledge_documents.");
+console.log("Confirmed known additions to nextway_leads, nextway_setter_conversations, nextway_knowledge_documents, partner_details and clients.");
 console.log("Confirmed migration-created tables are not misclassified as pre-existing core.");
 console.log("Static only: no baseline DDL was generated or applied; PostgreSQL runtime remains outstanding.");
