@@ -3255,3 +3255,15 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - **DA VERIFICARE:** schema e policy effettive `clients`/`partner_details`. Non preparare/applicare la migrazione finale prima di questo dato.
 - Nessuna query live, migrazione, DDL/DML, deploy, merge o modifica a `main`.
 - Dettagli in `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Approfondimento dipendenze CRM e preflight schema”.
+
+
+## 13 novembre 2026 — Autorizzazione conversione da membri workspace
+
+- Verificata la policy INSERT della richiesta: oggi autorizza solo proprietario Lead o platform_admin. La lettura workspace dei Lead non concede automaticamente il diritto di proporre conversioni.
+- Per Lead assegnati a workspace, proposta autorizzazione per membership attiva con ruolo owner/admin/manager/member; escluso viewer. Per Lead legacy senza workspace resta la regola owner/platform_admin.
+- Distinte le identità: proprietario/sponsor del Lead, collaboratore che crea la richiesta (`created_by`), platform_admin che revisiona e finalizza.
+- Coda e provisioning restano centrali platform_admin; eventuale delega ai manager richiede policy e audit separati.
+- Workspace snapshot derivato dal Lead lato DB; se il Lead viene trasferito dopo la richiesta, la finalizzazione deve fermarsi per revisione.
+- Corretto il preflight read-only: campo JSON `table_exists`.
+- Nessuna policy, UI o Edge Function modificata; nessun test live, DDL/DML o deploy.
+- Dettaglio nell'audit Edge Functions, sezione “Ulteriore verifica — autorizzazione avvio conversione da membri workspace”.
