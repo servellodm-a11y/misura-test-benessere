@@ -178,3 +178,30 @@ Nessuna migrazione, modifica DB, deploy, merge, seed, creazione membership o con
 8. RLS e query UI: utente A non legge né modifica dati attribuiti a B.
 
 **Esito progettuale:** percorso di correzione identificato. Non è ancora una migrazione pronta: mancano la definizione originaria di `clients`/`partner_details`, l'audit delle loro policy RLS e la verifica completa delle query che consumano i record cliente. Nessuna modifica SQL, database, Edge Function, UI o deploy è stata eseguita in questo passaggio.
+
+
+## Approfondimento dipendenze CRM e preflight schema — 13 novembre 2026
+
+### Risultati dell'ispezione repository
+
+- La migrazione `20261111001500_nextway_conversion_provisioning.sql` aggiunge a `partner_details` e `clients` soltanto `nextway_conversion_request_id` con indice univoco parziale. Non definisce le tabelle originarie né le policy RLS preesistenti.
+- La finalizzazione corrente usa `profiles(id,email,full_name,role,sponsor_id)`, `partner_details(profile_id,first_name,last_name,phone,language,sponsor_profile_id,team_side,status,nextway_conversion_request_id)` e `clients(partner_profile_id,first_name,last_name,email,phone,source,status,nextway_conversion_request_id)`. Questi sono i campi effettivamente referenziati dal codice, non una descrizione completa dello schema.
+- Le migrazioni multi-workspace associano workspace a Lead, conversazioni Setter, documenti, attività/audit tramite il Lead; non aggiungono workspace a `clients` o `partner_details`.
+- La migrazione RLS workspace include `nextway_lead_conversion_requests` e applica lo scope ereditato dal Lead. Questo protegge la richiesta in base al workspace corrente del Lead, ma non conserva uno snapshot immutabile del workspace d'origine nella richiesta.
+- La UI crea richieste con INSERT diretto e non legge né trasmette `workspace_id`; la coda amministrativa non mostra il workspace. La correzione dovrà quindi coordinare trigger/RPC, RLS e UI, non soltanto il provisioning.
+- La membership consente `invited`, `active`, `suspended`; solo `active` con workspace attivo dà accesso. L'admin workspace esistente può amministrare le membership. Non è stato trovato un handler automatico di accettazione invito che attivi membership: l'attivazione deve restare esplicita e amministrativa finché non sarà implementato un flusso di accettazione verificato.
+- Il repository contiene già `supabase/diagnostics/nextway_conversion_schema_readonly.sql`, che restituisce più result set. Per ridurre il lavoro manuale è stato aggiunto `supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql`: una sola riga JSON con colonne, vincoli, indici, policy, trigger, owner/RLS e firme delle funzioni rilevanti, senza leggere righe CRM o dati personali.
+
+### Decisione tecnica affinata
+
+1. La richiesta deve memorizzare lo workspace d'origine come snapshot immutabile, derivato dal Lead dal database. La policy RLS deve verificare sia lo snapshot della richiesta sia la coerenza con il Lead; un trasferimento amministrativo successivo del Lead non deve riscrivere retroattivamente la provenienza della conversione.
+2. Il percorso INSERT diretto della UI deve essere sostituito o protetto da una RPC/trigger affidabile: non basta inviare `workspace_id` dal browser. Il server deve verificare owner, Lead convertibile, workspace attivo e membership attiva dell'attore; NULL resta ammesso solo per il percorso centrale legacy.
+3. Per il partner, creare membership `invited` nel workspace d'origine, senza concedere accesso. Dopo l'accettazione dell'invito Auth, un amministratore autorizzato attiva la membership tramite il pannello già presente. Non fare upsert che sovrascriva membership/ruoli esistenti.
+4. Per il cliente, l'attribuzione al workspace deve essere separata dal profilo cliente condiviso finché non sono noti schema, RLS e consumatori di `clients`. La tabella di relazione dedicata resta l'opzione preferita da validare; deve mantenere owner/sponsor e workspace, e impedire che la stessa richiesta generi più attribuzioni.
+5. La finalizzazione deve verificare che la riga Lead abbia ancora lo stesso workspace della richiesta, oltre a owner, stato e archiviazione, sotto lock transazionale. Ogni record di destinazione e la membership/attribuzione devono essere creati nella stessa transazione.
+
+### Limite che resta aperto
+
+Le definizioni originarie e le policy live di `clients` e `partner_details` non sono presenti nelle migrazioni del repository; la ricerca statica non può ricostruirle. Non si può quindi produrre in sicurezza una migrazione finale per quelle tabelle senza i metadati read-only del progetto. Il nuovo preflight è stato aggiunto per raccoglierli in un solo risultato, senza esportare dati personali.
+
+**Stato:** dipendenze applicative e disegno precisati; schema effettivo di `clients`/`partner_details` e RLS ancora **DA VERIFICARE**. Nessuna query è stata eseguita sul database remoto; nessuna migrazione, DDL/DML, deploy o modifica UI è stata eseguita.
