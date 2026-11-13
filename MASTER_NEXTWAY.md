@@ -3173,3 +3173,21 @@ Nessuna migrazione, modifica DB, deploy, merge, import o seed eseguito. `main` i
 
 ### Aggiornamento report strutturale: output suddiviso in blocchi
 Il file `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` è stato aggiornato per restituire righe numerate `parte`, `totale_parti`, `report_parziale`, con segmenti da massimo 6.000 caratteri. Questo evita il limite di lunghezza del singolo messaggio. L'utente deve eseguire la query una sola volta e copiare tutte le righe in ordine, inviandole in messaggi separati. Query ancora da eseguire; nessuna modifica DB. Commit correzione CTE `50683a8` (versione chunked iniziale `de54793`).
+
+### Audit statico contratti Edge Functions e CI — 13 novembre 2026
+
+Completata la revisione statica delle sei Edge Functions presenti nel branch. Le RPC invocate dal codice sono state confrontate con le firme SQL delle migrazioni versionate:
+
+- AI Setter: rate limit finale `(text, integer)`, governance `(uuid)`, quattro RPC Setter workspace-aware (begin, get staged, store output, complete).
+- Ricerca: rate limit finale `(text, integer)`.
+- Workspace Admin: RPC di attivazione prompt e criteri `(uuid, uuid)`.
+- Conversion Provisioning: claim, finalize e release con firme `(uuid, uuid)` e `(uuid, uuid, uuid)`.
+- Le funzioni Setter workspace-aware operano sullo store dedicato `nextway_setter_workspace_generation_requests`; lo store legacy è preservato.
+
+**Esito statico: firme e nomi parametri coerenti con le migrazioni esaminate.** Sono stati inoltre controllati i principali confini di autenticazione, ruolo platform_admin, claim token e rate limit server-side. Nessuna incompatibilità statica è emersa nell'insieme esaminato.
+
+GitHub Actions: workflow `NEXTWAY static validation`, run #295, commit codice `4b9727b`, **SUCCESS**. Tutti gli step sono verdi, inclusi i test di sicurezza e `deno check` per tutte e sei le Edge Functions. Il successivo commit HEAD `3cefd52` è documentale e non modifica codice/SQL. Questo risultato non prova quale versione sia attualmente distribuita su Supabase e non sostituisce test runtime.
+
+Documento di dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Stato strutturale: `docs/NEXTWAY-STRUCTURAL-RECONCILIATION-STATUS.md`.
+
+**Gate aperti:** versione remota Edge Functions non verificata; test end-to-end runtime non eseguiti; importabilità del dump e riconciliazione completa di tipi/vincoli/sequenze/ownership/ACL non certificate. Nessuna migrazione, deploy, merge, seed, modifica DB live o modifica a `main` eseguita. PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato.
