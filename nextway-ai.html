@@ -46,7 +46,7 @@ window.NEXTWAY_LOCAL_ARCHIVE={
  getIndex(){
   if(!activeOwnerId)return {urls:[],identity_keys:[]};
   const urls=[],identityKeys=[],prospects=[];
-  for(const lead of data){if(lead.is_test)continue;const key=canonicalLeadSourceUrl(lead.url),meta=readProspectMetadata(lead),keys=Array.isArray(meta.identity_keys)?meta.identity_keys.filter(value=>typeof value==='string'):[];if(key)urls.push(key);identityKeys.push(...keys);prospects.push({url:key,identity_keys:keys,status:String(lead.status||'Da verificare'),name:String(lead.name||'').slice(0,120)});}
+  for(const lead of data){if(lead.is_test)continue;const key=canonicalLeadSourceUrl(lead.url),meta=readProspectMetadata(lead),keys=Array.isArray(meta.identity_keys)?meta.identity_keys.filter(value=>typeof value==='string'):[];if(key)urls.push(key);identityKeys.push(...keys);prospects.push({url:key,identity_keys:keys,status:String(lead.status||'Da verificare'),name:String(lead.name||'').slice(0,120),cloud_id:typeof lead.cloud_id==='string'?lead.cloud_id:''});}
   return {urls:[...new Set(urls)],identity_keys:[...new Set(identityKeys)],prospects};
  },
  addFromSearch(record){
