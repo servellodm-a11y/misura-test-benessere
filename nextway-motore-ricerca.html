@@ -18,7 +18,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <header><strong>NEXTWAY AI</strong><div style="font-size:13px;color:#cbd5e1">Motore di ricerca · generatore multi-query</div></header>
 <main>
 <h1>Ricerca mirata dei profili</h1>
-<p class="muted">Genera una batteria di ricerche diverse per individuare segnali pubblici pertinenti. Ogni risultato deve essere aperto, verificato e valutato da una persona prima di entrare nell'Archivio Lead.</p>
+<p class="muted">Genera una batteria di ricerche diverse per individuare segnali pubblici pertinenti. Ogni risultato deve essere aperto, verificato e valutato da una persona prima di entrare nell'Archivio Lead. Le ricerche su lavoro extra e attività imprenditoriale richiedono dichiarazioni esplicite; i contenuti generici non dimostrano interesse. Non profilare dati sanitari.</p>
 <div class="notice"><b>Stato del modulo:</b> generazione assistita di query. Non esegue scraping, non estrae automaticamente profili e non invia messaggi. Le ricerche riguardano informazioni professionali pubbliche; non raccogliere dati sensibili o informazioni non pertinenti.</div>
 <div class="notice" id="company-context">Caricamento configurazione aziendale…</div>
 <section class="panel">
@@ -151,23 +151,123 @@ business_seeking:[
 ['Collaborazione e autonomia','("lavorare in autonomia" OR "costruire un’attività" OR "business indipendente")']
 ]};
 Object.assign(templates,extraTemplates);
+// Query orientate a segnali pubblici specifici: privilegiano profili personali e dichiarazioni volontarie.
+// Non dedurre bisogno economico, condizioni di salute o disponibilità commerciale da contenuti generici.
+const refinedItalianQueries={
+ wellness_pro:[
+  ['Profili nominativi di professionisti','(nutrizionista OR dietista OR naturopata OR osteopata OR fisioterapista OR "personal trainer") ("mi chiamo" OR "il mio studio" OR "profilo professionale")'],
+  ['Professionisti e presentazione personale','("sono un nutrizionista" OR "sono una dietista" OR "sono naturopata" OR "sono osteopata" OR "sono fisioterapista" OR "sono personal trainer")'],
+  ['Studi professionali con titolare identificabile','("studio di nutrizione" OR "studio osteopatico" OR "studio fisioterapico" OR "personal training") (titolare OR professionista OR fondatore)'],
+  ['Collaborazioni dichiarate da professionisti','(nutrizionista OR dietista OR naturopata OR osteopata OR fisioterapista OR "personal trainer") ("cerco collaborazioni" OR partnership OR "collaborazione professionale")'],
+  ['Educazione e consulenza benessere','("educazione alimentare" OR "consulenza nutrizionale" OR "allenamento personalizzato") (professionista OR consulente)']
+ ],
+ wellness_networker:[
+  ['Networker che dichiarano il settore wellness','("network marketing" OR networker OR "vendita diretta") (wellness OR benessere OR nutrizione OR fitness) ("il mio team" OR "la mia attività" OR "consulente indipendente")'],
+  ['Leader e sviluppo team wellness','("team leader" OR "costruisco il mio team" OR "sviluppo il team") (wellness OR nutrizione OR fitness)'],
+  ['Partner e distributori wellness identificabili','("distributore indipendente" OR "brand partner" OR "consulente indipendente") (wellness OR nutrizione OR benessere)'],
+  ['Collaborazioni nel network wellness','("collaborazione" OR partnership OR "nuovo progetto") ("network marketing" OR "vendita diretta") (wellness OR benessere)'],
+  ['Formazione e community network wellness','("formazione team" OR "leader indipendente" OR "community") ("network marketing" OR "vendita diretta") wellness']
+ ],
+ new_networker:[
+  ['Dichiarazione di inizio attività','("ho iniziato da poco" OR "sono all’inizio" OR "primi passi") ("network marketing" OR "vendita diretta")'],
+  ['Nuovi incaricati e distributori','("nuovo incaricato" OR "nuova incaricata" OR "nuovo distributore" OR "nuova distributrice") (wellness OR benessere OR network marketing)'],
+  ['Principianti che raccontano il percorso','("sto imparando" OR "la mia prima esperienza" OR "inizio questo percorso") ("network marketing" OR "vendita diretta")'],
+  ['Primi clienti e formazione','("primi clienti" OR "formazione per iniziare" OR "consigli per iniziare") network marketing'],
+  ['Nuovi brand partner','("nuovo brand partner" OR "nuovo consulente indipendente" OR "nuovo brand ambassador") (wellness OR benessere)']
+ ],
+ other_networker:[
+  ['Networker attivi fuori dal wellness','("network marketing" OR networker OR "vendita diretta") (team OR distributore OR consulente) -wellness -nutrizione -fitness -integratori'],
+  ['Team leader in altri settori','("team leader" OR "leader di team" OR "costruisco il mio team") ("network marketing" OR "vendita diretta") -wellness'],
+  ['Distributori e consulenti indipendenti','("distributore indipendente" OR "consulente indipendente") ("vendita diretta" OR network marketing) -wellness'],
+  ['Ricerca collaboratori dichiarata','("cerco collaboratori" OR "amplio il team" OR "nuove persone nel team") ("network marketing" OR "vendita diretta") -wellness'],
+  ['Esperienza social selling','("social selling" OR "direct selling") (leader OR team OR distributore) -wellness']
+ ],
+ entrepreneur:[
+  ['Titolari e imprenditori nominativi','(imprenditore OR imprenditrice OR titolare OR founder) ("la mia azienda" OR "la mia attività" OR "sono titolare")'],
+  ['Founder e titolari di PMI','(founder OR "business owner" OR "titolare d’azienda") (PMI OR impresa OR azienda)'],
+  ['Imprenditori con ruolo dichiarato','("sono imprenditore" OR "sono titolare" OR "ho fondato" OR "fondatore di") (azienda OR impresa OR studio)'],
+  ['Partnership tra imprese','(imprenditore OR founder OR titolare) ("partnership" OR "collaborazione commerciale" OR networking)'],
+  ['Sviluppo e diversificazione','(imprenditore OR titolare) ("sviluppo commerciale" OR diversificazione OR "nuovo progetto")']
+ ],
+ side_income:[
+  ['Ricerca esplicita di lavoro extra','("cerco un lavoro extra" OR "cerco un secondo lavoro" OR "cerco un part-time")'],
+  ['Richiesta esplicita di attività parallela','("cerco un’attività da affiancare" OR "cerco una seconda attività" OR "attività da affiancare al lavoro")'],
+  ['Dichiarazione di disponibilità part-time','("valuto un lavoro part-time" OR "disponibile per un secondo lavoro" OR "cerco un impegno part-time")'],
+  ['Ricerca dichiarata di entrata aggiuntiva','("cerco un’entrata aggiuntiva" OR "cerco un reddito integrativo" OR "seconda entrata")'],
+  ['Post personali su lavoro flessibile','("cerco un lavoro flessibile" OR "valuto opportunità part-time") -offerte -annunci -agenzia']
+ ],
+ business_seeking:[
+  ['Ricerca esplicita di attività','("cerco un’attività imprenditoriale" OR "cerco un progetto di business" OR "valuto un’attività")'],
+  ['Persone che dichiarano di voler avviare','("voglio mettermi in proprio" OR "vorrei avviare un’attività" OR "sto cercando un business")'],
+  ['Ricerca di progetto indipendente','("cerco un progetto imprenditoriale" OR "cerco un’attività indipendente" OR "business da avviare")'],
+  ['Nuova iniziativa dichiarata','("nuovo progetto imprenditoriale" OR "nuova iniziativa" OR "avviare una nuova attività")'],
+  ['Interesse esplicito a costruire un business','("voglio costruire un’attività" OR "cerco un socio per un progetto" OR "valuto nuove iniziative")']
+ ],
+ exnetworker:[
+  ['Esperienza precedente dichiarata','("ex networker" OR "ex distributore" OR "ex incaricato")'],
+  ['Persone che raccontano l’uscita dal settore','("ho lasciato il network marketing" OR "dopo il network marketing" OR "esperienza passata nella vendita diretta")'],
+  ['Competenze maturate nel network','("esperienza nel network marketing" OR "esperienza nella vendita diretta") (formazione OR team OR leadership)'],
+  ['Ex leader e team builder','("ex team leader" OR "ex distributore" OR "ex consulente") network marketing'],
+  ['Nuovo percorso dopo la vendita diretta','("nuovo percorso professionale" OR "nuovo progetto") ("network marketing" OR "vendita diretta")']
+ ],
+ customers:[
+  ['Richiesta personale di consigli','("cerco consigli" OR "qualcuno può consigliarmi" OR "avete suggerimenti") (benessere OR alimentazione OR stile di vita)'],
+  ['Ricerca dichiarata di un professionista','("cerco un nutrizionista" OR "cerco un dietista" OR "cerco un professionista del benessere")'],
+  ['Domanda volontaria su prodotti e integrazione','("consigli su integratori" OR "informazioni sull’integrazione" OR "esperienze con integratori")'],
+  ['Interesse espresso per un percorso benessere','("cerco un percorso benessere" OR "vorrei migliorare il mio stile di vita" OR "cerco supporto per il benessere")'],
+  ['Richiesta pubblica di informazioni','("cerco informazioni" OR "vorrei saperne di più") (benessere OR nutrizione OR integrazione)']
+ ]
+};
+const refinedEnglishQueries={
+ wellness_pro:['(nutritionist OR dietitian OR naturopath OR osteopath OR physiotherapist OR "personal trainer") ("my practice" OR "about me" OR professional profile)','("I am a nutritionist" OR "I am a dietitian" OR "I am a personal trainer" OR "I am an osteopath")','("nutrition practice" OR "physiotherapy clinic" OR "fitness studio") (owner OR founder OR practitioner)','(nutritionist OR dietitian OR naturopath OR "personal trainer") (partnership OR collaboration) wellness','("nutrition coaching" OR "wellness education") practitioner'],
+ wellness_networker:['("wellness network marketer" OR "wellness network marketing") ("my team" OR "my business" OR consultant)','("wellness team leader" OR "building my wellness team")','("independent distributor" OR "brand partner") wellness nutrition','(partnership OR collaboration) ("direct selling" OR "network marketing") wellness','("team training" OR "independent leader") wellness network'],
+ new_networker:['("new to network marketing" OR "just started network marketing")','("new distributor" OR "new brand partner") wellness','("first steps" OR "just started") ("direct selling" OR "network marketing")','("first customers" OR "beginner training") network marketing','("new independent consultant" OR "new brand ambassador") wellness'],
+ other_networker:['("network marketer" OR "direct seller") (team OR distributor) -wellness -nutrition -fitness','("team leader" OR "team builder") network marketing -wellness','("independent distributor" OR "independent consultant") "direct selling" -wellness','("looking for team members" OR "growing my team") network marketing -wellness','("social selling" OR "direct sales") leader -wellness'],
+ entrepreneur:['(entrepreneur OR founder OR business owner) ("my company" OR "my business") Italy','(founder OR "business owner") (SME OR company) Italy','("I am an entrepreneur" OR "I founded" OR "business owner") company','(entrepreneur OR founder) (partnership OR networking) Italy','(business owner OR entrepreneur) ("business development" OR diversification)'],
+ side_income:['("looking for a part time job" OR "looking for a second job")','("looking for a side activity" OR "something alongside my job")','("available for part time work" OR "seeking flexible work")','("looking for extra income" OR "seeking supplementary income")','("looking for flexible work" OR "considering part time work") -jobs -agency'],
+ business_seeking:['("looking to start a business" OR "seeking a business project")','("I want to become self employed" OR "looking to launch a business")','("looking for an independent business" OR "business to start")','("new entrepreneurial project" OR "starting a new venture")','("looking to build a business" OR "exploring business opportunities")'],
+ exnetworker:['("former network marketer" OR "former distributor" OR "former direct seller")','("I left network marketing" OR "after network marketing")','("network marketing experience" OR "direct sales experience") (team OR leadership)','("former team leader" OR "former distributor") network marketing','("new career path" OR "new business project") ("direct sales" OR "network marketing")'],
+ customers:['("looking for wellness advice" OR "can anyone recommend")','("looking for a nutritionist" OR "looking for a dietitian")','("advice on supplements" OR "information about nutrition supplements")','("looking for a wellness program" OR "improve my lifestyle")','("looking for information" OR "would like to learn more") (wellness OR nutrition)']
+};
+const segmentGuidance={
+ wellness_pro:'Ricerca ruoli professionali dichiarati e profili nominativi; verifica qualifiche e ambito di attività.',
+ wellness_networker:'Ricerca persone che dichiarano attività di network marketing nel wellness; il livello resta da verificare.',
+ new_networker:'Richiede segnali espliciti di inizio attività o formazione da principiante; non confondere con annunci di reclutamento.',
+ other_networker:'Cerca networker di settori diversi dal wellness; controlla manualmente che il settore sia davvero distinto.',
+ entrepreneur:'Privilegia titolari e founder identificabili; una pagina aziendale non equivale al profilo del titolare.',
+ side_income:'Mostra solo dichiarazioni pubbliche esplicite di ricerca di lavoro extra; non inferire difficoltà economiche o disponibilità.',
+ business_seeking:'Mostra solo dichiarazioni esplicite di ricerca di un progetto; non attribuire intenzioni imprenditoriali.',
+ exnetworker:'Richiede una precedente esperienza dichiarata; non classificare come ex-networker per semplice assenza di attività.',
+ customers:'Richiede una richiesta volontaria e pertinente; non usare diagnosi, patologie o altri dati sanitari per profilare persone.'
+};
+const segmentExclusions={
+ wellness_pro:' -offerte di lavoro -annunci generici -directory',
+ wellness_networker:' -offerte di lavoro -franchising -annunci generici',
+ new_networker:' -offerte di lavoro -franchising -annunci generici',
+ other_networker:' -offerte di lavoro -franchising -annunci generici -wellness -nutrizione -integratori',
+ entrepreneur:' -directory -elenco aziende -offerte di lavoro',
+ side_income:' -offerte di lavoro -annunci di lavoro -agenzie interinali -prestiti',
+ business_seeking:' -franchising -offerte di lavoro -prestiti -directory',
+ exnetworker:' -offerte di lavoro -annunci generici',
+ customers:' -diagnosi -patologie -terapie -referti -dati sanitari'
+};
 const enTerms={networker:['("looking for team members" OR "building my team" OR "join my team") ("network marketing" OR "direct selling")','("team leader" OR "team development" OR "business builder") ("network marketing" OR "direct sales")','("growing my organization" OR "expanding my team") network marketing','("independent distributor" OR "brand partner") (team OR leadership OR training)','("new team members" OR "business opportunity") wellness'],new_networker:['("new to network marketing" OR "just started network marketing" OR "first steps in direct selling")','("new distributor" OR "new brand partner") wellness','("starting my wellness business" OR "new wellness project") network marketing','("beginner training" OR "first customers") "direct sales"','("new independent consultant" OR "new brand ambassador") wellness'],
 wellness_networker:['("wellness network marketer" OR "wellness network marketing" OR "direct selling wellness")','("wellness team leader" OR "building my wellness team")','(wellness OR nutrition) (partnership OR collaboration) network marketing','("team training" OR "independent leader") wellness','("growing my team" OR "looking for team members") wellness'],other_networker:['("network marketer" OR "direct seller") -wellness','("team leader" OR "team builder") network marketing','("independent distributor" OR "independent consultant") team','("looking for team members" OR "growing my team") network marketing','("direct sales" OR "social selling") leader'],wellness_pro:['(nutritionist OR dietitian OR naturopath OR osteopath OR physiotherapist OR "personal trainer")','("wellness center" OR "nutrition practice" OR "fitness studio")','(health OR wellness OR fitness) (partnership OR collaboration) professional','("wellness education" OR "nutrition coaching") professional','("new services" OR "professional network") wellness'],entrepreneur:['(entrepreneur OR founder OR business owner) Italy','(SME OR "small business owner") (growth OR partnership)','(entrepreneur OR founder) networking collaboration','("team management" OR leadership OR "business development") entrepreneur','("new business project" OR diversification) entrepreneur'],side_income:['("looking for a side job" OR "extra income" OR "second job")','("part time" OR flexible) work opportunity','("side business" OR "alongside my job")','("supplementary income" OR "additional income")','("flexible work" OR "part time opportunity")'],business_seeking:['("looking to start a business" OR "new business opportunity")','("become self employed" OR "start a business")','("side business" OR "entrepreneurial project")','("exploring new opportunities" OR "new venture")','("build my own business" OR "independent business")'],exnetworker:['("former network marketer" OR "former distributor" OR "ex direct seller")','("new business project" OR "career transition") collaboration','("direct sales experience" OR "network marketing experience") professional','("sales team management" OR "sales training") network marketing','("former team leader" OR "former distributor") entrepreneur'],wellness:['("personal trainer" OR nutritionist OR naturopath OR osteopath)','(wellness OR nutrition OR fitness) collaboration professional','("independent professional" OR consultant) wellness','("wellness education" OR "nutrition coaching") professional','("new services" OR partnership) wellness'],business:['(entrepreneur OR consultant OR professional) ("business development" OR partnership)','("independent consultant" OR freelancer) networking','("business development" OR "sales development") professional','("team management" OR leadership) entrepreneur','("side business" OR "new business project") professional'],customers:['("looking for advice" OR "looking for information") (wellness OR nutrition)','("how to improve" OR "recommendations for") wellness nutrition','(forum OR community OR discussion) wellness nutrition','("healthy lifestyle" OR "wellness journey") information','("looking for a professional" OR "expert advice") wellness nutrition']};
 function build(){
  const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
- let base=templates[seg],terms=base.map(x=>x[1]);
- if(lang==='en')terms=enTerms[seg];
- if(lang==='both')terms=terms.slice(0,3).concat(enTerms[seg].slice(0,2));
+ const base=templates[seg],refined=refinedItalianQueries[seg]||base;
+ let terms=refined.map(x=>Array.isArray(x)?x[1]:x);
+ if(lang==='en')terms=refinedEnglishQueries[seg]||enTerms[seg];
+ if(lang==='both')terms=terms.slice(0,3).concat((refinedEnglishQueries[seg]||enTerms[seg]).slice(0,2));
  generated=terms.slice(0,5).map((q,i)=>{
    let full=q+' "'+area+'"'+(platform?' site:'+platform:'')+(extra?' '+extra:'');
    const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
    if(companyTerms.length){const modifier=companyTerms[i%companyTerms.length].map(term=>'"'+term+'"').join(' OR ');full+=' ('+modifier+')';}
-   if(seg==='networker')full+=' -offerte di lavoro -annunci generici -franchising';
-   if(seg==='customers')full+=' -diagnosi -terapie -dati sanitari';
-   const label=lang==='en'?'English search '+(i+1):lang==='both'&&i>=3?'English search '+(i-2):base[i]?.[0]||'Ricerca';
+   full+=segmentExclusions[seg]||'';
+   const label=lang==='en'?'English search '+(i+1):lang==='both'&&i>=3?'English search '+(i-2):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
    return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full)};
  });
- $('summary').textContent=generated.length+' query create · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · '+(platform||'tutto il web')+' · Area: '+area;
+ $('summary').textContent=generated.length+' query mirate create · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · '+(platform||'tutto il web')+' · Area: '+area+' · '+(segmentGuidance[seg]||'Verifica sempre identità, ruolo e attualità della fonte.');
  render();
 }
 function render(){
@@ -347,7 +447,7 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
   side_income:/cerco un lavoro extra|cerco un secondo lavoro|attività part.time|lavoro part.time|entrata aggiuntiva|reddito integrativo/i,
   business_seeking:/cerco un’attività|cerco un'attività|avviare un’attività|mettermi in proprio|nuovo progetto imprenditoriale|cerco un business/i,
   exnetworker:/ex.networker|ex distributore|ex incaricato|ho lasciato il network marketing|esperienza precedente nel network marketing/i,
-  customers:/cerco consigli|cerco informazioni|cerco un professionista|interesse per il benessere|nutrizione|alimentazione|stile di vita|omega.3/i
+  customers:/cerco consigli|qualcuno può consigliarmi|avete suggerimenti|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|consigli su integratori|informazioni sull’integrazione|cerco un percorso benessere|vorrei migliorare il mio stile di vita|cerco supporto per il benessere/i
  };
  const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text);
  const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
@@ -416,7 +516,7 @@ function classifyProspectTarget(title,snippet,pageContent,selectedSegment){
  else if(isEx||isNew||networker){primary='Potenziale partner';kind='partner';segment=isEx?'exnetworker':isNew?'new_networker':wellnessContext?'wellness_networker':'other_networker';confidence=isEx||isNew?'media':'bassa';role=isEx?'Ex-networker':isNew?'Networker alle prime armi':wellnessContext?'Networker wellness':'Networker altro settore';reason=isEx?'La fonte dichiara una precedente esperienza nel network marketing.':isNew?'La fonte contiene un segnale esplicito di avvio nel network marketing.':'La fonte menziona network marketing o vendita diretta; il livello e il settore vanno verificati.';}
  else if(explicitOpportunity){primary='Potenziale partner';kind='partner';segment=/(lavoro extra|secondo lavoro|entrata aggiuntiva|reddito integrativo|part.time)/i.test(text)?'side_income':'business_seeking';confidence='media';role=segment==='side_income'?'Interesse dichiarato per lavoro extra':'Interesse dichiarato per attività imprenditoriale';reason='La fonte contiene un’espressione esplicita di ricerca di '+(segment==='side_income'?'un lavoro extra':'un’attività imprenditoriale')+'. Verificare autore e attualità del contenuto.';}
  else if(customerSignal){primary='Potenziale cliente';kind='customer';segment='customers';confidence='media';reason='La fonte contiene una richiesta o un interesse esplicito relativo a benessere o consulenza.';}
- else if(selected==='customers' && wellnessContext){primary='Possibile cliente · da verificare';kind='customer';segment='customers';confidence='bassa';reason='La ricerca era orientata ai clienti e la pagina tratta il benessere, ma non emerge una richiesta personale esplicita.';}
+ else if(selected==='customers' && wellnessContext){primary='Tema benessere presente · interesse personale non confermato';kind='unknown';segment='unclassified';confidence='bassa';reason='La pagina tratta il benessere, ma non contiene una richiesta personale esplicita: non classificare come potenziale cliente.';}
  const evidence=[];
  if(professional)evidence.push(professional.label);
  if(isNew)evidence.push('Segnale esplicito di avvio');
