@@ -3011,3 +3011,13 @@ Le assenze non dimostrano che le migrazioni siano state saltate o che gli oggett
 - Legge solo metadati `pg_catalog`, senza leggere righe delle tabelle e senza DDL/DML.
 - Non è ancora stato eseguito. Il suo scopo è identificare la struttura, non assumere che uno dei registri managed sia quello delle migrazioni NEXTWAY.
 - Nessuna modifica al database o deploy.
+
+
+### Esito struttura registri candidati — 13 novembre 2026
+L'utente ha eseguito il report SQL read-only in una sola cella. Metadati:
+- `auth.schema_migrations`: solo `version varchar(255) NOT NULL`; registro del componente Auth, non prova la cronologia SQL NEXTWAY.
+- `realtime.schema_migrations`: `version bigint NOT NULL`, `inserted_at timestamp(0)`; registro del componente Realtime, non prova la cronologia SQL NEXTWAY.
+- `storage.migrations`: `id integer`, `name varchar(100)`, `hash varchar(40)`, `executed_at timestamp`; registro interno Storage, non prova la cronologia SQL NEXTWAY.
+Nessuno dei tre è identificato come registro delle migrazioni applicative NEXTWAY. La relazione `supabase_migrations.schema_migrations` non esiste nel progetto. Questo non prova che le migrazioni applicative non siano state eseguite: potrebbero essere state eseguite via SQL Editor o altri strumenti senza un registro CLI accessibile.
+Decisione: non interrogare le righe dei tre registri managed. Ricostruire le migrazioni NEXTWAY confrontando definizioni live e file SQL del branch; verificare separatamente le versioni Edge Function effettivamente distribuite. Nessuna migrazione automatica.
+Stato: metadati registri completati; registro applicativo non identificato; nessuna modifica remota, DDL/DML, deploy, merge o modifica a `main`.
