@@ -36,6 +36,8 @@ on:
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-setter-stale-output-trigger.mjs"
+      - "supabase/config.toml"
+      - "scripts/test-nextway-staging-config.py"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
       - "scripts/test-nextway-conversion-workspace-preflight.mjs"
       - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
@@ -129,6 +131,8 @@ jobs:
         run: bash -n scripts/nextway-local-preflight.sh
       - name: Test NEXTWAY schema dump SQL scanner
         run: python3 scripts/check-nextway-schema-dump.py --self-test
+      - name: Validate isolated NEXTWAY staging CLI config
+        run: python3 scripts/test-nextway-staging-config.py
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
