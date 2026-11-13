@@ -137,3 +137,16 @@ Non assumere che una migrazione sia già inclusa nel dump solo perché il suo og
 - Nessuna spesa o creazione di un nuovo progetto cloud.
 
 **Conclusione:** è stato costruito l'inventario documentato e recuperata una baseline schema-only reale. Il passaggio successivo non è avviare Supabase né applicare migrazioni: è completare la riconciliazione degli oggetti del dump con i prerequisiti delle migrazioni, così da produrre una baseline locale riproducibile senza supposizioni.
+
+
+## Strumento di confronto locale
+
+Aggiunto `scripts/analyze-nextway-schema-baseline.py`. Lo script legge il dump schema-only e i file SQL del repository, stampa un inventario statico per categoria e segnala quali nomi dichiarati nelle migrazioni risultano già presenti nel dump o non vengono trovati. Mostra hash e nomi degli oggetti, non corpi SQL o valori.
+
+Esecuzione prevista sul Mac, dalla cartella del repository:
+
+```bash
+python3 scripts/analyze-nextway-schema-baseline.py
+```
+
+Il percorso predefinito del dump è `/tmp/nextway-public-schema.sql`; è possibile specificare un percorso alternativo con `--dump`. Lo script è un aiuto lessicale, non un parser PostgreSQL e non certifica da solo la sicurezza o l'importabilità. Non si connette a Supabase e non esegue SQL. **Non è ancora stato eseguito sul Mac dell'utente.**
