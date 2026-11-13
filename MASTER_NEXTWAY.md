@@ -3420,3 +3420,13 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - Esito successivo: CI run `43414160598` sul commit `3faa66e517f0caf40988ebb581545c72355be5ce` **SUCCESS**, 46 step, zero fallimenti; il test `Validate NEXTWAY core baseline migration deltas` è SUCCESS. Gli aggiornamenti successivi sono documentazione soltanto.
 
 - Ricerca storico Git: il repository nasce il 5 novembre 2026 con commit root `ee6e6ab707a1af658b05d999643c89f08ee9480a`, contenente solo la migrazione `20261105000100_nextway_ai_assistant_foundation.sql` (tabelle `nw_*`, dichiarata additiva e senza ALTER delle tabelle esistenti). Nessuna DDL pre-migrazioni per il core NEXTWAY è conservata nella cronologia Git esaminata. L'assenza nel repository non prova l'assenza di backup esterni o locali.
+
+
+## 13 novembre 2026 — Inventario oggetti baseline/migrazioni
+
+- Letti staticamente i file SQL delle migrazioni del branch e creato `docs/NEXTWAY-BASELINE-OBJECT-DELTA-INVENTORY.md`.
+- Il nuovo inventario distingue: tabelle core alterate; tabelle create e poi estese dalle migrazioni; funzioni con catene `CREATE OR REPLACE`; trigger Setter; policy RLS; grant; dipendenze managed `auth` e `storage`.
+- Confermate le modifiche a `partner_details` e `clients` introdotte da `20261111001500`; la precedente classificazione che le collocava anche tra le tabelle senza ALTER era contraddittoria ed è stata corretta nella mappa.
+- Identificate come core alterate direttamente: `nextway_leads`, `nextway_setter_conversations`, `partner_details`, `clients`; `nextway_setter_messages` non ha aggiunte di colonne individuate ma riceve modifiche a policy/privilegi. Le tabelle NEXTWAY create dalle migrazioni sono classificate separatamente.
+- **Limite operativo:** il dump `/tmp/nextway-public-schema.sql` risiede sul Mac dell'utente e non è accessibile dal workspace GitHub di questa sessione. Non sono stati quindi confrontati i blocchi DDL reali né ricostruiti i corpi originari di funzioni/policy/ACL. Nessun file SQL eseguibile è stato generato per supposizione.
+- Stato: inventario migrazioni **COMPLETATO staticamente**; confronto dump-oggetti **DA COMPLETARE**; baseline SQL **NON PRODOTTA**; nessuna operazione DB, deploy o merge.
