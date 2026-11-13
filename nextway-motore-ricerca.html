@@ -213,8 +213,9 @@ function extractPublicContacts(value){
  const text=String(value||'').slice(0,5000);
  const unique=items=>[...new Set(items)].slice(0,5);
  const emails=unique((text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(x=>x.toLowerCase()));
- const phones=unique((text.match(/(?:\+?\d[\d\s().-]{7,}\d)/g)||[]).map(x=>x.trim()).filter(x=>{const n=x.replace(/\D/g,'');return n.length>=9&&n.length<=15}));
  const whatsapp=unique((text.match(/https?:\/\/(?:wa\.me\/[^\s)\]]+|api\.whatsapp\.com\/[^\s)\]]+|web\.whatsapp\.com\/[^\s)\]]+)/gi)||[]).map(x=>x.replace(/[.,;]+$/,'')));
+ const whatsappNumbers=whatsapp.map(x=>x.replace(/\D/g,'')).filter(Boolean);
+ const phones=unique((text.match(/(?:\+?\d[\d\s().-]{7,}\d)/g)||[]).map(x=>x.trim()).filter(x=>{const n=x.replace(/\D/g,'');return n.length>=9&&n.length<=15&&!whatsappNumbers.includes(n)}));
  const socials=unique((text.match(/https?:\/\/(?:www\.)?(?:linkedin\.com\/(?:in|company)\/[^\s)\]]+|instagram\.com\/[^\s)\]]+|facebook\.com\/[^\s)\]]+|tiktok\.com\/@?[^\s)\]]+|youtube\.com\/(?:@|channel\/|c\/)[^\s)\]]+)/gi)||[]).map(x=>x.replace(/[.,;]+$/,'')));
  return {emails,phones,whatsapp,socials};
 }
