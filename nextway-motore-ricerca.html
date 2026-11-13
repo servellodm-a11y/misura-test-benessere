@@ -236,27 +236,47 @@ async function runSearch(){
 function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts){
  const box=document.createElement('section');box.className='message-draft-panel';box.style.cssText='margin:14px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:12px;';
  const heading=document.createElement('strong');heading.textContent='Messaggi personalizzati per canale';
- const note=document.createElement('p');note.className='muted';note.textContent='Bozze da controllare prima dell’uso. Nessun messaggio viene inviato. Usa WhatsApp o email solo quando il recapito è pubblicato per contatti professionali e il contatto è lecito; rispetta sempre consenso, regole della piattaforma e richieste di non essere ricontattati.';
+ const note=document.createElement('p');note.className='muted';note.textContent='Bozze da controllare prima dell’uso. Nessun messaggio viene inviato. Il link è facoltativo: nel primo contatto con un partner è normalmente meglio avviare una conversazione senza allegare subito un sito.';
+ const linkLabel=document.createElement('label');linkLabel.textContent='Sito da proporre (facoltativo)';linkLabel.style.cssText='display:block;font-weight:700;margin:10px 0 5px;';
+ const linkSelect=document.createElement('select');linkSelect.style.cssText='display:block;width:100%;margin:6px 0;padding:9px;';
+ const links=activeCompany?.consultantChannels||{};
+ const general=links.generalWellnessWebsite,replica=links.zinzinoReplicaWebsite;
+ const addOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;linkSelect.append(o);};
+ addOption('none','Nessun link — consigliato per il primo contatto');
+ if(general)addOption('general',general.label+' — sito generale');
+ if(replica)addOption('replica',replica.label+' — approfondimento Zinzino');
  const select=document.createElement('select');select.className='input';select.style.cssText='display:block;width:100%;margin:8px 0;padding:9px;';
  const output=document.createElement('textarea');output.className='input';output.rows=7;output.style.cssText='display:block;width:100%;min-height:150px;margin:8px 0;padding:10px;white-space:pre-wrap;';
  const copy=document.createElement('button');copy.type='button';copy.className='btn alt';copy.textContent='Copia bozza';
  const segmentLabels={customers:'un possibile cliente interessato al benessere',wellness_pro:'un professionista della salute e del benessere',wellness_networker:'un professionista del network marketing nel wellness',new_networker:'una persona agli inizi nel network marketing',other_networker:'un professionista del network marketing',exnetworker:'una persona con precedente esperienza nel network marketing',entrepreneur:'un imprenditore',side_income:'una persona che potrebbe valutare un’attività aggiuntiva',business_seeking:'una persona che potrebbe valutare un progetto imprenditoriale'};
  const audience=segmentLabels[segment]||'un potenziale contatto';
- const evidence=(String(snippet||'')+' '+String(pageContent||'')).replace(/\\s+/g,' ').trim();
- const topic=segment==='customers'?'un approccio basato sulla misurazione e sulla personalizzazione del benessere':segment==='wellness_pro'?'un confronto professionale su prevenzione, benessere e strumenti di misurazione':segment.includes('networker')||segment==='exnetworker'?'un confronto tra professionisti sulle opportunità e sugli strumenti di sviluppo nel wellness':'un confronto su un progetto professionale nel settore del benessere';
+ const evidence=(String(title||'')+' '+String(snippet||'')+' '+String(pageContent||'')).toLocaleLowerCase('it');
+ const explicitZinzinoInterest=/zinzino|balancetest|balance test|balance oil|zinzino products/.test(evidence);
+ const recommended=segment==='customers'||segment==='wellness_pro'?'general':explicitZinzinoInterest?'replica':'none';
+ linkSelect.value=recommended;
+ const recommendation=document.createElement('p');recommendation.className='muted';
+ const topic=segment==='customers'?'un approccio basato sulla misurazione e sulla personalizzazione del benessere':segment==='wellness_pro'?'un confronto professionale su benessere e strumenti di misurazione':segment.includes('networker')||segment==='exnetworker'?'un confronto tra professionisti sulle opportunità e sugli strumenti di sviluppo nel wellness':'un confronto su un progetto professionale nel settore del benessere';
  const drafts={
-  whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere': 'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
+  whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere':'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
   facebook:'Buongiorno! Ho visto la sua pagina e mi ha colpito il lavoro che comunica. Sto approfondendo un progetto legato al benessere e '+topic+'. Mi piacerebbe presentarglielo in modo semplice, senza impegno, e capire se può esserci un punto di interesse comune. Le va di parlarne?',
   linkedin:'Buongiorno, sto entrando in contatto con '+audience+' per un confronto su '+topic+'. Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
   instagram:'Ciao! Ho scoperto il tuo profilo attraverso i contenuti che condividi sul benessere. Sto conoscendo persone e professionisti con cui confrontarmi su '+topic+'. Se ti fa piacere, posso raccontarti in breve di cosa si tratta. Nessun problema se non è un tema in linea con i tuoi interessi.',
-  email:'Oggetto: Un possibile confronto sul settore benessere\n\nBuongiorno,\n\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\n\nSe l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\n\nLa ringrazio per l’attenzione e le auguro una buona giornata.'
+  email:'Oggetto: Un possibile confronto sul settore benessere\\n\\nBuongiorno,\\n\\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\\n\\nSe l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\\n\\nLa ringrazio per l’attenzione e le auguro una buona giornata.',
+  sms:'Buongiorno, sto approfondendo un progetto sul benessere e mi farebbe piacere un breve confronto, se il tema è di suo interesse. Nessun problema se non lo è.'
  };
  const channels=[['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email'],['sms','SMS']];
  channels.forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;select.append(opt);});
- function refresh(){output.value=drafts[select.value]||'';}
+ function refresh(){
+  const base=drafts[select.value]||'';
+  const chosen=linkSelect.value==='general'?general:linkSelect.value==='replica'?replica:null;
+  const linkLine=chosen?'\\n\\nPer approfondire, qui trova il mio riferimento: '+chosen.url:'';
+  output.value=base+linkLine;
+  recommendation.textContent=linkSelect.value==='general'?'Suggerimento: il sito generale mantiene la comunicazione sul benessere e sul metodo, senza presentare il marchio Zinzino.':linkSelect.value==='replica'?'Suggerimento: usa il sito replica quando la persona ha già manifestato interesse specifico per Zinzino.':'Nessun link inserito. Per i potenziali partner è spesso la scelta migliore nel primo messaggio.';
+ }
  select.addEventListener('change',refresh);
+ linkSelect.addEventListener('change',refresh);
  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(output.value);copy.textContent='Copiato';}catch(e){output.focus();output.select();copy.textContent='Seleziona e copia';}});
- box.append(heading,note,select,output,copy);refresh();return box;
+ box.append(heading,note,linkLabel,linkSelect,recommendation,select,output,copy);refresh();return box;
 }
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const t=String(title||''),body=String(snippet||'')+' '+String(pageContent||'');
