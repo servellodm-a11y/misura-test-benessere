@@ -247,3 +247,32 @@ Le due funzioni senza argomenti sono trigger function: l'assenza di argomenti è
 - Corpo e dipendenze di `nextway_is_platform_admin()`: **DA COMPLETARE**.
 - Correzione multi-workspace della conversione: **DA IMPLEMENTARE** dopo chiusura del controllo helper e delle dipendenze.
 - Nessuna modifica al database remoto, nessun deploy e nessun merge effettuati.
+
+
+## Verifica corpi funzioni workspace — 13 novembre 2026
+
+Sono stati acquisiti i corpi live di `nextway_has_workspace_access` e `nextway_is_platform_admin`.
+
+### `nextway_has_workspace_access`
+
+- `STABLE SECURITY DEFINER`, `search_path=pg_catalog, public`.
+- Richiede `auth.uid()` non nullo.
+- Consente l'accesso immediato al platform admin.
+- Per gli altri utenti richiede membership `active`, workspace `active` e ruolo incluso in `p_allowed_roles`.
+- Il default include owner/admin/manager/member/viewer; le operazioni che richiedono privilegi di modifica devono passare una lista di ruoli più restrittiva, escludendo viewer.
+- Il corpo usa nomi qualificati per tabelle e funzione amministrativa; non emerge una correzione logica necessaria da questa definizione.
+
+### `nextway_is_platform_admin`
+
+- `STABLE SECURITY DEFINER`, proprietario postgres.
+- Privilegi live: postgres, authenticated, service_role; nessun EXECUTE a PUBLIC/anon rilevato.
+- Il corpo verifica `profiles.id=auth.uid()` e `role='platform_admin'`.
+- Anomalia: `search_path=public`, non coerente con le altre funzioni privilegiate.
+- Preparata sul branch la migrazione additiva `20261113110000_nextway_platform_admin_search_path_hardening.sql`, che mantiene invariati corpo, firma e logica e imposta `search_path=pg_catalog, public`. La migrazione non è stata applicata.
+
+### Stato aggiornato
+
+- Privilegi EXECUTE delle sette funzioni: COMPLETATO E VERIFICATO sulla diagnostica live.
+- Corpo e logica di `nextway_has_workspace_access`: COMPLETATO E VERIFICATO sulla definizione live ricevuta.
+- Corpo e logica di `nextway_is_platform_admin`: COMPLETATO E VERIFICATO; hardening search_path PREPARATO MA NON APPLICATO.
+- Conversione multi-workspace: ancora DA IMPLEMENTARE; resta prioritario correggere la finalizzazione live non atomica e coordinare snapshot workspace, membership partner e attribuzione cliente.
