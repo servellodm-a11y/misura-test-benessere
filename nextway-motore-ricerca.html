@@ -385,6 +385,35 @@ async function runSearch(){
   const rankingHeading=document.createElement('h3');rankingHeading.textContent='Lista unica · prima i risultati pertinenti al segmento, poi le persone identificabili da verificare';
   const rankingContainer=document.createElement('div');sortedCards.forEach(card=>rankingContainer.append(card));list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
+
+  const agenda=document.createElement('section');agenda.className='panel';agenda.style.cssText='margin:14px 0;padding:14px;border:1px solid var(--border,#ddd);border-radius:12px;';
+  const agendaTitle=document.createElement('h3');agendaTitle.textContent='Agenda commerciale · priorità operative';
+  const agendaIntro=document.createElement('p');agendaIntro.className='muted';agendaIntro.textContent='I prospect sono ordinati per pertinenza del segmento, qualità delle evidenze e attualità della fonte. La priorità indica chi verificare prima, non chi è interessato o autorizza un contatto.';
+  const agendaCounts=document.createElement('p');agendaCounts.className='notice';
+  const readyCount=dailyProspects.filter(p=>p.qualification_status==='Prospect con recapiti utilizzabili'||p.qualification_status==='Prospect molto pertinente').length;
+  const reviewCountAgenda=dailyProspects.filter(p=>p.qualification_status==='Prospect interessante · da verificare'||p.qualification_status==='Da approfondire').length;
+  const excludedCount=dailyProspects.filter(p=>p.qualification_status==='Non adatto · da scartare').length;
+  agendaCounts.textContent=readyCount+' da verificare con priorità · '+reviewCountAgenda+' da approfondire · '+excludedCount+' da scartare o non acquisire.';
+  const agendaList=document.createElement('div');
+  dailyProspects.slice(0,15).forEach((prospect,index)=>{
+   const row=document.createElement('article');row.style.cssText='padding:12px 0;border-top:1px solid var(--border,#ddd);';
+   const name=document.createElement('strong');name.textContent=(index+1)+'. '+(prospect.profile?.name||prospect.title||'Prospect senza nome')+' · '+(prospect.prospect_type||'da qualificare').toUpperCase();
+   const detail=document.createElement('p');detail.className='muted';detail.textContent=[prospect.profile?.profession,prospect.profile?.organization,prospect.profile?.location].filter(Boolean).join(' · ')||'Professione, azienda o località non rilevate';
+   const score=document.createElement('p');score.className='muted';score.textContent='Priorità '+(Number(prospect.commercial_fit?.priority_score)||0)+'/100 · '+(prospect.commercial_fit?.priority_tier||'Da verificare')+' · '+(prospect.qualification_status||'Da approfondire')+' · fonte: '+(prospect.source_quality?.source_type||'non classificata')+' · '+(prospect.source_quality?.freshness_label||'data non rilevata');
+   const action=document.createElement('p');action.textContent='Prossima azione: '+(prospect.qualification_action||prospect.suggested_next_step||'Aprire e verificare la fonte originale.');
+   const evidence=document.createElement('p');evidence.className='muted';evidence.textContent='Motivo: '+(prospect.qualification_reasons||prospect.commercial_fit_reasons||[]).slice(0,3).join(' · ');
+   const actions=document.createElement('div');actions.className='actions';
+   const open=document.createElement('a');open.className='btn';open.href=prospect.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Verifica fonte';
+   const copy=document.createElement('button');copy.className='btn alt';copy.type='button';copy.textContent='Copia messaggio';
+   copy.disabled=!prospect.message;
+   copy.addEventListener('click',()=>{if(prospect.message)navigator.clipboard?.writeText(prospect.message);});
+   const copyProfile=document.createElement('button');copyProfile.className='btn alt';copyProfile.type='button';copyProfile.textContent='Copia scheda';
+   copyProfile.addEventListener('click',()=>navigator.clipboard?.writeText(['Nome: '+(prospect.profile?.name||'Non rilevato'),'Professione: '+(prospect.profile?.profession||'Non rilevata'),'Azienda: '+(prospect.profile?.organization||'Non rilevata'),'Località: '+(prospect.profile?.location||'Non rilevata'),'Tipo: '+(prospect.prospect_type||'da qualificare'),'Qualificazione: '+(prospect.qualification_status||'Da approfondire'),'Prossima azione: '+(prospect.qualification_action||''),'Fonti: '+(prospect.sources||[prospect.url]).join(' | ')].join('\\n')));
+   actions.append(open,copy,copyProfile);row.append(name,detail,score,action,evidence,actions);agendaList.append(row);
+  });
+  if(!dailyProspects.length){const empty=document.createElement('p');empty.textContent='Nessun prospect disponibile per costruire l’agenda.';agendaList.append(empty);}
+  agenda.append(agendaTitle,agendaIntro,agendaCounts,agendaList);
+  list.prepend(agenda);
   const duplicateTotal=dailyProspects.reduce((sum,p)=>sum+p.duplicate_count,0);
   const partnerCount=dailyProspects.filter(p=>p.classification==='Potenziale partner').length,customerCount=dailyProspects.filter(p=>p.classification.includes('cliente')).length,reviewCount=dailyProspects.filter(p=>p.classification==='Da qualificare').length;
   const completedQueries=Number(payload.queries_completed??groups.length),failedQueries=Array.isArray(payload.failures)?payload.failures:[];
