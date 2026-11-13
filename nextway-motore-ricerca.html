@@ -302,6 +302,9 @@ async function runSearch(){
     crmActivityByLead.get(activity.lead_id).push(activity);
    });
   }catch(activityError){status.textContent='Ricerca avviata. Registro attività CRM non disponibile: '+activityError.message;}
+  let openCrmFollowups=[];
+  try{openCrmFollowups=await window.NEXTWAY_CLOUD.getOpenLeadActivities(100);}
+  catch(followupError){status.textContent='Ricerca avviata. Promemoria CRM non disponibili: '+followupError.message;}
 
   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:generated.map(x=>x.query),max_results:10})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
@@ -450,6 +453,26 @@ async function runSearch(){
    actions.append(open,copy,copyProfile);row.append(name,detail,score,action,evidence,actions);agendaList.append(row);
   });
   if(!dailyProspects.length){const empty=document.createElement('p');empty.textContent='Nessun prospect disponibile per costruire l’agenda.';agendaList.append(empty);}
+  if(openCrmFollowups.length){
+   const followupPanel=document.createElement('section');followupPanel.style.cssText='margin:12px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;';
+   const followupTitle=document.createElement('h4');followupTitle.textContent='Follow-up aperti nel CRM · agenda generale';
+   const now=new Date(),todayStart=new Date(now);todayStart.setHours(0,0,0,0);const tomorrowStart=new Date(todayStart);tomorrowStart.setDate(tomorrowStart.getDate()+1);
+   const overdue=openCrmFollowups.filter(item=>new Date(item.next_action_at)<todayStart).length;
+   const dueToday=openCrmFollowups.filter(item=>{const d=new Date(item.next_action_at);return d>=todayStart&&d<tomorrowStart;}).length;
+   const later=openCrmFollowups.length-overdue-dueToday;
+   const followupSummary=document.createElement('p');followupSummary.className='muted';followupSummary.textContent=openCrmFollowups.length+' attività aperte · '+overdue+' scadute · '+dueToday+' previste oggi · '+later+' future.';
+   const followupList=document.createElement('div');
+   openCrmFollowups.slice(0,15).forEach(item=>{
+    const line=document.createElement('p');line.style.cssText='padding:8px 0;border-top:1px solid var(--border,#ddd);margin:0;';
+    const due=new Date(item.next_action_at),label=due<todayStart?'SCADUTO':due<tomorrowStart?'OGGI':'IN PROGRAMMA';
+    line.textContent=label+' · '+(item.lead?.display_name||'Lead CRM')+' · '+due.toLocaleString('it-IT')+' · '+(item.subject||'Follow-up senza oggetto');
+    followupList.append(line);
+   });
+   const openCrm=document.createElement('a');openCrm.className='btn alt';openCrm.href='/nextway-ai.html';openCrm.textContent='Apri archivio CRM';
+   followupPanel.append(followupTitle,followupSummary,followupList,openCrm);agenda.append(followupPanel);
+  }else{
+   const noFollowups=document.createElement('p');noFollowups.className='muted';noFollowups.textContent='Nessun follow-up aperto con data pianificata nel CRM.';agenda.append(noFollowups);
+  }
   agenda.append(agendaTitle,agendaIntro,agendaCounts,agendaList);
   list.prepend(agenda);
   const duplicateTotal=dailyProspects.reduce((sum,p)=>sum+p.duplicate_count,0);
