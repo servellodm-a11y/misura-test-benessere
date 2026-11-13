@@ -49,6 +49,11 @@ assert.ok(searchHtml.includes("segment==='customers'||segment==='wellness_pro'?'
 assert.ok(searchHtml.includes("explicitZinzinoInterest?'replica':'none'"));
 assert.ok(searchHtml.includes('const detectedRole=rolePatterns.find'));
 assert.ok(searchHtml.includes('const personalizedLine=detectedRole'));
+assert.ok(searchHtml.includes('const rankedResults=(group.results||[])'));
+assert.ok(searchHtml.includes('entityType,identity'));
+assert.ok(searchHtml.includes('identityScore,relevanceScore,evidenceScore'));
+assert.ok(searchHtml.includes('Pertinenza documentale:'));
+assert.ok(searchHtml.includes('non dimostra interesse o idoneità commerciale'));
 assert.ok(searchHtml.includes('non attribuire ruoli o interessi non documentati'));
 // Compile the browser script without executing DOM/network actions.
 const inlineScripts = [...searchHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
