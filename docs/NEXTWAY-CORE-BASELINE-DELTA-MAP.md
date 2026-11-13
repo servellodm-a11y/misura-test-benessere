@@ -23,11 +23,9 @@ Questa mappa documenta ciò che le migrazioni hanno aggiunto alle tabelle preesi
 
 La scansione statica delle migrazioni versionate non ha individuato `ALTER TABLE` diretto sulle seguenti tabelle:
 - `public.profiles`;
-- `public.nextway_setter_messages`;
-- `public.partner_details`;
-- `public.clients`.
+- `public.nextway_setter_messages`.
 
-Questo non certifica che siano prive di dipendenze: le funzioni, le policy e i trigger delle altre tabelle possono referenziarle. La loro DDL originaria deve comunque essere preservata integralmente.
+**Correzione:** `public.partner_details` e `public.clients` non appartengono a questo gruppo: la migrazione `20261111001500_nextway_conversion_provisioning.sql` aggiunge a entrambe la colonna `nextway_conversion_request_id`, la relativa chiave esterna e un indice unique parziale. La DDL originaria di queste due tabelle deve quindi essere ricostruita rimuovendo esclusivamente tali aggiunte, dopo confronto puntuale dei blocchi DDL.
 
 ## Oggetti creati dalle migrazioni, da non includere come tabelle core preesistenti
 
