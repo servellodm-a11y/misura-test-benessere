@@ -98,9 +98,9 @@ begin
   end if;
 
   if r.status = 'activated' then
-    select a.client_id into v_client_id
-    from public.nextway_client_workspace_attributions a
-    where a.conversion_request_id = r.id;
+    select c.id into v_client_id
+    from public.clients c
+    where c.nextway_conversion_request_id = r.id;
     return jsonb_build_object(
       'success', true,
       'already_activated', true,
@@ -179,14 +179,15 @@ begin
 
     if found then
       if v_profile.role::text <> 'partner'
-        or lower(coalesce(v_profile.email, '')) <> lower(r.email)
+        or (v_profile.email is not null and lower(v_profile.email) <> lower(r.email))
         or (v_profile.full_name is not null and v_profile.full_name <> r.full_name)
         or (v_profile.sponsor_id is not null and v_profile.sponsor_id <> r.sponsor_profile_id) then
         raise exception 'Esiste già un profilo incompatibile: nessun dato è stato sovrascritto.';
       end if;
 
       update public.profiles
-      set full_name = coalesce(full_name, r.full_name),
+      set email = coalesce(email, r.email),
+          full_name = coalesce(nullif(btrim(full_name), ''), r.full_name),
           sponsor_id = coalesce(sponsor_id, r.sponsor_profile_id)
       where id = p_auth_user_id;
     else
