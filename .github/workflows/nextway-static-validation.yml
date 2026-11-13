@@ -18,6 +18,10 @@ on:
       - "supabase/functions/nextway-workspace-admin/**"
       - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
+      - "nextway-motore-ricerca.html"
+      - "nextway-company-config.js"
+      - "docs/companies/zinzino/**"
+      - "scripts/test-nextway-company-config.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/migrations/**"
@@ -59,6 +63,10 @@ on:
       - "nextway-cloud.js"
       - "nextway-setter.js"
       - "nextway-ai.html"
+      - "nextway-motore-ricerca.html"
+      - "nextway-company-config.js"
+      - "docs/companies/zinzino/**"
+      - "scripts/test-nextway-company-config.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -169,6 +177,8 @@ jobs:
         run: node scripts/test-nextway-admin-ui.mjs
       - name: Validate NEXTWAY local static checks with Python 3
         run: python3 scripts/test-nextway-local-static.py
+      - name: Validate Zinzino company configuration and search integration
+        run: node scripts/test-nextway-company-config.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
