@@ -98,8 +98,8 @@ La sequenza effettiva è:
 | Test SQL rollback-only Partner | PREPARATO, NON ESEGUITO |
 | Configurazione CLI staging | PREPARATA, CI SUPERATA (run 43413398397) |
 | Manifest baseline core | COMPLETATO |
-| Mappa delta migrazioni core | PREPARATA, CI IN CORSO |
-| Test statico mappa delta | PREPARATO, CI IN CORSO |
+| Mappa delta migrazioni core | COMPLETATA, CI SUPERATA (run 43414160598) |
+| Test statico mappa delta | COMPLETATO, CI SUPERATA (run 43414160598) |
 | Preflight baseline read-only | PREPARATO, NON ESEGUITO |
 | Baseline schema-only core | BLOCCATA: DDL originaria completa non disponibile nel repository |
 | Riallineamento trigger Setter dopo isolamento | PREPARATO, CI SUPERATA (run 43412838823); runtime DA ESEGUIRE |
