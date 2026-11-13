@@ -3214,3 +3214,19 @@ Test statici già presenti per SQL, ingest, upload e RLS workspace. Nessuna inco
 Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit documentale audit KB: `ec0d41b`.
 
 Nessuna migrazione, DDL/DML, deploy, seed, test con dati reali, merge o modifica a `main`. PR #1 resta draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
+
+### Audit dipendenze CRM / Membership / Conversione — 13 novembre 2026
+
+Revisione statica di foundation workspace, membership, RPC di creazione Lead, amministrazione workspace e provisioning conversione.
+
+**Coerenze rilevate:** accesso workspace basato su membership attiva e workspace attivo; ruoli distinti; owner unico per workspace; RPC di attivazione riservate a service_role; creazione Lead idempotente e workspace-aware; conversione con claim token e finalizzazione transazionale che riblocca il Lead.
+
+<badge>P1 — GAP DA RISOLVERE</badge>
+
+La catena conversione non è ancora workspace-aware: `nextway_lead_conversion_requests` non conserva `workspace_id`; claim/finalize non lo trasportano; la finalizzazione crea partner/clienti senza assegnare membership al partner né conservare il workspace sul record cliente. Non è quindi certificabile l'associazione automatica al workspace corretto quando lo sponsor opera in più workspace.
+
+**Decisione necessaria prima del primo onboarding partner multi-workspace:** ereditare il workspace dal Lead nella richiesta; definire ruolo/stato membership del partner convertito; conservare l'attribuzione workspace dei clienti; mantenere il comportamento legacy centralizzato. La correzione richiederà migrazione additiva e test di idempotenza/concorrenza. Non effettuata alcuna modifica automatica.
+
+Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit gap conversione: `bbd1ad3`.
+
+Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/partner/cliente. `main` invariato; PR #1 draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
