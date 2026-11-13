@@ -59,7 +59,7 @@ assert.ok(searchHtml.includes('messaggio_primo_contatto'));
 assert.ok(searchHtml.includes("$('exportDaily').addEventListener"));
 const dedupeStart=searchHtml.indexOf('function canonicalProspectUrl(');
 const dedupeEnd=searchHtml.indexOf('function classifyProspectTarget(',dedupeStart);
-const dedupeContext={};
+const dedupeContext={URL};
 vm.runInNewContext(searchHtml.slice(dedupeStart,dedupeEnd)+';this.canonicalProspectUrl=canonicalProspectUrl;this.buildProspectDedupeKey=buildProspectDedupeKey;',dedupeContext);
 assert.equal(dedupeContext.canonicalProspectUrl('https://www.example.com/person/?utm_source=test#bio'),'https://example.com/person');
 assert.equal(dedupeContext.canonicalProspectUrl('https://example.com/person'),'https://example.com/person');
