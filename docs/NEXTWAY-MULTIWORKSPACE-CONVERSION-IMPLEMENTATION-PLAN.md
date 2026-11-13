@@ -366,6 +366,8 @@ La revisione statica delle migrazioni, UI, Edge Function e del nuovo test transa
 
 La finalizzazione ora azzera anche `activation_claimed_at` al completamento e la RPC di lettura clienti è eseguibile solo da `authenticated`, non da `service_role`. Il test transazionale esercita inoltre la creazione RPC, la revisione amministrativa e il claim service_role prima della finalizzazione.
 
+La suite statica ricostruita contiene 51 asserzioni e ora è collegata al workflow GitHub Actions: il file è incluso nei filtri push/pull_request e viene eseguito con Node 22. L'ultimo commit è stato pubblicato sul branch, ma al momento del controllo non risultava ancora associato un run GitHub Actions; pertanto la suite è integrata nel CI ma non è dichiarata superata.
+
 
 ### Correzione aggiuntiva RLS richieste conversione
 
