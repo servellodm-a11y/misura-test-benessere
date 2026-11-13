@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
     if (!uuidPattern.test(workspaceId)) {
       return respond({ error: "workspace_id obbligatorio e non valido" }, 400, origin);
     }
-    const moduleKey = String(form.get("module_key") ?? "zinzino").trim();
+    const moduleKey = String(form.get("module_key") ?? "general").trim();
     const title = String(form.get("title") ?? originalName).trim();
     const sourceType = String(form.get("source_type") ?? "official_document").trim();
     const languageCode = String(form.get("language_code") ?? "it").trim();
