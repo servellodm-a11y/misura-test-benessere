@@ -204,7 +204,9 @@ async function runSearch(){
     if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
     if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
     const assessment=item._assessment||assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
-    const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · Interesse commerciale: non deducibile';
+    const targetAssessment=classifyProspectTarget(item.title,item.snippet,pageContent,$('segment').value);
+    const targetSummary=document.createElement('p');targetSummary.className='tag';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason;
+    const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · non misura l’interesse commerciale';
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
     const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,$('segment').value,url,publicContacts);
@@ -215,18 +217,20 @@ async function runSearch(){
     capture.addEventListener('click',()=>{
      try{
       const segment=$('segment').value;
-      const category=segment==='customers'?'final_customer':segment==='wellness_pro'?'wellness_professional':'potential_partner';
-      const partnerTypes={wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / professionista',side_income:'Altro profilo individuale',business_seeking:'Altro profilo individuale'};
-      const evidence=[item.snippet||'',pageContent].filter(Boolean).join('\n\n').slice(0,3900);
+      const inferredCategory=targetAssessment.kind==='customer'?'final_customer':targetAssessment.kind==='partner'?'potential_partner':null;
+      const category=inferredCategory||(segment==='customers'?'final_customer':segment==='wellness_pro'?'wellness_professional':'potential_partner');
+      const partnerTypes={wellness_pro:'Professionista salute e benessere',wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / titolare',side_income:'Ricerca lavoro extra · da verificare',business_seeking:'Ricerca attività imprenditoriale · da verificare'};
+      const evidence=[item.snippet||'',pageContent].filter(Boolean).join('\\n\\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
-      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts,evidence_quality:assessment,fit_status:'Non valutato',company_id:activeCompany?.id||'zinzino',company_name:activeCompany?.name||'Zinzino'});
+      const enrichedAssessment={...assessment,target_classification:targetAssessment};
+      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:targetAssessment.role||partnerTypes[targetAssessment.segment]||partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts,evidence_quality:enrichedAssessment,fit_status:'Non valutato',company_id:activeCompany?.id||'zinzino',company_name:activeCompany?.name||'Zinzino'});
       if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
       capture.disabled=true;
       capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
-    card.append(title,snippet,quality,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
+    card.append(title,snippet,targetSummary,quality,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
   status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
@@ -336,6 +340,34 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  if(organizationEvidence&&!individual)reasons.push('prevalenza di segnali aziendali, non di identità personale');
  if(!individual)reasons.push('persona fisica non identificata con sufficiente evidenza');
  return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual};
+}
+function classifyProspectTarget(title,snippet,pageContent,selectedSegment){
+ const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\\s+/g,' ').trim();
+ const text=raw.toLocaleLowerCase('it');
+ const rules=[
+  {key:'wellness_pro',label:'Professionista salute e benessere',kind:'partner',role:'Professionista salute e benessere',re:/\\b(nutrizionist[ai]?|dietist[ai]?|naturopat[ai]?|osteopat[ai]?|fisioterapist[ai]?|personal trainer|farmacist[ai]?|medic[io]?|biolog[io] nutrizionist[ai]?)\\b/i},
+  {key:'wellness_networker',label:'Networker settore wellness',kind:'partner',role:'Networker wellness',re:/\\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente)\\b/i},
+  {key:'new_networker',label:'Networker alle prime armi',kind:'partner',role:'Networker alle prime armi',re:/(ho iniziato da poco|sono all[’']inizio|primi passi nel network|nuov[oa] incaricat[oa]|nuov[oa] distributore|sto imparando)/i},
+  {key:'other_networker',label:'Networker di altri settori',kind:'partner',role:'Networker altro settore',re:/\\b(network marketing|networker|vendita diretta|social selling|distributore indipendente)\\b/i},
+  {key:'exnetworker',label:'Ex-networker',kind:'partner',role:'Ex-networker',re:/(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato il network marketing|esperienza precedente nel network marketing)/i},
+  {key:'entrepreneur',label:'Imprenditore / titolare',kind:'partner',role:'Imprenditore / titolare',re:/\\b(imprenditor[ei]|titolare|founder|business owner|amministratore delegato)\\b/i},
+  {key:'side_income',label:'Ricerca di reddito extra',kind:'partner',role:'Interesse dichiarato per lavoro extra',re:/(cerco un lavoro extra|cerco un secondo lavoro|entrata aggiuntiva|reddito integrativo|attività part.time|lavoro part.time)/i},
+  {key:'business_seeking',label:'Ricerca di attività imprenditoriale',kind:'partner',role:'Interesse dichiarato per attività imprenditoriale',re:/(cerco un’attività|cerco un'attività|avviare un’attività|mettermi in proprio|nuovo progetto imprenditoriale|cerco un business)/i}
+ ];
+ const matched=rules.filter(r=>r.re.test(text));
+ const professional=matched.find(r=>['wellness_pro','wellness_networker','new_networker','other_networker','exnetworker','entrepreneur'].includes(r.key));
+ const explicitOpportunity=matched.find(r=>['side_income','business_seeking'].includes(r.key));
+ const customerSignal=/(cerco consigli|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|vorrei migliorare la mia alimentazione|interessat[oa] a migliorare il benessere)/i.test(text);
+ const selected=String(selectedSegment||'');
+ let primary='Da qualificare',kind='unknown',segment='unclassified',confidence='bassa',reason='La fonte non contiene elementi sufficienti per distinguere un cliente da un partner.';
+ if(professional){primary='Potenziale partner';kind='partner';segment=professional.key;confidence='media';reason='La fonte contiene un riferimento professionale o di esperienza: '+professional.label+'. Verificare che si riferisca alla persona del profilo.';}
+ else if(explicitOpportunity){primary='Potenziale partner';kind='partner';segment=explicitOpportunity.key;confidence='media';reason='La fonte contiene un’espressione esplicita di ricerca di '+(explicitOpportunity.key==='side_income'?'un lavoro extra':'un’attività imprenditoriale')+'. Verificare autore e attualità del contenuto.';}
+ else if(customerSignal){primary='Potenziale cliente';kind='customer';segment='customers';confidence='media';reason='La fonte contiene una richiesta o un interesse esplicito relativo a benessere o consulenza.';}
+ else if(selected==='customers' && /(benessere|wellness|nutrizione|alimentazione|fitness|omega.?3)/i.test(text)){primary='Possibile cliente · da verificare';kind='customer';segment='customers';confidence='bassa';reason='La ricerca era orientata ai clienti e la pagina tratta il benessere, ma non emerge una richiesta personale esplicita.';}
+ const evidence=matched.map(r=>r.label);
+ if(customerSignal)evidence.push('Richiesta esplicita sul benessere');
+ if(!evidence.length)evidence.push('Nessun segnale diretto sufficiente');
+ return {primary,kind,segment,confidence,reason,evidence:[...new Set(evidence)],role:professional?.role||explicitOpportunity?.role||'',matchedSegments:matched.map(r=>r.key)};
 }
 function classifyNetworkerStage(value){
  const t=String(value||'').toLocaleLowerCase('it');
