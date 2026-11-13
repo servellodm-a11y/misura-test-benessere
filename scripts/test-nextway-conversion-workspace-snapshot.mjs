@@ -17,7 +17,7 @@ const checks = [
   ["browser uses creation RPC", /rpc\('nextway_create_lead_conversion_request'/i.test(cloud)],
   ["browser does not supply workspace_id", !/p_workspace_id\s*:/i.test(cloud)],
   ["request detail and queue read workspace_id", cloud.includes("created_by,workspace_id,conversion_type") && cloud.includes("lead_id,workspace_id,conversion_type")],
-  ["admin queue resolves workspace name", /workspace:nextway_workspaces\\(name,partner_name\\)/i.test(cloud) && cloud.includes("Workspace: ' + workspaceLabel")],
+  ["admin queue resolves workspace name", /workspace:nextway_workspaces\(name,partner_name\)/i.test(cloud) && cloud.includes("Workspace: ' + workspaceLabel")],
   ["finalizer locks conversion request", /from public\.nextway_lead_conversion_requests[\s\S]*for update/i.test(finalize)],
   ["finalizer locks and validates Lead", /from public\.nextway_leads[\s\S]*for update/i.test(finalize) && /l\.workspace_id is distinct from r\.workspace_id/i.test(finalize)],
   ["Auth invite bound to conversion request metadata", /raw_user_meta_data ->> 'nextway_conversion_request_id' = r\.id::text/i.test(finalize)],
