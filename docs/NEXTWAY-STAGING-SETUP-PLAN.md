@@ -169,3 +169,23 @@ La verifica locale del Mac e la CLI 3.1.0 hanno consentito di recuperare in sola
 - Riconciliazione completa della baseline: **IN CORSO**.
 - Configurazione locale, import, seed, avvio container e test runtime: **NON ESEGUITI**.
 - Produzione, `main`, PR e Netlify: **NON MODIFICATI**.
+
+## Pre-flight locale automatizzato — 13 novembre 2026
+
+Aggiunto `scripts/nextway-local-preflight.sh`, script di sola lettura per raccogliere in un unico report i prerequisiti locali prima di definire il profilo PostgreSQL. Controlla CLI, Docker daemon/memoria, container attivi, presenza e SHA-256 del dump schema-only atteso, assenza di istruzioni `COPY`/`INSERT`, presenza di `supabase/config.toml`, integrità non modificata di `supabase/.temp/` e spazio disco.
+
+Il pre-flight:
+- non esegue `supabase init`, `supabase start`, `supabase link`, comandi remoti, migrazioni o deploy;
+- non modifica file, container, database o configurazioni;
+- si arresta se il dump non coincide con lo SHA-256 già revisionato o se rileva istruzioni dati;
+- produce un solo riepilogo testuale, senza stampare righe del dump o segreti.
+
+Esecuzione prevista dopo aver aggiornato il branch locale:
+
+```bash
+bash scripts/nextway-local-preflight.sh
+```
+
+Il workflow CI ora controlla la sintassi con `bash -n` e include lo script nei filtri `push` e `pull_request`. La validazione GitHub del nuovo commit è ancora da osservare; il file di workflow è configurato per eseguire i controlli anche sui push al branch `fix/nextway-password-recovery` oltre che su `main`.
+
+**Il superamento del pre-flight non autorizza l'avvio di container o l'import del dump.** Serve soltanto a confermare che i prerequisiti raccolti in precedenza sono ancora coerenti. Il profilo SQL e la baseline importabile richiedono ancora una revisione separata.
