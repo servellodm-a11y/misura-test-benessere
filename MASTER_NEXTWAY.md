@@ -2668,3 +2668,86 @@ La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è st
 ### Registro cronologico del MASTER
 
 - 13-11-2026, 19:21 Europe/Rome — aggiornati HEAD/blob main, commit recenti, inventario main/PR, PR #1, CI main #251 e CI PR #520 con causa del fallimento; registrati requisito prospect, nove segmenti Zinzino, P0 Rate Limit/Governance, workspace/membership, audit conversione, dump schema-only, staging e discrepanza CLI Intel. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni o deploy.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:35 (Europe/Rome)
+
+### Repository, branch e fonti effettivamente controllate
+
+- Recuperato questo MASTER da GitHub `main` prima dell'aggiornamento; blob SHA di partenza: `b1d9af49e44dd471af05b3fca2b6363d4ec658a8`. Il documento esistente è stato preservato integralmente e questa sezione è stata aggiunta in coda.
+- HEAD di `main` verificato: `4344bd2a181667ec6e80a704d298625e1321bb85`, commit del 12-11-2026 18:39:25 UTC, messaggio `docs(nextway): record follow-up continuity check`. Il diff del commit modifica soltanto `MASTER_NEXTWAY.md`.
+- Ultima GitHub Actions push osservata su `main`: run #251, ID `43175706330`, SUCCESS, sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Non è una validazione delle modifiche più recenti sul branch PR.
+- PR #1, `NEXTWAY: verifica integrazione AI Setter governance`: ancora OPEN, DRAFT e NOT MERGED. HEAD del branch `fix/nextway-password-recovery`: `e0b5098f88417597010e5845a61d0c16d65c2689` (13-11-2026 16:10:33 UTC). GitHub riporta 84 file modificati, 10.986 aggiunte e 88 cancellazioni. Il confronto con `main` risulta DIVERGED: 534 commit ahead e 4 behind; il metadato PR riporta `mergeable=false`. Non è stato eseguito rebase, merge o aggiornamento del branch.
+- Il repository risulta aggiornato sul branch PR fino al commit sopra indicato; la copia locale dell'utente non è stata letta direttamente. L'utente aveva riferito un `git pull --ff-only` riuscito sul branch `fix/nextway-password-recovery`, da `e8a0a6e` a `69b7426`, con 45 file aggiornati. Questo prova quel pull al momento riferito, non che la copia locale sia successivamente arrivata a `e0b5098`.
+- Il connettore GitHub consente di leggere repository, PR, commit, workflow e log. Non è disponibile un connettore Supabase o Netlify; le informazioni live Supabase sotto indicate provengono dai risultati restituiti dall'utente o da precedenti risultati già registrati, non da una nuova connessione diretta.
+
+### Lavoro prodotto sul branch PR il 13 novembre — non ancora in main
+
+Le seguenti attività sono state riscontrate nei commit, nei file e nei documenti del branch `fix/nextway-password-recovery`. Non vanno considerate pubblicate su `main` né attive nel progetto remoto.
+
+**Motore di ricerca prospect e perimetro MVP**
+- Creato/aggiornato `docs/NEXTWAY-MVP-SCOPE.md`: il primo MVP è uno strumento commerciale personale, con un solo titolare operativo (platform admin). I prospect acquisiti confluiscono nel suo archivio Lead; selezione, verifica, priorità, contatto, qualificazione e passaggio a Zoom sono gestiti centralmente. Distribuzione automatica dei Lead ai collaboratori, rotazione, dashboard e metriche individuali sono fuori perimetro MVP.
+- Il perimetro funzionale comprende ricerca per segmento e area, URL/fonte/evidenza verificabile, classificazione cliente/partner e sottocategorie, recapiti professionali pubblicamente esposti solo se utilizzabili lecitamente, deduplicazione, acquisizione controllata, scoring motivato, messaggi individuali basati su evidenze e gestione degli stati/follow-up.
+- La conversazione del 13 novembre ha precisato i target: potenziali clienti e partner; professionisti salute/benessere; networker del wellness; networker di altri settori; imprenditori; persone interessate a un'attività extra. Questa è una specifica di prodotto fornita dall'utente, non una prova che la ricerca reale sia già stata eseguita.
+- Su `nextway-motore-ricerca.html` sono stati sviluppati controlli di classificazione degli imprenditori, riduzione dei falsi positivi e regole che impediscono punteggi elevati quando persona e segmento non sono verificabili. L'ultimo commit `e0b5098` aggiunge `published_date`/ `publishedDate` alla lettura dei metadati Tavily per il calcolo della freschezza delle fonti.
+- Nella conversazione precedente è stato riportato un esito locale/statico di 5/5 test sul lavoro di classificazione e controllo sintattico PASS. Questo non coincide con l'esito dell'ultima GitHub Actions, che è fallita per un'altra asserzione del validatore audit (vedi sezione CI). Non risulta una ricerca prospect live, un'acquisizione reale o un invio di messaggi eseguito in questo controllo.
+
+**CRM, agenda commerciale e Zoom**
+- I commit del branch aggiungono cronologia attività e resa degli esiti, bozze di proposta Zoom contestuali alla conversazione CRM più recente, agenda commerciale complessiva, next-best-action basata sull'esito, priorità ai follow-up in scadenza, inclusione dei Lead sincronizzati non ancora lavorati e collegamento di prenotazione Calendly.
+- Sono state corrette l'inizializzazione e la persistenza dell'esito Zoom e l'allineamento dello stato CRM all'esito finale. La regola esplicita dell'utente è: dopo Zoom l'esito è esclusivamente **Interessato** oppure **Non interessato**; non devono partire sequenze o follow-up automatici post-incontro.
+- Queste sono modifiche di codice presenti nel branch e controlli statici/unitari riferiti nella cronologia; non dimostrano un ciclo CRM/Zoom verificato su utenti reali o un'integrazione Calendly live.
+
+**Workspace, conversione Partner e staging**
+- Corretto sul branch `supabase/functions/nextway-workspace-admin/index.ts` per conservare `invited_by` originario durante l'attivazione della membership, evitando di sostituirlo con l'amministratore attivatore. Il test di sicurezza è stato aggiornato. CI run `43410329154`, commit `6b24979df271df59b19b6c6e624e85f9dc769800`, è stata riportata SUCCESS.
+- Preparati una fixture SQL transazionale rollback-only per la cancellazione Partner e il relativo protocollo staging, inclusi retry idempotente, invalidazione claim e gare finalize-vs-cancel/claim-vs-cancel. Le prove SQL e di concorrenza non sono state eseguite perché manca un ambiente staging isolato.
+- Aggiunto `supabase/config.toml` con configurazione locale preparata, senza remote/project ref, URL produzione o segreti, e SMTP locale sandbox Mailpit. Test di configurazione statico CI run `43413398397` riportato SUCCESS. Il file non crea né collega un progetto Supabase.
+- Preparati manifest baseline, mappa delta migrazioni, inventario oggetti e diagnostiche read-only. La DDL core originaria completa non è disponibile nella cronologia Git esaminata. Il dump locale `/tmp/nextway-public-schema.sql` è uno snapshot dello schema corrente e non è sufficiente, da solo, per ricostruire in sicurezza la baseline pre-migrazioni.
+- L'utente ha eseguito lo script di estrazione DDL sul file locale; lo script ha rifiutato il formato perché richiede un dump `pg_dump` testuale/SQL. L'utente ha riferito che nessun file è stato modificato. Baseline SQL non prodotta e confronto DDL non completato.
+- Sul branch PR sono presenti le migrazioni `20261113110000_nextway_platform_admin_search_path_hardening.sql`, `20261113120000_nextway_conversion_request_workspace_snapshot.sql`, `20261113130000_nextway_conversion_workspace_finalization.sql`, `20261113140000_nextway_partner_conversion_cancellation.sql` e `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql`, oltre alle migrazioni governance e integrità conversione già documentate. Presenza nel repository e test statici non significano applicazione: nessuna di queste nuove migrazioni è stata verificata come applicata al progetto remoto.
+- `docs/NEXTWAY-STAGING-READINESS.md` registra che la configurazione CLI è preparata, ma la baseline core resta bloccante. Il Mac Intel da 8 GB è stato giudicato inadatto all'avvio dello stack Supabase full locale. Nessun progetto staging cloud è stato creato.
+
+### GitHub Actions — stato aggiornato della PR
+
+- Ultima run push del branch PR osservata: **#520**, ID `43460040655`, sul commit `e0b5098f88417597010e5845a61d0c16d65c2689`, conclusione **FAILURE**. Il job `validate` si interrompe allo step `Validate NEXTWAY audit`; gli step successivi risultano SKIPPED.
+- Il log mostra un'asserzione che cerca il testo `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount...` e non lo trova nel contenuto esaminato di `nextway-ai.html`. È un disallineamento tra aspettativa del test e sorgente corrente da investigare; il solo log non dimostra se sia il test a essere obsoleto o se manchi un'esportazione richiesta.
+- Anche la run #519 (ID `43459970766`) risulta FAILURE. La run #520 è l'ultima disponibile al controllo. Non dichiarare la CI del branch verde sulla base dei precedenti successi: i successi delle run precedenti certificano soltanto i rispettivi commit e test.
+- La run #251 su `main` resta SUCCESS, ma è precedente alle modifiche del branch PR e non valida il codice del 13 novembre.
+- Prossimo intervento di codice, da svolgere separatamente da questo aggiornamento documentale: confrontare l'implementazione corrente dell'archivio locale con `scripts/validate-nextway-audit.mjs`, correggere il contratto test o l'esportazione effettiva senza indebolire i controlli di sicurezza e rilanciare GitHub Actions sul branch.
+
+### Supabase — risultati disponibili e limiti
+
+- **Rate Limit e Governance P0:** secondo il risultato Supabase fornito dall'utente il 13 novembre, tabella Rate Limit OK, RPC Rate Limit OK, RPC Governance OK, RLS Rate Limit ATTIVA, accesso RPC Rate Limit OK e accesso RPC Governance OK. Classificare questi controlli P0 come **COMPLETATO E VERIFICATO** sulla base dell'output ricevuto; non ripeterli senza un cambiamento o un rischio concreto.
+- **CRM Lead:** l'ultima diagnostica live eseguita dall'utente restituisce `public.nextway_leads` presente, RLS attiva, FORCE RLS non attivo e quattro policy per `authenticated` (SELECT, INSERT, UPDATE, DELETE) con accesso al proprietario o a `platform_admin`. `public.nextway_lead_activities` e `public.nextway_lead_conversion_requests` risultano assenti al momento della query.
+- La query ha anche rilevato che `supabase_migrations.schema_migrations` non è disponibile nel contesto interrogato; non è possibile dedurre da quel risultato lo storico delle migrazioni. La diagnostica è stata corretta per non interrogare quella relazione.
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente nel repository, ma non è stato ricevuto il relativo JSON di esecuzione. Colonne `archived_*`, vincoli status, tabella idempotenza e firme RPC restano **DA COMPLETARE**.
+- Nessuna connessione diretta Supabase è stata effettuata in questo controllo. Non sono state applicate migrazioni, eseguiti DDL/DML, creati utenti Auth, inviate email o modificati record/schema del progetto `nextway-platform`.
+
+### Matrice di stato al 13 novembre
+
+- MASTER su `main`, recupero pre-modifica e verifica GitHub: **COMPLETATO E VERIFICATO** al termine di questo aggiornamento.
+- Branch PR #1 e confronto con `main`: **COMPLETATO E VERIFICATO** quanto a stato OPEN/DRAFT, head, file modificati e divergenza; merge **BLOCCATO/DA COMPLETARE**.
+- Motore ricerca prospect: **ESEGUITO MA NON VERIFICATO** end-to-end; modifiche e test locali/statici riferiti, nessuna ricerca reale o acquisizione verificata.
+- Agenda CRM, attività e regola esito Zoom: **ESEGUITO MA NON VERIFICATO** su runtime remoto.
+- Correzione audit `invited_by` e test CI relativo: **COMPLETATO E VERIFICATO** staticamente sul commit/run citati; comportamento Auth/membership live **DA COMPLETARE** in staging.
+- Rate Limit e Governance P0: **COMPLETATO E VERIFICATO** sulla base del risultato Supabase fornito dall'utente.
+- Lead core RLS e policy: **COMPLETATO E VERIFICATO** per la query ricevuta.
+- Tabelle attività e richieste conversione CRM: **DA COMPLETARE** (assenti nell'ultima query live).
+- Diagnostica prerequisiti CRM: file **COMPLETATO E VERIFICATO** nel repository; esecuzione e JSON **DA COMPLETARE**.
+- Configurazione CLI staging: **COMPLETATO E VERIFICATO** come file locale preparato e test statico CI; progetto staging **NON CREATO**.
+- Baseline schema-only core: **BLOCCATO** dalla mancanza della DDL originaria completa e dal formato non accettato del dump locale.
+- Migrazioni 13 novembre su branch PR: **ESEGUITE NEL REPOSITORY, NON APPLICATE AL DATABASE**; test PostgreSQL/Auth/concorrenza **DA COMPLETARE**.
+- CI branch PR al commit `e0b5098`: **BLOCCATA** dalla failure #520 nel validatore NEXTWAY audit.
+- Deploy Edge Functions, deploy Netlify e modifiche di produzione: **NON ESEGUITI/DA VERIFICARE**; resta valida la decisione di non effettuare deploy Netlify di produzione prima del 4 dicembre 2026.
+
+### Prossimo passo operativo preciso
+
+1. Risolvere il disallineamento tra `scripts/validate-nextway-audit.mjs` e l'implementazione corrente di `NEXTWAY_LOCAL_ARCHIVE`; mantenere il test rigoroso e rilanciare CI sul branch PR.
+2. Ottenere il JSON della diagnostica `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`; poi completare la riconciliazione CRM senza applicare migrazioni alla cieca.
+3. Recuperare un dump schema-only in formato testuale `pg_dump` oppure ricostruire e revisionare la baseline core statement per statement; non trasformare automaticamente lo snapshot corrente in baseline.
+4. Solo dopo baseline e test statici verdi, valutare staging isolato e test runtime Auth/PostgreSQL/concorrenza. Non usare `nextway-platform` come staging e non fare merge/deploy in assenza dei gate richiesti.
+
+### Registro cronologico del MASTER
+
+- 13-11-2026, 19:35 Europe/Rome — aggiunti stato GitHub aggiornato di `main` e PR #1, confronto 534 ahead/4 behind, CI #520 FAILURE e dettaglio dell'asserzione audit; sintetizzati i lavori del branch su prospect search, agenda/Zoom, workspace/Partner e preparazione staging; registrati il pull locale riferito, l'errore di formato del dump, i risultati Supabase P0 e CRM e i limiti di verifica. Modificato esclusivamente `MASTER_NEXTWAY.md`.
