@@ -465,3 +465,7 @@ La query legge esclusivamente cataloghi e viste di metadati; non legge righe app
 - **NESSUNA MODIFICA LIVE:** nessuna migrazione, DDL/DML, deploy, import, seed o modifica ai privilegi.
 
 Dopo l'esecuzione read-only nel SQL Editor, il report dovrà essere confrontato con le 31 migrazioni e con il dump schema-only già acquisito. Il confronto dovrà classificare ogni differenza come: presente e coerente; presente ma difforme; attesa perché gestita da Supabase; superata/obsoleta; assente da approfondire. Non applicare automaticamente alcuna migrazione sulla base delle differenze.
+
+
+### Aggiornamento: report strutturale a blocchi
+Per superare il limite di lunghezza dei messaggi, la query diagnostica è stata aggiornata per restituire più righe numerate (`parte`, `totale_parti`, `report_parziale`), ciascuna con al massimo 6.000 caratteri. Eseguire una sola volta; copiare tutte le righe in ordine e inviarle in messaggi separati. La query resta read-only e non legge dati applicativi. Non è ancora stata eseguita.
