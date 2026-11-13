@@ -14,6 +14,8 @@ const checks = [
   ["viewer excluded from conversion proposal", !/array\[[^\]]*workspace_viewer/i.test(snapshot)],
   ["direct authenticated INSERT revoked", /revoke insert on table public\.nextway_lead_conversion_requests from authenticated/i.test(snapshot)],
   ["snapshot immutable in request guard", /new\.workspace_id is distinct from old\.workspace_id/i.test(snapshot)],
+  ["concurrent requests with same email are serialized", /pg_advisory_xact_lock\(hashtextextended\(lower\(btrim\(p_email\)\), 0\)\)/i.test(snapshot)],
+  ["duplicate check includes provisioning state", /q\.status in \('pending','ready_for_activation','provisioning'\)/i.test(snapshot)],
   ["browser uses creation RPC", /rpc\('nextway_create_lead_conversion_request'/i.test(cloud)],
   ["browser does not supply workspace_id", !/p_workspace_id\s*:/i.test(cloud)],
   ["request detail and queue read workspace_id", cloud.includes("created_by,workspace_id,conversion_type") && cloud.includes("lead_id,workspace_id,conversion_type")],
