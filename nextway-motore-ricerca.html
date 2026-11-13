@@ -46,7 +46,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui le 5 ricerche sul web</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
 </section>
 <section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
-<section class="panel" id="live-results"><h2>Risultati trovati</h2><p class="muted">I risultati vengono ordinati per pertinenza documentale: identità individuale (0–40), coerenza con il segmento (0–40) e completezza delle prove pubbliche (0–20). Directory, articoli e pagine aziendali non vengono trattati come persone. Il punteggio non misura interesse, disponibilità o idoneità commerciale. Ogni fonte va aperta e verificata prima dell’acquisizione.</p><div id="live-list"></div></section>\n<section class="panel"><h2>Metodo di lavoro consigliato</h2>
+<section class="panel" id="live-results"><h2>Risultati trovati</h2><p class="muted">I risultati vengono ordinati per pertinenza documentale: identità individuale (0–40), coerenza con il segmento (0–40) e completezza delle prove pubbliche (0–20). Directory, articoli e pagine aziendali non vengono trattati come persone. Il punteggio non misura interesse, disponibilità o idoneità commerciale. Ogni fonte va aperta e verificata prima dell’acquisizione.</p><div id="daily-summary" class="notice" style="margin:12px 0">La lista giornaliera sarà compilata dopo l’esecuzione della ricerca.</div><div class="actions"><button class="btn alt" id="exportDaily" disabled>Esporta lista giornaliera CSV</button></div><div id="live-list"></div></section>\n<section class="panel"><h2>Metodo di lavoro consigliato</h2>
 <ol>
 <li>Apri una ricerca alla volta e seleziona solo risultati con un segnale professionale chiaro.</li>
 <li>Apri la fonte originale: snippet e titoli dei motori di ricerca non bastano.</li>
@@ -59,7 +59,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 </main>
 <script src="/nextway-company-config.js"></script>
 <script>
-const $=id=>document.getElementById(id);let generated=[];
+const $=id=>document.getElementById(id);let generated=[],dailyProspects=[];
 const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 const activeCompany=companyConfig?.active||null;
 if(activeCompany){$('company-context').textContent='Azienda attiva: '+activeCompany.name+' · criteri di ricerca caricati dalla configurazione aziendale.';}
@@ -176,12 +176,13 @@ function render(){
 }
 $('generate').addEventListener('click',build);
 $('runsearch').addEventListener('click',runSearch);
+$('exportDaily').addEventListener('click',()=>{if(!dailyProspects.length)return;const headers=['data_ricerca','nome_o_titolo','classificazione','segmento','affidabilita','ruolo_rilevato','motivazione','fonte','email_pubbliche','telefoni_pubblici','whatsapp_pubblici','profili_social','messaggio_primo_contatto'];const quote=v=>'\"'+String(v??'').replace(/\"/g,'\"\"')+'\"';const rows=[headers,...dailyProspects.map(p=>[p.date,p.title,p.classification,p.segment,p.confidence,p.role,p.reason,p.url,p.emails.join(' | '),p.phones.join(' | '),p.whatsapp.join(' | '),p.socials.join(' | '),p.message])];const csv='\\ufeff'+rows.map(row=>row.map(quote).join(';')).join('\\r\\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-lista-prospect-'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);});
 async function runSearch(){
  if(!generated.length)build();
  const status=$('searchstatus'),button=$('runsearch'),list=$('live-list');
  try{
   if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
-  button.disabled=true;status.textContent='Connessione a NEXTWAY e avvio delle 5 ricerche…';list.replaceChildren();
+  button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;status.textContent='Connessione a NEXTWAY e avvio delle 5 ricerche…';list.replaceChildren();
   const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();
   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:generated.map(x=>x.query),max_results:10})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
@@ -211,6 +212,7 @@ async function runSearch(){
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
     const messageSegment=targetAssessment.segment==='unclassified'?$('segment').value:targetAssessment.segment;
     const messagePanel=createMessageDraftPanel(item.title,item.snippet,pageContent,messageSegment,url,publicContacts);
+    dailyProspects.push({date:new Date().toISOString().slice(0,10),title:item.title||'Risultato senza titolo',classification:targetAssessment.primary,segment:targetAssessment.segment,confidence:targetAssessment.confidence,role:targetAssessment.role,reason:targetAssessment.reason,url,emails:publicContacts.emails,phones:publicContacts.phones,whatsapp:publicContacts.whatsapp,socials:publicContacts.socials,message:messagePanel.querySelector('textarea')?.value||''});
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Categoria: '+(generated[index]?.label||'Prospect')+'\\nTitolo: '+(item.title||'')+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
@@ -234,7 +236,7 @@ async function runSearch(){
     card.append(title,snippet,targetSummary,quality,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);list.append(card);
    });
   });
-  status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
+  const partnerCount=dailyProspects.filter(p=>p.classification==='Potenziale partner').length,customerCount=dailyProspects.filter(p=>p.classification.includes('cliente')).length,reviewCount=dailyProspects.filter(p=>p.classification==='Da qualificare').length;$('daily-summary').textContent='Lista del '+new Date().toLocaleDateString('it-IT')+' · '+dailyProspects.length+' risultati · '+partnerCount+' potenziali partner · '+customerCount+' potenziali clienti / da verificare · '+reviewCount+' da qualificare. Ogni riga esportata include fonte, recapiti pubblici rilevati, motivazione e bozza del primo messaggio.';$('exportDaily').disabled=!dailyProspects.length;status.textContent='Ricerca completata: '+total+' risultati con URL utilizzabili, distribuiti su '+groups.length+' query. La lista può essere esportata in CSV. I risultati acquisiti vengono salvati solo nel tuo archivio locale dopo un tuo clic. Nessun contatto viene contattato automaticamente.';
   if(!total)list.textContent='Nessun risultato utilizzabile. Prova a modificare area geografica o parole chiave.';
  }catch(error){status.textContent='Ricerca non riuscita: '+error.message;}
  finally{button.disabled=false;}
