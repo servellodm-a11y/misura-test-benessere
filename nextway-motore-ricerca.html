@@ -250,19 +250,30 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  const copy=document.createElement('button');copy.type='button';copy.className='btn alt';copy.textContent='Copia bozza';
  const segmentLabels={customers:'un possibile cliente interessato al benessere',wellness_pro:'un professionista della salute e del benessere',wellness_networker:'un professionista del network marketing nel wellness',new_networker:'una persona agli inizi nel network marketing',other_networker:'un professionista del network marketing',exnetworker:'una persona con precedente esperienza nel network marketing',entrepreneur:'un imprenditore',side_income:'una persona che potrebbe valutare un’attività aggiuntiva',business_seeking:'una persona che potrebbe valutare un progetto imprenditoriale'};
  const audience=segmentLabels[segment]||'un potenziale contatto';
- const evidence=(String(title||'')+' '+String(snippet||'')+' '+String(pageContent||'')).toLocaleLowerCase('it');
+ const rawEvidence=(String(title||'')+' '+String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
+ const evidence=rawEvidence.toLocaleLowerCase('it');
  const explicitZinzinoInterest=/zinzino|balancetest|balance test|balance oil|zinzino products/.test(evidence);
  const recommended=segment==='customers'||segment==='wellness_pro'?'general':explicitZinzinoInterest?'replica':'none';
  linkSelect.value=recommended;
  const recommendation=document.createElement('p');recommendation.className='muted';
  const topic=segment==='customers'?'un approccio basato sulla misurazione e sulla personalizzazione del benessere':segment==='wellness_pro'?'un confronto professionale su benessere e strumenti di misurazione':segment.includes('networker')||segment==='exnetworker'?'un confronto tra professionisti sulle opportunità e sugli strumenti di sviluppo nel wellness':'un confronto su un progetto professionale nel settore del benessere';
+ // Usa esclusivamente evidenze testuali restituite dalla pagina; non attribuire ruoli o interessi non documentati.
+ const rolePatterns=[[/nutrizionist|dietist/i,'nutrizione'],[/naturopat/i,'naturopatia'],[/osteopat/i,'osteopatia'],[/fisioterap/i,'fisioterapia'],[/personal trainer/i,'personal training'],[/farmacist/i,'farmacia'],[/medic/i,'medicina'],[/network marketing|networker|vendita diretta/i,'network marketing'],[/imprenditor|founder|titolare/i,'attività imprenditoriale'],[/coach/i,'coaching']];
+ const detectedRole=rolePatterns.find(([pattern])=>pattern.test(rawEvidence))?.[1]||'';
+ const snippetText=String(snippet||'').replace(/\s+/g,' ').trim();
+ const excerpt=snippetText.length>150?snippetText.slice(0,147).trimEnd()+'…':snippetText;
+ const personalizedLine=detectedRole
+   ? 'Ho notato i suoi contenuti relativi a '+detectedRole+'. '
+   : excerpt
+     ? 'Le scrivo dopo aver letto questo contenuto pubblico: «'+excerpt+'». '
+     : '';
  const drafts={
-  whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere':'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
-  facebook:'Buongiorno! Ho visto la sua pagina e mi ha colpito il lavoro che comunica. Sto approfondendo un progetto legato al benessere e '+topic+'. Mi piacerebbe presentarglielo in modo semplice, senza impegno, e capire se può esserci un punto di interesse comune. Le va di parlarne?',
-  linkedin:'Buongiorno, sto entrando in contatto con '+audience+' per un confronto su '+topic+'. Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
-  instagram:'Ciao! Ho scoperto il tuo profilo attraverso i contenuti che condividi sul benessere. Sto conoscendo persone e professionisti con cui confrontarmi su '+topic+'. Se ti fa piacere, posso raccontarti in breve di cosa si tratta. Nessun problema se non è un tema in linea con i tuoi interessi.',
-  email:'Oggetto: Un possibile confronto sul settore benessere\\n\\nBuongiorno,\\n\\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\\n\\nSe l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\\n\\nLa ringrazio per l’attenzione e le auguro una buona giornata.',
-  sms:'Buongiorno, sto approfondendo un progetto sul benessere e mi farebbe piacere un breve confronto, se il tema è di suo interesse. Nessun problema se non lo è.'
+  whatsapp:'Buongiorno, ho trovato il suo profilo mentre cercavo '+(segment==='customers'?'contenuti sul benessere':'professionisti e realtà del settore benessere')+'. Mi farebbe piacere condividere un’idea su '+topic+'. '+personalizedLine+'Se il tema può interessarle, posso inviarle due informazioni qui. Se preferisce, nessun problema.',
+  facebook:'Buongiorno! Ho visto la sua pagina e mi ha colpito il lavoro che comunica. Sto approfondendo un progetto legato al benessere e '+topic+'. '+personalizedLine+'Mi piacerebbe presentarglielo in modo semplice, senza impegno, e capire se può esserci un punto di interesse comune. Le va di parlarne?',
+  linkedin:'Buongiorno, sto entrando in contatto con '+audience+' per un confronto su '+topic+'. '+personalizedLine+'Se il tema è pertinente alla sua attività, mi farebbe piacere collegarmi.',
+  instagram:'Ciao! Ho scoperto il tuo profilo attraverso i contenuti che condividi sul benessere. Sto conoscendo persone e professionisti con cui confrontarmi su '+topic+'. '+personalizedLine+'Se ti fa piacere, posso raccontarti in breve di cosa si tratta. Nessun problema se non è un tema in linea con i tuoi interessi.',
+  email:'Oggetto: Un possibile confronto sul settore benessere\\n\\nBuongiorno,\\n\\nho consultato la sua presenza online e le scrivo perché sto sviluppando relazioni con '+audience+'. Vorrei proporle un breve confronto su '+topic+'.\\n\\n'+personalizedLine+'Se l’argomento è di suo interesse, posso inviarle una presentazione sintetica o concordare una breve telefonata, senza alcun impegno.\\n\\nLa ringrazio per l’attenzione e le auguro una buona giornata.',
+  sms:'Buongiorno, sto approfondendo un progetto sul benessere e mi farebbe piacere un breve confronto, se il tema è di suo interesse. '+personalizedLine+'Nessun problema se non lo è.'
  };
  const channels=[['whatsapp','WhatsApp'],['facebook','Facebook Messenger'],['linkedin','LinkedIn'],['instagram','Instagram Direct'],['email','Email'],['sms','SMS']];
  channels.forEach(([value,label])=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;select.append(opt);});
