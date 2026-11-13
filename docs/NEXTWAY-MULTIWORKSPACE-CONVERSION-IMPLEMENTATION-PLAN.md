@@ -403,3 +403,15 @@ Data: 13 novembre 2026
 - Controlli statici aggiunti alla suite di conversione e al workflow pull_request: **INTEGRATI NEL CODICE, NON ANCORA ESEGUITI**.
 - Test Auth/Partner runtime: **DA COMPLETARE IN AMBIENTE DI TEST**.
 - Database remoto, inviti, utenti, migrazioni, deploy e merge: **NON TOCCATI**.
+
+
+### Ulteriore chiusura del gate di attivazione membership
+
+- La sola `email_confirmed_at` non dimostrava che esistesse già una membership `invited`: l'azione amministrativa usava un upsert che poteva creare direttamente una membership `active`.
+- L'azione `set_membership` ora richiede, per lo stato `active`, una membership preesistente in stato `invited` (oppure `active` per operazioni idempotenti), oltre a workspace attivo e email confermata.
+- Se il profilo Partner è collegato a una richiesta di conversione, il backend verifica anche che la richiesta sia `activated`, che `activation_user_id` corrisponda all'utente e che il workspace coincida. Le membership manuali non collegate a una conversione restano gestibili dall'amministratore, ma devono comunque essere prima create come `invited`.
+- Sono stati aggiunti due controlli statici per questi vincoli. Il test non è ancora stato eseguito da Node/GitHub Actions.
+
+### Nota sullo stato anagrafico Partner
+
+Il finalizer assegna `partner_details.status = 'active'` nella stessa transazione in cui crea la membership workspace `invited`. L'accesso al workspace resta comunque negato finché `nextway_workspace_memberships.membership_status` non diventa `active`, perché il controllo di accesso richiede entrambi gli stati: workspace attivo e membership attiva. Nel codice applicativo revisionato non è emerso un controllo che usi `partner_details.status` come sostituto della membership. Il significato di `partner_details.status` resta quello di stato anagrafico del Partner, non di autorizzazione workspace.
