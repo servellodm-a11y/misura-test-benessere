@@ -58,7 +58,7 @@ assert.ok(searchHtml.includes('Pertinenza documentale:'));
 assert.ok(searchHtml.includes('non dimostra interesse o idoneità commerciale'));
 assert.ok(searchHtml.includes('non attribuire ruoli o interessi non documentati'));
 // Compile the browser script without executing DOM/network actions.
-const inlineScripts = [...searchHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
+const inlineScripts = [...searchHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]);
 const messageScript = inlineScripts.find(source => source.includes('function createMessageDraftPanel('));
 assert.ok(messageScript, 'Inline search script with message drafts must exist');
 new vm.Script(messageScript, { filename: 'nextway-motore-ricerca.inline.js' });
@@ -78,7 +78,7 @@ assert.ok(archiveHtml.includes('const evidenceExcerpt='));
 assert.ok(archiveHtml.includes('non dedurre qualifiche o interessi'));
 assert.ok(archiveHtml.includes('websites.generalWellnessWebsite'));
 assert.ok(archiveHtml.includes('websites.zinzinoReplicaWebsite'));
-const archiveScripts = [...archiveHtml.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(match => match[1]);
+const archiveScripts = [...archiveHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]);
 const crmScript = archiveScripts.find(source => source.includes('Prepara un messaggio per questo Lead'));
 assert.ok(crmScript, 'CRM inline script with message drafts must exist');
 new vm.Script(crmScript, { filename: 'nextway-ai.inline.js' });
