@@ -11,6 +11,7 @@ on:
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/functions/nextway-workspace-admin/**"
+      - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
       - "nextway-admin.html"
       - "nextway-admin.js"
@@ -141,3 +142,5 @@ jobs:
         run: deno check supabase/functions/nextway-conversion-provisioning/index.ts
       - name: Type-check workspace admin Edge Function
         run: deno check supabase/functions/nextway-workspace-admin/index.ts
+      - name: Type-check public search Edge Function
+        run: deno check supabase/functions/nextway-search/index.ts
