@@ -43,6 +43,12 @@ window.NEXTWAY_LOCAL_ARCHIVE={
  activate:activateLocalAccount,
  clear:clearLocalAccount,
  getOwner:()=>activeOwnerId,
+ getIndex(){
+  if(!activeOwnerId)return {urls:[],identity_keys:[]};
+  const urls=[],identityKeys=[];
+  for(const lead of data){if(lead.is_test)continue;const key=canonicalLeadSourceUrl(lead.url);if(key)urls.push(key);const meta=readProspectMetadata(lead);if(Array.isArray(meta.identity_keys))identityKeys.push(...meta.identity_keys.filter(value=>typeof value==='string'));}
+  return {urls:[...new Set(urls)],identity_keys:[...new Set(identityKeys)]};
+ },
  addFromSearch(record){
   if(!activeOwnerId)throw new Error('Accedi a NEXTWAY prima di acquisire un risultato.');
   const url=safeHttpUrl(record?.url);
