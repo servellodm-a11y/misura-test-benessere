@@ -20,7 +20,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <h1>Ricerca mirata dei profili</h1>
 <p class="muted">Genera una batteria di ricerche diverse per individuare segnali pubblici pertinenti. Ogni risultato deve essere aperto, verificato e valutato da una persona prima di entrare nell'Archivio Lead.</p>
 <div class="notice"><b>Stato del modulo:</b> generazione assistita di query. Non esegue scraping, non estrae automaticamente profili e non invia messaggi. Le ricerche riguardano informazioni professionali pubbliche; non raccogliere dati sensibili o informazioni non pertinenti.</div>
-<div class="notice" id="company-context"><b>Azienda attiva:</b> Zinzino · criteri di ricerca caricati dalla configurazione aziendale.</div>
+<div class="notice" id="company-context">Caricamento configurazione aziendale…</div>
 <section class="panel">
 <h2>Configura la ricerca</h2>
 <div class="grid">
@@ -62,7 +62,8 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 const $=id=>document.getElementById(id);let generated=[];
 const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 const activeCompany=companyConfig?.active||null;
-if(!activeCompany){$('company-context').textContent='Configurazione aziendale non caricata: impossibile generare ricerche commerciali.';$('generate').disabled=true;$('runsearch').disabled=true;}
+if(activeCompany){$('company-context').textContent='Azienda attiva: '+activeCompany.name+' · criteri di ricerca caricati dalla configurazione aziendale.';}
+else{$('company-context').textContent='Configurazione aziendale non caricata: impossibile generare ricerche commerciali.';$('generate').disabled=true;$('runsearch').disabled=true;}
 const templates={
 networker:[
 ['Ricerca attiva di collaboratori','("cerco collaboratori" OR "cerco collaboratrici" OR "nuove persone nel team" OR "amplio il team") ("network marketing" OR networker OR "vendita diretta")'],
