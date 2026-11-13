@@ -48,9 +48,11 @@ on:
       - "scripts/check-nextway-schema-dump.py"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
-    paths:
-      - "nextway-cloud.js"
-      - "nextway-setter.js"
+      - "scripts/test-nextway-partner-invite-lifecycle.mjs"
+      - "scripts/test-nextway-partner-cancellation-spec.mjs"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
+r.js"
       - "nextway-ai.html"
       - "nextway-admin.html"
       - "nextway-admin.js"
