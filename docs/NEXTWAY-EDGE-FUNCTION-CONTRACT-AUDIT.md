@@ -67,3 +67,33 @@ Il branch HEAD successivo `3cefd52` contiene soltanto il documento di stato dell
 - **BLOCCATO:** bootstrap Supabase full stack sul Mac Intel 8 GB per limiti di risorse.
 
 Nessuna migrazione, modifica al database, deploy, merge, seed o modifica a `main` eseguita durante questo audit.
+
+## Approfondimento Knowledge Base — 13 novembre 2026
+
+Revisione statica aggiuntiva di:
+- `nextway-knowledge-ingest/index.ts`;
+- `nextway-knowledge-upload/index.ts`;
+- migrazioni `20261111170000` (registro/chunk/ricerca), `20261111180000` (bucket privato), `20261111210000` (associazione workspace) e `20261111230000` (RLS workspace);
+- test statici `test-nextway-knowledge-base-sql.mjs`, `test-nextway-knowledge-ingest-security.mjs`, `test-nextway-knowledge-upload-security.mjs` e `test-nextway-workspace-scoped-rls.mjs`.
+
+### Esiti statici
+
+- **Autorizzazione:** entrambe le Edge Function richiedono Bearer token, validano l'utente con `auth.getUser` e verificano `profiles.role = platform_admin` prima delle operazioni privilegiate.
+- **Separazione workspace:** ingest richiede un UUID workspace, rifiuta workspace assente/archiviato e applica il filtro `workspace_id` alla deduplicazione. La migrazione scoped sostituisce l'indice hash globale con deduplicazione separata per workspace e limita ricerca e lettura dei documenti/chunk alla membership attiva; le fonti senza workspace restano riservate all'amministratore centrale.
+- **Ciclo documento:** i nuovi documenti nascono `pending`; l'Edge Function non li approva automaticamente. I chunk hanno indice univoco per documento e limite SQL di 12.000 caratteri; l'ingest usa chunk da 9.000 caratteri con sovrapposizione di 500.
+- **Storage:** bucket `nextway-knowledge` privato, limite 12 MiB, MIME ammessi PDF/DOCX/TXT. Il caricamento usa un percorso che include workspace e modulo. Il file viene rimosso in caso di duplicato o errore di ingest/link; il percorso viene collegato al documento solo dopo l'indicizzazione.
+- **Estrazione:** PDF limitati a 250 pagine, DOCX tramite Mammoth, TXT UTF-8 rigoroso; PDF scansiti senza testo vengono rifiutati perché OCR non è implementato.
+- **Ricerca:** la funzione SQL finale richiede workspace esplicito e membership; la vecchia firma senza workspace viene revocata. Risultati limitati a documenti approvati e nel periodo di validità.
+- **Test presenti:** gli script statici coprono autenticazione, ruolo, limiti, deduplicazione, approvazione, bucket privato, tipi file, estrazione e RLS workspace. La CI verde già registrata include questi controlli.
+
+### Limiti non coperti dalla revisione statica
+
+1. Non è stato eseguito un caricamento PDF/DOCX/TXT reale né un test di rollback su storage.
+2. Non sono stati verificati runtime, limiti effettivi della piattaforma Edge, OCR, qualità estrazione o ricerca full-text su contenuti reali.
+3. Non è stato verificato che la versione remota di queste due Edge Functions coincida con il branch.
+4. Le policy storage proteggono gli accessi autenticati diretti; le Edge Functions operano con service role dopo il controllo applicativo. Il comportamento effettivo va verificato sul progetto remoto senza esporre chiavi.
+5. I test sono statici: non provano isolamento effettivo tra due utenti/workspace in una sessione runtime.
+
+**Esito:** nessuna incompatibilità certa rilevata tra codice Edge, schema SQL e modello workspace esaminati. Knowledge Base e caricamento restano **ESEGUITO MA NON VERIFICATO a runtime**; non dichiarare il flusso end-to-end pronto.
+
+Nessuna migrazione, DDL/DML, test con dati reali, deploy, seed o modifica al database è stata eseguita in questo approfondimento.
