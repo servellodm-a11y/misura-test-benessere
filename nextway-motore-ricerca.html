@@ -20,6 +20,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <h1>Ricerca mirata dei profili</h1>
 <p class="muted">Genera una batteria di ricerche diverse per individuare segnali pubblici pertinenti. Ogni risultato deve essere aperto, verificato e valutato da una persona prima di entrare nell'Archivio Lead.</p>
 <div class="notice"><b>Stato del modulo:</b> generazione assistita di query. Non esegue scraping, non estrae automaticamente profili e non invia messaggi. Le ricerche riguardano informazioni professionali pubbliche; non raccogliere dati sensibili o informazioni non pertinenti.</div>
+<div class="notice" id="company-context"><b>Azienda attiva:</b> Zinzino · criteri di ricerca caricati dalla configurazione aziendale.</div>
 <section class="panel">
 <h2>Configura la ricerca</h2>
 <div class="grid">
@@ -56,8 +57,12 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <p class="small muted">Collegamenti: <a href="/nextway-ricerca.html">Ricerca assistita</a> · <a href="/nextway-ai.html">Archivio Lead</a></p>
 </section>
 </main>
+<script src="/nextway-company-config.js"></script>
 <script>
 const $=id=>document.getElementById(id);let generated=[];
+const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
+const activeCompany=companyConfig?.active||null;
+if(!activeCompany){$('company-context').textContent='Configurazione aziendale non caricata: impossibile generare ricerche commerciali.';$('generate').disabled=true;$('runsearch').disabled=true;}
 const templates={
 networker:[
 ['Ricerca attiva di collaboratori','("cerco collaboratori" OR "cerco collaboratrici" OR "nuove persone nel team" OR "amplio il team") ("network marketing" OR networker OR "vendita diretta")'],
@@ -154,6 +159,8 @@ function build(){
  if(lang==='both')terms=terms.slice(0,3).concat(enTerms[seg].slice(0,2));
  generated=terms.slice(0,5).map((q,i)=>{
    let full=q+' "'+area+'"'+(platform?' site:'+platform:'')+(extra?' '+extra:'');
+   const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
+   if(companyTerms.length){const modifier=companyTerms[i%companyTerms.length].map(term=>'"'+term+'"').join(' OR ');full+=' ('+modifier+')';}
    if(seg==='networker')full+=' -offerte di lavoro -annunci generici -franchising';
    if(seg==='customers')full+=' -diagnosi -terapie -dati sanitari';
    const label=lang==='en'?'English search '+(i+1):lang==='both'&&i>=3?'English search '+(i-2):base[i]?.[0]||'Ricerca';
@@ -175,7 +182,7 @@ async function runSearch(){
   if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
   button.disabled=true;status.textContent='Connessione a NEXTWAY e avvio delle 5 ricerche…';list.replaceChildren();
   const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();
-  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({queries:generated.map(x=>x.query),max_results:10})});
+  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:generated.map(x=>x.query),max_results:10})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
   const groups=payload.results||[];let total=0;
   groups.forEach((group,index)=>{
@@ -210,7 +217,7 @@ async function runSearch(){
       const partnerTypes={wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / professionista',side_income:'Altro profilo individuale',business_seeking:'Altro profilo individuale'};
       const evidence=[item.snippet||'',pageContent].filter(Boolean).join('\n\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
-      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts,evidence_quality:assessment,fit_status:'Non valutato'});
+      const result=window.NEXTWAY_LOCAL_ARCHIVE?.addFromSearch({title:item.title,evidence,url,category,partner_type:partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:publicContacts,evidence_quality:assessment,fit_status:'Non valutato',company_id:activeCompany?.id||'zinzino',company_name:activeCompany?.name||'Zinzino'});
       if(!result)throw new Error('Archivio locale non disponibile. Apri prima NEXTWAY AI ed effettua l’accesso.');
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
       capture.disabled=true;
