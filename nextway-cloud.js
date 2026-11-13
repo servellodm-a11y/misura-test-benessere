@@ -259,7 +259,7 @@ async function getLeadForConflict(cloudId){
   const {c}=await active();
   if(!(await isPlatformAdmin()))throw new Error('Accesso riservato a platform_admin.');
   const {data,error}=await c.from('nextway_lead_conversion_requests')
-   .select('id,lead_id,workspace_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at,lead:nextway_leads(display_name)')
+   .select('id,lead_id,workspace_id,owner_profile_id,sponsor_profile_id,created_by,conversion_type,full_name,email,phone,status,review_notes,reviewed_at,created_at,lead:nextway_leads(display_name),workspace:nextway_workspaces(name,partner_name)')
    .eq('status',status).order('created_at',{ascending:true}).limit(100);
   if(error)throw error;
   return data||[];
