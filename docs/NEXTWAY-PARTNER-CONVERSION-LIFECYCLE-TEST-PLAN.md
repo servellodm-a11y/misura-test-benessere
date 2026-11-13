@@ -106,7 +106,8 @@ Solo in ambiente isolato, con casella di test controllata: invio, accettazione, 
 
 La semantica di annullamento è ora definita nella specifica tecnica collegata, ma il ciclo Partner non è chiuso finché:
 - la procedura per reinviare un invito scaduto non è definita e testata;
-- la migrazione, la RPC, la guard e i test di annullamento non sono implementati e superati;
+- la migrazione, la RPC e la guard sono state preparate sul branch, ma non sono ancora validate da GitHub Actions e non sono state eseguite su PostgreSQL;
+- i test SQL rollback-only, le gare concorrenti e il collaudo Auth in staging non sono superati;
 - i test A e B non sono superati;
 - il test C non è superato in staging prima dell'applicazione delle migrazioni.
 
@@ -120,3 +121,13 @@ Questo piano non autorizza migrazioni, DDL/DML sul progetto reale, deploy Supaba
 La revisione delle migrazioni esistenti ha precisato i vincoli da coordinare: check dello stato richiesta, check coerenza revisione, check coerenza claim/attivazione e trigger `nextway_guard_conversion_request_review()`. Non è sufficiente aggiungere `cancelled` al solo check dello stato. La nuova specifica tecnica definisce come preservare i dati di revisione quando l'annullamento avviene dopo l'approvazione e come rappresentare l'annullamento da `pending` senza simulare una revisione.
 
 La gara annullamento/finalizzazione deve essere risolta dal lock della stessa riga richiesta. Il progetto staging non è ancora disponibile: test API Auth, test SQL e gare a due sessioni restano bloccati. Nessuna modifica al database reale o invio email è stato effettuato.
+
+
+## Implementazione annullamento — 13 novembre 2026
+
+- Preparata la migrazione `supabase/migrations/20261113140000_nextway_partner_conversion_cancellation.sql` con campi cancellation, vincoli status/review/cancellation, guard e RPC amministrativa.
+- La RPC usa `SELECT ... FOR UPDATE`, accetta solo platform_admin, invalida il claim e rifiuta richieste già `activated` o `rejected`; il retry su `cancelled` è idempotente.
+- La guard preserva i dati originari, i dati della revisione e i metadati di annullamento. Il finalizer esistente mantiene il lock sulla stessa richiesta e richiede stato `provisioning` più claim token valido.
+- Aggiunto `scripts/test-nextway-partner-cancellation-sql.mjs` e integrato nel workflow GitHub Actions.
+- Controllo statico locale dei 15 contratti SQL eseguito sui file del branch: tutti superati. Non è un test PostgreSQL e non certifica la correttezza runtime.
+- **Non applicato:** nessun DDL/DML sul progetto `nextway-platform`; nessun deploy.
