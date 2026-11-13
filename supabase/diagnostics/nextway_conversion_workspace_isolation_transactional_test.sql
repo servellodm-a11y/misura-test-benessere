@@ -245,9 +245,9 @@ reset role;
 
 -- Trasferimento amministrativo successivo del Lead A: la richiesta resta nello
 -- snapshot workspace A e non segue il workspace corrente del Lead.
-perform set_config('request.jwt.claim.sub',current_setting('nextway.test.admin'),true);
-perform set_config('request.jwt.claim.role','authenticated',true);
-perform set_config('request.jwt.claims',jsonb_build_object(
+select set_config('request.jwt.claim.sub',current_setting('nextway.test.admin'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
+select set_config('request.jwt.claims',jsonb_build_object(
   'sub',current_setting('nextway.test.admin'),'role','authenticated'
 )::text,true);
 update public.nextway_leads
