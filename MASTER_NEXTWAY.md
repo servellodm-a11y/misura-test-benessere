@@ -3281,3 +3281,12 @@ Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/part
 - GitHub Actions: nessun workflow run associato all'ultimo commit. L'ultimo commit è documentale e non ha attivato il workflow attraverso i path filter.
 - Nessuna modifica al database `nextway-platform`, nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email inviata, nessun utente o dato di prova creato. `main` invariato.
 - Vincoli confermati: PR #1 resta draft; niente merge; nessun deploy Netlify produzione prima del 4 dicembre 2026.
+
+
+## 13 novembre 2026 — Test statico annullamento Partner integrato
+
+- Aggiunto `scripts/test-nextway-partner-cancellation-spec.mjs`: verifica copertura della specifica, stati e metadati di annullamento, lock del finalizer, invalidazione claim, guard di immutabilità e limiti del cleanup Auth.
+- Integrato il test nel workflow `.github/workflows/nextway-static-validation.yml` per push e pull request; i path filter includono lo script e lo step esegue Node 22.
+- Il test è statico: non sostituisce le prove con PostgreSQL concorrente né il test API Auth in staging.
+- **Da verificare:** GitHub Actions non ha ancora restituito un run associato all'ultimo commit; non dichiarare CI superata finché il workflow non termina con successo.
+- Ultimo intervento su branch: commit `0d71dbcc5d471ed57db1746eed0764cf5a17a30b`; PR #1 ancora draft e non mergeata. Nessuna modifica a `main`, DB remoto, Edge Function remota o Netlify.
