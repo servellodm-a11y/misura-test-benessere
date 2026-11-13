@@ -166,3 +166,49 @@ Sono stati letti integralmente:
 Le migrazioni nel repository descrivono il corpo atteso delle RPC, ma non dimostrano da sole che il database live abbia esattamente quelle definizioni, grants e dipendenze. Il file `supabase/diagnostics/nextway_conversion_function_definitions_readonly.sql` è stato preparato per acquisire il DDL effettivo e le policy live.
 
 Non preparare una sostituzione SQL definitiva finché il DDL live non è stato confrontato con le migrazioni e non sono state verificate le dipendenze RLS. Questo gate evita di rimpiazzare accidentalmente modifiche live non presenti nel branch.
+
+
+## Confronto con il database live — diagnostica ricevuta
+
+Il 13 novembre 2026 è stato ricevuto l'output completo della diagnostica read-only. Le definizioni live sono state confrontate con le migrazioni nel branch.
+
+### Divergenza critica: finalizzazione live non atomica rispetto al Lead
+
+La funzione live `nextway_finalize_conversion_activation` (OID 18341) **non coincide** con la versione di `20261112170000_nextway_conversion_activation_integrity.sql`.
+
+La funzione live:
+- non acquisisce un lock `FOR UPDATE` sulla riga Lead;
+- crea/aggiorna prima `profiles`, `partner_details` o `clients`;
+- aggiorna il Lead soltanto dopo la creazione del record destinazione;
+- non usa `RETURNING` né controlla `FOUND` sull'UPDATE del Lead;
+- può quindi restituire `success=true` e attivare la richiesta anche se l'UPDATE Lead non ha trovato una riga ancora convertibile.
+
+La versione di repository del 12 novembre corregge precisamente questi punti con lock pessimista, verifica preventiva e UPDATE ... RETURNING; va considerata la baseline da preservare, non la prova che il database live sia già corretto.
+
+### Altre differenze e fatti live
+
+- La funzione live claim corrisponde sostanzialmente alla migrazione di provisioning.
+- La funzione live release corrisponde sostanzialmente alla migrazione di provisioning.
+- La funzione live review guard è SECURITY DEFINER con `search_path=pg_catalog`; gestisce transizioni review/claim/release/finalize.
+- La funzione live finalize ha `search_path=pg_catalog, public, auth` e SECURITY DEFINER.
+- Il trigger updated_at è non SECURITY DEFINER con `search_path=pg_catalog`.
+- Le policy conversion request comprendono una policy RESTRICTIVE di workspace scope derivata dal Lead, più una policy permissive workspace SELECT. La policy INSERT resta owner/admin e non abilita un membro attivo a proporre conversioni per un Lead condiviso.
+- La policy di SELECT Lead combina owner/admin e workspace access; una policy RESTRICTIVE limita comunque l'accesso al workspace.
+- La policy di SELECT conversion requests owner/admin e quella workspace SELECT sono permissive; l'accesso workspace è comunque limitato dalla policy RESTRICTIVE.
+- `clients` continua ad avere policy CRUD owner partner_profile_id/admin: non concede accesso ai membri del workspace.
+- `partner_details` resta leggibile dal soggetto e dall'admin; la policy admin_all consente scrittura solo all'admin.
+- La policy membership admin_all e self_read non concede automaticamente accesso a dati CRM.
+- La policy workspace member read include owner/admin/manager/member/viewer tramite `nextway_has_workspace_access`; la proposta di conversione può comunque escludere viewer senza alterare la lettura workspace.
+
+### Limiti dell'evidenza
+
+La diagnostica restituita contiene definizioni RPC e policy, ma non l'elenco dei GRANT effettivi alle funzioni. Non certifica quindi i privilegi EXECUTE live. Non legge dati CRM e non prova il comportamento runtime, concorrenza o rollback.
+
+### Conseguenze per la correzione
+
+1. La futura migrazione deve sostituire la funzione live finalize con una versione atomica che acquisisca lock su richiesta e Lead, verifichi lo snapshot workspace, controlli il numero di righe aggiornate e crei record di destinazione, membership/attribuzione e stati finali nella stessa transazione.
+2. Il ramo partner deve rifiutare profili o partner_details già esistenti e incompatibili; retry della stessa richiesta può essere idempotente solo se i legami alla richiesta coincidono.
+3. La richiesta deve acquisire `workspace_id` dal Lead lato database al momento della creazione, con NULL riservato al percorso legacy centrale; il client non deve poter scegliere o alterare tale valore.
+4. La policy INSERT va riprogettata per consentire a ruoli workspace autorizzati di proporre conversioni di Lead condivisi, verificando membership attiva e ruolo, mantenendo owner/sponsor come proprietario effettivo del Lead.
+5. L'accesso clienti dei collaboratori deve essere progettato e testato separatamente; la membership non deve diventare un bypass generalizzato di RLS.
+6. Prima di finalizzare la migrazione, acquisire i GRANT EXECUTE live e confermare le firme/grants di `nextway_has_workspace_access` e `nextway_is_platform_admin`, oltre a eseguire test statici e transazionali su fixture controllate.
