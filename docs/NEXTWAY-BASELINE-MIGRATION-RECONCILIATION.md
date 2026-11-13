@@ -285,3 +285,22 @@ I risultati confermano la presenza dei due store Setter e confermano nel databas
 - **COMPLETATO:** query read-only eseguita con successo; due tabelle Setter confermate presenti; sei oggetti/funzioni/trigger non trovati; tre relazioni candidate a registro individuate.
 - **DA COMPLETARE:** identificazione del registro migrazioni pertinente; confronto della cronologia con le 31 migrazioni; verifica della versione Edge Function distribuita.
 - **NON ESEGUITO:** migrazioni, DDL/DML, deploy, import, seed, test runtime o modifiche al database.
+
+
+## 10. Passo successivo: identificazione strutturale dei registri candidati — 13 novembre 2026
+
+La query precedente ha individuato tre relazioni candidate per nome (`auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`), ma non ne ha letto i contenuti. Per evitare di interrogare tabelle managed non pertinenti o assumere uno schema non verificato, è stato aggiunto `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql`.
+
+La nuova query:
+- interroga soltanto `pg_catalog`;
+- verifica l'esistenza delle tre relazioni candidate;
+- restituisce esclusivamente nomi e tipi delle colonne, posizione e indicatore NOT NULL;
+- non legge righe delle tabelle candidate;
+- non contiene DDL/DML e non modifica database o dati.
+
+**Prossimo passo:** eseguire questa query nel SQL Editor e riportare il risultato testuale o uno screenshot. In base ai nomi/tipi delle colonne si stabilirà se una relazione è effettivamente un registro di migrazioni applicative. Non leggere ancora le righe delle tabelle e non eseguire query manuali su schemi managed.
+
+File: `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql`.
+Commit: `cddb4d3`.
+
+Nessuna migrazione, deploy, merge, import, seed o modifica al database è stata eseguita.
