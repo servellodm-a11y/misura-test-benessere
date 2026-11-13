@@ -115,13 +115,38 @@ Deno.serve(async (req) => {
         // Recover an invite created by a previous timed-out attempt, but never attach
         // an unrelated Auth account that happens to use the same email address.
         const existingInvite = await findExistingInvite(admin, email, requestId);
-        if (existingInvite) {
+        const inviteMetadata = {
+          full_name: String(claim.full_name),
+          nextway_conversion_request_id: requestId,
+        };
+
+        if (existingInvite?.email_confirmed_at) {
+          // An already accepted invite is not resent or deleted. The finalizer
+          // will bind this exact Auth user to the pending conversion.
+          invitedUserId = existingInvite.id;
+        } else if (existingInvite) {
+          // Supabase Auth can re-send an invitation to an existing, unconfirmed
+          // invitee. Reuse the same user; never create a second identity. Confirm
+          // the API returned that exact user and that request metadata survived.
+          const { data: resent, error: resendError } = await admin.auth.admin.inviteUserByEmail(
+            email,
+            { data: inviteMetadata },
+          );
+          if (resendError || !resent.user || resent.user.id !== existingInvite.id) {
+            throw resendError ?? new Error("Reinvio invito non coerente con l'account esistente");
+          }
+          const { data: refreshed, error: refreshError } =
+            await admin.auth.admin.getUserById(existingInvite.id);
+          if (refreshError || !refreshed.user ||
+              String(refreshed.user.email ?? "").toLowerCase() !== email.toLowerCase() ||
+              refreshed.user.user_metadata?.nextway_conversion_request_id !== requestId) {
+            throw refreshError ?? new Error("Metadata invito non verificati dopo il reinvio");
+          }
           invitedUserId = existingInvite.id;
         } else {
           const { data: invite, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
             email,
-            { data: { full_name: String(claim.full_name),
-                nextway_conversion_request_id: requestId } },
+            { data: inviteMetadata },
           );
           if (inviteError || !invite.user) throw inviteError ?? new Error("Invito Auth non creato");
           invitedUserId = invite.user.id;
