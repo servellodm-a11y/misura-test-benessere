@@ -39,7 +39,8 @@ window.NEXTWAY_LOCAL_ARCHIVE={
   if(!activeOwnerId)throw new Error('Accedi a NEXTWAY prima di acquisire un risultato.');
   const url=safeHttpUrl(record?.url);
   if(!url)throw new Error('URL della fonte non valido.');
-  const duplicate=data.find(x=>!x.is_test&&x.url&&safeHttpUrl(x.url)?.toLowerCase()===url.toLowerCase());
+  const canonicalUrl=value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'');}catch{return String(value||'').trim().toLowerCase();}};
+  const duplicate=data.find(x=>!x.is_test&&x.url&&canonicalUrl(safeHttpUrl(x.url))===canonicalUrl(url));
   if(duplicate)return {duplicate:true,lead:duplicate};
   const title=String(record?.title||'').trim().slice(0,120);
   const evidence=String(record?.evidence||'').trim().slice(0,4000);
