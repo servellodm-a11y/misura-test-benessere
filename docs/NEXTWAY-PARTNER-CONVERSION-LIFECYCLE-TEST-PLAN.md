@@ -17,7 +17,7 @@ Il collaudo non deve creare utenti, inviti, email o dati di prova nel progetto S
 - Il finalizer verifica ID utente, email e metadata prima di creare i record Partner.
 - Il finalizer crea `profiles`, `partner_details` e, se la richiesta ha un workspace, una membership `workspace_member / invited` nella stessa transazione.
 - I profili e i dettagli Partner preesistenti incompatibili causano un errore, senza UPSERT distruttivi.
-- Un retry recupera un invito precedente associato alla stessa richiesta. Un invito creato dal tentativo corrente può essere eliminato in compensazione solo se non risulta confermato; un invito recuperato non viene eliminato.
+- Un retry recupera un invito precedente associato alla stessa richiesta. Se l'utente esiste ma non ha confermato l'email, l'Edge Function ora richiama `inviteUserByEmail` per reinviare l'invito allo stesso account e verifica che ID, email e metadata della richiesta siano rimasti coerenti. Se l'utente ha già confermato l'email, non reinvia e riutilizza quell'ID. Un invito creato dal tentativo corrente può essere eliminato in compensazione solo se non risulta confermato; un invito recuperato non viene eliminato.
 - L'attivazione amministrativa della membership richiede email Auth confermata, membership `invited` preesistente e coerenza tra richiesta attivata, utente e workspace.
 
 Questi sono controlli statici sul codice, non test runtime.
@@ -33,7 +33,7 @@ Questi sono controlli statici sul codice, non test runtime.
 | Errore dopo creazione invito nel tentativo corrente | Cleanup solo se l'account non è stato confermato; claim rilasciato | Da testare in staging |
 | Errore dopo recupero di invito precedente | Non eliminare l'account recuperato; rendere possibile il retry | Da testare in staging |
 | Invito accettato prima del retry | Riutilizzare lo stesso Auth user; non cancellarlo; completare la finalizzazione se ancora pendente | Da testare in staging |
-| Invito scaduto/non più utilizzabile | Non trattarlo silenziosamente come invito valido; prevedere un reinvio controllato | Gap da risolvere |
+| Invito scaduto/non più utilizzabile | Reinviare l'invito all'account non confermato già associato, mantenendo ID e metadata | Implementato staticamente; da testare in staging |
 | Email già appartenente a un account Auth non legato alla richiesta | Fail closed; nessuna associazione automatica | Da testare in staging |
 | Profilo o partner_details incompatibile già esistente | Rollback completo; nessuna sovrascrittura | Da testare in staging |
 | Membership già esistente | Bloccare e richiedere riconciliazione; non fare UPSERT cieco | Da testare in staging |
@@ -45,9 +45,9 @@ Questi sono controlli statici sul codice, non test runtime.
 
 ### 1. Invito scaduto
 
-Supabase documenta che i link di invito scadono secondo la configurazione Email OTP Expiration (default documentato: un'ora) e che, se il link scade, occorre inviare un nuovo invito. L'Edge Function attuale trova un utente non confermato con lo stesso metadata e lo riutilizza, ma non verifica se il link precedente è ancora valido e non attiva un percorso di reinvio.
+Supabase documenta che i link di invito scadono secondo la configurazione Email OTP Expiration e che, se il link scade, occorre inviare un nuovo invito. L'Edge Function è stata aggiornata per richiamare `auth.admin.inviteUserByEmail()` quando trova un utente non confermato già associato alla stessa richiesta. Prima di proseguire verifica che l'API restituisca lo stesso ID; poi rilegge l'utente e controlla email e metadata. Se l'ID cambia o i metadata non corrispondono, il provisioning fallisce in modo chiuso. Gli utenti già confermati non ricevono un nuovo invito.
 
-Non introdurre una stima dell'expiry basata su un valore hardcoded: la durata è configurabile. La soluzione deve usare una procedura Auth supportata e verificata, preservare lo stesso legame richiesta/utente e non eliminare account già accettati. Va anche verificato il comportamento dell'API Auth con un utente non confermato già esistente.
+Questa correzione è supportata dalla documentazione Auth per il reinvio di un invito, ma il comportamento effettivo su un account esistente non confermato deve ancora essere provato in staging. Non viene calcolata localmente una scadenza hardcoded.
 
 ### 2. Invito rifiutato o annullato
 
