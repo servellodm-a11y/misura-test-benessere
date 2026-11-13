@@ -368,6 +368,6 @@ const genericFit=assessFit('Profilo personale','Benessere e stile di vita','', '
 assert.equal(genericFit.prospect_type,'da qualificare');
 assert.equal(genericFit.commercial_fit_score,0);
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
-assert.ok(archiveHtml.includes('Prossima azione: '+ '(fit.suggested_next_step'));
+assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
 console.log('NEXTWAY company configuration contract: PASS');
