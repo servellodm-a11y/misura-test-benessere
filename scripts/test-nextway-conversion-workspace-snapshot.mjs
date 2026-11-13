@@ -14,7 +14,7 @@ const checks = [
   ["snapshot immutable in guard", /new\.workspace_id is distinct from old\.workspace_id/i.test(migration)],
   ["browser uses creation RPC", /rpc\('nextway_create_lead_conversion_request'/i.test(cloud)],
   ["browser does not send workspace_id to creation RPC", /p_workspace_id\s*:/i.test(cloud) === false],
-  ["request reads include workspace_id", /select\([^\n]*workspace_id[^\n]*\)[\s\S]*\.eq\('id',requestId\)/i.test(cloud)],
+  ["request reads include workspace_id", cloud.includes("created_by,workspace_id,conversion_type") && cloud.includes("lead_id,workspace_id,conversion_type")],
 ];
 
 for (const [name, passed] of checks) {
