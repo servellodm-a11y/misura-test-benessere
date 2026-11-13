@@ -2869,3 +2869,29 @@ Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece 
 - Nessun dump remoto eseguito, nessuna password richiesta o acquisita, nessun dato applicativo esportato. Nessuna connessione remota aperta in questo passaggio.
 - Il dump `public` non contiene le strutture gestite `auth`/`storage`: devono essere fornite dallo stack locale; i ruoli standard devono essere confrontati separatamente.
 - Il dump non va versionato prima della revisione per assenza di righe dati, segreti hard-coded e oggetti specifici della produzione. Occorre riconciliarlo con le 31 migrazioni del branch prima di importarlo.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026 — RECUPERO BASELINE SCHEMA-ONLY
+
+### Dump remoto in sola lettura
+- Verificata la sintassi con Supabase CLI 3.1.0 ed eseguito: `supabase db dump --remote=obqwbtlltxjfeirstsya --schema public --file /tmp/nextway-public-schema.sql`.
+- La CLI ha identificato il target come progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`, production. Il dump è stato scritto in `/tmp`, senza applicare SQL al database remoto.
+- File risultante: circa 154 KB / 3.615 righe. SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
+- Controlli: zero occorrenze `COPY` / `INSERT INTO`; 21 tabelle, 22 funzioni `SECURITY DEFINER`, 53 policy RLS, 11 trigger e 48 indici. Le definizioni esaminate includono configurazioni `search_path`; il dump usa `CREATE OR REPLACE TRIGGER`.
+- Il dump originale non è stato committato e resta in `/tmp`. Nessuna migrazione, scrittura SQL o modifica ai dati/configurazione remoti.
+
+### Inventario migrazioni e riconciliazione
+- Recuperato l'albero Git ricorsivo del branch `fix/nextway-password-recovery` al commit `d11e3e812f11b5949ebd388b976d35cdfd2e83dd`; inventariati e letti staticamente i 31 file SQL in `supabase/migrations/`.
+- Creato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`: elenco delle 31 migrazioni, aree funzionali, dipendenze preesistenti e managed Auth/Storage, limiti probatori e ordine di costruzione.
+- Aggiornato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con il risultato effettivo del dump e lo stato.
+- Aggiornato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` con il nuovo stato della baseline e i vincoli per il setup locale.
+- La migrazione `20261105000100_nextway_ai_assistant_foundation.sql` resta draft separato. La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` risulta già applicata live secondo il registro: non riapplicarla in produzione.
+
+### Stato e decisione tecnica
+- **COMPLETATO:** verifica CLI/Docker e risorse Mac; recupero schema-only read-only; controlli iniziali assenza righe; inventario statico migrazioni; aggiornamento documentazione sul branch.
+- **DA COMPLETARE:** confronto puntuale di nomi e definizioni del dump con tutte le migrazioni; verifica tipi, sequenze, ownership, grant, FK e dipendenze; preparazione baseline locale revisionata.
+- **NON ESEGUITO:** `supabase init`, `supabase start`, import locale, seed sintetici, test runtime, migrazioni.
+- Non tentare il full stack sul Mac Intel da 8 GB RAM; non aumentare la memoria Docker. Prima profilo SQL ridotto, poi eventuale profilo integrazione soltanto se sostenibile.
+- Nessun `supabase link`, `db push`, deploy, merge, modifica a `main`, progetto cloud o spesa. Il blocco Netlify produzione fino al 4 dicembre 2026 resta invariato.
