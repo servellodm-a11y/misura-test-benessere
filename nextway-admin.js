@@ -269,7 +269,7 @@
       event.preventDefault();
       const form = event.currentTarget;
       const values = Object.fromEntries(new FormData(form).entries());
-      const lines = (value) => String(value || "").split(/\\r?\\n/).map((item) => item.trim()).filter(Boolean);
+      const lines = (value) => String(value || "").split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
       values.settings = {
         profile_version: 1,
         offering: lines(values.profile_offering),
