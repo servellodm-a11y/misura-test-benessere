@@ -184,7 +184,7 @@ schemas_data as (
   where n.nspname in ('public')
 )
 
-with report_data as (
+, report_data as (
 select jsonb_pretty(jsonb_build_object(
   'report_version', 1,
   'scope', 'public schema metadata only',
