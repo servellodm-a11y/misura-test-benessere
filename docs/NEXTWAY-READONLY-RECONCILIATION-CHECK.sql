@@ -1,8 +1,8 @@
 -- NEXTWAY: verifica mirata in SOLA LETTURA di oggetti Setter e registro migrazioni.
 -- Eseguire nel SQL Editor del progetto nextway-platform (ref obqwbtlltxjfeirstsya).
 -- Non modifica dati o schema. Contiene esclusivamente SELECT sui cataloghi.
--- La precedente ipotesi supabase_migrations.schema_migrations è risultata
--- non valida per questo progetto: qui non viene referenziata direttamente.
+-- Non si presume uno schema o un nome specifico per il registro:
+-- la ricerca viene effettuata soltanto sui cataloghi PostgreSQL.
 
 -- RISULTATO 1: cerca eventuali tabelle di registro migrazioni senza presumere
 -- schema o nome. L'assenza di righe significa che non è stato trovato un
