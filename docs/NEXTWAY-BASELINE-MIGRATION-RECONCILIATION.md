@@ -349,3 +349,31 @@ Il report unico consolida e conferma il precedente controllo degli oggetti. Il p
 - Legge esclusivamente i metadati delle colonne tramite `pg_catalog` e `to_regclass`; non legge righe delle tabelle candidate e non contiene DDL/DML.
 - Serve a stabilire se uno dei registri abbia una struttura compatibile con un registro di versioni migrazione. Non presume che i registri Auth/Realtime/Storage siano il registro delle migrazioni applicative.
 - File pronto sul branch `fix/nextway-password-recovery`. Nessuna query ancora eseguita con questo file; nessuna modifica remota.
+
+
+## 12. Esito struttura registri candidati — 13 novembre 2026
+
+L'utente ha eseguito correttamente `docs/NEXTWAY-REGISTRY-COLUMNS-REPORT.sql`. La query ha restituito una sola cella testuale e ha letto esclusivamente metadati `pg_catalog`; nessuna riga delle tabelle candidate è stata letta e nessuna modifica è stata apportata.
+
+### Strutture individuate
+
+| Relazione | Colonne | Interpretazione |
+|---|---|---|
+| `auth.schema_migrations` | `version varchar(255) NOT NULL` | Tabella di versioni del componente Auth; da sola non dimostra la cronologia delle migrazioni SQL NEXTWAY |
+| `realtime.schema_migrations` | `version bigint NOT NULL`, `inserted_at timestamp(0)` | Tabella di versioni del componente Realtime; non è evidenza della cronologia SQL NEXTWAY |
+| `storage.migrations` | `id integer NOT NULL`, `name varchar(100) NOT NULL`, `hash varchar(40) NOT NULL`, `executed_at timestamp` | Registro interno del componente Storage; non è evidenza della cronologia SQL NEXTWAY |
+
+### Conclusione
+
+Nessuno dei tre registri individuati può essere assunto come registro delle migrazioni SQL applicative NEXTWAY. I primi due appartengono ai componenti Auth e Realtime; il terzo è il registro del componente Storage. Il tentativo precedente di interrogare `supabase_migrations.schema_migrations` ha inoltre confermato che quella relazione non è presente nel progetto.
+
+**Conclusione probatoria:** al momento non è stato identificato un registro remoto delle migrazioni applicative NEXTWAY accessibile con il metodo SQL tentato. Questo non prova che le migrazioni non siano state applicate: potrebbero essere state eseguite dal SQL Editor, da altri strumenti o senza un registro CLI remoto. Non leggere le righe di questi tre registri managed: non risolverebbe la cronologia NEXTWAY.
+
+### Decisione tecnica e prossimo passo
+
+1. Considerare conclusa la ricerca del registro tramite nomi di tabelle nei cataloghi: i tre candidati sono registri di componenti managed, non un registro applicativo dimostrato.
+2. Ricostruire lo stato delle migrazioni NEXTWAY confrontando le definizioni effettive degli oggetti con i file SQL del branch, e separatamente verificare la versione effettivamente distribuita delle Edge Functions.
+3. Non applicare automaticamente le migrazioni mancanti: prima controllare prerequisiti, dipendenze, compatibilità con lo schema live e stato runtime.
+4. Nessuna query sulle righe dei registri Auth/Realtime/Storage, nessuna migrazione, DDL/DML, deploy, merge o modifica a `main`.
+
+**Stato:** struttura registri candidati completata; registro migrazioni applicative NEXTWAY non identificato; nessuna modifica al database.
