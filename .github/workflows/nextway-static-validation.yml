@@ -49,6 +49,7 @@ on:
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
       - "supabase/functions/nextway-workspace-admin/**"
+      - "supabase/functions/nextway-search/**"
       - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
