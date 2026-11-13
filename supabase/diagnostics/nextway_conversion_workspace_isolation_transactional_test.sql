@@ -256,7 +256,7 @@ where id=current_setting('nextway.test.lead_a')::uuid;
 
 set local role authenticated;
 
-do $
+do $$
 declare
   v_user_a uuid := current_setting('nextway.test.user_a')::uuid;
   v_user_b uuid := current_setting('nextway.test.user_b')::uuid;
