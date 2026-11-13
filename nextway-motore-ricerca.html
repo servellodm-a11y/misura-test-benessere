@@ -213,7 +213,7 @@ async function runSearch(){
       duplicateEntry.sources=[...new Set([...duplicateEntry.sources,url])];
       duplicateEntry.daily.sources=duplicateEntry.sources;
       const sourceRecord={url,title:item.title||'',snippet:String(item.snippet||'').slice(0,1200),evidence:pageContent.slice(0,4000),collected_at:new Date().toISOString(),public_contacts:publicContacts};
-      const sourceKey=value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\\/+$/,'')||'/';return u.toString().replace(/\\/$/,'')}catch{return String(value||'').toLowerCase()}};
+      const sourceKey=value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'')}catch{return String(value||'').toLowerCase()}};
       if(!duplicateEntry.daily.source_evidence.some(source=>sourceKey(source.url)===sourceKey(url)))duplicateEntry.daily.source_evidence.push(sourceRecord);
       for(const field of ['emails','phones','whatsapp','socials']){duplicateEntry.daily[field]=[...new Set([...duplicateEntry.daily[field],...publicContacts[field]])].slice(0,10);}
       duplicateEntry.contactSummary.textContent+=' Fonte aggiuntiva consolidata: '+url+'.';
