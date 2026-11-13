@@ -3003,3 +3003,11 @@ Le assenze non dimostrano che le migrazioni siano state saltate o che gli oggett
 - **DA COMPLETARE:** identificare il registro migrazioni pertinente e ricostruire la cronologia; verificare la versione Edge Function effettivamente distribuita.
 - **NON ESEGUITO:** migrazioni, DDL/DML, deploy, merge, import locale, seed, test runtime o modifiche al database.
 - Branch di lavoro: `fix/nextway-password-recovery`. `main` invariato. PR #1 resta draft. Nessun deploy Netlify in produzione prima del 4 dicembre 2026.
+
+
+### Prossimo controllo pronto — metadati registri in un'unica cella — 13 novembre 2026
+- Creato `docs/NEXTWAY-REGISTRY-COLUMNS-REPORT.sql` sul branch di lavoro.
+- Restituisce un solo campo testuale `report` che riepiloga presenza e colonne dei tre registri candidati.
+- Legge solo metadati `pg_catalog`, senza leggere righe delle tabelle e senza DDL/DML.
+- Non è ancora stato eseguito. Il suo scopo è identificare la struttura, non assumere che uno dei registri managed sia quello delle migrazioni NEXTWAY.
+- Nessuna modifica al database o deploy.
