@@ -135,3 +135,8 @@ La CLI documenta l'opzione `supabase start -x` per escludere servizi; la lista e
 - Ambiente locale avviato: **NO**.
 - Migrazioni/test runtime: **NON ESEGUITI**.
 - Produzione, Netlify, progetto cloud, PR e `main`: **NON MODIFICATI**.
+
+
+## Riferimento alla matrice servizi — 13 novembre 2026
+
+È stato aggiunto `docs/NEXTWAY-LOCAL-SERVICE-MATRIX.md`, che classifica le dipendenze delle migrazioni e separa il profilo SQL/concorrenza dal profilo di integrazione Auth/API/Storage/Edge Functions. La lista dei servizi da escludere resta candidata e deve essere verificata sulla CLI 3.1.0 prima di qualsiasi avvio. La baseline deve ricostruire anche le dipendenze `auth` e `storage`; non si deve dichiarare un test Auth/Storage superato con il solo PostgreSQL.
