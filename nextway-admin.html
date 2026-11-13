@@ -41,7 +41,15 @@
         <label>Paese mercato<input name="market_country" maxlength="120" placeholder="Es. Italia"></label>
         <label>Lingua<select name="language_code"><option value="it">Italiano</option></select></label>
       </div>
-      <label>Descrizione<textarea name="description" maxlength="2000"></textarea></label>
+      <label>Descrizione generale dell’azienda<textarea name="description" maxlength="2000" placeholder="Descrizione neutra dell’azienda e del suo settore."></textarea></label>
+      <details>
+        <summary><strong>Profilo commerciale iniziale (facoltativo)</strong></summary>
+        <p class="muted">Queste informazioni vengono salvate nelle impostazioni del workspace. Una voce per riga; inserisci soltanto informazioni documentate.</p>
+        <label>Prodotti e servizi<textarea name="profile_offering" maxlength="5000" rows="3" placeholder="Un prodotto o servizio per riga"></textarea></label>
+        <label>Pubblici e clienti ideali<textarea name="profile_audiences" maxlength="5000" rows="3" placeholder="Un pubblico o segmento per riga"></textarea></label>
+        <label>Parole chiave per la ricerca<textarea name="profile_discovery_terms" maxlength="5000" rows="3" placeholder="Una parola chiave o frase per riga"></textarea></label>
+        <label>Posizionamento e proposta di valore approvati<textarea name="profile_positioning" maxlength="3000" rows="3" placeholder="Descrivi in modo verificabile il valore dell’offerta."></textarea></label>
+      </details>
       <button class="btn" type="submit">Crea workspace in bozza</button>
     </form>
     <div class="row"><h3>Workspace registrati</h3><button class="btn alt" id="workspace-refresh" type="button">Aggiorna elenco</button></div>
