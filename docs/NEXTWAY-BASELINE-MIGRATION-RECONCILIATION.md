@@ -150,3 +150,48 @@ python3 scripts/analyze-nextway-schema-baseline.py
 ```
 
 Il percorso predefinito del dump è `/tmp/nextway-public-schema.sql`; è possibile specificare un percorso alternativo con `--dump`. Lo script è un aiuto lessicale, non un parser PostgreSQL e non certifica da solo la sicurezza o l'importabilità. Non si connette a Supabase e non esegue SQL. **Non è ancora stato eseguito sul Mac dell'utente.**
+
+
+## 8. Esito del confronto automatico sul Mac — 13 novembre 2026
+
+Eseguito localmente sul branch aggiornato al commit `ed8187d`:
+
+```bash
+python3 scripts/analyze-nextway-schema-baseline.py
+```
+
+Lo script ha letto il dump con SHA-256 già registrato e tutte le 31 migrazioni. Il risultato è utile per orientare la revisione, ma contiene falsi positivi di parsing e non deve essere interpretato come una lista definitiva di oggetti mancanti.
+
+### Differenze classificate
+
+| Risultato | Interpretazione |
+|---|---|
+| 12 tabelle `nw_*` non presenti | Attese: appartengono alla migrazione draft `20261105000100_nextway_ai_assistant_foundation.sql`, mantenuta fuori dal perimetro della baseline corrente |
+| 12 tabelle NEXTWAY dichiarate nelle migrazioni risultano nel dump | Evidenza positiva di una parte importante dello schema CRM, Knowledge Base e workspace |
+| 4 policy Knowledge Storage non presenti nel dump `public` | Non confrontabili con questo dump: la migrazione le crea su `storage.objects`, schema gestito escluso dall'esportazione `public` |
+| Trigger `already` e indice `if` | Falsi positivi del riconoscimento lessicale: il parser non gestisce in modo completo le clausole SQL `IF NOT EXISTS` |
+| Alcuni indici Setter legacy non presenti | Da verificare insieme alla tabella legacy; non assumere che siano eliminabili |
+| Differenze nei conteggi delle policy rispetto al controllo precedente | Il conteggio lessicale non è ancora normalizzato; verificare le definizioni effettive prima di certificare il totale |
+
+### Anomalie da risolvere prima della baseline
+
+1. **Tabella legacy Setter:** lo script non trova `public.nextway_setter_generation_requests`. La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` contiene un controllo esplicito che richiede questa tabella e dichiara che deve essere preservata; la migrazione crea invece una tabella separata `nextway_setter_workspace_generation_requests`. La sua assenza nel dump è quindi una discrepanza sostanziale da chiarire, non un oggetto da ricreare automaticamente.
+2. **Rate limit:** non risultano nel dump né `nextway_api_rate_limits` né `nextway_consume_api_rate_limit` (la funzione viene ridefinita dalla migrazione `20261110000300_nextway_rate_limit_units.sql`). Verificare se questa funzionalità sia stata effettivamente applicata, rimossa o sostituita prima di includerla nella baseline.
+3. **Pulizia output Setter:** non risultano `nextway_clear_stale_setter_output` e il trigger `nextway_clear_stale_setter_output_trg`; la migrazione `20261110000700_nextway_clear_stale_staged_output.sql` li definisce sulla tabella legacy. La discrepanza dipende anche dal punto 1.
+4. **Retention Setter legacy:** non risulta `nextway_prune_setter_generation_requests`; verificare il percorso legacy e la distinzione dalla funzione workspace `nextway_prune_workspace_setter_generation_requests`.
+5. **Governance Setter:** non risulta `nextway_get_active_setter_governance`, benché sia dichiarata dalla migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`. Confrontare la definizione e il registro migrazioni, senza dedurre dal solo dump se la migrazione sia stata applicata.
+
+### Decisione tecnica aggiornata
+
+- Le 12 tabelle draft `nw_*` restano escluse dalla baseline corrente.
+- Le policy Storage restano fuori dal confronto del dump `public` e saranno predisposte attraverso lo stack/fixture Storage locale.
+- La baseline **non è ancora certificabile come riproducibile** finché non sono chiarite soprattutto la tabella legacy Setter e le discrepanze rate limit/governance.
+- Non creare manualmente gli oggetti mancanti e non riapplicare migrazioni in produzione.
+- Il passo successivo è un controllo mirato, in sola lettura, del dump locale e delle definizioni/cronologia delle migrazioni; poi si correggerà il parser per evitare falsi positivi.
+
+### Stato
+
+- **COMPLETATO:** esecuzione dello script sul Mac; identificazione delle aree già rappresentate nella baseline; classificazione delle tabelle draft e delle policy Storage escluse.
+- **DA RISOLVERE:** discrepanza tabella Setter legacy, rate limit, funzione governance e retention/trigger legacy.
+- **DA MIGLIORARE:** parser di trigger/indici e conteggi RLS.
+- **NON ESEGUITO:** import locale, seed, migrazioni, test runtime, modifiche al database remoto o deploy.
