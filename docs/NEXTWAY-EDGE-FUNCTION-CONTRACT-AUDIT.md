@@ -97,3 +97,37 @@ Revisione statica aggiuntiva di:
 **Esito:** nessuna incompatibilità certa rilevata tra codice Edge, schema SQL e modello workspace esaminati. Knowledge Base e caricamento restano **ESEGUITO MA NON VERIFICATO a runtime**; non dichiarare il flusso end-to-end pronto.
 
 Nessuna migrazione, DDL/DML, test con dati reali, deploy, seed o modifica al database è stata eseguita in questo approfondimento.
+
+## Audit dipendenze CRM, membership e conversione — 13 novembre 2026
+
+È stata esaminata la catena multi-workspace (foundation, membership, RLS, creazione Lead), l'amministrazione workspace e il provisioning di conversione.
+
+### Parti coerenti staticamente
+
+- La foundation crea workspace, prompt e criteri versionati; l'attivazione richiede workspace attivo e approvazione amministrativa, con RPC riservate a `service_role`.
+- Le membership hanno ruoli e stati espliciti, unicità workspace/utente e un solo owner attivo o invitato per workspace.
+- `nextway_has_workspace_access` richiede sessione autenticata, membership attiva, workspace attivo e ruolo ammesso; `platform_admin` conserva accesso centrale.
+- Le RPC di creazione Lead/Conversazione distinguono il percorso legacy centrale dal percorso workspace-aware e legano la chiave idempotente al workspace. La vecchia idempotenza rifiuta il replay di richieste che appartengono a un workspace.
+- Le funzioni admin verificano il ruolo `platform_admin`; la modifica delle membership è centralizzata. I test statici coprono ruoli, stati, unicità owner, grants, CORS e contratti di creazione.
+- Il provisioning conversione usa claim token, idempotenza e finalizzazione transazionale; la finalizzazione riblocca e ricontrolla il Lead prima di aggiornare lo stato e creare il record di destinazione.
+
+### GAP P1 — conversione non ancora collegata al workspace
+
+La revisione ha rilevato una lacuna architetturale da risolvere prima di considerare pronto il ciclo multi-workspace partner/cliente:
+
+1. `nextway_lead_conversion_requests` non contiene `workspace_id`.
+2. Le RPC claim/finalize e l'Edge Function di provisioning non trasportano il workspace di origine.
+3. La finalizzazione crea `profiles` e `partner_details` (partner) oppure `clients` (cliente), ma non crea/assegna una membership al workspace di origine né persiste un riferimento workspace sui record di destinazione.
+4. Di conseguenza, dal solo codice esaminato non si può dimostrare che un partner convertito venga associato automaticamente al workspace corretto o che i clienti restino attribuiti in modo non ambiguo quando uno sponsor opera in più workspace.
+
+Questo non dimostra un errore nell'attuale conversione centralizzata, ma impedisce di certificare il flusso di conversione come multi-workspace end-to-end. È necessaria una decisione di modello: il workspace deve essere ereditato dal Lead e persistito nella richiesta; la conversione partner deve creare una membership coerente (ruolo/stato da definire) e la conversione cliente deve conservare l'attribuzione workspace, senza creare accessi Auth per i clienti. La correzione dovrà essere progettata con migrazione additiva, test idempotenza/concorrenza e protezioni per richieste legacy.
+
+**Priorità:** P1 — risolvere prima del primo onboarding/conversione partner in workspace multipli. Non applicare una correzione automatica senza definire la semantica di membership e proprietà cliente.
+
+### Altri gate
+
+- L'API admin può modificare lo stato del workspace; il comportamento di sospensione membership e revoca accessi al cambio stato deve essere verificato con test runtime.
+- Nessun test con due utenti reali in workspace distinti è stato eseguito.
+- La revisione resta statica: non prova che il database remoto abbia tutte le versioni attese né che le Edge Function distribuite coincidano con Git.
+
+Nessuna migrazione, modifica DB, deploy, merge, seed, creazione membership o conversione è stata eseguita durante questo audit.
