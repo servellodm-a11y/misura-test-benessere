@@ -12,6 +12,22 @@
       language:'it',
       sector:['benessere','nutrizione','integrazione alimentare','vendita diretta'],
       positioning:'Progetto commerciale nel settore benessere e nutrizione. Le caratteristiche di prodotti, test e piano compensi devono essere ricavate esclusivamente dalla documentazione ufficiale aggiornata.',
+      consultantChannels:{
+        generalWellnessWebsite:{
+          url:'https://misura-test-benessere.netlify.app',
+          label:'Misura Test Benessere',
+          role:'sito generale del metodo e del benessere',
+          companyBranding:'neutro',
+          use:'Primo punto di ingresso per persone interessate a misurazione, consapevolezza e benessere; non presentarlo come sito ufficiale Zinzino.'
+        },
+        zinzinoReplicaWebsite:{
+          url:'https://www.zinzino.com/2017234122',
+          label:'Sito replica personale Zinzino',
+          role:'approfondimento personale su prodotti e proposta Zinzino',
+          companyBranding:'Zinzino',
+          use:'Condividerlo quando il contatto ha già manifestato interesse specifico per Zinzino, i suoi prodotti o la collaborazione.'
+        }
+      },
       searchModifiers:{
         customers:[
           ['omega 3','acidi grassi','benessere personalizzato'],
@@ -70,7 +86,9 @@
         'Non inventare prezzi, commissioni, qualifiche, risultati o caratteristiche di prodotto.',
         'Non formulare promesse di reddito o affermazioni mediche.',
         'Distinguere informazioni ufficiali, contenuti pubblici di terzi e ipotesi da verificare.',
-        'Non presentare una persona come interessata a una collaborazione senza un segnale pubblico esplicito.'
+        'Non presentare una persona come interessata a una collaborazione senza un segnale pubblico esplicito.',
+        'Non confondere il sito generale Misura Test Benessere con il sito ufficiale o replica Zinzino.',
+        'Non inserire automaticamente link commerciali in ogni primo messaggio: scegliere il sito in base all’interesse espresso dal contatto.'
       ]
     }
   };
