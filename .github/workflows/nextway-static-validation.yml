@@ -72,6 +72,7 @@ on:
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
+      - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
