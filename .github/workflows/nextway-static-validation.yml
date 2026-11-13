@@ -10,6 +10,8 @@ on:
       - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
+      - "scripts/test-nextway-partner-invite-lifecycle.mjs"
+      - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
       - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
@@ -55,6 +57,8 @@ on:
       - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
+      - "scripts/test-nextway-partner-invite-lifecycle.mjs"
+      - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
       - "supabase/functions/nextway-search/**"
       - "supabase/migrations/**"
@@ -133,6 +137,8 @@ jobs:
         run: node scripts/test-nextway-conversion-workspace-preflight.mjs
       - name: Validate conversion workspace snapshot and transactional fixture contract
         run: node scripts/test-nextway-conversion-workspace-snapshot.mjs
+      - name: Test Partner invitation lifecycle decisions
+        run: node scripts/test-nextway-partner-invite-lifecycle.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
