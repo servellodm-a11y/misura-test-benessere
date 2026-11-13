@@ -469,3 +469,43 @@ Dopo l'esecuzione read-only nel SQL Editor, il report dovrà essere confrontato 
 
 ### Aggiornamento: report strutturale a blocchi
 Per superare il limite di lunghezza dei messaggi, la query diagnostica è stata aggiornata per restituire più righe numerate (`parte`, `totale_parti`, `report_parziale`), ciascuna con al massimo 6.000 caratteri. Eseguire una sola volta; copiare tutte le righe in ordine e inviarle in messaggi separati. La query resta read-only e non legge dati applicativi. Non è ancora stata eseguita.
+
+## 9. Aggiornamento riconciliazione — confronto completo e sequenza Setter
+
+Data: 13 novembre 2026  
+Dump: `/tmp/nextway-public-schema.sql`  
+SHA-256: `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`  
+Migrazioni lette dallo script: 36
+
+### 9.1 Risultato lessicale
+
+L'esecuzione sul dump completo ha rilevato: 21 tabelle baseline, 31 funzioni, 11 trigger, 50 policy e 48 indici. Il confronto lessicale segnala, tra gli altri, oggetti non trovati come `nextway_api_rate_limits`, `nextway_client_workspace_attributions`, alcune funzioni Setter e gli indici delle tabelle draft `nw_*`.
+
+Questi conteggi non costituiscono un delta DB affidabile: lo script non è un parser PostgreSQL, le migrazioni possono essere successive allo snapshot, alcune policy riguardano lo schema gestito `storage` escluso dal dump `public`, e i rilevamenti includono falsi positivi lessicali (`already` tra i trigger e `if` tra gli indici). Il risultato va usato come indice di revisione, non come prova di assenza.
+
+Le tabelle `nw_*` appartengono alla fondazione AI Assistant iniziale, già classificata come draft separato. Non includerle automaticamente nella baseline core.
+
+### 9.2 Sequenza Setter: distinzione legacy/workspace
+
+La sequenza da mantenere esplicita è:
+
+- `20261110000200_nextway_setter_idempotency.sql`: crea lo store legacy `nextway_setter_generation_requests`, con `user_id`, `response`, stato `pending/completed` e `lease_expires_at`.
+- `20261110000400_nextway_idempotency_retention.sql`: la funzione legacy `nextway_prune_setter_generation_requests()` opera su stati `pending/completed` e sulle colonne legacy.
+- `20261110000700_nextway_clear_stale_staged_output.sql`: il trigger storico fa riferimento a `NEW.generated_output`, ma lo store legacy definito dalla migrazione 100002 usa `response`. Non va considerato compatibile con la tabella legacy.
+- `20261111240000_nextway_setter_generation_workspace.sql`: introduce la prima implementazione workspace-aware usando il nome `nextway_setter_generation_requests`. La sua clausola `CREATE TABLE IF NOT EXISTS` non converte una tabella legacy preesistente né aggiunge le colonne workspace a quella tabella; quindi questa migrazione non può essere usata da sola come prova della forma effettiva dello store.
+- `20261112020000_nextway_setter_generation_table_isolation.sql`: richiede che lo store legacy esista, crea lo store separato `nextway_setter_workspace_generation_requests` e riassocia le RPC correnti a quest'ultimo. Preserva il nome e il ruolo dello store legacy e mantiene una retention workspace separata.
+- `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql`: rimuove il trigger storico dalla tabella legacy, revoca condizionalmente la funzione storica se esiste, e installa la pulizia di `generated_output` esclusivamente sulla tabella workspace.
+
+### 9.3 Correzione applicata al branch
+
+La migrazione `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql` è stata aggiornata per non eseguire `REVOKE` su una funzione legacy eventualmente inesistente. La revoca è ora protetta da `to_regprocedure(...)`.
+
+Commit sul branch `fix/nextway-password-recovery`: `7f74731816154584c6298d23dc6ea69479e402d6`.
+
+### 9.4 Stato e limiti
+
+- Revisione statica della sequenza Setter: **COMPLETATA**.
+- Compatibilità runtime PostgreSQL della sequenza completa: **DA TESTARE**.
+- Stato effettivo degli oggetti dopo tutte le operazioni successive allo snapshot: **non deducibile dal dump delle 07:37**.
+- Nessuna migrazione è stata applicata durante questa revisione.
+- Nessun deploy, modifica a `main`, import o scrittura sul database remoto.
