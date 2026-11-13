@@ -178,9 +178,9 @@ begin
     for update;
 
     if found then
-      if v_profile.role::text <> 'partner'
+      if v_profile.role is null or v_profile.role::text <> 'partner'
         or (v_profile.email is not null and lower(v_profile.email) <> lower(r.email))
-        or (v_profile.full_name is not null and v_profile.full_name <> r.full_name)
+        or (nullif(btrim(v_profile.full_name), '') is not null and v_profile.full_name <> r.full_name)
         or (v_profile.sponsor_id is not null and v_profile.sponsor_id <> r.sponsor_profile_id) then
         raise exception 'Esiste già un profilo incompatibile: nessun dato è stato sovrascritto.';
       end if;
