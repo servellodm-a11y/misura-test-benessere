@@ -384,12 +384,12 @@ async function runSearch(){
     total++;
     const targetSummary=document.createElement('p');targetSummary.className='tag';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason;
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · '+(assessment.individual?'PERSONA IDENTIFICABILE · verifica ruolo e attualità':'IDENTITÀ PERSONALE NON CONFERMATA · da approfondire')+' · non misura l’interesse commerciale';
+    const sourceQuality=assessSourceQuality(item,url,pageContent);
     const sourceQualityCard=document.createElement('p');sourceQualityCard.className='muted';sourceQualityCard.textContent='Fonte: '+sourceQuality.source_type+' · '+sourceQuality.reliability_score+'/100. Attualità: '+sourceQuality.freshness_label+' · qualità complessiva fonte: '+sourceQuality.quality_score+'/100. '+sourceQuality.verification_note;
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
     const profile=buildProspectProfile(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment);
     const qualification=qualifyCommercialProspect(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment,profile);
     const commercialFit=assessCommercialFit(item.title,item.snippet,pageContent,$('segment').value,targetAssessment,assessment,publicContacts);
-    const sourceQuality=assessSourceQuality(item,url,pageContent);
     commercialFit.source_quality_score=sourceQuality.quality_score;
     commercialFit.source_quality=sourceQuality;
     const priorityEligible=assessment.individual===true&&commercialFit.segment_match===true&&commercialFit.prospect_type!=='da qualificare'&&(commercialFit.prospect_type!=='cliente'||commercialFit.explicit_intent==='dichiarato');
