@@ -453,7 +453,7 @@ assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 assert.ok(searchHtml.includes('function assessLeadPriority('));
 assert.ok(searchHtml.includes('commercialFit.priority_components=leadPriority'));
 assert.ok(searchHtml.includes('Acquisisci come ricerca da qualificare'));
-assert.ok(searchHtml.includes("outcome==='insufficient_evidence'?'research_result':'research_result'"));
+assert.ok(searchHtml.includes("const category=outcome==='customer_potential'?'final_customer':outcome==='partner_potential'?'potential_partner':'research_result'"));
 const leadPriorityStart=searchHtml.indexOf('function assessLeadPriority(');
 const leadPriorityEnd=searchHtml.indexOf('function buildProspectProfile(',leadPriorityStart);
 assert.ok(leadPriorityStart>=0&&leadPriorityEnd>leadPriorityStart,'Lead priority helper must exist');
