@@ -67,6 +67,7 @@ on:
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
       - "docs/companies/zinzino/**"
+      - "scripts/test-nextway-manual-lead-review-sql.mjs"
       - "scripts/test-nextway-company-config.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
@@ -180,6 +181,8 @@ jobs:
         run: python3 scripts/test-nextway-local-static.py
       - name: Validate Zinzino company configuration and search integration
         run: node scripts/test-nextway-company-config.mjs
+      - name: Validate NEXTWAY manual Lead review contract
+        run: node scripts/test-nextway-manual-lead-review-sql.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
