@@ -5,7 +5,10 @@ alter table public.nextway_leads
   add column if not exists manual_reviewed_at timestamptz,
   add column if not exists manual_reviewed_by uuid references public.profiles(id) on delete set null;
 -- Existing qualifications have no stored human-review evidence: return them to review.
+-- Temporarily disable the legacy auto-qualification trigger for this one-time backfill.
+alter table public.nextway_leads disable trigger nextway_qualification_v1;
 update public.nextway_leads set qualification='Da approfondire',manual_reviewed_at=null,manual_reviewed_by=null where qualification='Qualificato';
+alter table public.nextway_leads enable trigger nextway_qualification_v1;
 alter table public.nextway_leads drop constraint if exists nextway_qualified_manual_review_check;
 alter table public.nextway_leads add constraint nextway_qualified_manual_review_check
  check (qualification <> 'Qualificato' or (manual_reviewed_at is not null and manual_reviewed_by is not null)) not valid;
