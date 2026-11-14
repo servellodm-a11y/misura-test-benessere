@@ -21,7 +21,8 @@ as $function$
 declare v_review_rpc boolean := coalesce(current_setting('nextway.manual_review_rpc',true),'')='on';
 begin
  if v_review_rpc then
-  if auth.uid() is null or new.manual_reviewed_by is distinct from auth.uid()
+  -- A custom GUC alone is not an authorization boundary: require the SECURITY DEFINER owner context too.
+  if current_user is distinct from 'postgres' or auth.uid() is null or new.manual_reviewed_by is distinct from auth.uid()
    or new.manual_reviewed_at is null or new.qualification is distinct from 'Qualificato'
    or new.identity_check is distinct from 'confirmed'
    or (coalesce(new.score_fit,0)+coalesce(new.score_activity,0)+coalesce(new.score_presence,0)+coalesce(new.score_interest,0)+coalesce(new.score_approach,0))<50 then
@@ -48,9 +49,9 @@ begin
   or new.score_approach is distinct from old.score_approach then
   new.manual_reviewed_at:=null; new.manual_reviewed_by:=null;
   if new.qualification='Qualificato' then new.qualification:='Da approfondire'; end if;
- elsif old.qualification <> 'Qualificato' and new.qualification='Qualificato' then
+ elsif old.qualification is distinct from 'Qualificato' and new.qualification='Qualificato' then
   new.qualification:='Da approfondire';
- elsif new.qualification <> 'Qualificato' then
+ elsif new.qualification is distinct from 'Qualificato' then
   new.manual_reviewed_at:=null; new.manual_reviewed_by:=null;
  end if;
  return new;
