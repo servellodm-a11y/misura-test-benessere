@@ -807,4 +807,29 @@ assert.equal(acquiredHistory[0].prospects[0].archive_status,'acquired','Manual C
 assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')[0]?.prospects?.[0]?.archive_status,undefined,'Acquisition status must not leak across owner scopes');
 assert.equal(JSON.parse(historySandbox.localStorage.getItem('nextway_search_history_v1:'+historyOwner))[0].prospects[0].archive_status,'acquired','Acquisition status must survive a browser-page reload');
 
+
+const bridgeMatch=cloudHtml.match(/function addSearchLeadToLocalArchive\\(userId,record\\)\\{[\\s\\S]*?\\n \\}/);
+assert.ok(bridgeMatch,'Search archive bridge implementation must be extractable for behavioral tests');
+const bridgeSandbox={
+ localStorage:{data:new Map(),getItem(key){return this.data.has(key)?this.data.get(key):null;},setItem(key,value){this.data.set(key,String(value));}},
+ Date,Math,URL,
+ localArchiveKey:(userId)=>'nextway_ai_records_v1:'+userId,
+ safeHttpUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}},
+ canonicalSearchArchiveUrl:(value)=>{try{const url=new URL(String(value||''));url.hash='';url.hostname=url.hostname.toLowerCase().replace(/^www\\./,'');return url.toString().replace(/\\/$/,'');}catch{return '';}},
+ readSearchArchiveRows(userId){try{const rows=JSON.parse(this.localStorage.getItem(this.localArchiveKey(userId))||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}},
+ readSearchArchiveMeta(lead){const notes=String(lead?.notes||''),marker='[NEXTWAY_PROSPECT_METADATA_V1]',at=notes.lastIndexOf(marker);if(at<0)return {};try{return JSON.parse(notes.slice(at+marker.length).trim())||{};}catch{return {};}}
+};
+vm.runInNewContext(bridgeMatch[0]+';this.addSearchLeadToLocalArchive=addSearchLeadToLocalArchive;',bridgeSandbox);
+const bridgeOwner='123e4567-e89b-42d3-a456-426614174000';
+const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b',evidence:'Profilo professionale pubblico · nutrizionista · Roma',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
+const bridgeSaved=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
+assert.equal(bridgeSaved.duplicate,false,'First manual acquisition must create one local archive lead');
+assert.equal(bridgeSaved.lead.name,'Andrea Fabbri');
+assert.equal(bridgeSaved.lead.profession,'Nutrizionista');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Acquisition must persist exactly one lead in the authenticated owner archive');
+assert.equal(bridgeSandbox.readSearchArchiveRows('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Acquired leads must remain isolated by owner');
+const bridgeDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
+assert.equal(bridgeDuplicate.duplicate,true,'Repeated acquisition of the same source must be detected as duplicate');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Duplicate acquisition must not create a second lead');
+
 console.log('NEXTWAY search history persistence contract: PASS');
