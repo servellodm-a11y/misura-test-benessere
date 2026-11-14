@@ -452,20 +452,37 @@ assert.ok(prospectProfileStart >= 0 && prospectProfileEnd > prospectProfileStart
 const prospectProfileSource = searchHtml.slice(prospectProfileStart, prospectProfileEnd);
 const buildProspectProfile = new Function("safeUrl", prospectProfileSource + "; return buildProspectProfile;")(value => value);
 const prospectCases = [
-  { title: "Dott. Marco Verdi – Nutrizionista", expected: "Marco Verdi", profession: "Nutrizionista" },
-  { title: "Mario Rossi - Personal Trainer", expected: "Mario Rossi", profession: "Personal trainer" },
-  { title: "Laura Bianchi | LinkedIn", expected: "Laura Bianchi" },
-  { title: "Profilo professionale", snippet: "Mi chiamo Giulia Neri, sono biologa nutrizionista.", expected: "Giulia Neri", profession: "Biologo/a nutrizionista" },
-  { title: "Centro Benessere Aurora", expected: "Non rilevato con certezza" },
-  { title: "Studio Medico Rossi", expected: "Non rilevato con certezza" },
-  { title: "Articolo senza nominativo", expected: "Non rilevato con certezza" }
+  { title: "Dott. Marco Verdi – Nutrizionista", expected: "Marco Verdi", individual: true, profession: "Nutrizionista" },
+  { title: "Mario Rossi - Personal Trainer", expected: "Mario Rossi", individual: true, profession: "Personal trainer" },
+  { title: "Laura Bianchi | LinkedIn", expected: "Laura Bianchi", individual: true },
+  { title: "Profilo professionale", snippet: "Mi chiamo Giulia Neri, sono biologa nutrizionista.", expected: "Giulia Neri", individual: true, profession: "Biologo/a nutrizionista" },
+  { title: "Centro Benessere Aurora", expected: "Non rilevato con certezza", individual: false, entityType: "Azienda o organizzazione" },
+  { title: "Studio Medico Rossi", expected: "Non rilevato con certezza", individual: false, entityType: "Azienda o organizzazione" },
+  { title: "Articolo senza nominativo", expected: "Non rilevato con certezza", individual: false, entityType: "Directory / articolo / annuncio" },
+  { title: "Centro Benessere Aurora", snippet: "Mi chiamo Mario Rossi e sono il responsabile del centro.", expected: "Non rilevato con certezza", candidate: "Mario Rossi", individual: false, entityType: "Azienda o organizzazione" }
 ];
 for (const item of prospectCases) {
-  const profile = buildProspectProfile(item.title, item.snippet || "", "", "https://example.test/profilo", {}, { individual: false, score: 20 }, {});
-  assert.equal(profile.name, item.expected, "Unexpected extracted name for: " + item.title);
+  const profile = buildProspectProfile(item.title, item.snippet || "", "", "https://example.test/profilo", {}, { individual: item.individual, score: 80, entityType: item.entityType || "Possibile profilo individuale" }, {});
+  assert.equal(profile.name, item.expected, "Unexpected confirmed name for: " + item.title);
+  assert.equal(profile.name_candidate, item.candidate || "", "Unexpected unconfirmed name candidate for: " + item.title);
   if (item.profession) assert.equal(profile.profession, item.profession);
 }
-console.log("Prospect identity extraction: 7 controlled cases PASS (including organization false-positive guards)");
+const identityStart = searchHtml.indexOf("function assessSearchEvidence(");
+const identityEnd = searchHtml.indexOf("function qualifyCommercialProspect", identityStart);
+assert.ok(identityStart >= 0 && identityEnd > identityStart, "Identity assessment function must exist");
+const identitySource = searchHtml.slice(identityStart, identityEnd);
+const assessSearchEvidence = new Function(identitySource + "; return assessSearchEvidence;")();
+const companyPage = assessSearchEvidence("Centro Benessere Aurora", "Mi chiamo Mario Rossi e sono il responsabile del centro.", "", "https://example.test/centro", {}, "wellness_pro");
+assert.equal(companyPage.individual, false, "Organization page must not be promoted to an individual based on a quoted name");
+assert.equal(companyPage.entityType, "Azienda o organizzazione");
+const companyLinkedIn = assessSearchEvidence("Aurora Wellness", "Team e servizi", "", "https://www.linkedin.com/company/aurora-wellness/", {}, "wellness_pro");
+assert.equal(companyLinkedIn.individual, false, "LinkedIn company pages must not be treated as personal profiles");
+const personPage = assessSearchEvidence("Dott. Marco Verdi – Nutrizionista", "", "", "https://example.test/marco-verdi", {}, "wellness_pro");
+assert.equal(personPage.individual, true, "Named professional page should remain an individual candidate");
+assert.match(searchHtml, /const personConfirmed=assessment\?\.individual===true/);
+assert.match(searchHtml, /Pagina aziendale\/organizzazione · persona non confermata/);
+assert.match(searchHtml, /Nome citato nella pagina, ma non confermato come prospect individuale/);
+console.log("Prospect identity extraction: 8 controlled cases PASS; organization-page false-positive guards PASS");
 
 // Prospect acquisition: unsuitable directory/article/organization results cannot be saved as Leads.
 assert.match(searchHtml, /const notSuitable=qualification\.status==='Non adatto · da scartare'/);
