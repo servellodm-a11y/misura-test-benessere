@@ -812,20 +812,20 @@ assert.equal(historySandbox.readSearchHistory(otherHistoryOwner)[0].prospects[0]
 assert.equal(JSON.parse(historySandbox.localStorage.getItem('nextway_search_history_v1:'+historyOwner))[0].prospects[0].archive_status,'acquired','Acquisition status must survive a browser-page reload');
 
 
-const bridgeMatch=cloudHtml.match(/function addSearchLeadToLocalArchive\\(userId,record\\)\\{[\\s\\S]*?\\n \\}/);
+const bridgeMatch=cloudHtml.match(/function addSearchLeadToLocalArchive\(userId,record\)\{[\s\S]*?\n \}/);
 assert.ok(bridgeMatch,'Search archive bridge implementation must be extractable for behavioral tests');
 const bridgeSandbox={
  localStorage:{data:new Map(),getItem(key){return this.data.has(key)?this.data.get(key):null;},setItem(key,value){this.data.set(key,String(value));}},
  Date,Math,URL,
  localArchiveKey:(userId)=>'nextway_ai_records_v1:'+userId,
  safeHttpUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}},
- canonicalSearchArchiveUrl:(value)=>{try{const url=new URL(String(value||''));url.hash='';url.hostname=url.hostname.toLowerCase().replace(/^www\\./,'');return url.toString().replace(/\\/$/,'');}catch{return '';}},
+ canonicalSearchArchiveUrl:(value)=>{try{const url=new URL(String(value||''));if(!['http:','https:'].includes(url.protocol)||url.username||url.password)return '';url.hash='';url.hostname=url.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(key=>url.searchParams.delete(key));url.searchParams.sort();url.pathname=url.pathname.replace(/\/+$/,'')||'/';return url.toString().replace(/\/$/,'');}catch{return '';}},
  readSearchArchiveRows(userId){try{const rows=JSON.parse(this.localStorage.getItem(this.localArchiveKey(userId))||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}},
  readSearchArchiveMeta(lead){const notes=String(lead?.notes||''),marker='[NEXTWAY_PROSPECT_METADATA_V1]',at=notes.lastIndexOf(marker);if(at<0)return {};try{return JSON.parse(notes.slice(at+marker.length).trim())||{};}catch{return {};}}
 };
 vm.runInNewContext(bridgeMatch[0]+';this.addSearchLeadToLocalArchive=addSearchLeadToLocalArchive;',bridgeSandbox);
 const bridgeOwner='123e4567-e89b-42d3-a456-426614174000';
-const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b',evidence:'Profilo professionale pubblico · nutrizionista · Roma',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
+const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b/?utm_source=test#bio',evidence:'Profilo professionale pubblico · nutrizionista · Roma',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
 const bridgeSaved=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
 assert.equal(bridgeSaved.duplicate,false,'First manual acquisition must create one local archive lead');
 assert.equal(bridgeSaved.lead.name,'Andrea Fabbri');
@@ -834,8 +834,8 @@ assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Acquisit
 assert.ok(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].notes.includes('[NEXTWAY_PROSPECT_METADATA_V1]'),'Acquisition must preserve structured prospect metadata in the local archive');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].url,bridgeRecord.url,'Acquisition must preserve the original source URL');
 assert.equal(bridgeSandbox.readSearchArchiveRows('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Acquired leads must remain isolated by owner');
-const bridgeDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
-assert.equal(bridgeDuplicate.duplicate,true,'Repeated acquisition of the same source must be detected as duplicate');
+const bridgeDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,url:'https://linkedin.com/in/andrea-fabbri-8039157b',identity_keys:[]});
+assert.equal(bridgeDuplicate.duplicate,true,'Canonical URL matching must detect duplicates across www, tracking parameters, fragments and trailing slashes even without identity keys');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Duplicate acquisition must not create a second lead');
 
 console.log('NEXTWAY search history persistence contract: PASS');
