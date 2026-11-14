@@ -475,6 +475,10 @@ const assessSearchEvidence = new Function(identitySource + "; return assessSearc
 const companyPage = assessSearchEvidence("Centro Benessere Aurora", "Mi chiamo Mario Rossi e sono il responsabile del centro.", "", "https://example.test/centro", {}, "wellness_pro");
 assert.equal(companyPage.individual, false, "Organization page must not be promoted to an individual based on a quoted name");
 assert.equal(companyPage.entityType, "Azienda o organizzazione");
+const namedCompanyPage = assessSearchEvidence("Aurora Wellness", "Mi chiamo Mario Rossi e sono il responsabile del centro.", "", "https://example.test/azienda", {}, "wellness_pro");
+assert.equal(namedCompanyPage.individual, false, "Organization context in the body must override an incidental self-introduction");
+const brandedSocialPage = assessSearchEvidence("Aurora Wellness", "Mi chiamo Mario Rossi e presento i servizi del nostro centro.", "", "https://www.instagram.com/aurorawellness/", {}, "wellness_pro");
+assert.equal(brandedSocialPage.individual, false, "A branded social account must not be treated as a personal profile based on company copy");
 const companyLinkedIn = assessSearchEvidence("Aurora Wellness", "Team e servizi", "", "https://www.linkedin.com/company/aurora-wellness/", {}, "wellness_pro");
 assert.equal(companyLinkedIn.individual, false, "LinkedIn company pages must not be treated as personal profiles");
 const personPage = assessSearchEvidence("Dott. Marco Verdi – Nutrizionista", "", "", "https://example.test/marco-verdi", {}, "wellness_pro");
