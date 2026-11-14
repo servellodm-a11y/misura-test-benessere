@@ -28,6 +28,15 @@ assert.match(migration,/alter function public\.nextway_confirm_lead_manual_revie
 assert.match(migration,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
 assert.match(migration,/revoke all on function public\.nextway_confirm_lead_manual_review\(uuid\) from public,anon/i);
 assert.match(migration,/grant execute on function public\.nextway_confirm_lead_manual_review\(uuid\) to authenticated/i);
+assert.match(rpcScopeFix,/perform set_config\\('nextway\\.manual_review_rpc','on',true\\)/i);
+assert.match(rpcScopeFix,/perform set_config\\('nextway\\.manual_review_rpc','off',true\\)/i);
+assert.match(rpcScopeFix,/alter function public\\.nextway_confirm_lead_manual_review\\(uuid\\) owner to postgres/i);
+assert.match(rpcScopeFix,/security definer[\\s\\S]*?set search_path='pg_catalog','public'/i);
+const enableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','on',true)");
+const guardedUpdate=rpcScopeFix.indexOf('update public.nextway_leads',enableFlag);
+const disableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','off',true)",guardedUpdate);
+const rpcReturn=rpcScopeFix.indexOf('return jsonb_build_object',disableFlag);
+assert.ok(enableFlag>=0 && guardedUpdate>enableFlag && disableFlag>guardedUpdate && rpcReturn>disableFlag,'The RPC flag must be disabled after its guarded UPDATE and before returning');
 assert.match(archive,/name="manual_review_confirmed" id="manualReviewConfirmed"/);
 assert.match(archive,/values\.manual_review_confirmed=el\('manualReviewConfirmed'\)\.checked/);
 assert.match(archive,/values\.qualification==='Qualificato'&&!values\.manual_review_confirmed/);
