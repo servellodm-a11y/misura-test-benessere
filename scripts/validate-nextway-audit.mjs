@@ -272,7 +272,7 @@ assert.match(leadUiScript, /qualification=el\('qualificationFilter'\)\.value,par
 assert.match(leadUiScript, /x\.company_brand,x\.location,x\.source,x\.url,x\.evidence,x\.notes/);
 assert.match(leadUiScript, /!qualification\|\|x\.qualification===qualification/);
 assert.match(leadUiScript, /!partner\|\|x\.partner_type===partner/);
-assert.match(leadUiScript, /'qualificationFilter','partnerFilter','sort'/);
+assert.match(leadUiScript, /'qualificationFilter','partnerFilter','commercialQualificationFilter','prospectQualityFilter','entityTypeFilter','sort'/, "Filter state must include all expanded prospect filters");
 console.log("NEXTWAY CRM search: company/source/evidence/notes plus qualification and partner filters: PASS");
 
 
