@@ -53,6 +53,8 @@ assert.ok(searchHtml.includes('const rankedResults=(group.results||[])'));
 assert.ok(searchHtml.includes('entityType,identity'));
 assert.ok(searchHtml.includes('id="daily-summary"'));
 assert.ok(searchHtml.includes('id="exportDaily"'));
+assert.ok(searchHtml.includes('Esegui 1 ricerca · fino a 10 risultati'),'The search UI must disclose the operational result limit');
+assert.ok(searchHtml.includes('max_results:10'),'A single search execution must request up to ten results');
 assert.ok(searchHtml.includes('dailyProspects.push('));
 assert.ok(searchHtml.includes('function buildProspectProfile('));
 assert.ok(searchHtml.includes('Scheda prospect · '));
