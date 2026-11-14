@@ -247,7 +247,7 @@ assert.match(leadUiScript, /editingLeadId=lead\.id/);
 assert.match(leadUiScript, /Object\.entries\(fields\)\.forEach/);
 assert.match(leadUiScript, /const existing=editingLeadId\?data\.find\(y=>y\.id===editingLeadId\):null/);
 assert.match(leadUiScript, /data\.some\(y=>y!==existing&&!y\.is_test&&y\.url&&values\.url/);
-assert.match(leadUiScript, /if\(existing\)\{Object\.assign\(existing,values\)/);
+assert.match(leadUiScript, /if\(existing\)\{const metadata=readProspectMetadata\(existing\);Object\.assign\(existing,values\);if\(Object\.keys\(metadata\)\.length\)writeProspectMetadata\(existing,metadata\)/, "Editing a Lead must preserve its prospect metadata");
 assert.match(leadUiScript, /existing\.local_dirty=true/);
 assert.match(leadUiScript, /values\.id=Date\.now\(\)\.toString\(36\)/);
 assert.match(leadUiScript, /edit\.textContent='Modifica Lead'/);
