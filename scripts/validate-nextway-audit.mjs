@@ -445,9 +445,10 @@ console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticat
 
 
 // Prospect identity extraction: guard against treating organization names as people.
-const prospectProfileMatch = html.match(/function buildProspectProfile\\([\\s\\S]*?\\n}\\nfunction canonicalProspectUrl/);
-assert.ok(prospectProfileMatch, "Prospect profile extraction function must exist");
-const prospectProfileSource = prospectProfileMatch[0].replace(/\\nfunction canonicalProspectUrl$/, "");
+const prospectProfileStart = html.indexOf("function buildProspectProfile(");
+const prospectProfileEnd = html.indexOf("\\nfunction canonicalProspectUrl", prospectProfileStart);
+assert.ok(prospectProfileStart >= 0 && prospectProfileEnd > prospectProfileStart, "Prospect profile extraction function must exist");
+const prospectProfileSource = html.slice(prospectProfileStart, prospectProfileEnd);
 const buildProspectProfile = new Function("safeUrl", prospectProfileSource + "; return buildProspectProfile;")(value => value);
 const prospectCases = [
   { title: "Dott. Marco Verdi – Nutrizionista", expected: "Marco Verdi", profession: "Nutrizionista" },
