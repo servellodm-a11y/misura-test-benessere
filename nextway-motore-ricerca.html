@@ -658,6 +658,16 @@ function assessNetworkerActivity(title,snippet,pageContent){
  if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
  return {status,label,excerpt,source,verified:false,disclaimer:'Classificazione basata sul testo disponibile: non dimostra attività commerciale effettiva, continuità, risultati o disponibilità a collaborare.'};
 }
+function assessCustomerIntent(title,snippet,pageContent){
+ const positivePattern=/(cerco consigli|qualcuno può consigliarmi|avete suggerimenti|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|consigli su integratori|informazioni sull’integrazione|cerco un percorso benessere|vorrei migliorare il mio stile di vita|cerco supporto per il benessere|vorrei una consulenza|cerco una consulenza)/i;
+ const deniedPattern=/\bnon\s+(?:(?:sto|sono)\s+)?(?:cerco|cercando|voglio|vorrei|interessat[oa])\b/i;
+ const fields=[title,snippet,pageContent].map(value=>String(value||''));
+ for(const value of fields){
+  const clauses=value.split(/[.!?;,]|\b(?:ma|però|tuttavia)\b/i);
+  if(clauses.some(clause=>positivePattern.test(clause)&&!deniedPattern.test(clause)))return true;
+ }
+ return false;
+}
 function assessOpportunityIntent(title,snippet,pageContent){
  const fields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
  const sidePattern=/\b(?:cerco|sto cercando|valuto|vorrei trovare|mi interessa trovare|sono disponibile a valutare|disponibile a valutare)\s+(?:un[oa]?\s+)?(?:lavoro extra|secondo lavoro|lavoro part.?time|impiego part.?time|part.?time|lavoro flessibile|entrata aggiuntiva|reddito integrativo|seconda entrata|attività da affiancare|opportunità di guadagno extra)\b|\b(?:cerco|sto cercando|valuto)\s+(?:un[oa]?\s+)?(?:entrata aggiuntiva|reddito integrativo|seconda entrata|opportunità di guadagno extra)\b|\b(?:vorrei|voglio) arrotondare (?:lo )?(?:stipendio|le entrate)\b|\b(?:vorrei|voglio) integrare (?:il )?reddito\b/i;
@@ -793,7 +803,7 @@ function assessCommercialFit(title,snippet,pageContent,selectedSegment,targetAss
  const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
  const text=raw.toLocaleLowerCase('it'),selected=String(selectedSegment||'');
  const type=targetAssessment?.kind==='customer'?'cliente':targetAssessment?.kind==='partner'?'partner':'da qualificare';
- const explicitCustomer=/(cerco consigli|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|vorrei migliorare la mia alimentazione|interessat[oa] a migliorare il benessere|vorrei una consulenza|cerco una consulenza)/i.test(text);
+ const explicitCustomer=assessCustomerIntent(title,snippet,pageContent);
  const opportunityIntent=assessOpportunityIntent(title,snippet,pageContent);
  const deniedCollaborationIntent=/\bnon\s+(?:(?:sto|sono)\s+)?(?:cerco|cercando|valuto|voglio|vorrei|intendo|interessat[oa])\b(?:(?!\b(?:ma|però|tuttavia)\b)[^.!?;]){0,65}\b(?:collaborazion[ei]|partnership)(?=$|[\s.,;!?])/i.test(text);
  const explicitOpportunity=/(cerco (?:un )?(?:lavoro extra|secondo lavoro|part.?time|impiego part.?time)|valuto (?:un )?(?:lavoro part.?time|secondo lavoro)|disponibile (?:per|a valutare) (?:(?:un )?lavoro part.?time|(?:un )?(?:secondo lavoro|lavoro extra|part.?time))|cerco un['’]attivit[aà] da affiancare|attivit[aà] da affiancare al lavoro|cerco (?:un['’])?(?:entrata|reddito) aggiuntiv[oa]|reddito integrativo|seconda entrata|integrare (?:il )?reddito|arrotondare (?:lo )?stipendio|opportunit[aà] di guadagno extra|lavoro da affiancare al mio lavoro|cerco un['’]attivit[aà] imprenditoriale|cerco un progetto (?:di )?business|valuto (?:un['’]attivit[aà]|un progetto imprenditoriale|un business da avviare)|voglio mettermi in proprio|vorrei avviare (?:un['’]attivit[aà]|una mia attivit[aà])|sto cercando un business|cerco un progetto imprenditoriale|business da avviare|cerco un['’]opportunit[aà] imprenditoriale|voglio avviare una mia attivit[aà]|cerco un progetto da sviluppare in proprio|voglio costruire un['’]attivit[aà])/i.test(text);
@@ -1018,7 +1028,7 @@ function classifyProspectTarget(title,snippet,pageContent,selectedSegment){
  const opportunityIntent=assessOpportunityIntent(title,snippet,pageContent);
  const explicitSide=opportunityIntent.status==='side_income';
  const explicitBusiness=opportunityIntent.status==='business_seeking';
- const customerSignal=/(cerco consigli|qualcuno può consigliarmi|avete suggerimenti|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|consigli su integratori|informazioni sull’integrazione|cerco un percorso benessere|vorrei migliorare il mio stile di vita|cerco supporto per il benessere)/i.test(text);
+ const customerSignal=assessCustomerIntent(title,snippet,pageContent);
  const roleSelfDeclared=/(?:\b(?:sono|mi chiamo|lavoro come|mi occupo di)\b.{0,55}\b(?:imprenditor[ei]|titolare|founder|business owner)\b|\b(?:titolare|founder|amministratore|proprietario|proprietaria)\s+(?:di|della|del|presso)\b)/i.test(text);
  let primary='Da qualificare',kind='unknown',segment='unclassified',confidence='bassa',reason='La fonte non contiene elementi sufficienti per confermare il segmento selezionato.',role='';
  const professionalSelected=selected==='wellness_pro'&&(wellnessRole.test(titleText)||/(sono|mi chiamo|lavoro come|mi occupo di).{0,45}(nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|farmacist|medic)/i.test(text));
