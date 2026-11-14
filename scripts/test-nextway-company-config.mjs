@@ -204,7 +204,7 @@ assert.equal(classify('Pagina personale','Contenuti generici','', 'customers').k
 assert.ok(searchHtml.includes('const linkedinPersonProfile='));
 assert.ok(searchHtml.includes('const linkedinCompanyPage='));
 assert.ok(searchHtml.includes('const organizationTitle='));
-assert.ok(searchHtml.includes('const individual=!!(linkedinPersonProfile||(socialProfile&&(personTitle||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence))'));
+assert.ok(searchHtml.includes('const individual=!!(linkedinPersonProfile||(socialProfile&&((personTitle&&!organizationEvidence)||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence))'));
 assert.ok(searchHtml.includes("entityType=individual?'Possibile profilo individuale'"));
 assert.ok(searchHtml.includes('identityScore,relevanceScore,evidenceScore'));
 assert.ok(searchHtml.includes('Pertinenza documentale:'));
