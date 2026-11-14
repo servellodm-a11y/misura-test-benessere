@@ -374,7 +374,7 @@ assert.ok(searchHtml.includes("Number(b.commercial_fit?.priority_score)||0"), "C
 assert.ok(searchHtml.includes('source_quality_score=sourceQuality.quality_score'));
 assert.ok(searchHtml.includes('sourceQuality.quality_score>duplicateEntry.daily.source_quality.quality_score'));
 assert.ok(searchHtml.includes('affidabilita_fonte'));
-assert.ok(archiveHtml.includes('commercial.source_quality'));
+assert.ok(archiveHtml.includes('x?.evidence_quality?.commercial_qualification||meta.commercial_qualification'), 'CRM archive must retain and read commercial qualification metadata');
 const sourceStart=searchHtml.indexOf('function assessSourceQuality(');
 const sourceEnd=searchHtml.indexOf('function buildProspectProfile(',sourceStart);
 const sourceContext={Date,URL};
