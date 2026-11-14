@@ -412,7 +412,7 @@ const unconfirmedDuplicate={name:'Studio Beta',profession:'',company_brand:'',lo
 const unconfirmedMeta={prospect_profile:{name:'Studio Beta',name_source:'Titolo della pagina',profession:'',organization:'',location:''}};
 metadataContext.mergeSearchProspectDuplicate(unconfirmedDuplicate,unconfirmedMeta,{evidence_quality:{prospect_profile:{name:'Luca Bianchi',name_source:'Nome citato nella pagina · non attribuito a un prospect individuale',identity_status:'Identità individuale non confermata',profession:'',organization:'',location:''}}},[]);
 assert.equal(unconfirmedDuplicate.name,'Studio Beta','Un unconfirmed individual identity must not replace an existing CRM name');
-assert.ok(archiveHtml.includes('meta.prospect_profile=evidenceQuality.prospect_profile'),'New Leads must retain source-managed profile values for safe future enrichment');
+assert.ok(archiveHtml.includes('prospect_profile:evidenceQuality.prospect_profile'),'New Leads must retain source-managed profile values for safe future enrichment');
 assert.ok(archiveHtml.includes('function mergeSearchProspectDuplicate('));
 
 assert.ok(searchHtml.includes('source_evidence:[{url,title:item.title||\'\',snippet:'));
