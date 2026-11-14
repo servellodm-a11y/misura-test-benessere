@@ -415,6 +415,25 @@ assert.equal(unconfirmedDuplicate.name,'Studio Beta','Un unconfirmed individual 
 assert.ok(archiveHtml.includes('prospect_profile:evidenceQuality.prospect_profile'),'New Leads must retain source-managed profile values for safe future enrichment');
 assert.ok(archiveHtml.includes('function mergeSearchProspectDuplicate('));
 
+const crmReview2026Start=archiveHtml.indexOf('function getProspectReviewProfile(');
+const crmReview2026End=archiveHtml.indexOf('function renderLeadProspectAssessment(',crmReview2026Start);
+assert.ok(crmReview2026Start>=0&&crmReview2026End>crmReview2026Start,'Prospect review profile helper must be present and independently testable');
+vm.runInNewContext(archiveHtml.slice(crmReview2026Start,crmReview2026End)+';this.getProspectReviewProfile=getProspectReviewProfile;',metadataContext);
+const crmReview2026Lead={notes:''};
+metadataContext.writeProspectMetadata(crmReview2026Lead,{prospect_profile:{identity_status:'Identità individuale non confermata',entity_type:'Azienda o organizzazione',name_candidate:'Paolo Bianchi',name_source:'Nome citato nella pagina · non attribuito a un prospect individuale',segment:'side_income',confidence:'media',priority:'Da approfondire',priority_reason:'Nessuna dichiarazione esplicita di ricerca lavoro extra.'},target_classification:{segment:'side_income',role:'Interesse lavoro extra'},sources:[{url:'https://example.com/profilo',title:'Pagina pubblica'}]});
+const crmReview2026Profile=metadataContext.getProspectReviewProfile(crmReview2026Lead);
+assert.equal(crmReview2026Profile.identity_status,'Identità individuale non confermata');
+assert.equal(crmReview2026Profile.segment_label,'Interesse esplicito per lavoro extra');
+assert.equal(crmReview2026Profile.name_candidate,'Paolo Bianchi');
+assert.equal(crmReview2026Profile.source_count,1);
+assert.equal(crmReview2026Profile.priority,'Da approfondire');
+assert.ok(archiveHtml.includes('function renderLeadProspectAssessment(lead)'),'CRM must render a dedicated prospect review panel');
+assert.ok(archiveHtml.includes('const prospectAssessmentPanel=renderLeadProspectAssessment(x)'),'Prospect review panel must be attached to each Lead card');
+assert.ok(archiveHtml.includes('Nome citato nella fonte, non attribuito al prospect:'),'Un unconfirmed name candidate must be labelled as not attributed');
+assert.ok(archiveHtml.includes('meta.target_classification=evidenceQuality.target_classification'),'New Leads must retain target classification');
+assert.ok(archiveHtml.includes('meta.target_classification=incomingQuality.target_classification'),'Duplicate enrichment must refresh target classification');
+
+
 assert.ok(searchHtml.includes('source_evidence:[{url,title:item.title||\'\',snippet:'));
 assert.ok(searchHtml.includes('duplicateEntry.daily.source_evidence.push(sourceRecord)'));
 assert.ok(searchHtml.includes('sources:dailyEntry.source_evidence'));
