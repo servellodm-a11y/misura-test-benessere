@@ -40,6 +40,41 @@ function canonicalLeadSourceUrl(value){try{const u=new URL(String(value||''));if
 function normalizeLeadSource(source){if(typeof source==='string')source={url:source};if(!source||typeof source!=='object')return null;const url=safeHttpUrl(source.url);if(!url)return null;const contacts=source.public_contacts&&typeof source.public_contacts==='object'?source.public_contacts:{};const take=key=>Array.isArray(contacts[key])?contacts[key].filter(v=>typeof v==='string').slice(0,10):[];return {url,title:String(source.title||'').slice(0,200),snippet:String(source.snippet||'').slice(0,1200),evidence:String(source.evidence||source.page_content||'').slice(0,4000),collected_at:String(source.collected_at||source.date||new Date().toISOString()).slice(0,40),public_contacts:{emails:take('emails'),phones:take('phones'),whatsapp:take('whatsapp'),socials:take('socials')}}}
 function mergeLeadSourceRecords(existing,incoming){const all=[...(Array.isArray(existing)?existing:[]),...(Array.isArray(incoming)?incoming:[])].map(normalizeLeadSource).filter(Boolean),seen=new Map();all.forEach(item=>{const key=canonicalLeadSourceUrl(item.url);if(!key)return;const prior=seen.get(key);if(!prior){seen.set(key,item);return;}prior.title=prior.title||item.title;prior.snippet=prior.snippet||item.snippet;prior.evidence=prior.evidence||item.evidence;for(const field of ['emails','phones','whatsapp','socials'])prior.public_contacts[field]=[...new Set([...prior.public_contacts[field],...item.public_contacts[field]])].slice(0,10);});return [...seen.values()].slice(0,30)}
 function mergeLeadPublicContactSets(...sets){const result={emails:[],phones:[],whatsapp:[],socials:[]};for(const set of sets){if(!set||typeof set!=='object')continue;for(const key of Object.keys(result)){const values=Array.isArray(set[key])?set[key]:[];result[key]=[...new Set([...result[key],...values.filter(v=>typeof v==='string')])].slice(0,20)}}return result}
+function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
+ const incomingQuality=record?.evidence_quality&&typeof record.evidence_quality==='object'?record.evidence_quality:{};
+ const incoming=incomingQuality.prospect_profile&&typeof incomingQuality.prospect_profile==='object'?incomingQuality.prospect_profile:{};
+ const previous=meta.prospect_profile&&typeof meta.prospect_profile==='object'?meta.prospect_profile:{};
+ const profileMap={name:'name',profession:'profession',company_brand:'organization',location:'location'};
+ const usable=value=>{
+  const text=String(value??'').trim();
+  return !!text&&!/^(?:non rilevat[oa](?: con certezza)?|non confermat[oa]|identità individuale non confermata|da approfondire)$/i.test(text);
+ };
+ const identityConfirmed=/possibile profilo individuale/i.test(String(incoming.identity_status||''))&&!/non confermata/i.test(String(incoming.identity_status||''));
+ for(const [leadField,profileField] of Object.entries(profileMap)){
+  const next=String(incoming[profileField]??'').trim();
+  if(!usable(next))continue;
+  if(leadField==='name'&&(!identityConfirmed||!usable(incoming.name_source)))continue;
+  const current=String(lead[leadField]??'').trim();
+  const previousValue=String(previous[profileField]??'').trim();
+  const stillSystemManaged=Object.prototype.hasOwnProperty.call(previous,profileField)&&current===previousValue;
+  if(!current||stillSystemManaged)lead[leadField]=next;
+ }
+ const mergedProfile={...previous};
+ for(const key of ['name','name_candidate','name_source','profession','organization','location','identity_status','entity_type','segment','confidence','priority','priority_reason']){
+  const value=incoming[key];
+  if(usable(value)||!Object.prototype.hasOwnProperty.call(mergedProfile,key))mergedProfile[key]=value??'';
+ }
+ meta.prospect_profile=mergedProfile;
+ meta.identity_keys=[...new Set([...(Array.isArray(meta.identity_keys)?meta.identity_keys:[]),...(Array.isArray(incomingIdentityKeys)?incomingIdentityKeys:[])])].slice(0,50);
+ if(incomingQuality.commercial_qualification&&typeof incomingQuality.commercial_qualification==='object'){
+  const history=Array.isArray(meta.commercial_qualification_history)?meta.commercial_qualification_history:[];
+  const signature=JSON.stringify(incomingQuality.commercial_qualification);
+  if(!history.some(item=>JSON.stringify(item.value)===signature))history.push({collected_at:new Date().toISOString(),value:incomingQuality.commercial_qualification});
+  meta.commercial_qualification_history=history.slice(-10);
+  if(!meta.commercial_qualification)meta.commercial_qualification=incomingQuality.commercial_qualification;
+ }
+ return {lead,meta};
+}
 window.NEXTWAY_LOCAL_ARCHIVE={
  activate:activateLocalAccount,
  clear:clearLocalAccount,
@@ -67,9 +102,8 @@ window.NEXTWAY_LOCAL_ARCHIVE={
    const meta=readProspectMetadata(duplicate);
    meta.sources=mergeLeadSourceRecords(meta.sources,record?.sources||[{url,title:duplicate.name,snippet:String(record?.evidence||'').slice(0,1200),evidence:record?.evidence||'',public_contacts:record?.public_contacts||{}}]);
    meta.public_contacts=mergeLeadPublicContactSets(meta.public_contacts,record?.public_contacts||{});
-   meta.identity_keys=[...new Set([...(Array.isArray(meta.identity_keys)?meta.identity_keys:[]),...incomingIdentityKeys])];
-   if(record?.evidence_quality?.commercial_qualification)meta.commercial_qualification=record.evidence_quality.commercial_qualification;
-   writeProspectMetadata(duplicate,meta);
+   const mergedDuplicate=mergeSearchProspectDuplicate(duplicate,meta,record,incomingIdentityKeys);
+   writeProspectMetadata(duplicate,mergedDuplicate.meta);
    duplicate.public_contacts=meta.public_contacts;
    duplicate.local_dirty=true;
    persist();
