@@ -220,6 +220,8 @@ vm.runInNewContext(searchHtml.slice(opportunityStart,opportunityEnd)+';this.asse
 const assessOpportunityIntent=opportunityContext.assessOpportunityIntent;
 const seekingExtra=assessOpportunityIntent('Profilo personale','Cerco un lavoro extra part-time','');
 assert.equal(seekingExtra.status,'side_income');
+const availablePartTime=assessOpportunityIntent('Profilo personale','Disponibile a valutare un lavoro part-time','');
+assert.equal(availablePartTime.status,'side_income','Explicit availability for part-time work must be recognized by the shared opportunity helper');
 assert.equal(seekingExtra.source,'Descrizione del risultato');
 const seekingBusiness=assessOpportunityIntent('Profilo personale','Vorrei avviare una mia attività','');
 assert.equal(seekingBusiness.status,'business_seeking');
