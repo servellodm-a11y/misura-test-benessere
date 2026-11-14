@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const migration=fs.readFileSync('supabase/migrations/20261114150000_nextway_lead_manual_review.sql','utf8');
+const rpcScopeFix=fs.readFileSync('supabase/migrations/20261114161500_nextway_manual_review_rpc_scope.sql','utf8');
 const cloud=fs.readFileSync('nextway-cloud.js','utf8');
 const archive=fs.readFileSync('nextway-ai.html','utf8');
 assert.match(migration,/manual_reviewed_at timestamptz/i);
