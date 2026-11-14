@@ -497,7 +497,7 @@ assert.equal(professionalFit.explicit_intent,'non dichiarato');
 assert.equal(professionalFit.segment_match,true);
 assert.ok(professionalFit.priority_score>0);
 assert.ok(professionalFit.reasons.some(reason=>reason.includes('non prova interesse')));
-const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-time','', 'side_income',{kind:'partner',segment:'side_income',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
+const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-time','', 'side_income',{kind:'partner',segment:'side_income',confidence:'media'}, {individual:true,score:45,entityType:'Possibile profilo individuale'},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(opportunityFit.signal_strength,'forte');
 assert.equal(opportunityFit.explicit_intent,'dichiarato');
 assert.equal(opportunityFit.commercial_outcome,'partner_potential','An explicit extra-income declaration must remain a commercial partner prospect');
