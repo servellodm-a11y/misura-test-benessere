@@ -478,6 +478,26 @@ assert.ok(customerWithoutProfessionalRole.priority_score<explicitPartnerPriority
 const noDatePriority=assessLeadPriority({commercial_outcome:'partner_potential',segment_match:true},{individual:true,evidence:[{kind:'Ruolo o professione'}]},{},{quality_score:50,published_at:null},contacts,completeProfile);
 assert.ok(noDatePriority.source_score<explicitPartnerPriority.source_score,'Missing source date must lower the source-quality component');
 
+
+assert.ok(searchHtml.includes('function classifyLeadQueue('));
+assert.ok(searchHtml.includes('Prospect organizzati per priorità operativa'));
+assert.ok(searchHtml.includes('1. Priorità alta · prospect con prove solide'));
+assert.ok(searchHtml.includes('2. Da approfondire · profili pertinenti, informazioni incomplete'));
+assert.ok(searchHtml.includes('3. Da escludere · aziende, identità non confermate o risultati non idonei'));
+const queueStart=searchHtml.indexOf('function classifyLeadQueue(');
+const queueEnd=searchHtml.indexOf('function assessLeadPriority(',queueStart);
+assert.ok(queueStart>=0&&queueEnd>queueStart,'Operational queue classifier must exist');
+const queueContext={};
+vm.runInNewContext(searchHtml.slice(queueStart,queueEnd)+';this.classifyLeadQueue=classifyLeadQueue;',queueContext);
+const classifyLeadQueue=queueContext.classifyLeadQueue;
+const baseQueueProspect={person_confirmed:true,qualification_status:'Prospect interessante · da verificare',source_quality:{quality_score:90,published_at:'2026-11-01T00:00:00.000Z',age_days:13},commercial_fit:{commercial_outcome:'partner_potential',priority_score:85,priority_components:{eligible:true,role_documented:true}}};
+assert.equal(classifyLeadQueue(baseQueueProspect).code,'high','An explicit, evidenced, recent individual partner prospect belongs in high priority');
+assert.equal(classifyLeadQueue({...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,commercial_outcome:'generic_result'}}).code,'review','A relevant person without explicit commercial intent must be reviewed, not prioritized');
+assert.equal(classifyLeadQueue({...baseQueueProspect,source_quality:{quality_score:90,published_at:null,age_days:null}}).code,'review','A source without a publication date cannot enter high priority');
+assert.equal(classifyLeadQueue({...baseQueueProspect,person_confirmed:false}).code,'exclude','An unconfirmed individual identity must be excluded');
+assert.equal(classifyLeadQueue({...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,commercial_outcome:'not_suitable'}}).code,'exclude','Unsuitable results must be excluded');
+assert.equal(classifyLeadQueue({...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,commercial_outcome:'customer_potential',priority_components:{eligible:true,role_documented:false}}}).code,'high','An explicit customer request does not require a professional role');
+
 console.log('NEXTWAY company configuration contract: PASS');
 
 assert.ok(archiveHtml.includes('getIndex(){'));
