@@ -65,6 +65,7 @@ function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
   if(usable(value)||!Object.prototype.hasOwnProperty.call(mergedProfile,key))mergedProfile[key]=value??'';
  }
  meta.prospect_profile=mergedProfile;
+ if(incomingQuality.target_classification&&typeof incomingQuality.target_classification==='object')meta.target_classification=incomingQuality.target_classification;
  meta.identity_keys=[...new Set([...(Array.isArray(meta.identity_keys)?meta.identity_keys:[]),...(Array.isArray(incomingIdentityKeys)?incomingIdentityKeys:[])])].slice(0,50);
  if(incomingQuality.commercial_qualification&&typeof incomingQuality.commercial_qualification==='object'){
   const history=Array.isArray(meta.commercial_qualification_history)?meta.commercial_qualification_history:[];
