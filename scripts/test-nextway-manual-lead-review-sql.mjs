@@ -13,6 +13,9 @@ assert.match(migration,/update public\.nextway_leads[\s\S]*?qualification='Da ap
 assert.match(migration,/disable trigger nextway_qualification_v1[\s\S]*?update public\.nextway_leads[\s\S]*?enable trigger nextway_qualification_v1/i);
 assert.match(migration,/create trigger zzzz_nextway_lead_manual_review_guard/i);
 assert.match(migration,/current_setting\('nextway\.manual_review_rpc',true\)/i);
+assert.match(migration,/current_user is distinct from 'postgres' or auth\.uid\(\) is null/i);
+assert.match(migration,/old\.qualification is distinct from 'Qualificato'/i);
+assert.match(migration,/new\.qualification is distinct from 'Qualificato'/i);
 assert.match(migration,/new\.manual_reviewed_by is distinct from auth\.uid\(\)/i);
 assert.match(migration,/new\.identity_check is distinct from 'confirmed'/i);
 assert.match(migration,/coalesce\(new\.score_fit,0\)\+coalesce\(new\.score_activity,0\)/i);
