@@ -487,7 +487,8 @@ assert.ok(Array.isArray(personPage.evidence), "Identity assessment must expose s
 assert.ok(personPage.evidence.some(item => item.kind === "Nominativo nel titolo" && item.source === "Titolo della pagina"), "Person name evidence must identify the title as its source");
 assert.ok(personPage.evidence.some(item => item.kind === "Ruolo o professione" && /Nutrizionista/i.test(item.excerpt)), "Professional-role evidence must include the matching source phrase");
 const selfIntroEvidence = assessSearchEvidence("Profilo professionale", "Mi chiamo Giulia Neri, sono biologa nutrizionista.", "", "https://example.test/giulia", {}, "wellness_pro");
-assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Autopresentazione" && item.source === "Estratto del testo"), "Self-introduction evidence must preserve its source excerpt");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Autopresentazione" && item.source === "Descrizione del risultato" && /Mi chiamo Giulia Neri/i.test(item.excerpt)), "Self-introduction evidence must preserve its exact source and excerpt");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Ruolo o professione" && item.source === "Descrizione del risultato"), "Professional role evidence must identify the exact source field");
 assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Corrispondenza al segmento"), "Segment evidence must identify its matching phrase");
 assert.ok(companyPage.evidence.some(item => item.kind === "Contesto organizzativo"), "Organization evidence must be visible in the evidence list");
 assert.match(searchHtml, /Prove rilevate nella fonte · da verificare/);
