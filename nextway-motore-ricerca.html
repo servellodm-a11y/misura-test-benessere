@@ -1095,4 +1095,4 @@ $('copyall').addEventListener('click',()=>{if(!generated.length)build();navigato
 $('download').addEventListener('click',()=>{if(!generated.length)build();const rows=[['numero','categoria','query','url'],...generated.map((x,i)=>[i+1,x.label,x.query,x.url])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-batteria-ricerche.csv';a.click();URL.revokeObjectURL(a.href)});
 build();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script>initializeSearchHistory();</script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script>if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeSearchHistory,{once:true});else initializeSearchHistory();</script></body></html>
