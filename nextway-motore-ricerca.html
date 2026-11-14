@@ -698,7 +698,7 @@ function assessCommercialFit(title,snippet,pageContent,selectedSegment,targetAss
  const directContacts=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
  const documentaryScore=Math.max(0,Math.min(100,Number(assessment?.score)||0));
  const segmentScore=segmentMatch?100:0;
- const priorityScore=type==='cliente'&&!explicitCustomer?0:Math.round(segmentScore*.55+score*.30+documentaryScore*.15);
+ const priorityScore=type==='da qualificare'||(type==='cliente'&&!explicitCustomer)?0:Math.round(segmentScore*.55+score*.30+documentaryScore*.15);
  const priorityTier=priorityScore>=80?'Alta pertinenza':priorityScore>=55?'Da verificare':'Bassa pertinenza';
  const segmentStatus=segmentMatch?'Corrisponde al segmento selezionato':type==='da qualificare'?'Segmento non confermato':'Fuori dal segmento selezionato';
  if(!segmentMatch)reasons.push('Il risultato non dimostra una corrispondenza con il segmento selezionato: viene declassato nella lista.');
