@@ -412,6 +412,13 @@ const unconfirmedDuplicate={name:'Studio Beta',profession:'',company_brand:'',lo
 const unconfirmedMeta={prospect_profile:{name:'Studio Beta',name_source:'Titolo della pagina',profession:'',organization:'',location:''}};
 metadataContext.mergeSearchProspectDuplicate(unconfirmedDuplicate,unconfirmedMeta,{evidence_quality:{prospect_profile:{name:'Luca Bianchi',name_source:'Nome citato nella pagina · non attribuito a un prospect individuale',identity_status:'Identità individuale non confermata',profession:'',organization:'',location:''}}},[]);
 assert.equal(unconfirmedDuplicate.name,'Studio Beta','Un unconfirmed individual identity must not replace an existing CRM name');
+
+const titleFallbackDuplicate={name:'Studio Beta',profession:'',company_brand:'',location:'',notes:''};
+const titleFallbackMeta={prospect_profile:{name:'Studio Beta',profession:'',company_brand:'',location:''}};
+metadataContext.mergeSearchProspectDuplicate(titleFallbackDuplicate,titleFallbackMeta,{evidence_quality:{prospect_profile:{name:'Luca Bianchi - Nutrizionista',name_source:'Nominativo non rilevato',identity_status:'Possibile profilo individuale · nominativo non estratto',profession:'Nutrizionista',organization:'',location:''}}},[]);
+assert.equal(titleFallbackDuplicate.name,'Studio Beta','A page-title fallback must not overwrite a CRM prospect name when no individual name was extracted');
+assert.ok(archiveHtml.includes('/nominativo non rilevato|non attribuito/i'),'Duplicate name enrichment must reject generic or unattributed name sources');
+
 assert.ok(archiveHtml.includes('prospect_profile:evidenceQuality.prospect_profile'),'New Leads must retain source-managed profile values for safe future enrichment');
 assert.ok(archiveHtml.includes('function mergeSearchProspectDuplicate('));
 
