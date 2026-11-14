@@ -85,6 +85,8 @@ begin
  return jsonb_build_object('lead_id',v_lead.id,'qualification',v_lead.qualification,'manual_reviewed_at',v_lead.manual_reviewed_at,'manual_reviewed_by',v_lead.manual_reviewed_by,'updated_at',v_lead.updated_at);
 end;
 $function$;
+-- Make the execution-context guard deterministic even if migration ownership changes.
+alter function public.nextway_confirm_lead_manual_review(uuid) owner to postgres;
 revoke all on function public.nextway_confirm_lead_manual_review(uuid) from public,anon;
 grant execute on function public.nextway_confirm_lead_manual_review(uuid) to authenticated;
 commit;
