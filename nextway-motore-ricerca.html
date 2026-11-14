@@ -292,27 +292,58 @@ const segmentExclusions={
 };
 const enTerms={networker:['("looking for team members" OR "building my team" OR "join my team") ("network marketing" OR "direct selling")','("team leader" OR "team development" OR "business builder") ("network marketing" OR "direct sales")','("growing my organization" OR "expanding my team") network marketing','("independent distributor" OR "brand partner") (team OR leadership OR training)','("new team members" OR "business opportunity") wellness'],new_networker:['("new to network marketing" OR "just started network marketing" OR "first steps in direct selling")','("new distributor" OR "new brand partner") wellness','("starting my wellness business" OR "new wellness project") network marketing','("beginner training" OR "first customers") "direct sales"','("new independent consultant" OR "new brand ambassador") wellness'],
 wellness_networker:['("wellness network marketer" OR "wellness network marketing" OR "direct selling wellness")','("wellness team leader" OR "building my wellness team")','(wellness OR nutrition) (partnership OR collaboration) network marketing','("team training" OR "independent leader") wellness','("growing my team" OR "looking for team members") wellness'],other_networker:['("network marketer" OR "direct seller") -wellness','("team leader" OR "team builder") network marketing','("independent distributor" OR "independent consultant") team','("looking for team members" OR "growing my team") network marketing','("direct sales" OR "social selling") leader'],wellness_pro:['(nutritionist OR dietitian OR naturopath OR osteopath OR physiotherapist OR "personal trainer")','("wellness center" OR "nutrition practice" OR "fitness studio")','(health OR wellness OR fitness) (partnership OR collaboration) professional','("wellness education" OR "nutrition coaching") professional','("new services" OR "professional network") wellness'],entrepreneur:['(entrepreneur OR founder OR business owner) Italy','(SME OR "small business owner") (growth OR partnership)','(entrepreneur OR founder) networking collaboration','("team management" OR leadership OR "business development") entrepreneur','("new business project" OR diversification) entrepreneur'],side_income:['("looking for a side job" OR "extra income" OR "second job")','("part time" OR flexible) work opportunity','("side business" OR "alongside my job")','("supplementary income" OR "additional income")','("flexible work" OR "part time opportunity")'],business_seeking:['("looking to start a business" OR "new business opportunity")','("become self employed" OR "start a business")','("side business" OR "entrepreneurial project")','("exploring new opportunities" OR "new venture")','("build my own business" OR "independent business")'],exnetworker:['("former network marketer" OR "former distributor" OR "ex direct seller")','("new business project" OR "career transition") collaboration','("direct sales experience" OR "network marketing experience") professional','("sales team management" OR "sales training") network marketing','("former team leader" OR "former distributor") entrepreneur'],wellness:['("personal trainer" OR nutritionist OR naturopath OR osteopath)','(wellness OR nutrition OR fitness) collaboration professional','("independent professional" OR consultant) wellness','("wellness education" OR "nutrition coaching") professional','("new services" OR partnership) wellness'],business:['(entrepreneur OR consultant OR professional) ("business development" OR partnership)','("independent consultant" OR freelancer) networking','("business development" OR "sales development") professional','("team management" OR leadership) entrepreneur','("side business" OR "new business project") professional'],customers:['("looking for advice" OR "looking for information") (wellness OR nutrition)','("how to improve" OR "recommendations for") wellness nutrition','(forum OR community OR discussion) wellness nutrition','("healthy lifestyle" OR "wellness journey") information','("looking for a professional" OR "expert advice") wellness nutrition']};
+function buildProspectSearchQuery(baseQuery,area,platform,extra,segment,companyTerms=[],includeCompanyContext=false,sourceScope=''){
+ const location=String(area||'Italia').trim()||'Italia';
+ const locationClause=/[," ]/.test(location)?'"'+location.replace(/"/g,'').trim()+'"':location;
+ let query=String(baseQuery||'').trim()+' '+locationClause;
+ const selectedPlatform=String(platform||'').trim();
+ const scope=selectedPlatform?(selectedPlatform==='linkedin.com'?'site:linkedin.com/in':'site:'+selectedPlatform):String(sourceScope||'').trim();
+ if(scope)query+=' '+scope;
+ const additional=String(extra||'').trim();
+ if(additional)query+=' '+additional;
+ if(includeCompanyContext&&Array.isArray(companyTerms)&&companyTerms.length){
+  const terms=companyTerms.map(term=>String(term||'').trim()).filter(Boolean);
+  if(terms.length)query+=' ('+terms.map(term=>'"'+term.replace(/"/g,'')+'"').join(' OR ')+')';
+ }
+ query+=segmentExclusions[segment]||'';
+ return query.replace(/\\s+/g,' ').trim();
+}
+function getProspectSearchLane(index,platform,hasCompanyTerms){
+ const selected=String(platform||'').trim();
+ const lanes=[
+  {scope:'site:linkedin.com/in',label:selected?'LinkedIn · profili individuali':'LinkedIn · profili individuali'},
+  {scope:'site:instagram.com',label:'Instagram · profili pubblici'},
+  {scope:'site:facebook.com',label:'Facebook · contenuti pubblici'},
+  {scope:'',label:'Web aperto · profili e siti personali'},
+  {scope:'',label:hasCompanyTerms?'Web aperto · contesto aziendale':'Web aperto · ricerca complementare'}
+ ];
+ const lane=lanes[Math.max(0,Math.min(lanes.length-1,Number(index)||0))];
+ if(selected)return {scope:selected==='linkedin.com'?'site:linkedin.com/in':'site:'+selected,label:selected==='linkedin.com'?'LinkedIn · profili individuali':selected.replace(/\\.com$/,'')+' · ricerca mirata'};
+ return lane;
+}
 function build(){
  const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
  const base=templates[seg],refined=refinedItalianQueries[seg]||base;
  let terms=refined.map(x=>Array.isArray(x)?x[1]:x);
  if(lang==='en')terms=refinedEnglishQueries[seg]||enTerms[seg];
  if(lang==='both')terms=terms.slice(0,3).concat((refinedEnglishQueries[seg]||enTerms[seg]).slice(0,2));
+ const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
  generated=terms.slice(0,5).map((q,i)=>{
-   let full=q+' "'+area+'"'+(platform?' site:'+platform:'')+(extra?' '+extra:'');
-   const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
-   if(companyTerms.length){const modifier=companyTerms[i%companyTerms.length].map(term=>'"'+term+'"').join(' OR ');full+=' ('+modifier+')';}
-   full+=segmentExclusions[seg]||'';
-   const label=lang==='en'?((Array.isArray(refinedEnglishQueries[seg])?refinedEnglishQueries[seg][i]:null)?.[0]||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?('English search '+(i-2)):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
-   return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full)};
+   const lane=getProspectSearchLane(i,platform,companyTerms.length>0);
+   const includeCompanyContext=i===4&&companyTerms.length>0;
+   const modifier=includeCompanyContext?companyTerms[(i-4+companyTerms.length)%companyTerms.length]:[];
+   const full=buildProspectSearchQuery(q,area,platform,extra,seg,modifier,includeCompanyContext,lane.scope);
+   const baseLabel=lang==='en'?((Array.isArray(refinedEnglishQueries[seg])?refinedEnglishQueries[seg][i]:null)?.[0]||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?('English search '+(i-2)):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
+   const label=baseLabel+' · '+lane.label+(includeCompanyContext?' · focus '+(activeCompany?.name||'azienda'):'');
+   return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full),source_lane:lane.label,company_context:includeCompanyContext};
  });
- $('summary').textContent=generated.length+' query mirate create · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · '+(platform||'tutto il web')+' · Area: '+area+' · '+(segmentGuidance[seg]||'Verifica sempre identità, ruolo e attualità della fonte.');
+ $('summary').textContent=generated.length+' query differenziate per fonte · 4 ricerche prospect senza vincolo aziendale e '+(generated.some(entry=>entry.company_context)?'1 ricerca complementare con contesto '+(activeCompany?.name||'azienda'):'5 ricerche senza filtro aziendale')+' · '+(lang==='en'?'Inglese':lang==='both'?'Italiano e inglese':'Italiano')+' · Area: '+area+' · '+(segmentGuidance[seg]||'Verifica sempre identità, ruolo e attualità della fonte.');
  render();
 }
 function render(){
  const selector=$('selected-query');if(selector){selector.replaceChildren();generated.forEach((entry,index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=(index+1)+'. '+entry.label;selector.append(option);});selector.disabled=generated.length===0;}
  const root=$('results');root.replaceChildren();
- generated.forEach((x,i)=>{const card=document.createElement('article');card.className='query';const head=document.createElement('div');head.className='queryhead';const title=document.createElement('strong');title.textContent=(i+1)+'. '+x.label;const tag=document.createElement('span');tag.className='tag';tag.textContent='Query '+(i+1);head.append(title,tag);const pre=document.createElement('pre');pre.textContent=x.query;const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='btn';open.href=x.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Apri ricerca';const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia';copy.addEventListener('click',()=>navigator.clipboard?.writeText(x.query));actions.append(open,copy);card.append(head,pre,actions);root.append(card)});
+ generated.forEach((x,i)=>{const card=document.createElement('article');card.className='query';const head=document.createElement('div');head.className='queryhead';const title=document.createElement('strong');title.textContent=(i+1)+'. '+x.label;const tag=document.createElement('span');tag.className='tag';tag.textContent='Query '+(i+1)+' · '+(x.company_context?'focus aziendale':'ricerca prospect');head.append(title,tag);const pre=document.createElement('pre');pre.textContent=x.query;const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='btn';open.href=x.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Apri ricerca';const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia';copy.addEventListener('click',()=>navigator.clipboard?.writeText(x.query));actions.append(open,copy);card.append(head,pre,actions);root.append(card)});
 }
 $('generate').addEventListener('click',build);
 $('runsearch').addEventListener('click',runSearch);
