@@ -467,7 +467,7 @@ for (const item of prospectCases) {
   assert.equal(profile.name_candidate, item.candidate || "", "Unexpected unconfirmed name candidate for: " + item.title);
   if (item.profession) assert.equal(profile.profession, item.profession);
 }
-const identityStart = searchHtml.indexOf("function assessSearchEvidence(");
+const identityStart = searchHtml.indexOf("function assessProfessionalActivity(");
 const identityEnd = searchHtml.indexOf("function qualifyCommercialProspect", identityStart);
 assert.ok(identityStart >= 0 && identityEnd > identityStart, "Identity assessment function must exist");
 const identitySource = searchHtml.slice(identityStart, identityEnd);
