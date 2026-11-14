@@ -3,7 +3,7 @@
 begin;
 alter table public.nextway_leads
   add column if not exists manual_reviewed_at timestamptz,
-  add column if not exists manual_reviewed_by uuid references public.profiles(id) on delete set null;
+  add column if not exists manual_reviewed_by uuid references public.profiles(id) on delete restrict;
 -- Existing qualifications have no stored human-review evidence: return them to review.
 -- Temporarily disable the legacy auto-qualification trigger for this one-time backfill.
 alter table public.nextway_leads disable trigger nextway_qualification_v1;
@@ -69,7 +69,7 @@ begin
  if auth.uid() is null then raise exception 'Autenticazione richiesta.' using errcode='28000'; end if;
  select * into v_lead from public.nextway_leads where id=p_lead_id for update;
  if not found then raise exception 'Lead non trovato o non accessibile.' using errcode='P0002'; end if;
- if v_lead.owner_profile_id <> auth.uid() and not public.nextway_is_platform_admin() then
+ if v_lead.owner_profile_id is distinct from auth.uid() and not public.nextway_is_platform_admin() then
   raise exception 'Non autorizzato a revisionare questo Lead.' using errcode='42501';
  end if;
  if v_lead.archived_at is not null then raise exception 'Un Lead archiviato non può essere qualificato.' using errcode='22023'; end if;
