@@ -594,7 +594,7 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const linkedinPersonProfile=/linkedin\.com\/in\//i.test(url||'');
  const linkedinCompanyPage=/linkedin\.com\/company\//i.test(url||'');
  const socialProfile=/instagram\.com\/[^/]+\/?$|facebook\.com\/[^/]+\/?$|tiktok\.com\/@|youtube\.com\/@/i.test(url||'');
- const personTitle=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,3}(?:\s*[|–-]\s*[^|–-]{2,70})?$/.test(t);
+ const personTitle=/^(?:(?:dott(?:ore|oressa|\.)?|dr\.?|prof(?:essore|essoressa|\.)?|ing\.?|avv\.?)\s+)?[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,3}(?:\s*[|–-]\s*[^|–-]{2,70})?$/.test(t);
  const selfIdentification=/\b(mi chiamo|sono\s+(?:un[oa]?\s+)?(?:nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|coach|imprenditor|consulent|networker|titolare))\b/i.test(body);
  const roleEvidence=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|consulent|imprenditor|titolare|founder|team leader|networker|distributore|brand partner|vendita diretta/i.test(text);
  const organizationTitle=/^(?:centro|studio|azienda|società|associazione|fondazione|clinica|palestra|farmacia|gruppo|team|network|servizi|agenzia|istituto|ospedale|poliambulatorio|laboratorio|hotel|ristorante)\b/i.test(t)||linkedinCompanyPage;
