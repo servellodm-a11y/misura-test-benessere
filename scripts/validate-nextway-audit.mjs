@@ -442,3 +442,25 @@ for (const signature of [
 assert.doesNotMatch(triggerPrivileges, /drop trigger|disable trigger|drop function/i);
 assert.doesNotMatch(triggerPrivileges, /nextway_save_ai_analysis|nextway_prune_lead_creation_requests|nextway_is_platform_admin/i);
 console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticated revoked; installed triggers retained: PASS");
+
+
+// Prospect identity extraction: guard against treating organization names as people.
+const prospectProfileMatch = html.match(/function buildProspectProfile\\([\\s\\S]*?\\n}\\nfunction canonicalProspectUrl/);
+assert.ok(prospectProfileMatch, "Prospect profile extraction function must exist");
+const prospectProfileSource = prospectProfileMatch[0].replace(/\\nfunction canonicalProspectUrl$/, "");
+const buildProspectProfile = new Function("safeUrl", prospectProfileSource + "; return buildProspectProfile;")(value => value);
+const prospectCases = [
+  { title: "Dott. Marco Verdi – Nutrizionista", expected: "Marco Verdi", profession: "Nutrizionista" },
+  { title: "Mario Rossi - Personal Trainer", expected: "Mario Rossi", profession: "Personal trainer" },
+  { title: "Laura Bianchi | LinkedIn", expected: "Laura Bianchi" },
+  { title: "Profilo professionale", snippet: "Mi chiamo Giulia Neri, sono biologa nutrizionista.", expected: "Giulia Neri", profession: "Biologo/a nutrizionista" },
+  { title: "Centro Benessere Aurora", expected: "Non rilevato con certezza" },
+  { title: "Studio Medico Rossi", expected: "Non rilevato con certezza" },
+  { title: "Articolo senza nominativo", expected: "Non rilevato con certezza" }
+];
+for (const item of prospectCases) {
+  const profile = buildProspectProfile(item.title, item.snippet || "", "", "https://example.test/profilo", {}, { individual: false, score: 20 }, {});
+  assert.equal(profile.name, item.expected, "Unexpected extracted name for: " + item.title);
+  if (item.profession) assert.equal(profile.profession, item.profession);
+}
+console.log("Prospect identity extraction: 7 controlled cases PASS (including organization false-positive guards)");
