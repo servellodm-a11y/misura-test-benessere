@@ -92,10 +92,11 @@ window.NEXTWAY_LOCAL_ARCHIVE={
    ...publicContacts.socials.map(x=>'Profilo social pubblicato: '+x)
   ];
   const quality=record?.evidence_quality&&typeof record.evidence_quality==='object'?record.evidence_quality:{};
-  const evidenceQuality={score:Math.max(0,Math.min(100,Number(quality.score)||0)),identityScore:Math.max(0,Math.min(40,Number(quality.identityScore)||0)),relevanceScore:Math.max(0,Math.min(40,Number(quality.relevanceScore)||0)),evidenceScore:Math.max(0,Math.min(20,Number(quality.evidenceScore)||0)),identity:String(quality.identity||'Identità individuale non confermata').slice(0,120),entityType:String(quality.entityType||'Identità individuale non confermata').slice(0,120),reasons:Array.isArray(quality.reasons)?quality.reasons.filter(x=>typeof x==='string').slice(0,8):[],commercial_qualification:quality.commercial_qualification&&typeof quality.commercial_qualification==='object'?quality.commercial_qualification:null};
+  const prospectProfile=normalizeSearchProspectProfile(quality,title);
+  const evidenceQuality={score:Math.max(0,Math.min(100,Number(quality.score)||0)),identityScore:Math.max(0,Math.min(40,Number(quality.identityScore)||0)),relevanceScore:Math.max(0,Math.min(40,Number(quality.relevanceScore)||0)),evidenceScore:Math.max(0,Math.min(20,Number(quality.evidenceScore)||0)),identity:String(quality.identity||'Identità individuale non confermata').slice(0,120),entityType:String(quality.entityType||'Identità individuale non confermata').slice(0,120),reasons:Array.isArray(quality.reasons)?quality.reasons.filter(x=>typeof x==='string').slice(0,8):[],prospect_profile:prospectProfile,target_classification:quality.target_classification&&typeof quality.target_classification==='object'?quality.target_classification:null,commercial_qualification:quality.commercial_qualification&&typeof quality.commercial_qualification==='object'?quality.commercial_qualification:null};
   const lead={
    id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
-   name:title,profession:'',company_brand:'',location:'',
+   name:prospectProfile.name,profession:prospectProfile.profession,company_brand:prospectProfile.company_brand,location:prospectProfile.location,
    partner_company_id:String(record.company_id||'zinzino').slice(0,80),partner_company_name:String(record.company_name||'Zinzino').slice(0,120),
    category:['potential_partner','final_customer','wellness_professional','research_result'].includes(record.category)?record.category:'research_result',
    partner_type:record.partner_type||'',networker_stage:String(record.networker_stage||'').slice(0,100),mode:'Affinità professionale',signal_type:'Altro segnale documentato',
@@ -118,6 +119,26 @@ const safeHttpUrl=value=>{try{const u=new URL(String(value??'').trim());return [
 const points=x=>['fit','activity','presence','interest','approach'].reduce((n,k)=>n+Math.max(0,Number(x[k]||0)),0);
 const rank=n=>n>=80?'A':n>=65?'B':n>=50?'C':'Sotto soglia';
 function getProspectQuality(x){if(x?.evidence_quality&&typeof x.evidence_quality==='object')return x.evidence_quality;const note=String(x?.notes||'');const match=note.match(/PUNTEGGIO DOCUMENTALE:\s*(\d+)\/100\s*\(identità\s*(\d+)\/40;\s*coerenza segmento\s*(\d+)\/40;\s*prove pubbliche\s*(\d+)\/20\)\.\s*Classificazione:\s*([^\.]+)\.([\s\S]*?)Motivazioni:\s*([\s\S]*?)\. Questo punteggio/i);if(!match)return null;return {score:Number(match[1]),identityScore:Number(match[2]),relevanceScore:Number(match[3]),evidenceScore:Number(match[4]),entityType:match[5].trim(),identity:match[6].trim(),reasons:match[7].split(';').map(v=>v.trim()).filter(Boolean)};}
+function normalizeSearchProspectProfile(quality,title){
+ const source=quality?.prospect_profile&&typeof quality.prospect_profile==='object'?quality.prospect_profile:{};
+ const field=(value,fallback='')=>{
+  const text=String(value??'').trim().slice(0,180);
+  return !text||/^(?:non rilevat[oa](?: con certezza)?|non confermat[oa]|identità individuale non confermata)$/i.test(text)?fallback:text;
+ };
+ return {
+  name:field(source.name,String(title||'Prospect da verificare').trim().slice(0,160)),
+  name_candidate:field(source.name_candidate,''),
+  profession:field(source.profession,''),
+  company_brand:field(source.organization,''),
+  location:field(source.location,''),
+  identity_status:field(source.identity_status,'Identità da verificare'),
+  entity_type:field(source.entity_type,'Identità individuale non confermata'),
+  segment:field(source.segment,'unclassified'),
+  confidence:field(source.confidence,'bassa'),
+  priority:field(source.priority,'Da approfondire'),
+  priority_reason:field(source.priority_reason,'Verificare la fonte originale.')
+ };
+}
 function getCommercialQualification(x){const meta=readProspectMetadata(x);const value=x?.evidence_quality?.commercial_qualification||meta.commercial_qualification;if(!value||typeof value!=='object'||typeof value.status!=='string')return null;return {status:String(value.status).slice(0,100),action:String(value.action||'').slice(0,1000),reasons:Array.isArray(value.reasons)?value.reasons.filter(v=>typeof v==='string').slice(0,8):[],direct_contact_count:Math.max(0,Number(value.direct_contact_count)||0),social_profile_count:Math.max(0,Number(value.social_profile_count)||0),commercial_fit:value.commercial_fit&&typeof value.commercial_fit==='object'?value.commercial_fit:null};}
 function getCommercialPriority(x){const q=getCommercialQualification(x);const order=['Prospect con recapiti utilizzabili','Prospect molto pertinente','Prospect interessante · da verificare','Da approfondire','Non adatto · da scartare'];return q?order.indexOf(q.status):order.length;}
 function getVerificationPriority(x){const quality=getProspectQuality(x);if(!quality||!Number.isFinite(Number(quality.score)))return 'missing';const score=Number(quality.score),type=String(quality.entityType||'Identità individuale non confermata');if(score>=80&&type==='Possibile profilo individuale')return 'high';if(score>=50&&['Possibile profilo individuale','Identità individuale non confermata'].includes(type))return 'medium';return 'low';}
