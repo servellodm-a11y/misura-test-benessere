@@ -318,7 +318,7 @@ console.log("NEXTWAY CRM archived Lead: activity history remains readable while 
 
 assert.match(cloud, /async function getOpenLeadActivities\(limit=100\)/);
 assert.match(cloud, /\.eq\('next_action_status','open'\)\.not\('next_action_at','is',null\)/);
-assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity/);
+assert.match(cloud, /getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity/, "Cloud API must expose the open-activity summary");
 assert.match(html, /id="loadFollowups"/);
 assert.match(leadUiScript, /getOpenLeadActivities\(100\)/);
 assert.match(leadUiScript, /Completa/);
