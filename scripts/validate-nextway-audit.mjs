@@ -544,7 +544,7 @@ console.log("NEXTWAY multi-query: 11 segment-specific evidence/classification ca
 
 
 // Segment relevance must distinguish explicit personal declarations from generic industry mentions.
-const evidenceStart=searchHtml.indexOf("function assessSearchEvidence(");
+const evidenceStart=searchHtml.indexOf("function assessProfessionalActivity(");
 const evidenceEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",evidenceStart);
 assert.ok(evidenceStart>=0&&evidenceEnd>evidenceStart,"Segment evidence assessor must exist");
 const evidenceAssessor=new Function(searchHtml.slice(evidenceStart,evidenceEnd)+"; return assessSearchEvidence;")();
