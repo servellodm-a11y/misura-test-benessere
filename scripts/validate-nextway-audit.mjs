@@ -518,7 +518,9 @@ console.log("Prospect source-quality rendering: initialization precedes UI acces
 const targetStart=searchHtml.indexOf("function classifyProspectTarget(");
 const targetEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",targetStart);
 assert.ok(targetStart>=0&&targetEnd>targetStart,"Segment-specific prospect classifier must exist");
-const targetClassifier=new Function(searchHtml.slice(targetStart,targetEnd)+"; return classifyProspectTarget;")();
+const networkerHelperStart=searchHtml.indexOf("function assessNetworkerActivity(");
+assert.ok(networkerHelperStart>=0&&networkerHelperStart<targetStart,"Networker activity helper must precede the segment classifier");
+const targetClassifier=new Function(searchHtml.slice(networkerHelperStart,targetEnd)+"; return classifyProspectTarget;")();
 const classifyCases=[
  {segment:"wellness_networker",title:"Network marketing wellness",body:"Sono networker nel settore wellness",expected:"wellness_networker"},
  {segment:"wellness_networker",title:"Network marketing",body:"Sono networker nel settore immobiliare",expected:"unclassified"},
