@@ -781,9 +781,10 @@ const historySandbox={
  document:{getElementById(){return null;}},
  $:(id)=>id==='segment'?{value:'wellness_pro'}:id==='area'?{value:'Italia'}:null,
  safeUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch{return '';}},
+ canonicalProspectUrl:(value)=>{try{const url=new URL(String(value||''));url.hash='';url.pathname=url.pathname.replace(/\\/+$/,'')||'/';return url.href.replace(/\\/$/,'').toLowerCase();}catch{return ''; }},
  console
 };
-vm.runInNewContext("let searchHistoryOwnerId='';"+searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;',historySandbox);
+vm.runInNewContext("let searchHistoryOwnerId='';"+searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;this.markSearchHistoryAcquired=markSearchHistoryAcquired;',historySandbox);
 const historyOwner='123e4567-e89b-42d3-a456-426614174000';
 assert.equal(historySandbox.searchHistoryKey(),null,'History must not write to an unknown owner scope');
 assert.equal(historySandbox.saveSearchHistory([{url:'https://example.com'}]),false,'History save must fail closed until an authenticated owner is known');
@@ -799,5 +800,11 @@ assert.equal(savedHistory[0].prospects[0].profile.location,'Roma');
 assert.equal(savedHistory[0].prospects[0].source_evidence[0].evidence,'Nutrizionista · Roma','History must preserve source evidence needed to re-evaluate a prospect after refresh');
 assert.equal(historySandbox.searchHistoryKey('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),'nextway_search_history_v1:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
 assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Search history must remain isolated by authenticated owner');
+assert.equal(savedHistory[0].prospects[0].archive_status,'new','New search results must start as not yet acquired');
+historySandbox.markSearchHistoryAcquired(historyProspect.url,historyProspect.identity_keys);
+const acquiredHistory=historySandbox.readSearchHistory();
+assert.equal(acquiredHistory[0].prospects[0].archive_status,'acquired','Manual CRM acquisition must update the saved history record');
+assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')[0]?.prospects?.[0]?.archive_status,undefined,'Acquisition status must not leak across owner scopes');
+assert.equal(JSON.parse(historySandbox.localStorage.getItem('nextway_search_history_v1:'+historyOwner))[0].prospects[0].archive_status,'acquired','Acquisition status must survive a browser-page reload');
 
 console.log('NEXTWAY search history persistence contract: PASS');
