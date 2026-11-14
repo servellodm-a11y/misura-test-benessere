@@ -411,6 +411,12 @@ async function runSearch(){
     const profileCandidate=document.createElement('p');profileCandidate.className='muted';if(profile.name_candidate){profileCandidate.textContent='Nome citato nella pagina, ma non confermato come prospect individuale: '+profile.name_candidate+'. Non usare questo nominativo per acquisire o contattare una persona senza verifica.';}
     const profilePriority=document.createElement('p');profilePriority.className='tag';profilePriority.textContent='Priorità di verifica: '+profile.priority+'. '+profile.priority_reason+' Non equivale a interesse commerciale.';
     profileCard.append(profileTitle,profileDetails,profileIdentity);if(profile.name_candidate)profileCard.append(profileCandidate);profileCard.append(profilePriority);
+    const evidenceHeading=document.createElement('strong');evidenceHeading.textContent='Prove rilevate nella fonte · da verificare';
+    const evidenceList=document.createElement('ul');evidenceList.style.cssText='margin:6px 0 0;padding-left:20px;';
+    const evidenceItems=Array.isArray(assessment.evidence)?assessment.evidence:[];
+    if(evidenceItems.length){evidenceItems.forEach(ev=>{const li=document.createElement('li');li.style.marginBottom='7px';const label=document.createElement('strong');label.textContent=ev.kind+' · '+ev.source+': ';const excerpt=document.createElement('span');excerpt.textContent='“'+ev.excerpt+'” ';const reason=document.createElement('span');reason.className='muted';reason.textContent=ev.reason;li.append(label,excerpt,reason);evidenceList.append(li);});}
+    else{const li=document.createElement('li');li.textContent='Nessuna evidenza testuale specifica estratta automaticamente. Aprire la fonte originale.';evidenceList.append(li);}
+    profileCard.append(evidenceHeading,evidenceList);
     const qualificationCard=document.createElement('div');qualificationCard.className='commercial-qualification';qualificationCard.style.cssText='margin:10px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;background:#f8faff;';
     const qualificationTitle=document.createElement('strong');qualificationTitle.textContent='Qualificazione commerciale: '+qualification.status;
     const qualificationAction=document.createElement('p');qualificationAction.textContent='Azione suggerita: '+qualification.action;
@@ -634,7 +640,24 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  if(directoryEvidence)reasons.push('possibile directory, articolo o annuncio: pertinenza ridotta');
  if(organizationEvidence&&!individual)reasons.push('prevalenza di segnali aziendali, non di identità personale');
  if(!individual)reasons.push('persona fisica non identificata con sufficiente evidenza');
- return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual};
+ const evidence=[];
+ const addEvidence=(kind,source,value,reason)=>{
+  const excerpt=String(value||'').replace(/\s+/g,' ').trim().slice(0,220);
+  if(excerpt&&!evidence.some(item=>item.kind===kind&&item.source===source&&item.excerpt===excerpt))evidence.push({kind,source,excerpt,reason});
+ };
+ if(linkedinPersonProfile)addEvidence('Identificativo URL','Indirizzo della fonte',url,'URL con percorso LinkedIn /in/: indicatore di profilo personale, non prova dell’identità reale.');
+ if(linkedinCompanyPage)addEvidence('Identificativo URL','Indirizzo della fonte',url,'URL con percorso LinkedIn /company/: pagina aziendale, non profilo personale.');
+ if(personTitle)addEvidence('Nominativo nel titolo','Titolo della pagina',t,'Il titolo ha una forma compatibile con nome e cognome; il nominativo va confermato sulla fonte originale.');
+ const selfMatch=body.match(/\b(?:mi chiamo|sono\s+(?:un[oa]?\s+)?(?:nutrizionist\w*|dietist\w*|naturopat\w*|osteopat\w*|fisioterapist\w*|personal trainer|coach|imprenditor\w*|consulent\w*|networker|titolare))\b[^.!?]{0,150}/i);
+ if(selfMatch)addEvidence('Autopresentazione','Estratto del testo',selfMatch[0],'La pagina contiene una frase di autopresentazione; verificare che si riferisca all’autore del profilo e non a un soggetto citato.');
+ const roleMatch=(t+' '+body).match(/\b(?:biolog[oa]\s+nutrizionist\w*|nutrizionist\w*|dietist\w*|naturopat\w*|osteopat\w*|fisioterapist\w*|personal trainer|farmacist\w*|medic[io]|coach|consulent\w*|imprenditor\w*|titolare|founder|team leader|networker|distributore indipendente|brand partner|vendita diretta)\b/i);
+ if(roleMatch)addEvidence('Ruolo o professione','Titolo o testo della fonte',roleMatch[0],'Termine professionale o commerciale rilevato nel contenuto; non certifica abilitazione o attività attuale.');
+ const segmentMatch=(t+' '+body).match(segmentSignals[segment]||/benessere|wellness|professionista/i);
+ if(segmentMatch)addEvidence('Corrispondenza al segmento','Titolo o testo della fonte',segmentMatch[0],'Parola o frase coerente con il segmento selezionato; da valutare nel contesto completo.');
+ if(contactCount)addEvidence('Recapiti pubblicati','Testo della fonte',contactCount+' recapito/i rilevati','La presenza di recapiti non dimostra titolarità, validità o consenso al contatto.');
+ if(directoryEvidence)addEvidence('Tipo di fonte','Titolo o dominio',t||host,'Possibile directory, articolo o annuncio: non equivale a un profilo individuale.');
+ if(organizationEvidence&&!individual)addEvidence('Contesto organizzativo','Titolo o testo della fonte',t+' '+body,'Sono presenti riferimenti aziendali o organizzativi; non attribuire i nomi citati all’organizzazione come prospect.');
+ return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual,evidence};
 }
 function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assessment,targetAssessment,profile){
  const directContacts=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
