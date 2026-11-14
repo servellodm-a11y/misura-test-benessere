@@ -505,7 +505,7 @@ const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-t
 assert.equal(opportunityFit.signal_strength,'forte');
 assert.equal(opportunityFit.explicit_intent,'dichiarato');
 assert.equal(opportunityFit.commercial_outcome,'partner_potential','An explicit extra-income declaration must remain a commercial partner prospect');
-const businessOpportunityFit=assessFit('Profilo personale','Cerco un progetto imprenditoriale da sviluppare in proprio','', 'business_seeking',{kind:'partner',segment:'business_seeking',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
+const businessOpportunityFit=assessFit('Profilo personale','Cerco un progetto imprenditoriale da sviluppare in proprio','', 'business_seeking',{kind:'partner',segment:'business_seeking',confidence:'media'}, {individual:true,score:45,entityType:'Possibile profilo individuale'},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(businessOpportunityFit.explicit_intent,'dichiarato');
 assert.equal(businessOpportunityFit.commercial_outcome,'partner_potential','An explicit business-seeking declaration must qualify as partner potential');
 const genericOpportunityFit=assessFit('Profilo personale','Cerco un’opportunità interessante','', 'business_seeking',{kind:'partner',segment:'business_seeking',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
