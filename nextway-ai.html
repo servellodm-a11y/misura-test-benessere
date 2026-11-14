@@ -44,7 +44,7 @@ function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
  const incomingQuality=record?.evidence_quality&&typeof record.evidence_quality==='object'?record.evidence_quality:{};
  const incoming=incomingQuality.prospect_profile&&typeof incomingQuality.prospect_profile==='object'?incomingQuality.prospect_profile:{};
  const previous=meta.prospect_profile&&typeof meta.prospect_profile==='object'?meta.prospect_profile:{};
- const profileMap={name:{incoming:'name',stored:'name'},profession:{incoming:'profession',stored:'profession'},company_brand:{incoming:'organization',stored:'company_brand'},location:{incoming:'location',stored:'location'}};
+ const profileMap={name:{incoming:'name',stored:'name'},profession:{incoming:'profession',stored:'profession'},company_brand:{incoming:'company_brand',stored:'company_brand'},location:{incoming:'location',stored:'location'}};
  const usable=value=>{
   const text=String(value??'').trim();
   return !!text&&!/^(?:non rilevat[oa](?: con certezza)?|non confermat[oa]|identità individuale non confermata|da approfondire)$/i.test(text);
