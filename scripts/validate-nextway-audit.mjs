@@ -261,7 +261,7 @@ assert.match(html, /id="sort" aria-label="Ordina Lead"/);
 assert.match(leadUiScript, /sort==='recent'\?new Date\(b\.created\|\|0\)-new Date\(a\.created\|\|0\)/);
 assert.match(leadUiScript, /sort==='oldest'\?new Date\(a\.created\|\|0\)-new Date\(b\.created\|\|0\)/);
 assert.match(leadUiScript, /sort==='name'\?String\(a\.name\|\|''\)\.localeCompare/);
-assert.match(leadUiScript, /\['query','cat','state','archiveFilter','qualificationFilter','partnerFilter','sort'\]\.forEach/);
+assert.match(leadUiScript, /\['query','cat','state','archiveFilter','qualificationFilter','partnerFilter','commercialQualificationFilter','prospectQualityFilter','entityTypeFilter','sort'\]\.forEach/, "All CRM filters, including prospect-quality filters, must trigger list refresh");
 console.log("NEXTWAY CRM sorting: score, newest, oldest and alphabetical order: PASS");
 
 
