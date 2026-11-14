@@ -60,13 +60,29 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 </main>
 <script src="/nextway-company-config.js"></script>
 <script>
-const $=id=>document.getElementById(id);let generated=[],dailyProspects=[];
+const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searchHistoryOwnerId='';
 const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 const activeCompany=companyConfig?.active||null;
 const SEARCH_HISTORY_LIMIT=10;
-function searchHistoryKey(){const owner=window.NEXTWAY_LOCAL_ARCHIVE?.getOwner?.();return owner?'nextway_search_history_v1:'+owner:null;}
-function readSearchHistory(){const key=searchHistoryKey();if(!key)return [];try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value.slice(0,SEARCH_HISTORY_LIMIT):[]}catch{return []}}
-function saveSearchHistory(prospects){const key=searchHistoryKey();if(!key)return;const record={id:Date.now().toString(36),date:new Date().toISOString(),segment:$('segment').value,area:$('area').value.trim(),count:prospects.length,prospects:prospects.slice(0,100).map(p=>({name:String(p.profile?.name||p.title||'Prospect senza nome').slice(0,120),url:p.url,identity_keys:Array.isArray(p.identity_keys)?p.identity_keys.slice(0,10):[],priority_score:Number(p.commercial_fit?.priority_score)||0,qualification_status:p.qualification_status||'Da approfondire',archive_status:p.archive_status||'new'}))};const history=readSearchHistory().filter(item=>item.id!==record.id);history.unshift(record);localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();}
+function searchHistoryKey(ownerId=searchHistoryOwnerId){return typeof ownerId==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(ownerId)?'nextway_search_history_v1:'+ownerId:null;}
+function setSearchHistoryOwner(ownerId){searchHistoryOwnerId=typeof ownerId==='string'?ownerId:'';renderSearchHistory();return !!searchHistoryKey();}
+function readSearchHistory(ownerId=searchHistoryOwnerId){const key=searchHistoryKey(ownerId);if(!key)return [];try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value.filter(item=>item&&Array.isArray(item.prospects)).slice(0,SEARCH_HISTORY_LIMIT):[]}catch{return []}}
+function snapshotSearchHistoryProspect(p){
+ const profile=p?.profile&&typeof p.profile==='object'?p.profile:{};
+ const sourceEvidence=Array.isArray(p?.source_evidence)?p.source_evidence.slice(0,3).map(source=>({url:safeUrl(source?.url),title:String(source?.title||'').slice(0,180),snippet:String(source?.snippet||'').slice(0,1200),evidence:String(source?.evidence||'').slice(0,1800),collected_at:source?.collected_at||null,source_quality:source?.source_quality||null})):[];
+ return {name:String(profile.name||p?.title||'Prospect senza nome').slice(0,120),title:String(p?.title||'').slice(0,180),url:safeUrl(p?.url),identity_keys:Array.isArray(p?.identity_keys)?p.identity_keys.filter(value=>typeof value==='string').slice(0,10):[],profile,qualification_status:String(p?.qualification_status||'Da approfondire'),qualification_action:String(p?.qualification_action||''),qualification_reasons:Array.isArray(p?.qualification_reasons)?p.qualification_reasons.slice(0,10):[],commercial_fit:p?.commercial_fit||null,source_quality:p?.source_quality||null,segment:String(p?.segment||''),confidence:String(p?.confidence||''),role:String(p?.role||profile.profession||''),reason:String(p?.reason||''),person_confirmed:!!p?.person_confirmed,archive_status:String(p?.archive_status||'new'),queue:p?.queue||null,evidence_review:p?.evidence_review||null,source_evidence:sourceEvidence,emails:Array.isArray(p?.emails)?p.emails.filter(value=>typeof value==='string').slice(0,5):[],phones:Array.isArray(p?.phones)?p.phones.filter(value=>typeof value==='string').slice(0,5):[],socials:Array.isArray(p?.socials)?p.socials.filter(value=>typeof value==='string').slice(0,5):[],priority_score:Number(p?.commercial_fit?.priority_score)||0};
+}
+function saveSearchHistory(prospects){
+ const key=searchHistoryKey();if(!key)return false;
+ try{
+  const record={id:Date.now().toString(36),date:new Date().toISOString(),segment:$('segment').value,area:$('area').value.trim(),count:prospects.length,prospects:prospects.slice(0,25).map(snapshotSearchHistoryProspect)};
+  const history=readSearchHistory();history.unshift(record);localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();return true;
+ }catch(error){console.warn('NEXTWAY: impossibile salvare lo storico locale.',error);return false;}
+}
+async function initializeSearchHistory(){try{if(!window.NEXTWAY_CLOUD?.active)return false;const {s}=await window.NEXTWAY_CLOUD.active();return s?.user?.id?setSearchHistoryOwner(s.user.id):false;}catch(error){console.warn('NEXTWAY: storico non disponibile finché non viene effettuato l’accesso.',error);return false;}}
+function markSearchHistoryAcquired(url,identityKeys=[]){const key=searchHistoryKey();if(!key)return;const canonical=canonicalProspectUrl(url);const keys=new Set(identityKeys);const history=readSearchHistory();let changed=false;history.forEach(entry=>(entry.prospects||[]).forEach(p=>{if(canonicalProspectUrl(p.url)===canonical||(p.identity_keys||[]).some(value=>keys.has(value))){if(p.archive_status!=='acquired'){p.archive_status='acquired';changed=true;}}}));if(changed){localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();}}
+function renderSearchHistory(){const root=$('search-history');if(!root)return;root.replaceChildren();const history=readSearchHistory();if(!history.length){const empty=document.createElement('p');empty.className='muted';empty.textContent=searchHistoryKey()?'Nessuna ricerca salvata. Lo storico viene creato dopo la prima ricerca completata.':'Accedi all’Archivio Lead per visualizzare lo storico personale su questo browser.';root.append(empty);return;}history.forEach(entry=>{const row=document.createElement('article');row.style.cssText='padding:10px 0;border-top:1px solid #dfe5ef';const title=document.createElement('strong');title.textContent=new Date(entry.date).toLocaleString('it-IT')+' · '+(entry.segment||'segmento non indicato')+' · '+(entry.area||'area non indicata');const detail=document.createElement('p');detail.className='muted';const acquired=(entry.prospects||[]).filter(p=>p.archive_status==='acquired').length,followup=(entry.prospects||[]).filter(p=>p.archive_status==='followup').length;detail.textContent=(entry.count||0)+' risultati unici · '+acquired+' già acquisiti · '+followup+' in follow-up · '+Math.max(0,(entry.prospects||[]).length-acquired-followup)+' nuovi/non acquisiti nel CRM';const links=document.createElement('div');links.className='actions';(entry.prospects||[]).slice(0,8).forEach(p=>{const a=document.createElement('a');a.href=safeUrl(p.url)||'#';a.target='_blank';a.rel='noopener noreferrer';a.textContent=p.name+' · '+(p.role||p.qualification_status||'da verificare')+' · '+(Number(p.priority_score)||0)+'/100';links.append(a);});row.append(title,detail,links);root.append(row);});}
+renderSearchHistory();
 function classifyNextBestAction(activity,crmStatus,now=new Date()){
  const status=String(crmStatus||'').trim().toLocaleLowerCase('it');
  const outcome=String(activity?.last_contact_outcome||'').trim().toLocaleLowerCase('it');
@@ -354,7 +370,7 @@ async function runSearch(){
  try{
   if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
   button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;const selectedIndex=Math.max(0,Math.min(generated.length-1,Number($('selected-query')?.value||0)));const selectedQuery=generated[selectedIndex];if(!selectedQuery)throw new Error('Genera e seleziona una query prima di avviare la ricerca.');status.textContent='Connessione a NEXTWAY e avvio di 1 ricerca (massimo 5 risultati)…';list.replaceChildren();
-  const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();
+  const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();setSearchHistoryOwner(s.user.id);
   const archiveIndex=window.NEXTWAY_CLOUD.getLocalSearchArchiveIndex(s.user.id);
   const acquiredUrls=new Set(archiveIndex.urls||[]),acquiredKeys=new Set(archiveIndex.identity_keys||[]),crmProspects=Array.isArray(archiveIndex.prospects)?archiveIndex.prospects:[];
   const crmActivityByLead=new Map();
@@ -501,7 +517,7 @@ async function runSearch(){
   queueGroups.forEach(group=>{const section=document.createElement('section');section.style.cssText='margin:14px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;';const heading=document.createElement('h3');heading.textContent=group.title;section.append(heading);const members=sortedCards.filter(card=>card.dataset.queue===group.code);const count=document.createElement('p');count.className='muted';count.textContent=members.length+' risultati';section.append(count);if(!members.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='Nessun risultato in questo gruppo.';section.append(empty);}members.forEach(card=>section.append(card));rankingContainer.append(section);});
   list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
-  saveSearchHistory(dailyProspects);
+  if(!saveSearchHistory(dailyProspects))status.textContent='Ricerca completata, ma lo storico locale non è stato salvato. Verifica lo spazio disponibile nel browser e riprova dopo aver effettuato l’accesso.';
 
   dailyProspects.sort((a,b)=>(Number(a.crm_activity?.next_best_action?.priority??50)-Number(b.crm_activity?.next_best_action?.priority??50))||(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0));
   const agenda=document.createElement('section');agenda.className='panel';agenda.style.cssText='margin:14px 0;padding:14px;border:1px solid var(--border,#ddd);border-radius:12px;';
@@ -1079,4 +1095,4 @@ $('copyall').addEventListener('click',()=>{if(!generated.length)build();navigato
 $('download').addEventListener('click',()=>{if(!generated.length)build();const rows=[['numero','categoria','query','url'],...generated.map((x,i)=>[i+1,x.label,x.query,x.url])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-batteria-ricerche.csv';a.click();URL.revokeObjectURL(a.href)});
 build();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script>initializeSearchHistory();</script></body></html>
