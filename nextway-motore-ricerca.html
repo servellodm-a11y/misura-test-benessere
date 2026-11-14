@@ -740,8 +740,8 @@ function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,
  // I titoli dei motori spesso separano il nome dal ruolo con trattino semplice,
  // barra verticale o lineetta lunga. Accettiamo solo 2–3 parole con iniziali maiuscole.
  if(!name){
-  const head=String(title||'').split(/\\s+[|–—-]\\s+|[|–—]/)[0].trim()
-   .replace(/^(?:dott(?:ore|oressa|\.)?|dr\.?|prof(?:essore|essoressa|\.)?|ing\.?|avv\.?)\\s+/i,'');
+  const head=String(title||'').split(/\s+[|–—-]\s+|[|–—]/)[0].trim()
+   .replace(/^(?:dott(?:ore|oressa|\.)?|dr\.?|prof(?:essore|essoressa|\.)?|ing\.?|avv\.?)\s+/i,'');
   if(new RegExp("^"+namePattern+"$").test(head))name=head;
  }
  // Alcune pagine espongono il nominativo in un campo etichettato, non nel titolo.
