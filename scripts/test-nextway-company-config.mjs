@@ -830,11 +830,12 @@ const bridgeSandbox={
 };
 vm.runInNewContext(canonicalBridgeMatch[0]+'\n'+bridgeMatch[0]+';this.addSearchLeadToLocalArchive=addSearchLeadToLocalArchive;',bridgeSandbox);
 const bridgeOwner='123e4567-e89b-42d3-a456-426614174000';
-const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b/?utm_source=test#bio',evidence:'Profilo professionale pubblico · nutrizionista · Roma',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
+const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b/?utm_source=test#bio',evidence:'Profilo professionale pubblico · nutrizionista · Roma',category:'research_result',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
 const bridgeSaved=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
 assert.equal(bridgeSaved.duplicate,false,'First manual acquisition must create one local archive lead');
 assert.equal(bridgeSaved.lead.name,'Andrea Fabbri');
 assert.equal(bridgeSaved.lead.profession,'Nutrizionista');
+assert.equal(bridgeSaved.lead.category,'research_result','Unqualified search results must retain research_result category in the local archive');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Acquisition must persist exactly one lead in the authenticated owner archive');
 assert.ok(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].notes.includes('[NEXTWAY_PROSPECT_METADATA_V1]'),'Acquisition must preserve structured prospect metadata in the local archive');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].url,bridgeRecord.url,'Acquisition must preserve the original source URL');
@@ -859,7 +860,7 @@ assert.equal(rowsWithTest.filter(row=>row.is_test).length,1,'Exactly one test re
 const rowsAfterCleanup=rowsWithTest.filter(row=>!(row.id===syntheticBridgeTest.lead.id&&row.is_test===true));
 bridgeSandbox.localStorage.setItem('nextway_ai_records_v1:'+bridgeOwner,JSON.stringify(rowsAfterCleanup));
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Removing the synthetic test must preserve all real archive rows');
-assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].is_test,undefined,'Cleanup must leave the real lead unchanged');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].is_test,false,'Cleanup must leave the real lead unchanged and explicitly non-test');
 assert.ok(searchHtml.includes('id="bridge-test-panel"'),'The search page must expose the controlled local bridge test');
 assert.ok(searchHtml.includes('id="run-bridge-test"')&&searchHtml.includes('id="clean-bridge-test"'),'The local test must have explicit run and cleanup controls');
 assert.ok(searchHtml.includes('removeBridgeTestRecord()'),'The UI must provide a dedicated cleanup operation');
