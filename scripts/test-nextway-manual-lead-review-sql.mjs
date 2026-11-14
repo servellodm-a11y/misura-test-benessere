@@ -21,6 +21,7 @@ assert.match(archive,/name="manual_review_confirmed" id="manualReviewConfirmed"/
 assert.match(archive,/values\.manual_review_confirmed=el\('manualReviewConfirmed'\)\.checked/);
 assert.match(archive,/values\.qualification==='Qualificato'&&!values\.manual_review_confirmed/);
 assert.match(cloud,/nextway_confirm_lead_manual_review/);
+assert.equal((cloud.match(/x\.manual_review_confirmed&&payload\.qualification==='Qualificato'/g)||[]).length,2,'Both insert and update sync paths must invoke explicit review after the database scoring trigger runs');
 assert.match(cloud,/manual_reviewed_at/);
 assert.match(cloud,/manual_reviewed_by/);
 console.log('NEXTWAY manual lead review contract: PASS');
