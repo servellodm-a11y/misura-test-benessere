@@ -14,7 +14,10 @@ assert.match(migration,/disable trigger nextway_qualification_v1[\s\S]*?update p
 assert.match(migration,/create trigger zzzz_nextway_lead_manual_review_guard/i);
 assert.match(migration,/current_setting\('nextway\.manual_review_rpc',true\)/i);
 assert.match(migration,/new\.manual_reviewed_by is distinct from auth\.uid\(\)/i);
-assert.match(migration,/new\.identity_check <> 'confirmed'/i);
+assert.match(migration,/new\.identity_check is distinct from 'confirmed'/i);
+assert.match(migration,/coalesce\(new\.score_fit,0\)\+coalesce\(new\.score_activity,0\)/i);
+assert.match(migration,/v_lead\.identity_check is distinct from 'confirmed'/i);
+assert.match(migration,/coalesce\(v_lead\.score_fit,0\)\+coalesce\(v_lead\.score_activity,0\)/i);
 assert.match(migration,/create or replace function public\.nextway_confirm_lead_manual_review/i);
 assert.match(migration,/security definer set search_path='pg_catalog','public'/i);
 assert.match(migration,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
