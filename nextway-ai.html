@@ -57,10 +57,10 @@ function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
   const current=String(lead[leadField]??'').trim();
   const previousValue=String(previous[profileField]??'').trim();
   const stillSystemManaged=Object.prototype.hasOwnProperty.call(previous,profileField)&&current===previousValue;
-  if(!current||stillSystemManaged)lead[leadField]=next;
+  if(!current||stillSystemManaged){lead[leadField]=next;previous[profileField]=next;}
  }
  const mergedProfile={...previous};
- for(const key of ['name','name_candidate','name_source','profession','organization','location','identity_status','entity_type','segment','confidence','priority','priority_reason']){
+ for(const key of ['name_candidate','name_source','identity_status','entity_type','segment','confidence','priority','priority_reason']){
   const value=incoming[key];
   if(usable(value)||!Object.prototype.hasOwnProperty.call(mergedProfile,key))mergedProfile[key]=value??'';
  }
