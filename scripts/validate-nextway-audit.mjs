@@ -6,6 +6,7 @@ const cloud = read("../nextway-cloud.js");
 const setter = read("../nextway-setter.js");
 const setterFunction = read("../supabase/functions/nextway-ai-setter/index.ts");
 const html = read("../nextway-ai.html");
+const searchHtml = read("../nextway-motore-ricerca.html");
 const leadSchema = read("../supabase/nextway_leads.sql");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
@@ -445,7 +446,7 @@ console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticat
 
 
 // Prospect identity extraction: guard against treating organization names as people.
-const prospectProfileStart = html.indexOf("function buildProspectProfile(");
+const prospectProfileStart = searchHtml.indexOf("function buildProspectProfile(");
 const prospectProfileEnd = html.indexOf("\\nfunction canonicalProspectUrl", prospectProfileStart);
 assert.ok(prospectProfileStart >= 0 && prospectProfileEnd > prospectProfileStart, "Prospect profile extraction function must exist");
 const prospectProfileSource = html.slice(prospectProfileStart, prospectProfileEnd);
