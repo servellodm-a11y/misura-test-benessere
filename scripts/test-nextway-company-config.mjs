@@ -240,6 +240,13 @@ assert.equal(classify('Profilo personale','Ho iniziato da poco la mia attività 
 assert.equal(classify('Profilo personale','Network marketing nel settore wellness','', 'wellness_networker').segment,'unclassified','A generic wellness industry mention is not proof of active networker status');
 
 assert.equal(classify('Profilo personale','Cerco un lavoro extra part-time','', 'side_income').segment,'side_income');
+assert.equal(classify('Profilo personale','Vorrei arrotondare lo stipendio con un’opportunità di guadagno extra','', 'side_income').segment,'side_income','A clearly stated extra-income goal should qualify');
+assert.equal(classify('Profilo personale','Disponibile a valutare un lavoro part-time','', 'side_income').segment,'side_income','Explicit availability for part-time work should qualify');
+assert.equal(classify('Profilo personale','Sono titolare di un’impresa e gestisco il mio negozio','', 'side_income').segment,'unclassified','Being an entrepreneur does not imply seeking extra income');
+assert.equal(classify('Profilo personale','Sono imprenditore e titolare di una società','', 'business_seeking').segment,'unclassified','An entrepreneur role does not imply seeking a new business');
+assert.equal(classify('Profilo personale','Cerco un’opportunità imprenditoriale da sviluppare in proprio','', 'business_seeking').segment,'business_seeking','An explicit entrepreneurial opportunity search should qualify');
+assert.equal(classify('Profilo personale','Vorrei avviare una mia attività','', 'business_seeking').segment,'business_seeking','A declared intention to start a business should qualify');
+assert.equal(classify('Profilo personale','Opportunità, crescita e nuove sfide','', 'business_seeking').segment,'unclassified','Generic opportunity language must not imply business-seeking intent');
 assert.equal(classify('Profilo personale','Cerco consigli per migliorare la mia alimentazione','', 'customers').kind,'customer');
 assert.equal(classify('Profilo personale','Benessere e stile di vita','', 'customers').confidence,'bassa');
 assert.equal(classify('Profilo personale','Benessere e stile di vita','', 'customers').kind,'unknown','Generic wellness content must not be classified as a potential customer');
