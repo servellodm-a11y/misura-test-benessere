@@ -506,11 +506,12 @@ assert.ok(searchHtml.includes('commercial_fit:commercialFit'), 'Prospect assessm
 const fitStart=searchHtml.indexOf('function assessCommercialFit(');
 const fitEnd=searchHtml.indexOf('function buildProspectProfile(',fitStart);
 assert.ok(fitStart>=0&&fitEnd>fitStart,'Commercial fit helper must be present');
+const opportunityHelperStart=searchHtml.indexOf('function assessOpportunityIntent(');
 const customerHelperStart=searchHtml.indexOf('function assessCustomerIntent(');
-const opportunityHelperEnd=searchHtml.indexOf('function assessSearchEvidence(',customerHelperStart);
-assert.ok(customerHelperStart>=0&&opportunityHelperEnd>customerHelperStart,'Customer and opportunity intent helpers must be available to commercial qualification tests');
+const opportunityHelperEnd=searchHtml.indexOf('function assessSearchEvidence(',opportunityHelperStart);
+assert.ok(opportunityHelperStart>=0&&customerHelperStart>opportunityHelperStart&&opportunityHelperEnd>customerHelperStart,'Customer and opportunity intent helpers must be available to commercial qualification tests');
 const fitContext={};
-vm.runInNewContext(searchHtml.slice(customerHelperStart,opportunityHelperEnd)+searchHtml.slice(fitStart,fitEnd)+';this.assessCommercialFit=assessCommercialFit;',fitContext);
+vm.runInNewContext(searchHtml.slice(opportunityHelperStart,opportunityHelperEnd)+searchHtml.slice(fitStart,fitEnd)+';this.assessCommercialFit=assessCommercialFit;',fitContext);
 const assessFit=fitContext.assessCommercialFit;
 const customerFit=assessFit('Profilo personale','Cerco un nutrizionista per una consulenza','', 'customers',{kind:'customer',segment:'customers',confidence:'media'}, {score:70},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(customerFit.prospect_type,'cliente');
