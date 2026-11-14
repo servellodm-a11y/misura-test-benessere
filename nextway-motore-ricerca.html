@@ -392,16 +392,12 @@ async function runSearch(){
     const commercialFit=assessCommercialFit(item.title,item.snippet,pageContent,$('segment').value,targetAssessment,assessment,publicContacts);
     commercialFit.source_quality_score=sourceQuality.quality_score;
     commercialFit.source_quality=sourceQuality;
-    const priorityEligible=assessment.individual===true&&commercialFit.segment_match===true&&commercialFit.prospect_type!=='da qualificare'&&(commercialFit.prospect_type!=='cliente'||commercialFit.explicit_intent==='dichiarato');
-    if(priorityEligible){
-     commercialFit.priority_score=Math.round(commercialFit.priority_score*.85+sourceQuality.quality_score*.15);
-     commercialFit.priority_gate='Persona identificabile e segmento coerente; priorità documentale calcolata.';
-    }else{
-     commercialFit.priority_score=0;
-     commercialFit.priority_gate='Priorità esclusa: occorre confermare una persona individuale e la corrispondenza al segmento; per i clienti serve anche una richiesta esplicita.';
-     commercialFit.reasons.push(commercialFit.priority_gate);
-    }
-    commercialFit.priority_tier=commercialFit.priority_score>=80?'Alta pertinenza':commercialFit.priority_score>=55?'Da verificare':'Bassa pertinenza';
+    const leadPriority=assessLeadPriority(commercialFit,assessment,targetAssessment,sourceQuality,publicContacts,profile);
+    commercialFit.priority_score=leadPriority.priority_score;
+    commercialFit.priority_tier=leadPriority.priority_tier;
+    commercialFit.priority_gate=leadPriority.gate_reason;
+    commercialFit.priority_components=leadPriority;
+    commercialFit.reasons.push(...leadPriority.reasons);
     card.dataset.segmentPriority=String(commercialFit.priority_score);card.dataset.segmentTier=commercialFit.priority_tier;
     const outcomeCard=document.createElement('p');outcomeCard.className='tag';outcomeCard.textContent='Esito commerciale: '+commercialFit.commercial_outcome_label+'. '+(commercialFit.commercial_outcome==='generic_result'?'Non classificarlo come cliente o partner.':commercialFit.commercial_outcome==='insufficient_evidence'?'Non acquisire come prospect qualificato.':commercialFit.commercial_outcome==='not_suitable'?'Non acquisire come prospect individuale.':'La dichiarazione va comunque verificata sulla fonte originale.');
     const reasons=document.createElement('p');reasons.className='muted';reasons.textContent='Identità: '+assessment.identityScore+'/40 · Segmento: '+assessment.relevanceScore+'/40 · Prove: '+assessment.evidenceScore+'/20. Elementi: '+assessment.reasons.join(' · ')+'. Il punteggio ordina le evidenze pubbliche: non dimostra interesse o idoneità commerciale.';
@@ -445,13 +441,13 @@ async function runSearch(){
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Nome: '+profile.name+'\\nIdentità: '+profile.identity_status+'\\nOrigine nominativo: '+profile.name_source+'\\nProfessione: '+profile.profession+'\\nAzienda: '+profile.organization+'\\nLocalità: '+profile.location+'\\nCategoria: '+targetAssessment.primary+'\\nSegmento: '+targetAssessment.segment+'\\nPriorità verifica: '+profile.priority+'\\nMotivazione: '+targetAssessment.reason+'\\nFonte: '+url+'\\nDOCUMENTATO NELLA FONTE: '+evidenceReview.documented.map(e=>e.kind+' ['+e.field+']: '+e.excerpt).join(' | ')+'\\nINTERPRETAZIONE NEXTWAY (non accertata): '+evidenceReview.inference.map(e=>e.kind+': '+e.value+' — '+e.reason).join(' | ')+'\\nDA VERIFICARE: '+evidenceReview.verify.join('; ')));
-    const capture=document.createElement('button');capture.className='btn alt';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':'Acquisisci nel mio archivio';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':'Acquisizione manuale: il risultato non viene salvato automaticamente.';
+    const capture=document.createElement('button');capture.className='btn alt';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisisci prospect qualificato':'Acquisisci come ricerca da qualificare';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisizione manuale di un prospect con dichiarazione esplicita; verificare comunque la fonte.':'Acquisizione manuale come risultato di ricerca, non come cliente o partner qualificato.';
     capture.addEventListener('click',()=>{
      if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
      try{
       const segment=$('segment').value;
       const outcome=commercialFit.commercial_outcome;
-      const category=outcome==='customer_potential'?'final_customer':outcome==='partner_potential'?'potential_partner':outcome==='not_suitable'?'research_result':outcome==='insufficient_evidence'?'research_result':segment==='wellness_pro'?'wellness_professional':'research_result';
+      const category=outcome==='customer_potential'?'final_customer':outcome==='partner_potential'?'potential_partner':outcome==='not_suitable'?'research_result':outcome==='insufficient_evidence'?'research_result':'research_result';
       const partnerTypes={wellness_pro:'Professionista salute e benessere',wellness_networker:'Networker settore wellness',new_networker:'Networker alle prime armi',other_networker:'Networker di altri settori',exnetworker:'Ex-networker',entrepreneur:'Imprenditore / titolare',side_income:'Ricerca lavoro extra · da verificare',business_seeking:'Ricerca attività imprenditoriale · da verificare'};
       const evidence=['SCHEDA PROSPECT · revisione umana obbligatoria','DOCUMENTATO NELLA FONTE (dichiarazioni, non fatti verificati): '+evidenceReview.documented.map(e=>e.kind+' ['+e.field+']: '+e.excerpt).join(' | '),'INTERPRETAZIONE NEXTWAY (non accertata): '+evidenceReview.inference.map(e=>e.kind+': '+e.value+' — '+e.reason).join(' | '),'DA VERIFICARE MANUALMENTE: '+evidenceReview.verify.join('; '),'Nome: '+profile.name,'Professione: '+profile.profession,'Azienda: '+profile.organization,'Località: '+profile.location,'Priorità di verifica: '+profile.priority,'Motivazione priorità: '+profile.priority_reason,'Classificazione: '+profile.category,'Motivazione classificazione: '+targetAssessment.reason,'Qualificazione commerciale: '+qualification.status,'Esito commerciale: '+commercialFit.commercial_outcome_label,'Tipo prospect: '+commercialFit.prospect_type,'Pertinenza commerciale: '+commercialFit.commercial_fit_score+'/100','Segnale commerciale: '+commercialFit.signal_label,'Intenzione: '+commercialFit.explicit_intent,'Prossima azione: '+commercialFit.suggested_next_step,'Azione suggerita: '+qualification.action,'Motivazioni qualificazione: '+qualification.reasons.join(' · '),'Fonte: '+url,item.snippet||'',pageContent].filter(Boolean).join('\\n\\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
@@ -810,6 +806,33 @@ function buildEvidenceReview(assessment,title,snippet,pageContent,profile,target
   'Data e attualità delle informazioni'
  ];
  return {documented,interpreted,inference,verify,source_date:sourceQuality?.published_at||null,source_date_label:sourceQuality?.published_at?'Data indicata dalla fonte: '+new Date(sourceQuality.published_at).toLocaleDateString('it-IT'):'Data della fonte non rilevata · da verificare',source_url:sourceQuality?.host||''};
+}
+function assessLeadPriority(commercialFit,assessment,targetAssessment,sourceQuality,contacts,profile){
+ const outcome=String(commercialFit?.commercial_outcome||'');
+ const isCustomer=outcome==='customer_potential';
+ const isPartner=outcome==='partner_potential';
+ const identity=assessment?.individual===true?25:0;
+ const roleEvidence=Array.isArray(assessment?.evidence)&&assessment.evidence.some(item=>item?.kind==='Ruolo o professione');
+ const role=isCustomer?15:(isPartner&&roleEvidence?15:0);
+ const segment=commercialFit?.segment_match===true?10:0;
+ const intent=(isCustomer||isPartner)?20:0;
+ const source=Math.round(Math.max(0,Math.min(100,Number(sourceQuality?.quality_score)||0))*.20);
+ const directCount=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
+ const socialCount=Array.isArray(contacts?.socials)?contacts.socials.length:0;
+ const contact=directCount?15:socialCount?5:0;
+ const usable=value=>!!value&&!/^(non rilevat[oa]|non confermata|non rilevata con certezza)$/i.test(String(value).trim());
+ const completeness=(usable(profile?.name)?5:0)+(usable(profile?.profession)?5:0)+((usable(profile?.organization)||usable(profile?.location))?5:0);
+ const eligible=(isCustomer||isPartner)&&identity===25&&segment===10&&(!isPartner||roleEvidence);
+ const score=eligible?Math.min(100,identity+role+segment+intent+source+contact+completeness):0;
+ const reasons=[];
+ if(!isCustomer&&!isPartner)reasons.push('Nessuna dichiarazione commerciale esplicita: non entra nella lista prioritaria.');
+ if(!identity)reasons.push('Identità individuale non sufficientemente confermata.');
+ if(isPartner&&!roleEvidence)reasons.push('Ruolo professionale non documentato testualmente.');
+ if(!segment)reasons.push('Corrispondenza al segmento selezionato non confermata.');
+ if(!sourceQuality?.published_at)reasons.push('Data della fonte non rilevata: attualità da verificare.');
+ if(!directCount&&!socialCount)reasons.push('Nessun recapito o profilo social pubblico rilevato.');
+ if(!usable(profile?.name))reasons.push('Nominativo non attribuito con sufficiente certezza.');
+ return {priority_score:score,priority_tier:score>=80?'Alta priorità':score>=60?'Priorità media':score>0?'Priorità da verificare':'Fuori dalla lista prioritaria',eligible,identity_score:identity,role_score:role,segment_score:segment,intent_score:intent,source_score:source,contact_score:contact,completeness_score:completeness,role_documented:roleEvidence,reasons,gate_reason:eligible?'Dichiarazione esplicita, persona e segmento confermati; punteggio ponderato su fonte e completezza.':'Per la priorità servono dichiarazione esplicita, identità individuale, segmento coerente e, per i partner, ruolo documentato.'};
 }
 function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,targetAssessment){
   const raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
