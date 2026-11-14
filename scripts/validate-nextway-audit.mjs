@@ -59,6 +59,7 @@ const activateWithArchive = new Function("window", archiveActivation + "; return
 assert.equal(activateWithArchive("123e4567-e89b-12d3-a456-426614174000"), true);
 assert.equal(archiveActivated, "123e4567-e89b-12d3-a456-426614174000");
 
+assert.match(cloud, /if\(previousId!==nextId\)\{clearLocalArchive\(\);\$\('nw-results'\)\.replaceChildren\(\);\$\('nw-act-results'\)\.replaceChildren\(\);\$\('nw-org-activity'\)\.hidden=true/);
 assert.match(cloud, /clearLocalArchive\(\)/);
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
 assert.ok(leadUiScript.includes("sourceUrl?'<a target=\"_blank\" rel=\"noopener noreferrer\" href="), "Valid historical source URL must render as a safe external link");
