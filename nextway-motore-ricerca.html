@@ -428,8 +428,9 @@ async function runSearch(){
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Nome: '+profile.name+'\\nIdentità: '+profile.identity_status+'\\nOrigine nominativo: '+profile.name_source+'\\nProfessione: '+profile.profession+'\\nAzienda: '+profile.organization+'\\nLocalità: '+profile.location+'\\nCategoria: '+targetAssessment.primary+'\\nSegmento: '+targetAssessment.segment+'\\nPriorità verifica: '+profile.priority+'\\nMotivazione: '+targetAssessment.reason+'\\nFonte: '+url+'\\nEvidenza pubblica: '+(item.snippet||'')));
-    const capture=document.createElement('button');capture.className='btn alt';capture.textContent=alreadyAcquired?'Già presente nel CRM':'Acquisisci nel mio archivio';capture.disabled=alreadyAcquired;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':'Acquisizione manuale: il risultato non viene salvato automaticamente.';
+    const capture=document.createElement('button');capture.className='btn alt';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':'Acquisisci nel mio archivio';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':'Acquisizione manuale: il risultato non viene salvato automaticamente.';
     capture.addEventListener('click',()=>{
+     if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
      try{
       const segment=$('segment').value;
       const inferredCategory=targetAssessment.kind==='customer'?'final_customer':targetAssessment.kind==='partner'?'potential_partner':null;
