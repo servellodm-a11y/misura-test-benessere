@@ -646,10 +646,10 @@ function assessProfessionalActivity(title,snippet,pageContent){
 }
 function assessNetworkerActivity(title,snippet,pageContent){
  const fields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
- const combined=fields.map(([,value])=>value).join(' ').replace(/\\s+/g,' ').trim();
- const context=/\\b(network marketing|networker|vendita diretta|social selling|distributore indipendente|brand partner|incaricato alla vendita)\\b/i;
- const past=/\\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato il network marketing|non collaboro più|non lavoro più nel network|in passato (?:ero|lavoravo|collaboravo)|precedentemente (?:ero|lavoravo|collaboravo)|esperienza passata nel network marketing)\\b/i;
- const active=/\\b(?:sono (?:un[oa]? )?(?:networker|distributore indipendente|brand partner)|lavoro (?:nel|con il|con la) network marketing|faccio network marketing|mi occupo di network marketing|collaboro (?:attualmente )?con [A-ZÀ-ÖØ-Þ][\\wÀ-ÿ&.-]+|sviluppo (?:la mia|un')? attività (?:di network marketing|di vendita diretta)|gestisco (?:un team|una rete) (?:di vendita|di network)|seguo (?:un team|clienti) (?:nel|per il) network|attualmente (?:sono|lavoro|collaboro) (?:nel|con il|con la) network marketing)\\b/i;
+ const combined=fields.map(([,value])=>value).join(' ').replace(/\s+/g,' ').trim();
+ const context=/\b(network marketing|networker|vendita diretta|social selling|distributore indipendente|brand partner|incaricato alla vendita)\b/i;
+ const past=/\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato il network marketing|non collaboro più|non lavoro più nel network|in passato (?:ero|lavoravo|collaboravo)|precedentemente (?:ero|lavoravo|collaboravo)|esperienza passata nel network marketing)\b/i;
+ const active=/\b(?:sono (?:un[oa]? )?(?:networker|distributore indipendente|brand partner)|lavoro (?:nel|con il|con la) network marketing|faccio network marketing|mi occupo di network marketing|collaboro (?:attualmente )?con [A-ZÀ-ÖØ-Þ][\wÀ-ÿ&.-]+|sviluppo (?:la mia|un')? attività (?:di network marketing|di vendita diretta)|gestisco (?:un team|una rete) (?:di vendita|di network)|seguo (?:un team|clienti) (?:nel|per il) network|attualmente (?:sono|lavoro|collaboro) (?:nel|con il|con la) network marketing)\b/i;
  const pastMatch=combined.match(past),activeMatch=combined.match(active),mentioned=context.test(combined);
  let status='non_documentata',label='Attività nel network marketing non documentata',excerpt='',source='';
  if(pastMatch){status='possibile_attivita_passata';label='Possibile esperienza passata nel network marketing · verificare';excerpt=pastMatch[0];}
