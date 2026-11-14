@@ -570,11 +570,11 @@ assert.ok(archiveHtml.includes("'research_result'"));
 assert.ok(archiveHtml.includes('Risultato da qualificare'));
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
 
-const crmTransfer2026HelperStart=archiveHtml.indexOf('function crmTransfer2026Normalize(');
+const crmTransfer2026HelperStart=archiveHtml.indexOf('function normalizeSearchProspectProfile(');
 const crmTransfer2026HelperEnd=archiveHtml.indexOf('function getCommercialQualification(',crmTransfer2026HelperStart);
 assert.ok(crmTransfer2026HelperStart>=0&&crmTransfer2026HelperEnd>crmTransfer2026HelperStart,'Search-to-CRM prospect profile normalizer must exist');
 const crmTransfer2026VmContext={};
-vm.runInNewContext(archiveHtml.slice(crmTransfer2026HelperStart,crmTransfer2026HelperEnd)+';this.crmTransfer2026Normalize=crmTransfer2026Normalize;',crmTransfer2026VmContext);
+vm.runInNewContext(archiveHtml.slice(crmTransfer2026HelperStart,crmTransfer2026HelperEnd)+';this.normalizeSearchProspectProfile=normalizeSearchProspectProfile;',crmTransfer2026VmContext);
 const crmTransfer2026Normalize=crmTransfer2026VmContext.crmTransfer2026Normalize;
 const crmTransfer2026Mapped=crmTransfer2026Normalize({prospect_profile:{name:'Mario Rossi',profession:'Nutrizionista',organization:'Studio Alfa',location:'Milano',identity_status:'Possibile profilo individuale',entity_type:'Possibile profilo individuale',segment:'wellness_pro',confidence:'alta',priority:'Alta · verifica prioritaria',priority_reason:'Ruolo e identità da verificare'}},'Mario Rossi - Nutrizionista');
 assert.equal(crmTransfer2026Mapped.name,'Mario Rossi');
