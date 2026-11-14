@@ -53,7 +53,7 @@ function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
  for(const [leadField,keys] of Object.entries(profileMap)){
   const next=String(incoming[keys.incoming]??'').trim();
   if(!usable(next))continue;
-  if(leadField==='name'&&(!identityConfirmed||!usable(incoming.name_source)))continue;
+  if(leadField==='name'&&(!identityConfirmed||!usable(incoming.name_source)||/nominativo non rilevato|non attribuito/i.test(String(incoming.name_source||''))))continue;
   const current=String(lead[leadField]??'').trim();
   const previousValue=String(previous[keys.stored]??'').trim();
   const stillSystemManaged=Object.prototype.hasOwnProperty.call(previous,keys.stored)&&current===previousValue;
