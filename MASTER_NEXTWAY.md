@@ -2806,3 +2806,86 @@ Le seguenti attività sono state riscontrate nei commit, nei file e nei document
 ### Registro cronologico del MASTER
 
 - 13-11-2026, 19:49 Europe/Rome — verificati HEAD main `7bb8883`, stato/confronto PR #1 (534 ahead/7 behind, 84 file), run CI PR #520 e log dettagliato della failure audit, file sorgente e regex responsabili, run main #251 e relativi step, Deploy Preview Netlify segnalata dal check PR; ribaditi i risultati CRM forniti dall'utente e la diagnostica prerequisiti ancora da eseguire. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni, segreti, deploy o impostazioni.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 14 NOVEMBRE 2026, ORE 19:23 (Europe/Rome)
+
+### Repository, branch main e fonti verificate
+
+- Recuperato questo MASTER da GitHub `main` prima della modifica: blob SHA di partenza `121add0e3facc9300f3e8874ceb8ebf911a873d3`; documento di 2.809 righe. La nuova registrazione viene aggiunta in coda, preservando il contenuto cronologico esistente.
+- HEAD di `main` verificato tramite GitHub: `d8b900cdd6d578f017706a8f6f1be5d9d89600dc`, commit del 13-11-2026 18:54:33 UTC, messaggio `docs(nextway): update MASTER continuity for 13 Nov 19:49`. Nei primi otto commit recenti esaminati, questo resta l'HEAD di `main`; non risultano nuovi commit applicativi su `main` dopo l'ultimo aggiornamento documentale precedente.
+- Il branch endpoint riporta `protected=false` per `main` e nessun required status check configurato. È un dato GitHub osservato, non una modifica effettuata. Da considerare nel processo di governance prima di un futuro merge.
+- Il connettore GitHub ha permesso di leggere file, branch, commit, confronti PR, workflow run e job. Nell'inventario degli strumenti disponibili in questa sessione non risultano connettori Supabase o Netlify. Non è stato interrogato direttamente il database né il sito Netlify. Sono state usate le evidenze presenti nella conversazione corrente e nel MASTER; non si presume accesso a chat storiche non disponibili.
+
+### Pull request e divergenza dei branch
+
+**PR #1 — NEXTWAY: verifica integrazione AI Setter governance**
+- Stato GitHub: OPEN, DRAFT, NOT MERGED; base `main`, head `fix/nextway-password-recovery`.
+- Head osservato: `f76044111ae2ecd8c45d23dd8dfdb4c2660c8154`; base SHA ancora riportato dalla PR: `a3fbec076221f0f043d60373e2864d7d07db30d7`.
+- Metadati aggiornati: 727 commit, 87 file modificati, 12.159 aggiunte e 109 cancellazioni; confronto con main: DIVERGED, 727 commit ahead e 8 behind; `mergeable=false`.
+- Il diff PR include anche `MASTER_NEXTWAY.md` con 1.063 righe aggiunte. Questo è un rischio concreto di conflitto o sostituzione di registrazioni documentali più recenti se la PR venisse integrata senza riconciliazione. Non effettuare merge senza riallineare esplicitamente il MASTER del branch con la versione corrente di `main`.
+- Ultimo push workflow individuato sulla head PR #1: run #712, ID `43606004689`, SUCCESS sul commit `f760441`. La run certifica i controlli statici previsti per quel commit, non test runtime Supabase.
+
+**PR #2 — Fix NEXTWAY manual review RPC flag scope**
+- Stato GitHub: OPEN, non draft, NOT MERGED; base `fix/nextway-password-recovery` alla head PR #1 `f760441`; head `fix/nextway-manual-review-rpc-scope` a `f542e3c44078d0c55573854f1693ffa98a6294cf`.
+- Cinque commit, due file modificati, 83 aggiunte e una cancellazione. Il confronto tra head PR #1 e head PR #2 risulta ahead di cinque commit e behind zero. Il metadato `mergeable=true` vale per questa base branch, non equivale a un merge verso `main`.
+- La PR aggiunge `supabase/migrations/20261114161500_nextway_manual_review_rpc_scope.sql` (blob `01321e9a4f1cd6f9916a80699c9207396395db7a`) e aggiorna `scripts/test-nextway-manual-lead-review-sql.mjs` (blob `334d36f23d0b45cda803134ca5e13d42677b1ba7`). La migrazione è esplicitamente candidata e dichiara di non essere applicata senza autorizzazione separata.
+
+### Revisione statica: revisione manuale Lead
+
+- La migrazione candidata PR #1 `20261114150000_nextway_lead_manual_review.sql` (blob `872c9d27b3155c6185952bfdbdd8ccc76ec12efe`) aggiunge `manual_reviewed_at` e `manual_reviewed_by`, impone evidenza di revisione per la qualifica `Qualificato`, introduce un trigger di protezione e una RPC `nextway_confirm_lead_manual_review(uuid)`.
+- Le condizioni previste per la qualificazione manuale includono identità confermata e punteggio aggregato minimo di 50; il trigger invalida la revisione se cambiano identità o punteggi. Il sorgente è candidato nel branch PR e non prova che la migrazione sia applicata sul progetto Supabase.
+- Nel sorgente originario della RPC viene attivata l'impostazione transazionale `nextway.manual_review_rpc=on` prima dell'UPDATE, ma non viene riportato il reset a `off` prima del ritorno. PR #2 introduce una sostituzione della funzione che disattiva esplicitamente il flag subito dopo l'UPDATE e prima di restituire il JSON. La guardia richiede inoltre il contesto proprietario `postgres`, autenticazione e coerenza dei dati di revisione.
+- Il test statico aggiornato verifica l'ordine: attivazione flag, UPDATE protetto, disattivazione flag, return. Questo riduce il rischio che altre istruzioni nella stessa transazione ereditino il flag attivo; il comportamento effettivo resta da validare su PostgreSQL in staging.
+- La cronologia PR #2 mostra i commit di correzione del test e del contratto RPC. Non sono state modificate migrazioni, codice applicativo o database in questa attività documentale.
+
+### GitHub Actions — risultati più recenti esaminati
+
+- **PR #2 run #715**, ID `43609280854`, evento pull_request, commit `f542e3c`: SUCCESS. Job `validate` completato; tutti i 44 step funzionali e di validazione elencati dal job sono SUCCESS, inclusi il test del contratto di revisione manuale Lead, i controlli statici SQL/sicurezza/UI, gli script locali e i sei type-check Deno delle Edge Functions.
+- **PR #2 run #714**, ID `43609268265`, commit precedente `a61b245`: FAILURE allo step `Validate NEXTWAY manual Lead review contract`; i successivi controlli browser e Deno risultano SKIPPED. La run #715 successiva passa tutti gli step, quindi il problema immediato del test è stato corretto sul commit successivo. Non si deduce da ciò un test runtime.
+- **PR #1 run #712**, ID `43606004689`, SUCCESS sul suo head `f760441`.
+- **main**: ultima run push osservata resta #251, ID `43175706330`, SUCCESS sul commit `b2ce72e` del 12-11-2026. Non risultano run push più recenti su main nell'elenco controllato. La run #251 non valida i cambiamenti dei branch PR del 14 novembre.
+- I risultati CI sono validazioni statiche e type-check. Non dimostrano compilazione/esecuzione delle migrazioni sul database live, isolamento multi-tenant runtime, corretto invio Auth o funzionamento end-to-end del CRM.
+
+### Diagnostica CRM live — risultato fornito dall'utente il 14 novembre
+
+- La query corretta `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è stata aggiornata per non interrogare `supabase_migrations.schema_migrations`, relazione non disponibile nel contesto SQL. Aggiornamento GitHub su main: commit `2876295001c66c7105eba20094bae49b11c48509`; blob finale del file `82be22c8ca93583557be8bdd4e22f9c4c0c67763`.
+- L'utente ha eseguito la versione corretta e ha fornito il JSON:
+  - `public.nextway_leads`: presente; RLS attivo; FORCE RLS non attivo.
+  - Quattro policy per `authenticated`: SELECT, INSERT, UPDATE e DELETE. Le condizioni consentono il proprietario (`owner_profile_id = auth.uid()`) oppure un profilo `platform_admin`. La policy INSERT usa `WITH CHECK`; UPDATE usa sia `USING` sia `WITH CHECK`.
+  - `public.nextway_lead_activities`: assente al momento della query.
+  - `public.nextway_lead_conversion_requests`: assente al momento della query.
+  - `supabase_migrations.schema_migrations`: non disponibile nel contesto interrogato. Lo storico delle migrazioni non è deducibile da questo risultato.
+- Questo risultato è una lettura riportata dall'utente; non è un accesso diretto dell'assistente al database. Non sono stati letti o modificati record applicativi.
+
+### Diagnostica prerequisiti CRM — file presente, esecuzione ancora attesa
+
+- Creato su main `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`, commit `b0034232809b124a1afcbfe352777ba34b0ac6e1`, blob `832d328fd84b0694f7e324866a2db4927ab83dd2`.
+- La query restituisce un solo JSON in sola lettura su: colonne `owner_profile_id`, `status`, `created_at`, `archived_at`, `archived_by`, `archive_reason`; vincoli CHECK che contengono `status`; presenza delle tabelle attività, conversion requests e idempotenza; firme e attributo SECURITY DEFINER delle RPC `nextway_create_lead_with_conversation` e `nextway_create_lead_with_conversation_idempotent`.
+- Al momento di questo aggiornamento non è stato ricevuto il JSON di esecuzione di tale diagnostica. Colonne archive, vincolo status, tabella idempotenza e firme RPC live restano quindi DA COMPLETARE. Non applicare migrazioni CRM in assenza di questo risultato e dei gate di backup/staging già registrati.
+
+### Matrice di stato al 14 novembre 2026
+
+- MASTER su main, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** per questa operazione documentale.
+- HEAD main e cronologia commit recenti: **COMPLETATO E VERIFICATO** per i dati GitHub consultati.
+- Protezione branch main: **COMPLETATO E VERIFICATO** come metadato GitHub (`protected=false`, nessun required check).
+- PR #1: **BLOCCATO** per divergenza 727 ahead/8 behind, `mergeable=false` e modifica concorrente del MASTER nel diff; non integrata.
+- PR #2: **COMPLETATO E VERIFICATO** quanto a metadati, file e CI statica #715; **DA COMPLETARE** per revisione, eventuale integrazione controllata nella PR #1 e test PostgreSQL runtime. Non integrata in main.
+- Contratto statico revisione manuale Lead: **COMPLETATO E VERIFICATO** limitatamente al passaggio del test CI #715; migrazioni e comportamento live: **DA COMPLETARE**.
+- CRM Lead core RLS/policy: **COMPLETATO E VERIFICATO** limitatamente al JSON fornito dall'utente.
+- Tabelle attività e richieste conversione: **DA COMPLETARE** (assenti nell'ultima diagnostica live).
+- Diagnostica prerequisiti CRM: file **COMPLETATO E VERIFICATO** nel repository; esecuzione Supabase **DA COMPLETARE**.
+- Applicazione migrazioni, test runtime, backup/restore, staging e deploy Edge Functions/Netlify: restano **BLOCCATI/DA COMPLETARE** secondo i gate già registrati. Nessuna modifica live eseguita in questo controllo.
+
+### Prossimo passo operativo preciso
+
+1. Eseguire in Supabase SQL Editor `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo, senza applicare migrazioni.
+2. Mantenere PR #2 come proposta separata finché il contratto RPC non è revisionato e la migrazione non è validata su PostgreSQL staging; la CI #715 non è una prova runtime.
+3. Prima di qualsiasi merge della PR #1, riallineare il branch con main e riconciliare esplicitamente `MASTER_NEXTWAY.md`, che compare nel diff PR con 1.063 righe aggiunte. Non sovrascrivere la cronologia documentale più recente.
+4. Mantenere backup/restore verificato, staging isolato e test sintetici come gate prima di modifiche Supabase o deploy.
+
+### Registro cronologico del MASTER
+
+- 14-11-2026, 19:23 Europe/Rome — aggiornati HEAD main e commit recenti; verificati stato e confronto PR #1/#2, file e migrazione di revisione manuale Lead, run GitHub Actions #712/#714/#715 e relativi risultati; registrato il JSON CRM live fornito dall'utente, la correzione della diagnostica 42P01 e la nuova diagnostica prerequisiti ancora da eseguire; annotati assenza di connettori Supabase/Netlify e protezione branch main disattivata. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
