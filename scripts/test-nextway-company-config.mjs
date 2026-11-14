@@ -164,6 +164,8 @@ assert.ok(searchHtml.includes('identity_keys:identityKeys'));
 assert.ok(archiveHtml.includes("cloud_id:typeof lead.cloud_id==='string'?lead.cloud_id:''"),'CRM index must expose cloud lead IDs for activity matching');
 const cloudHtml=fs.readFileSync('nextway-cloud.js','utf8');
 assert.ok(cloudHtml.includes("if(x.category==='research_result'){deferred++;continue;}"),'Unqualified research results must remain local and must never be silently promoted to potential partners during cloud sync');
+assert.ok(cloudHtml.includes('requires_manual_qualification:true'),'Search-acquired prospects must retain a manual qualification gate after category selection');
+assert.ok(cloudHtml.includes("if(x.requires_manual_qualification&&(x.qualification!=='Qualificato'||x.identity_check!=='confirmed'||['fit','activity','presence','interest','approach'].reduce((n,k)=>n+Math.max(0,Number(x[k]||0)),0)<50)){deferred++;continue;}"),'Search-acquired prospects must not sync until identity is confirmed, qualification is explicit and the minimum score is met');
 assert.ok(cloudHtml.includes("da qualificare, non sincronizzati: '+deferred"),'Cloud sync summary must report unqualified records deferred from synchronization');
 assert.ok(cloudHtml.includes('I risultati da qualificare restano locali e non vengono trasformati in Potenziali Partner.'),'The sync status must explain why unqualified research results are deferred');
 assert.ok(cloudHtml.includes('function getLocalSearchArchiveIndex(userId)'), 'Cloud bridge must read the authenticated user local archive index');
@@ -838,6 +840,7 @@ assert.equal(bridgeSaved.duplicate,false,'First manual acquisition must create o
 assert.equal(bridgeSaved.lead.name,'Andrea Fabbri');
 assert.equal(bridgeSaved.lead.profession,'Nutrizionista');
 assert.equal(bridgeSaved.lead.category,'research_result','Unqualified search results must retain research_result category in the local archive');
+assert.equal(bridgeSaved.lead.requires_manual_qualification,true,'Search-acquired prospects must require explicit manual qualification before cloud sync');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Acquisition must persist exactly one lead in the authenticated owner archive');
 assert.ok(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].notes.includes('[NEXTWAY_PROSPECT_METADATA_V1]'),'Acquisition must preserve structured prospect metadata in the local archive');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].url,bridgeRecord.url,'Acquisition must preserve the original source URL');
