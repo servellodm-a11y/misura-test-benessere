@@ -491,7 +491,7 @@ assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Autopresentazio
 assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Ruolo o professione" && item.source === "Descrizione del risultato"), "Professional role evidence must identify the exact source field");
 assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Corrispondenza al segmento"), "Segment evidence must identify its matching phrase");
 assert.ok(companyPage.evidence.some(item => item.kind === "Contesto organizzativo"), "Organization evidence must be visible in the evidence list");
-assert.match(searchHtml, /Prove rilevate nella fonte · da verificare/);
+assert.match(searchHtml, /Documentato nella fonte · citazione testuale/);
 assert.match(searchHtml, /assessment\.evidence/);
 assert.match(searchHtml, /const personConfirmed=assessment\?\.individual===true/);
 assert.match(searchHtml, /Pagina aziendale\/organizzazione · persona non confermata/);
