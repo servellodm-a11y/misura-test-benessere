@@ -473,3 +473,11 @@ assert.match(searchHtml, /capture\.disabled=alreadyAcquired\|\|notSuitable/);
 assert.match(searchHtml, /if\(notSuitable\)\{status\.textContent=/);
 assert.match(searchHtml, /Non adatto · non acquisibile/);
 console.log("Prospect acquisition guard: unsuitable results disabled and protected by a click-time check: PASS");
+
+// Prospect result rendering: initialize source-quality data before the UI reads it.
+const prospectRenderStart = searchHtml.indexOf("const targetSummary=");
+const sourceQualityInit = searchHtml.indexOf("const sourceQuality=assessSourceQuality(item,url,pageContent);", prospectRenderStart);
+const sourceQualityCard = searchHtml.indexOf("const sourceQualityCard=", prospectRenderStart);
+assert.ok(prospectRenderStart >= 0 && sourceQualityInit > prospectRenderStart && sourceQualityCard > sourceQualityInit,
+  "Source quality must be initialized before rendering the prospect source-quality card");
+console.log("Prospect source-quality rendering: initialization precedes UI access: PASS");
