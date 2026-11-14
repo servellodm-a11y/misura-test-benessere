@@ -7,6 +7,7 @@ assert.match(migration,/manual_reviewed_at timestamptz/i);
 assert.match(migration,/manual_reviewed_by uuid/i);
 assert.match(migration,/nextway_qualified_manual_review_check/i);
 assert.match(migration,/update public\.nextway_leads[\s\S]*?qualification='Da approfondire'[\s\S]*?where qualification='Qualificato'/i);
+assert.match(migration,/disable trigger nextway_qualification_v1[\s\S]*?update public\.nextway_leads[\s\S]*?enable trigger nextway_qualification_v1/i);
 assert.match(migration,/create trigger zzzz_nextway_lead_manual_review_guard/i);
 assert.match(migration,/current_setting\('nextway\.manual_review_rpc',true\)/i);
 assert.match(migration,/new\.manual_reviewed_by is distinct from auth\.uid\(\)/i);
