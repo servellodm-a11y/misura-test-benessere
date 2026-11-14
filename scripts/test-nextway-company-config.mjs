@@ -202,7 +202,10 @@ assert.equal(classify('Profilo personale','Benessere e stile di vita','', 'custo
 assert.equal(classify('Profilo personale','Cerco un nutrizionista per una consulenza','', 'customers').kind,'customer');
 assert.equal(classify('Pagina personale','Contenuti generici','', 'customers').kind,'unknown');
 assert.ok(searchHtml.includes('const linkedinPersonProfile='));
-assert.ok(searchHtml.includes('const individual=!!(linkedinPersonProfile||selfIdentification||(personTitle&&roleEvidence))'));
+assert.ok(searchHtml.includes('const linkedinCompanyPage='));
+assert.ok(searchHtml.includes('const organizationTitle='));
+assert.ok(searchHtml.includes('const individual=!!(linkedinPersonProfile||(socialProfile&&(personTitle||selfIdentification))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle))'));
+assert.ok(searchHtml.includes("entityType=individual?'Possibile profilo individuale'"));
 assert.ok(searchHtml.includes('identityScore,relevanceScore,evidenceScore'));
 assert.ok(searchHtml.includes('Pertinenza documentale:'));
 assert.ok(searchHtml.includes('non dimostra interesse o idoneità commerciale'));
