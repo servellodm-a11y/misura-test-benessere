@@ -176,7 +176,7 @@ assert.ok(strategyContext.refinedItalianQueries.side_income.every(([,q])=>/cerco
 assert.ok(strategyContext.refinedItalianQueries.business_seeking.every(([,q])=>/cerco|valuto|voglio|vorrei|sto cercando/i.test(q)),'Business-seeking queries must require explicit declarations');
 assert.ok(strategyContext.refinedItalianQueries.new_networker.some(([,q])=>/iniziato|primi passi|sto imparando/i.test(q)),'Beginner networker queries must include explicit start signals');
 assert.ok(strategyContext.refinedItalianQueries.exnetworker.some(([,q])=>/ex networker|ho lasciato|esperienza passata/i.test(q)),'Former networker queries must require prior experience signals');
-assert.ok(strategyContext.segmentGuidance.customers.includes('Non usare diagnosi'));
+assert.ok(strategyContext.segmentGuidance.customers.includes('non usare diagnosi'), 'Customer guidance must exclude diagnosis and health-data profiling');
 assert.ok(strategyContext.segmentGuidance.side_income.includes('non inferire'));
 assert.ok(searchHtml.includes("kind='unknown';segment='unclassified';confidence='bassa'"));
 assert.ok(searchHtml.includes('function classifyProspectTarget('));
