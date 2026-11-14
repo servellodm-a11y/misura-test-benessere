@@ -4,7 +4,9 @@ const migration=fs.readFileSync('supabase/migrations/20261114150000_nextway_lead
 const cloud=fs.readFileSync('nextway-cloud.js','utf8');
 const archive=fs.readFileSync('nextway-ai.html','utf8');
 assert.match(migration,/manual_reviewed_at timestamptz/i);
-assert.match(migration,/manual_reviewed_by uuid references public\.profiles\(id\) on delete restrict/i);
+assert.match(migration,/manual_reviewed_by uuid[,;]/i);
+assert.match(migration,/manual_reviewed_by is 'UUID immutabile del revisore autenticato/i);
+assert.doesNotMatch(migration,/manual_reviewed_by uuid references/i);
 assert.match(migration,/v_lead\.owner_profile_id is distinct from auth\.uid\(\)/i);
 assert.match(migration,/nextway_qualified_manual_review_check/i);
 assert.match(migration,/update public\.nextway_leads[\s\S]*?qualification='Da approfondire'[\s\S]*?where qualification='Qualificato'/i);
