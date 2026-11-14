@@ -799,12 +799,16 @@ assert.equal(savedHistory[0].prospects[0].role,'Nutrizionista');
 assert.equal(savedHistory[0].prospects[0].profile.location,'Roma');
 assert.equal(savedHistory[0].prospects[0].source_evidence[0].evidence,'Nutrizionista · Roma','History must preserve source evidence needed to re-evaluate a prospect after refresh');
 assert.equal(historySandbox.searchHistoryKey('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),'nextway_search_history_v1:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Search history must remain isolated by authenticated owner');
+const otherHistoryOwner='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+assert.equal(historySandbox.setSearchHistoryOwner(otherHistoryOwner),true);
+assert.equal(historySandbox.saveSearchHistory([historyProspect]),true,'A second owner must be able to maintain a separate search history');
+historySandbox.setSearchHistoryOwner(historyOwner);
+assert.equal(historySandbox.readSearchHistory(otherHistoryOwner)[0].prospects[0].archive_status,'new');
 assert.equal(savedHistory[0].prospects[0].archive_status,'new','New search results must start as not yet acquired');
 historySandbox.markSearchHistoryAcquired(historyProspect.url,historyProspect.identity_keys);
 const acquiredHistory=historySandbox.readSearchHistory();
 assert.equal(acquiredHistory[0].prospects[0].archive_status,'acquired','Manual CRM acquisition must update the saved history record');
-assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')[0]?.prospects?.[0]?.archive_status,undefined,'Acquisition status must not leak across owner scopes');
+assert.equal(historySandbox.readSearchHistory(otherHistoryOwner)[0].prospects[0].archive_status,'new','Acquisition status must not leak across owner scopes');
 assert.equal(JSON.parse(historySandbox.localStorage.getItem('nextway_search_history_v1:'+historyOwner))[0].prospects[0].archive_status,'acquired','Acquisition status must survive a browser-page reload');
 
 
@@ -827,6 +831,8 @@ assert.equal(bridgeSaved.duplicate,false,'First manual acquisition must create o
 assert.equal(bridgeSaved.lead.name,'Andrea Fabbri');
 assert.equal(bridgeSaved.lead.profession,'Nutrizionista');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Acquisition must persist exactly one lead in the authenticated owner archive');
+assert.ok(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].notes.includes('[NEXTWAY_PROSPECT_METADATA_V1]'),'Acquisition must preserve structured prospect metadata in the local archive');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].url,bridgeRecord.url,'Acquisition must preserve the original source URL');
 assert.equal(bridgeSandbox.readSearchArchiveRows('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Acquired leads must remain isolated by owner');
 const bridgeDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
 assert.equal(bridgeDuplicate.duplicate,true,'Repeated acquisition of the same source must be detected as duplicate');
