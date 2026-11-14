@@ -396,7 +396,7 @@ assert.ok(searchHtml.includes('coerenza_segmento'));
 assert.ok(searchHtml.includes('priorita_segmento'));
 assert.ok(searchHtml.includes("fitTitle.textContent='Valore commerciale · '+commercialFit.prospect_type"));
 assert.ok(searchHtml.includes('punteggio_pertinenza_commerciale'));
-assert.ok(searchHtml.includes('commercial_fit:value.commercial_fit'));
+assert.ok(searchHtml.includes('commercial_fit:commercialFit'), 'Prospect assessment must retain its computed commercial fit');
 const fitStart=searchHtml.indexOf('function assessCommercialFit(');
 const fitEnd=searchHtml.indexOf('function buildProspectProfile(',fitStart);
 assert.ok(fitStart>=0&&fitEnd>fitStart,'Commercial fit helper must be present');
