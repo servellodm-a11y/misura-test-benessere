@@ -407,9 +407,10 @@ async function runSearch(){
     const profileCard=document.createElement('div');profileCard.className='prospect-profile';profileCard.style.cssText='margin:10px 0;padding:10px;border:1px solid var(--border,#ddd);border-radius:10px;';
     const profileTitle=document.createElement('strong');profileTitle.textContent='Scheda prospect · '+profile.name;
     const profileDetails=document.createElement('p');profileDetails.className='muted';profileDetails.textContent='Professione: '+profile.profession+' · Azienda: '+profile.organization+' · Località: '+profile.location+' · Recapiti pubblici rilevati: '+profile.public_contact_count;
-    const profileIdentity=document.createElement('p');profileIdentity.className='muted';profileIdentity.textContent='Identità: '+profile.identity_status+' · Metodo: '+profile.name_source+'.';
+    const profileIdentity=document.createElement('p');profileIdentity.className='muted';profileIdentity.textContent='Tipo di fonte: '+profile.entity_type+' · Identità: '+profile.identity_status+' · Metodo: '+profile.name_source+'.';
+    const profileCandidate=document.createElement('p');profileCandidate.className='muted';if(profile.name_candidate){profileCandidate.textContent='Nome citato nella pagina, ma non confermato come prospect individuale: '+profile.name_candidate+'. Non usare questo nominativo per acquisire o contattare una persona senza verifica.';}
     const profilePriority=document.createElement('p');profilePriority.className='tag';profilePriority.textContent='Priorità di verifica: '+profile.priority+'. '+profile.priority_reason+' Non equivale a interesse commerciale.';
-    profileCard.append(profileTitle,profileDetails,profileIdentity,profilePriority);
+    profileCard.append(profileTitle,profileDetails,profileIdentity);if(profile.name_candidate)profileCard.append(profileCandidate);profileCard.append(profilePriority);
     const qualificationCard=document.createElement('div');qualificationCard.className='commercial-qualification';qualificationCard.style.cssText='margin:10px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;background:#f8faff;';
     const qualificationTitle=document.createElement('strong');qualificationTitle.textContent='Qualificazione commerciale: '+qualification.status;
     const qualificationAction=document.createElement('p');qualificationAction.textContent='Azione suggerita: '+qualification.action;
@@ -591,14 +592,16 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const text=(t+' '+body).toLocaleLowerCase('it');
  const host=(()=>{try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch{return '';}})();
  const linkedinPersonProfile=/linkedin\.com\/in\//i.test(url||'');
+ const linkedinCompanyPage=/linkedin\.com\/company\//i.test(url||'');
  const socialProfile=/instagram\.com\/[^/]+\/?$|facebook\.com\/[^/]+\/?$|tiktok\.com\/@|youtube\.com\/@/i.test(url||'');
  const personTitle=/^[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’-]+){1,3}(?:\s*[|–-]\s*[^|–-]{2,70})?$/.test(t);
  const selfIdentification=/\b(mi chiamo|sono\s+(?:un[oa]?\s+)?(?:nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|coach|imprenditor|consulent|networker|titolare))\b/i.test(body);
  const roleEvidence=/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|consulent|imprenditor|titolare|founder|team leader|networker|distributore|brand partner|vendita diretta/i.test(text);
+ const organizationTitle=/^(?:centro|studio|azienda|società|associazione|fondazione|clinica|palestra|farmacia|gruppo|team|network|servizi|agenzia|istituto|ospedale|poliambulatorio|laboratorio|hotel|ristorante)\b/i.test(t)||linkedinCompanyPage;
  const organizationEvidence=/\b(srl|s\.r\.l|spa|s\.p\.a|azienda|società|company|centro|studio associato|team ufficiale|contatti|chi siamo)\b/i.test(t+' '+body);
  const directoryEvidence=/directory|elenco professionisti|trova un professionista|portale|catalogo|annuario|pagine gialle|job board|offerte di lavoro|annunci di lavoro|articolo|blog|news|magazine/i.test(t+' '+host);
- const individual=!!(linkedinPersonProfile||selfIdentification||(personTitle&&roleEvidence));
- const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
+ const individual=!!(linkedinPersonProfile||(socialProfile&&(personTitle||selfIdentification))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle));
+ const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationTitle||organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
  const segmentSignals={
   wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|studio.*benessere/i,
   wellness_networker:/network marketing|networker|vendita diretta|brand partner|distributore indipendente|team leader/i,
@@ -762,8 +765,14 @@ function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,
   let location='';
   const loc=raw.match(/(?:sede|studio|riceve|lavora|opera)\s+(?:a|in|presso)\s+([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’ -]{2,55})/i);
   if(loc)location=clean(loc[1].split(/[.,;|]/)[0].split(/\b(?:per|con|e|dal|da)\b/i)[0]).slice(0,55);
-  const priority=assessment?.individual&&assessment?.score>=80?'Alta · verifica prioritaria':assessment?.individual&&assessment?.score>=50?'Media · verifica necessaria':'Da approfondire';
-  return {name:name||'Non rilevato con certezza',name_source:nameSource||'Nominativo non rilevato',identity_status:name?'Nominativo estratto automaticamente · da confermare aprendo la fonte':'Nominativo non rilevato con certezza',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:assessment?.individual?'Profilo personale identificabile e prove documentali disponibili.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',evidence_summary:String(snippet||'').slice(0,500)};
+  const candidateName=name;
+ const personConfirmed=assessment?.individual===true;
+ const confirmedName=personConfirmed?candidateName:'';
+ const priority=personConfirmed&&assessment?.score>=80?'Alta · verifica prioritaria':personConfirmed&&assessment?.score>=50?'Media · verifica necessaria':'Da approfondire';
+ const organizationPage=assessment?.entityType==='Azienda o organizzazione';
+ const identityStatus=personConfirmed?(confirmedName?'Possibile profilo individuale · nominativo estratto, da confermare':'Possibile profilo individuale · nominativo non estratto'):organizationPage?'Pagina aziendale/organizzazione · persona non confermata':'Identità individuale non confermata · nessun nominativo attribuito al prospect';
+ return {name:confirmedName||'Non rilevato con certezza',name_candidate:!personConfirmed&&candidateName?candidateName:'',name_source:personConfirmed?(nameSource||'Nominativo non rilevato'):candidateName?'Nome citato nella pagina · non attribuito a un prospect individuale':'Nominativo non rilevato',identity_status:identityStatus,entity_type:assessment?.entityType||'Identità individuale non confermata',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:personConfirmed?'Possibile profilo individuale supportato da evidenze; verificare fonte e ruolo.':organizationPage?'La fonte rappresenta un’organizzazione: non attribuire automaticamente i nomi citati a un prospect.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',evidence_summary:String(snippet||'').slice(0,500)};
+
 }
 function canonicalProspectUrl(value){
  try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'');}
