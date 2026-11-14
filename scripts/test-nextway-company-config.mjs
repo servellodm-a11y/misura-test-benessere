@@ -449,6 +449,35 @@ assert.ok(archiveHtml.includes('Risultato da qualificare'));
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
 assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
+
+assert.ok(searchHtml.includes('function assessLeadPriority('));
+assert.ok(searchHtml.includes('commercialFit.priority_components=leadPriority'));
+assert.ok(searchHtml.includes('Acquisisci come ricerca da qualificare'));
+assert.ok(searchHtml.includes("outcome==='insufficient_evidence'?'research_result':'research_result'"));
+const leadPriorityStart=searchHtml.indexOf('function assessLeadPriority(');
+const leadPriorityEnd=searchHtml.indexOf('function buildProspectProfile(',leadPriorityStart);
+assert.ok(leadPriorityStart>=0&&leadPriorityEnd>leadPriorityStart,'Lead priority helper must exist');
+const leadPriorityContext={};
+vm.runInNewContext(searchHtml.slice(leadPriorityStart,leadPriorityEnd)+';this.assessLeadPriority=assessLeadPriority;',leadPriorityContext);
+const assessLeadPriority=leadPriorityContext.assessLeadPriority;
+const sourceQuality={quality_score:90,published_at:'2026-11-01'};
+const contacts={emails:['mario@example.it'],phones:[],whatsapp:[],socials:[]};
+const completeProfile={name:'Mario Rossi',profession:'Nutrizionista',organization:'Studio Alfa',location:'Milano'};
+const explicitPartnerPriority=assessLeadPriority({commercial_outcome:'partner_potential',segment_match:true},{individual:true,evidence:[{kind:'Ruolo o professione'}]},{},{...sourceQuality},contacts,completeProfile);
+assert.equal(explicitPartnerPriority.eligible,true);
+assert.ok(explicitPartnerPriority.priority_score>=80);
+assert.equal(explicitPartnerPriority.role_documented,true);
+const genericProfessionalPriority=assessLeadPriority({commercial_outcome:'generic_result',segment_match:true},{individual:true,evidence:[{kind:'Ruolo o professione'}]},{},{...sourceQuality},contacts,completeProfile);
+assert.equal(genericProfessionalPriority.priority_score,0,'A relevant professional without explicit intent must not enter the commercial priority list');
+assert.equal(genericProfessionalPriority.eligible,false);
+const partnerWithoutRole=assessLeadPriority({commercial_outcome:'partner_potential',segment_match:true},{individual:true,evidence:[]},{},{...sourceQuality},contacts,completeProfile);
+assert.equal(partnerWithoutRole.priority_score,0,'A partner prospect needs a documented professional role');
+const customerWithoutProfessionalRole=assessLeadPriority({commercial_outcome:'customer_potential',segment_match:true},{individual:true,evidence:[]},{},{...sourceQuality},{emails:[],phones:[],whatsapp:[],socials:[]},{name:'Anna Bianchi',profession:'Non confermata',organization:'Non rilevata',location:'Milano'});
+assert.equal(customerWithoutProfessionalRole.eligible,true,'A customer request does not require a professional role');
+assert.ok(customerWithoutProfessionalRole.priority_score<explicitPartnerPriority.priority_score);
+const noDatePriority=assessLeadPriority({commercial_outcome:'partner_potential',segment_match:true},{individual:true,evidence:[{kind:'Ruolo o professione'}]},{},{quality_score:50,published_at:null},contacts,completeProfile);
+assert.ok(noDatePriority.priority_score<explicitPartnerPriority.priority_score,'Missing source date must lower priority');
+
 console.log('NEXTWAY company configuration contract: PASS');
 
 assert.ok(archiveHtml.includes('getIndex(){'));
