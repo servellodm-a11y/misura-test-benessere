@@ -609,26 +609,24 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const individual=!!(linkedinPersonProfile||(socialProfile&&((personTitle&&!organizationEvidence)||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence));
  const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationTitle||organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
  const segmentSignals={
-  wellness_pro:/\\b(nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|biolog\\w+ nutrizionist)\\b/i,
-  wellness_networker:/\\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente)\\b/i,
+  wellness_pro:/\b(nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|biolog\w+ nutrizionist)\b/i,
+  wellness_networker:/\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente)\b/i,
   new_networker:/(ho iniziato da poco|sono all[’']inizio|primi passi nel network|nuov[oa] incaricat[oa]|nuovo distributore|nuova distributrice|sto imparando|new to network marketing|just started network marketing)/i,
-  other_networker:/\\b(network marketing|networker|vendita diretta|social selling|distributore indipendente)\\b/i,
-  entrepreneur:/\\b(imprenditor|titolare|founder|business owner|amministratore delegato)\\b/i,
+  other_networker:/\b(network marketing|networker|vendita diretta|social selling|distributore indipendente)\b/i,
+  entrepreneur:/\b(imprenditor|titolare|founder|business owner|amministratore delegato)\b/i,
   side_income:/(cerco un lavoro extra|cerco un secondo lavoro|cerco un part.?time|valuto un lavoro part.?time|disponibile per un secondo lavoro|attività da affiancare al lavoro|entrata aggiuntiva|reddito integrativo|seconda entrata)/i,
   business_seeking:/(cerco un’attività imprenditoriale|cerco un'attività imprenditoriale|cerco un progetto di business|voglio mettermi in proprio|vorrei avviare un’attività|vorrei avviare un'attività|sto cercando un business|cerco un progetto imprenditoriale|business da avviare)/i,
   exnetworker:/(ex[- ]?networker|ex distributore|ex incaricato|ho lasciato il network marketing|esperienza precedente nel network marketing|former network marketer)/i,
   customers:/(cerco consigli|qualcuno può consigliarmi|avete suggerimenti|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|consigli su integratori|informazioni sull’integrazione|cerco un percorso benessere|vorrei migliorare il mio stile di vita|cerco supporto per il benessere)/i
  };
  const segmentEvidenceMatches={
-  wellness_networker:/\\b(wellness|benessere|nutrizione|fitness|integrator[ei])\\b/i.test(text),
-  other_networker:!/\\b(wellness|benessere|nutrizione|fitness|integrator[ei])\\b/i.test(text),
-  side_income:/\\b(cerco|valuto|disponibile|sto cercando)\\b/i.test(text),
-  business_seeking:/\\b(cerco|voglio|vorrei|sto cercando|valuto)\\b/i.test(text)
+  wellness_networker:/\b(wellness|benessere|nutrizione|fitness|integrator[ei])\b/i.test(text),
+  other_networker:!/\b(wellness|benessere|nutrizione|fitness|integrator[ei])\b/i.test(text),
+  side_income:/\b(cerco|valuto|disponibile|sto cercando)\b/i.test(text),
+  business_seeking:/\b(cerco|voglio|vorrei|sto cercando|valuto)\b/i.test(text)
  };
  const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text)&&
-  (segmentEvidenceMatches[segment]===undefined||segmentEvidenceMatches[segment]);;
- const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text);
- const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
+  (segmentEvidenceMatches[segment]===undefined||segmentEvidenceMatches[segment]);; const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
  const contactCount=['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0);
  let identityScore=(linkedinPersonProfile?24:0)+(selfIdentification?16:0)+(personTitle&&roleEvidence?14:0)+(socialProfile&&personTitle&&roleEvidence?5:0)+(roleEvidence?6:0);
  identityScore=Math.min(40,identityScore);
@@ -832,18 +830,18 @@ function buildProspectDedupeKey(url,title,assessment,target,contacts){
  return identityKeys[0]||'url:'+canonicalProspectUrl(url);
 }
 function classifyProspectTarget(title,snippet,pageContent,selectedSegment){
- const titleText=String(title||''),raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\\s+/g,' ').trim();
+ const titleText=String(title||''),raw=[title,snippet,pageContent].map(v=>String(v||'')).join(' ').replace(/\s+/g,' ').trim();
  const text=raw.toLocaleLowerCase('it'),selected=String(selectedSegment||'');
- const wellnessRole=/\\b(nutrizionist[ai]?|dietist[ai]?|naturopat[ai]?|osteopat[ai]?|fisioterapist[ai]?|personal trainer|farmacist[ai]?|medic[io]?|biolog[io] nutrizionist[ai]?)\\b/i;
- const entrepreneurRole=/\\b(imprenditor[ei]|titolare|founder|business owner|amministratore delegato)\\b/i;
- const networker=/\\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente|social selling)\\b/i.test(text);
- const wellnessContext=/\\b(wellness|benessere|nutrizione|fitness|salute|integrator[ei])\\b/i.test(text);
+ const wellnessRole=/\b(nutrizionist[ai]?|dietist[ai]?|naturopat[ai]?|osteopat[ai]?|fisioterapist[ai]?|personal trainer|farmacist[ai]?|medic[io]?|biolog[io] nutrizionist[ai]?)\b/i;
+ const entrepreneurRole=/\b(imprenditor[ei]|titolare|founder|business owner|amministratore delegato)\b/i;
+ const networker=/\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente|social selling)\b/i.test(text);
+ const wellnessContext=/\b(wellness|benessere|nutrizione|fitness|salute|integrator[ei])\b/i.test(text);
  const isNew=/(ho iniziato da poco|sono all[’']inizio|primi passi nel network|nuov[oa] incaricat[oa]|nuov[oa] distributore|sto imparando|new to network marketing|just started network marketing)/i.test(text);
  const isEx=/(ex[- ]?networker|ex distributore|ex incaricato|ho lasciato il network marketing|esperienza precedente nel network marketing|former network marketer)/i.test(text);
  const explicitSide=/(cerco un lavoro extra|cerco un secondo lavoro|cerco un part.?time|valuto un lavoro part.?time|disponibile per un secondo lavoro|cerco un’attività da affiancare|cerco un'attività da affiancare|attività da affiancare al lavoro|cerco un’entrata aggiuntiva|cerco un'entrata aggiuntiva|reddito integrativo|seconda entrata)/i.test(text);
  const explicitBusiness=/(cerco un’attività imprenditoriale|cerco un'attività imprenditoriale|cerco un progetto di business|valuto un’attività|valuto un'attività|voglio mettermi in proprio|vorrei avviare un’attività|vorrei avviare un'attività|sto cercando un business|cerco un progetto imprenditoriale|business da avviare)/i.test(text);
  const customerSignal=/(cerco consigli|qualcuno può consigliarmi|avete suggerimenti|cerco informazioni|cerco un professionista|cerco un nutrizionista|cerco un dietista|consigli su integratori|informazioni sull’integrazione|cerco un percorso benessere|vorrei migliorare il mio stile di vita|cerco supporto per il benessere)/i.test(text);
- const roleSelfDeclared=/(?:\\b(?:sono|mi chiamo|lavoro come|mi occupo di)\\b.{0,55}\\b(?:imprenditor[ei]|titolare|founder|business owner)\\b|\\b(?:titolare|founder|amministratore|proprietario|proprietaria)\\s+(?:di|della|del|presso)\\b)/i.test(text);
+ const roleSelfDeclared=/(?:\b(?:sono|mi chiamo|lavoro come|mi occupo di)\b.{0,55}\b(?:imprenditor[ei]|titolare|founder|business owner)\b|\b(?:titolare|founder|amministratore|proprietario|proprietaria)\s+(?:di|della|del|presso)\b)/i.test(text);
  let primary='Da qualificare',kind='unknown',segment='unclassified',confidence='bassa',reason='La fonte non contiene elementi sufficienti per confermare il segmento selezionato.',role='';
  const professionalSelected=selected==='wellness_pro'&&(wellnessRole.test(titleText)||/(sono|mi chiamo|lavoro come|mi occupo di).{0,45}(nutrizionist|dietist|naturopat|osteopat|fisioterapist|personal trainer|farmacist|medic)/i.test(text));
  const entrepreneurSelected=selected==='entrepreneur'&&(entrepreneurRole.test(titleText)||roleSelfDeclared);
