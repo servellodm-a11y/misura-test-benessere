@@ -23,6 +23,7 @@ assert.match(migration,/v_lead\.identity_check is distinct from 'confirmed'/i);
 assert.match(migration,/coalesce\(v_lead\.score_fit,0\)\+coalesce\(v_lead\.score_activity,0\)/i);
 assert.match(migration,/create or replace function public\.nextway_confirm_lead_manual_review/i);
 assert.match(migration,/security definer set search_path='pg_catalog','public'/i);
+assert.match(migration,/alter function public\.nextway_confirm_lead_manual_review\(uuid\) owner to postgres/i);
 assert.match(migration,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
 assert.match(migration,/revoke all on function public\.nextway_confirm_lead_manual_review\(uuid\) from public,anon/i);
 assert.match(migration,/grant execute on function public\.nextway_confirm_lead_manual_review\(uuid\) to authenticated/i);
