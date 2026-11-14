@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const migration=fs.readFileSync('supabase/migrations/20261114150000_nextway_lead_manual_review.sql','utf8');
+const rpcScopeFix=fs.readFileSync('supabase/migrations/20261114161500_nextway_manual_review_rpc_scope.sql','utf8');
 const cloud=fs.readFileSync('nextway-cloud.js','utf8');
 const archive=fs.readFileSync('nextway-ai.html','utf8');
 assert.match(migration,/manual_reviewed_at timestamptz/i);
@@ -24,9 +25,17 @@ assert.match(migration,/coalesce\(v_lead\.score_fit,0\)\+coalesce\(v_lead\.score
 assert.match(migration,/create or replace function public\.nextway_confirm_lead_manual_review/i);
 assert.match(migration,/security definer set search_path='pg_catalog','public'/i);
 assert.match(migration,/alter function public\.nextway_confirm_lead_manual_review\(uuid\) owner to postgres/i);
-assert.match(migration,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
 assert.match(migration,/revoke all on function public\.nextway_confirm_lead_manual_review\(uuid\) from public,anon/i);
 assert.match(migration,/grant execute on function public\.nextway_confirm_lead_manual_review\(uuid\) to authenticated/i);
+assert.match(rpcScopeFix,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
+assert.match(rpcScopeFix,/perform set_config\('nextway\.manual_review_rpc','off',true\)/i);
+assert.match(rpcScopeFix,/alter function public\.nextway_confirm_lead_manual_review\(uuid\) owner to postgres/i);
+assert.match(rpcScopeFix,/security definer[\s\S]*?set search_path='pg_catalog','public'/i);
+const enableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','on',true)");
+const guardedUpdate=rpcScopeFix.indexOf('update public.nextway_leads',enableFlag);
+const disableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','off',true)",guardedUpdate);
+const rpcReturn=rpcScopeFix.indexOf('return jsonb_build_object',disableFlag);
+assert.ok(enableFlag>=0 && guardedUpdate>enableFlag && disableFlag>guardedUpdate && rpcReturn>disableFlag,'The RPC flag must be disabled after its guarded UPDATE and before returning');
 assert.match(archive,/name="manual_review_confirmed" id="manualReviewConfirmed"/);
 assert.match(archive,/values\.manual_review_confirmed=el\('manualReviewConfirmed'\)\.checked/);
 assert.match(archive,/values\.qualification==='Qualificato'&&!values\.manual_review_confirmed/);
