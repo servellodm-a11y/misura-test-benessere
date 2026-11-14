@@ -435,7 +435,7 @@ assert.ok(archiveHtml.includes('identity_keys:[...new Set(identityKeys)]'));
 assert.ok(searchHtml.includes('const SEARCH_HISTORY_LIMIT=10'));
 assert.ok(searchHtml.includes('function saveSearchHistory(prospects)'));
 assert.ok(searchHtml.includes('function renderSearchHistory()'));
-assert.ok(searchHtml.includes('archive_status:alreadyAcquired?\'acquired\':\'new\''));
+assert.ok(searchHtml.includes("const archiveStatus=crmMatch?.status==='In follow-up'?'followup':alreadyAcquired?'acquired':'new'"), 'Search results must distinguish new, acquired and follow-up CRM records');
 assert.ok(searchHtml.includes('Già presente nel CRM'));
 
 assert.ok(archiveHtml.includes("status:String(lead.status||'Da verificare')"));
