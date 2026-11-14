@@ -292,7 +292,7 @@ assert.match(cloud, /async function addLeadActivity\(cloudId,activity\)/);
 assert.match(cloud, /async function setLeadActivityStatus\(activityId,status\)/);
 assert.match(cloud, /nextway_lead_activities/);
 assert.match(cloud, /owner_profile_id:lead\.owner_profile_id,created_by:s\.user\.id/);
-assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity,setLeadActivityStatus/);
+assert.match(cloud, /getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity,setLeadActivityStatus/, "Cloud API must expose lead activities, follow-up summary and status updates");
 assert.match(cloud, /owner_profile_id:r\.owner_profile_id/);
 assert.match(leadUiScript, /Attività e follow-up/);
 assert.match(leadUiScript, /Registra attività/);
