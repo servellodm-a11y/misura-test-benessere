@@ -44,20 +44,20 @@ function mergeSearchProspectDuplicate(lead,meta,record,incomingIdentityKeys){
  const incomingQuality=record?.evidence_quality&&typeof record.evidence_quality==='object'?record.evidence_quality:{};
  const incoming=incomingQuality.prospect_profile&&typeof incomingQuality.prospect_profile==='object'?incomingQuality.prospect_profile:{};
  const previous=meta.prospect_profile&&typeof meta.prospect_profile==='object'?meta.prospect_profile:{};
- const profileMap={name:'name',profession:'profession',company_brand:'organization',location:'location'};
+ const profileMap={name:{incoming:'name',stored:'name'},profession:{incoming:'profession',stored:'profession'},company_brand:{incoming:'organization',stored:'company_brand'},location:{incoming:'location',stored:'location'}};
  const usable=value=>{
   const text=String(value??'').trim();
   return !!text&&!/^(?:non rilevat[oa](?: con certezza)?|non confermat[oa]|identità individuale non confermata|da approfondire)$/i.test(text);
  };
  const identityConfirmed=/possibile profilo individuale/i.test(String(incoming.identity_status||''))&&!/non confermata/i.test(String(incoming.identity_status||''));
- for(const [leadField,profileField] of Object.entries(profileMap)){
-  const next=String(incoming[profileField]??'').trim();
+ for(const [leadField,keys] of Object.entries(profileMap)){
+  const next=String(incoming[keys.incoming]??'').trim();
   if(!usable(next))continue;
   if(leadField==='name'&&(!identityConfirmed||!usable(incoming.name_source)))continue;
   const current=String(lead[leadField]??'').trim();
-  const previousValue=String(previous[profileField]??'').trim();
-  const stillSystemManaged=Object.prototype.hasOwnProperty.call(previous,profileField)&&current===previousValue;
-  if(!current||stillSystemManaged){lead[leadField]=next;previous[profileField]=next;}
+  const previousValue=String(previous[keys.stored]??'').trim();
+  const stillSystemManaged=Object.prototype.hasOwnProperty.call(previous,keys.stored)&&current===previousValue;
+  if(!current||stillSystemManaged){lead[leadField]=next;previous[keys.stored]=next;}
  }
  const mergedProfile={...previous};
  for(const key of ['name_candidate','name_source','identity_status','entity_type','segment','confidence','priority','priority_reason']){
