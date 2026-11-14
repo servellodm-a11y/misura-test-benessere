@@ -334,7 +334,7 @@ assert.ok(searchHtml.includes('function qualifyCommercialProspect('));
 assert.ok(searchHtml.includes('Qualificazione commerciale: '));
 assert.ok(searchHtml.includes('Azione suggerita: '));
 assert.ok(searchHtml.includes('qualification_status:qualification.status'));
-assert.ok(searchHtml.includes('commercial_qualification:qualification'));
+assert.ok(searchHtml.includes('commercial_qualification:{...qualification,commercial_fit:commercialFit}'), 'Commercial qualification and fit must be retained together in the prospect assessment');
 assert.ok(searchHtml.includes("'Azione suggerita: '+qualification.action"));
 assert.ok(searchHtml.includes('qualificazione_commerciale'));
 const qualificationStart=searchHtml.indexOf('function qualifyCommercialProspect(');
