@@ -369,7 +369,7 @@ assert.ok(searchHtml.includes("Agenda commerciale · priorità operative"));
 assert.ok(searchHtml.includes("Copia messaggio"));
 assert.ok(searchHtml.includes("Verifica fonte"));
 assert.ok(searchHtml.includes("dailyProspects.slice(0,15)"));
-assert.ok(searchHtml.includes("priorità indica chi verificare prima"));
+assert.ok(searchHtml.includes("Number(b.commercial_fit?.priority_score)||0"), "Commercial agenda must sort prospects by calculated priority score");
 
 assert.ok(searchHtml.includes('source_quality_score=sourceQuality.quality_score'));
 assert.ok(searchHtml.includes('sourceQuality.quality_score>duplicateEntry.daily.source_quality.quality_score'));
