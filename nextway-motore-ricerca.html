@@ -644,8 +644,23 @@ function assessProfessionalActivity(title,snippet,pageContent){
  if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
  return {status,label,excerpt,source,verified:false,disclaimer:'Indicatore lessicale: non certifica che l’attività sia oggi effettivamente operativa.'};
 }
+function assessNetworkerActivity(title,snippet,pageContent){
+ const fields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
+ const combined=fields.map(([,value])=>value).join(' ').replace(/\\s+/g,' ').trim();
+ const context=/\\b(network marketing|networker|vendita diretta|social selling|distributore indipendente|brand partner|incaricato alla vendita)\\b/i;
+ const past=/\\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato il network marketing|non collaboro più|non lavoro più nel network|in passato (?:ero|lavoravo|collaboravo)|precedentemente (?:ero|lavoravo|collaboravo)|esperienza passata nel network marketing)\\b/i;
+ const active=/\\b(?:sono (?:un[oa]? )?(?:networker|distributore indipendente|brand partner)|lavoro (?:nel|con il|con la) network marketing|faccio network marketing|mi occupo di network marketing|collaboro (?:attualmente )?con [A-ZÀ-ÖØ-Þ][\\wÀ-ÿ&.-]+|sviluppo (?:la mia|un')? attività (?:di network marketing|di vendita diretta)|gestisco (?:un team|una rete) (?:di vendita|di network)|seguo (?:un team|clienti) (?:nel|per il) network|attualmente (?:sono|lavoro|collaboro) (?:nel|con il|con la) network marketing)\\b/i;
+ const pastMatch=combined.match(past),activeMatch=combined.match(active),mentioned=context.test(combined);
+ let status='non_documentata',label='Attività nel network marketing non documentata',excerpt='',source='';
+ if(pastMatch){status='possibile_attivita_passata';label='Possibile esperienza passata nel network marketing · verificare';excerpt=pastMatch[0];}
+ else if(activeMatch&&mentioned){status='dichiarazione_attivita_attuale';label='Dichiarazione di attività attuale nel network marketing · da confermare';excerpt=activeMatch[0];}
+ else if(mentioned){status='solo_menzione';label='Il network marketing è soltanto menzionato';excerpt=combined.match(context)?.[0]||'';}
+ if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
+ return {status,label,excerpt,source,verified:false,disclaimer:'Classificazione basata sul testo disponibile: non dimostra attività commerciale effettiva, continuità, risultati o disponibilità a collaborare.'};
+}
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const activity=assessProfessionalActivity(title,snippet,pageContent);
+ const networkerActivity=assessNetworkerActivity(title,snippet,pageContent);
  const t=String(title||'').trim(),body=(String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
  const text=(t+' '+body).toLocaleLowerCase('it');
  const host=(()=>{try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch{return '';}})();
@@ -716,9 +731,10 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  if(segmentMatch)addEvidence('Corrispondenza al segmento',segmentMatch.source,segmentMatch.match,'Parola o frase coerente con il segmento selezionato; da valutare nel contesto completo.');
  if(contactCount)addEvidence('Recapiti pubblicati','Testo della fonte',contactCount+' recapito/i rilevati','La presenza di recapiti non dimostra titolarità, validità o consenso al contatto.');
  if(activity.excerpt)addEvidence('Segnale di attività professionale',activity.source,activity.excerpt,activity.disclaimer);
+ if(networkerActivity.excerpt&&networkerActivity.status!=='solo_menzione')addEvidence('Segnale di esperienza nel network marketing',networkerActivity.source,networkerActivity.excerpt,networkerActivity.disclaimer);
  if(directoryEvidence)addEvidence('Tipo di fonte','Titolo o dominio',t||host,'Possibile directory, articolo o annuncio: non equivale a un profilo individuale.');
  if(organizationEvidence&&!individual)addEvidence('Contesto organizzativo','Titolo o testo della fonte',t+' '+body,'Sono presenti riferimenti aziendali o organizzativi; non attribuire i nomi citati all’organizzazione come prospect.');
- return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual,evidence,activity_status:activity};
+ return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual,evidence,activity_status:activity,networker_activity_status:networkerActivity};
 }
 function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assessment,targetAssessment,profile){
  const directContacts=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
@@ -843,7 +859,8 @@ function buildEvidenceReview(assessment,title,snippet,pageContent,profile,target
   {kind:'Professione',value:profile?.profession||'Non confermata',reason:'Ruolo estratto automaticamente; qualifica e attività attuale non verificate.'},
   {kind:'Organizzazione',value:profile?.organization||'Non rilevata',reason:'Attribuzione automatica da confermare sulla fonte originale.'},
   {kind:'Punteggio documentale',value:String(Number(assessment?.score)||0)+'/100',reason:'Indice interno di ordinamento, non misura interesse o idoneità.'},
-  {kind:'Attività professionale',value:assessment?.activity_status?.label||'Non documentata',reason:assessment?.activity_status?.disclaimer||'Attività attuale non accertata.'}
+  {kind:'Attività professionale',value:assessment?.activity_status?.label||'Non documentata',reason:assessment?.activity_status?.disclaimer||'Attività attuale non accertata.'},
+  {kind:'Attività nel network marketing',value:assessment?.networker_activity_status?.label||'Non documentata',reason:assessment?.networker_activity_status?.disclaimer||'Attività non accertata.'}
  ].filter(item=>item.value&& !/^(Non rilevat[oa]|Non confermata|Non classificato)$/i.test(item.value));
  const verify=[
   'Identità e titolarità del profilo',
@@ -939,7 +956,7 @@ function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,
  const priority=personConfirmed&&assessment?.score>=80?'Alta · verifica prioritaria':personConfirmed&&assessment?.score>=50?'Media · verifica necessaria':'Da approfondire';
  const organizationPage=assessment?.entityType==='Azienda o organizzazione';
  const identityStatus=personConfirmed?(confirmedName?'Possibile profilo individuale · nominativo estratto, da confermare':'Possibile profilo individuale · nominativo non estratto'):organizationPage?'Pagina aziendale/organizzazione · persona non confermata':'Identità individuale non confermata · nessun nominativo attribuito al prospect';
- return {name:confirmedName||'Non rilevato con certezza',name_candidate:!personConfirmed&&candidateName?candidateName:'',name_source:personConfirmed?(nameSource||'Nominativo non rilevato'):candidateName?'Nome citato nella pagina · non attribuito a un prospect individuale':'Nominativo non rilevato',identity_status:identityStatus,entity_type:assessment?.entityType||'Identità individuale non confermata',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:personConfirmed?'Possibile profilo individuale supportato da evidenze; verificare fonte e ruolo.':organizationPage?'La fonte rappresenta un’organizzazione: non attribuire automaticamente i nomi citati a un prospect.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',activity_status:assessment?.activity_status||{status:'non_documentata',label:'Attività attuale non documentata',verified:false},evidence_summary:String(snippet||'').slice(0,500)};
+ return {name:confirmedName||'Non rilevato con certezza',name_candidate:!personConfirmed&&candidateName?candidateName:'',name_source:personConfirmed?(nameSource||'Nominativo non rilevato'):candidateName?'Nome citato nella pagina · non attribuito a un prospect individuale':'Nominativo non rilevato',identity_status:identityStatus,entity_type:assessment?.entityType||'Identità individuale non confermata',profession:profession||'Non confermata',organization:organization||'Non rilevata',location:location||'Non rilevata',source_url:safeUrl(url),source_domain:(()=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return ''}})(),public_contact_count:['emails','phones','whatsapp','socials'].reduce((n,k)=>n+(contacts?.[k]?.length||0),0),category:targetAssessment?.primary||'Da qualificare',segment:targetAssessment?.segment||'unclassified',confidence:targetAssessment?.confidence||'bassa',priority,priority_reason:personConfirmed?'Possibile profilo individuale supportato da evidenze; verificare fonte e ruolo.':organizationPage?'La fonte rappresenta un’organizzazione: non attribuire automaticamente i nomi citati a un prospect.':'Identità personale o prove insufficienti: verificare la fonte prima di acquisire.',activity_status:assessment?.activity_status||{status:'non_documentata',label:'Attività attuale non documentata',verified:false},networker_activity_status:assessment?.networker_activity_status||{status:'non_documentata',label:'Attività nel network marketing non documentata',verified:false},evidence_summary:String(snippet||'').slice(0,500)};
 
 }
 function canonicalProspectUrl(value){
