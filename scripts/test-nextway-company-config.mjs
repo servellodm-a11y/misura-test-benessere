@@ -569,6 +569,28 @@ assert.equal(organizationFit.commercial_outcome,'not_suitable');
 assert.ok(archiveHtml.includes("'research_result'"));
 assert.ok(archiveHtml.includes('Risultato da qualificare'));
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
+
+const profileHelperStart=archiveHtml.indexOf('function normalizeSearchProspectProfile(');
+const profileHelperEnd=archiveHtml.indexOf('function getCommercialQualification(',profileHelperStart);
+assert.ok(profileHelperStart>=0&&profileHelperEnd>profileHelperStart,'Search-to-CRM prospect profile normalizer must exist');
+const profileContext={};
+vm.runInNewContext(archiveHtml.slice(profileHelperStart,profileHelperEnd)+';this.normalizeSearchProspectProfile=normalizeSearchProspectProfile;',profileContext);
+const normalizeSearchProspectProfile=profileContext.normalizeSearchProspectProfile;
+const mappedProfile=normalizeSearchProspectProfile({prospect_profile:{name:'Mario Rossi',profession:'Nutrizionista',organization:'Studio Alfa',location:'Milano',identity_status:'Possibile profilo individuale',entity_type:'Possibile profilo individuale',segment:'wellness_pro',confidence:'alta',priority:'Alta · verifica prioritaria',priority_reason:'Ruolo e identità da verificare'}},'Mario Rossi - Nutrizionista');
+assert.equal(mappedProfile.name,'Mario Rossi');
+assert.equal(mappedProfile.profession,'Nutrizionista');
+assert.equal(mappedProfile.company_brand,'Studio Alfa');
+assert.equal(mappedProfile.location,'Milano');
+assert.equal(mappedProfile.segment,'wellness_pro');
+const fallbackProfile=normalizeSearchProspectProfile({prospect_profile:{name:'Non rilevato con certezza',profession:'Non confermata',organization:'Non rilevata',location:'Non rilevata'}},'Pagina professionale - Studio Beta');
+assert.equal(fallbackProfile.name,'Pagina professionale - Studio Beta','A missing individual name must fall back to the source title rather than a placeholder');
+assert.equal(fallbackProfile.profession,'','Unconfirmed profession placeholders must not be written as CRM data');
+assert.equal(fallbackProfile.company_brand,'');
+assert.equal(fallbackProfile.location,'');
+assert.ok(archiveHtml.includes('prospect_profile:prospectProfile'),'The CRM must preserve the normalized prospect profile in evidence metadata');
+assert.ok(archiveHtml.includes('target_classification:quality.target_classification'),'The CRM must preserve the original target classification');
+assert.ok(archiveHtml.includes('name:prospectProfile.name,profession:prospectProfile.profession,company_brand:prospectProfile.company_brand,location:prospectProfile.location'),'The CRM Lead must receive the mapped name, profession, organization and location');
+
 assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
 
