@@ -813,18 +813,19 @@ assert.equal(historySandbox.readSearchHistory(otherHistoryOwner)[0].prospects[0]
 assert.equal(JSON.parse(historySandbox.localStorage.getItem('nextway_search_history_v1:'+historyOwner))[0].prospects[0].archive_status,'acquired','Acquisition status must survive a browser-page reload');
 
 
+const canonicalBridgeMatch=cloudHtml.match(/function canonicalSearchArchiveUrl\(value\)\{[\s\S]*?\n \}/);
 const bridgeMatch=cloudHtml.match(/function addSearchLeadToLocalArchive\(userId,record\)\{[\s\S]*?\n \}/);
+assert.ok(canonicalBridgeMatch,'Production canonical URL normalizer must be extractable for behavioral tests');
 assert.ok(bridgeMatch,'Search archive bridge implementation must be extractable for behavioral tests');
 const bridgeSandbox={
  localStorage:{data:new Map(),getItem(key){return this.data.has(key)?this.data.get(key):null;},setItem(key,value){this.data.set(key,String(value));}},
  Date,Math,URL,
  localArchiveKey:(userId)=>{if(typeof userId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId))throw new Error('Profilo non valido per archivio locale.');return 'nextway_ai_records_v1:'+userId;},
  safeHttpUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}},
- canonicalSearchArchiveUrl:(value)=>{try{const url=new URL(String(value||''));if(!['http:','https:'].includes(url.protocol)||url.username||url.password)return '';url.hash='';url.hostname=url.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(key=>url.searchParams.delete(key));url.searchParams.sort();url.pathname=url.pathname.replace(/\/+$/,'')||'/';return url.toString().replace(/\/$/,'');}catch{return '';}},
  readSearchArchiveRows(userId){try{const rows=JSON.parse(this.localStorage.getItem(this.localArchiveKey(userId))||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}},
  readSearchArchiveMeta(lead){const notes=String(lead?.notes||''),marker='[NEXTWAY_PROSPECT_METADATA_V1]',at=notes.lastIndexOf(marker);if(at<0)return {};try{return JSON.parse(notes.slice(at+marker.length).trim())||{};}catch{return {};}}
 };
-vm.runInNewContext(bridgeMatch[0]+';this.addSearchLeadToLocalArchive=addSearchLeadToLocalArchive;',bridgeSandbox);
+vm.runInNewContext(canonicalBridgeMatch[0]+'\n'+bridgeMatch[0]+';this.addSearchLeadToLocalArchive=addSearchLeadToLocalArchive;',bridgeSandbox);
 const bridgeOwner='123e4567-e89b-42d3-a456-426614174000';
 const bridgeRecord={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b/?utm_source=test#bio',evidence:'Profilo professionale pubblico · nutrizionista · Roma',identity_keys:['linkedin:andrea-fabbri-8039157b'],evidence_quality:{prospect_profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'}}};
 const bridgeSaved=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,bridgeRecord);
