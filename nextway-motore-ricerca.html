@@ -777,7 +777,7 @@ function assessSourceQuality(item,url,pageContent){
 }
 function buildEvidenceReview(assessment,title,snippet,pageContent,profile,targetAssessment,sourceQuality){
  const sourceFields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
- const normalize=value=>String(value||'').replace(/\\s+/g,' ').trim().toLocaleLowerCase('it');
+ const normalize=value=>String(value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('it');
  const documented=[],interpreted=[];
  (Array.isArray(assessment?.evidence)?assessment.evidence:[]).forEach(ev=>{
   const excerpt=String(ev?.excerpt||'').trim();
