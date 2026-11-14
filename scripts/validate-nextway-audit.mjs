@@ -39,7 +39,7 @@ assert.match(leadUiScript, /let activeOwnerId=null,data=\[\]/);
 assert.match(leadUiScript, /localStorage\.getItem\(KEY\+':'\+userId\)/);
 assert.match(leadUiScript, /localStorage\.setItem\(KEY\+':'\+activeOwnerId/);
 assert.match(leadUiScript, /if\(!activeOwnerId\)\{alert\('Accedi con il tuo account NEXTWAY prima di creare un Lead\.'/);
-assert.match(leadUiScript, /window\.NEXTWAY_LOCAL_ARCHIVE=\{activate:activateLocalAccount,clear:clearLocalAccount/);
+assert.match(leadUiScript, /window\.NEXTWAY_LOCAL_ARCHIVE=\{\s*activate:activateLocalAccount,\s*clear:clearLocalAccount/);
 assert.doesNotMatch(leadUiScript, /localStorage\.(?:getItem|setItem)\(KEY(?:\)|,)/, "Lead UI must not read or write the unscoped legacy archive key");
 assert.match(cloud, /function localArchiveKey\(userId\)/);
 assert.match(cloud, /localStorage\.getItem\(localArchiveKey\(s\.user\.id\)\)/);
