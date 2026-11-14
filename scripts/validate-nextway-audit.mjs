@@ -541,3 +541,27 @@ assert.match(searchHtml,/const segmentEvidenceMatches=/,"Documentary signals mus
 assert.match(searchHtml,/Ricerca esplicita di lavoro extra/);
 assert.match(searchHtml,/Ricerca esplicita di attività imprenditoriale/);
 console.log("NEXTWAY multi-query: 11 segment-specific evidence/classification cases PASS");
+
+
+// Segment relevance must distinguish explicit personal declarations from generic industry mentions.
+const evidenceStart=searchHtml.indexOf("function assessSearchEvidence(");
+const evidenceEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",evidenceStart);
+assert.ok(evidenceStart>=0&&evidenceEnd>evidenceStart,"Segment evidence assessor must exist");
+const evidenceAssessor=new Function(searchHtml.slice(evidenceStart,evidenceEnd)+"; return assessSearchEvidence;")();
+const evidenceCases=[
+ ["wellness_networker","Network marketing wellness","Sono networker nel settore wellness",true],
+ ["wellness_networker","Network marketing","Sono networker nel settore immobiliare",false],
+ ["other_networker","Network marketing","Sono networker nel settore immobiliare",true],
+ ["other_networker","Network marketing wellness","Sono networker nel settore wellness",false],
+ ["side_income","Cerco un secondo lavoro","Cerco un secondo lavoro part-time",true],
+ ["side_income","Benessere e lavoro","Mi piace il benessere e lavoro part-time",false],
+ ["business_seeking","Cerco un progetto","Vorrei avviare un'attività e mettermi in proprio",true],
+ ["business_seeking","Imprenditoria","Articolo sull'imprenditoria in Italia",false],
+ ["customers","Richiesta informazioni","Cerco informazioni su un percorso benessere",true],
+ ["customers","Articolo benessere","Il benessere è importante per tutti",false]
+];
+for(const [segment,title,body,expected] of evidenceCases){
+ const result=evidenceAssessor(title,body,"","https://example.test/profilo",{},segment);
+ assert.equal(result.relevanceScore>10,expected,"Generic sector mention must not satisfy segment-specific evidence: "+segment+" / "+body);
+}
+console.log("NEXTWAY segment evidence scoring: 10 explicit-vs-generic cases PASS");
