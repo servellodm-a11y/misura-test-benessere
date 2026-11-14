@@ -7,8 +7,8 @@ const edge = readFileSync("supabase/functions/nextway-workspace-admin/index.ts",
 
 // Creating a workspace is a database write: never prefill a real organization.
 assert.match(html, /La creazione registra un nuovo workspace nel database/);
-assert.match(html, /name="name" required maxlength="160" placeholder="Es\. Zinzino Italia"/);
-assert.match(html, /name="workspace_key" required maxlength="80" pattern="\[a-z0-9\]\[a-z0-9_-\]\{1,79\}" placeholder="Es\. zinzino-italia"/);
+assert.match(html, /name="name" required maxlength="160" placeholder="Es\. Azienda partner Italia"/);
+assert.match(html, /name="workspace_key" required maxlength="80" pattern="\[a-z0-9\]\[a-z0-9_-\]\{1,79\}" placeholder="Es\. azienda-partner-italia"/);
 assert.match(html, /name="market_country" maxlength="120" placeholder="Es\. Italia"/);
 assert.doesNotMatch(html, /name="(?:name|workspace_key|market_country)"[^>]*\bvalue=/, "workspace creation fields must not be prefilled");
 
