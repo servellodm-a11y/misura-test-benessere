@@ -565,3 +565,36 @@ for(const [segment,title,body,expected] of evidenceCases){
  assert.equal(result.relevanceScore>10,expected,"Generic sector mention must not satisfy segment-specific evidence: "+segment+" / "+body);
 }
 console.log("NEXTWAY segment evidence scoring: 10 explicit-vs-generic cases PASS");
+
+
+// Source evidence review: only exact excerpts from the declared source field are documented.
+const reviewStart=searchHtml.indexOf("function buildEvidenceReview(");
+const reviewEnd=searchHtml.indexOf("\\nfunction buildProspectProfile",reviewStart);
+assert.ok(reviewStart>=0&&reviewEnd>reviewStart,"Evidence review helper must exist before prospect profile extraction");
+const reviewHelper=searchHtml.slice(reviewStart,reviewEnd);
+const reviewFn=new Function(reviewHelper+"; return buildEvidenceReview;")();
+const reviewed=reviewFn(
+ {score:78,evidence:[
+  {kind:"Ruolo",source:"Descrizione del risultato",excerpt:"Sono nutrizionista",reason:"Ruolo rilevato"},
+  {kind:"Segmento",source:"Contenuto estratto della pagina",excerpt:"network marketing wellness",reason:"Contesto rilevato"},
+  {kind:"Recapiti",source:"Testo della fonte",excerpt:"1 recapito rilevato",reason:"Conteggio automatico"}
+ ]},
+ "Mario Rossi - Profilo","Sono nutrizionista","Esperienza in network marketing wellness",
+ {identity_status:"Possibile profilo individuale",profession:"Nutrizionista",organization:"Non rilevata"},
+ {segment:"wellness_pro",reason:"Ruolo coerente"},
+ {published_at:null,host:"example.test"}
+);
+assert.equal(reviewed.documented.length,2,"Only exact excerpts found in their declared fields may be documented");
+assert.equal(reviewed.documented[0].field,"Descrizione del risultato");
+assert.equal(reviewed.interpreted.length,1,"Derived contact counts must not be represented as direct source quotations");
+assert.ok(reviewed.inference.some(item=>item.kind==="Segmento suggerito"));
+assert.ok(reviewed.verify.some(item=>item.includes("Interesse e disponibilità")));
+const mismatched=reviewFn({evidence:[{kind:"Ruolo",source:"Titolo della pagina",excerpt:"Sono nutrizionista",reason:"test"}]},"Titolo senza ruolo","","",{},{},{});
+assert.equal(mismatched.documented.length,0,"An excerpt absent from its claimed source field must not be documented");
+assert.equal(mismatched.interpreted.length,1);
+assert.match(searchHtml,/Documentato nella fonte · citazione testuale/);
+assert.match(searchHtml,/Interpretazione NEXTWAY · non è un fatto accertato/);
+assert.match(searchHtml,/Da verificare manualmente/);
+assert.match(searchHtml,/evidence_review:evidenceReview/);
+assert.match(searchHtml,/DOCUMENTATO NELLA FONTE \(dichiarazioni, non fatti verificati\)/);
+console.log("NEXTWAY evidence review: exact-source, inference separation and manual verification cases PASS");
