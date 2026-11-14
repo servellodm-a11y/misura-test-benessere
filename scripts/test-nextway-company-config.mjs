@@ -435,6 +435,17 @@ assert.equal(genericFit.prospect_type,'da qualificare');
 assert.equal(genericFit.commercial_fit_score,0);
 assert.equal(genericFit.priority_score,0);
 assert.equal(genericFit.priority_tier,'Bassa pertinenza');
+assert.equal(genericFit.commercial_outcome,'insufficient_evidence');
+const genericProfessionalFit=assessFit('Mario Rossi - Nutrizionista','Sono nutrizionista','Consulenze nutrizionali','wellness_pro',{kind:'partner',segment:'wellness_pro',confidence:'media'},{individual:true,score:85,entityType:'Possibile profilo individuale'},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(genericProfessionalFit.commercial_outcome,'generic_result','A professional role alone must never qualify a partner');
+const explicitPartnerFit=assessFit('Profilo personale','Cerco collaboratori per il mio team','', 'wellness_networker',{kind:'partner',segment:'wellness_networker',confidence:'alta'},{individual:true,score:70,entityType:'Possibile profilo individuale'},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(explicitPartnerFit.commercial_outcome,'partner_potential');
+const explicitCustomerFit=assessFit('Profilo personale','Cerco un nutrizionista per una consulenza','', 'customers',{kind:'customer',segment:'customers',confidence:'media'},{individual:true,score:70,entityType:'Possibile profilo individuale'},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(explicitCustomerFit.commercial_outcome,'customer_potential');
+const organizationFit=assessFit('Studio Alfa','Studio professionale wellness','', 'wellness_pro',{kind:'partner',segment:'wellness_pro',confidence:'alta'},{individual:false,score:80,entityType:'Azienda o organizzazione'},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(organizationFit.commercial_outcome,'not_suitable');
+assert.ok(archiveHtml.includes("'research_result'"));
+assert.ok(archiveHtml.includes('Risultato da qualificare'));
 assert.ok(archiveHtml.includes('commercial_fit:value.commercial_fit'));
 assert.ok(archiveHtml.includes("Prossima azione: '+(fit.suggested_next_step"));
 
