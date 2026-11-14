@@ -846,4 +846,21 @@ assert.throws(()=>bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...brid
 assert.throws(()=>bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,evidence:''}),/non contiene titolo o evidenza/,'Archive acquisition must reject records without public evidence');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Rejected and duplicate acquisitions must not mutate the local archive');
 
+
+const syntheticBridgeTest=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{title:'TEST TECNICO NEXTWAY — NON È UN PROSPECT',url:'https://example.com/nextway-bridge-test',evidence:'Record sintetico esclusivamente tecnico.',is_test:true,evidence_quality:{prospect_profile:{name:'TEST TECNICO NEXTWAY'}}});
+assert.equal(syntheticBridgeTest.duplicate,false,'The local bridge must allow a dedicated synthetic test record');
+assert.equal(syntheticBridgeTest.lead.is_test,true,'Synthetic bridge records must carry the test-only marker');
+const rowsWithTest=bridgeSandbox.readSearchArchiveRows(bridgeOwner);
+assert.equal(rowsWithTest.length,2,'A synthetic test must be written to the same owner-scoped archive');
+assert.equal(rowsWithTest.filter(row=>row.is_test).length,1,'Exactly one test record must be marked as technical');
+const rowsAfterCleanup=rowsWithTest.filter(row=>!(row.id===syntheticBridgeTest.lead.id&&row.is_test===true));
+bridgeSandbox.localStorage.setItem('nextway_ai_records_v1:'+bridgeOwner,JSON.stringify(rowsAfterCleanup));
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Removing the synthetic test must preserve all real archive rows');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner)[0].is_test,undefined,'Cleanup must leave the real lead unchanged');
+assert.ok(searchHtml.includes('id="bridge-test-panel"'),'The search page must expose the controlled local bridge test');
+assert.ok(searchHtml.includes('id="run-bridge-test"')&&searchHtml.includes('id="clean-bridge-test"'),'The local test must have explicit run and cleanup controls');
+assert.ok(searchHtml.includes('removeBridgeTestRecord()'),'The UI must provide a dedicated cleanup operation');
+assert.ok(archiveHtml.includes("x.is_test?' <span class=\"tag\">TEST TECNICO</span>':''"),'The archive must visibly label technical test records');
+assert.ok(archiveHtml.includes('data.filter(x=>!x.is_test)'),'Technical test records must remain excluded from archive counters');
+
 console.log('NEXTWAY search history persistence contract: PASS');
