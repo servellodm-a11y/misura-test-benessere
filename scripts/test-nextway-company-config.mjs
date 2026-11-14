@@ -476,7 +476,7 @@ const customerWithoutProfessionalRole=assessLeadPriority({commercial_outcome:'cu
 assert.equal(customerWithoutProfessionalRole.eligible,true,'A customer request does not require a professional role');
 assert.ok(customerWithoutProfessionalRole.priority_score<explicitPartnerPriority.priority_score);
 const noDatePriority=assessLeadPriority({commercial_outcome:'partner_potential',segment_match:true},{individual:true,evidence:[{kind:'Ruolo o professione'}]},{},{quality_score:50,published_at:null},contacts,completeProfile);
-assert.ok(noDatePriority.priority_score<explicitPartnerPriority.priority_score,'Missing source date must lower priority');
+assert.ok(noDatePriority.source_score<explicitPartnerPriority.source_score,'Missing source date must lower the source-quality component');
 
 console.log('NEXTWAY company configuration contract: PASS');
 
