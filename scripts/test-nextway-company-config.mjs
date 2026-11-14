@@ -224,7 +224,8 @@ assert.ok(searchHtml.includes('target_classification:targetAssessment'));
 assert.ok(searchHtml.includes('targetSummary'));
 const classifierStart=searchHtml.indexOf('function classifyProspectTarget(');
 const classifierEnd=searchHtml.indexOf('function classifyNetworkerStage(',classifierStart);
-const classifierSource=searchHtml.slice(classifierStart,classifierEnd);
+const networkerHelperStart=searchHtml.indexOf('function assessNetworkerActivity(');
+const classifierSource=searchHtml.slice(networkerHelperStart,classifierEnd);
 const classifierContext={};
 vm.runInNewContext(classifierSource+';this.classifyProspectTarget=classifyProspectTarget;',classifierContext);
 const classify=classifierContext.classifyProspectTarget;
@@ -232,7 +233,12 @@ assert.equal(classify('Mario Rossi - Nutrizionista','Consulente nutrizionale',''
 assert.equal(classify('Mario Rossi - Nutrizionista','Consulente nutrizionale','', 'wellness_pro').kind,'partner');
 assert.equal(classify('Profilo personale','Cerco un nutrizionista per una consulenza','', 'customers').kind,'customer');
 assert.equal(classify('Profilo personale','Network marketing nel settore wellness','', 'other_networker').segment,'unclassified','A wellness networker must not be misclassified into the other-sector segment');
-assert.equal(classify('Profilo personale','Network marketing nel settore energia','', 'other_networker').segment,'other_networker');
+assert.equal(classify('Profilo personale','Network marketing nel settore energia','', 'other_networker').segment,'unclassified','A generic industry mention is not proof of active networker status');
+assert.equal(classify('Profilo personale','Sono un networker attivo e sviluppo la mia attività di network marketing nel settore energia','', 'other_networker').segment,'other_networker','An explicit active networker declaration in a non-wellness sector should match');
+assert.equal(classify('Profilo personale','Sono un networker attivo nel settore wellness e sviluppo la mia attività','', 'wellness_networker').segment,'wellness_networker','An explicit active networker declaration in wellness should match');
+assert.equal(classify('Profilo personale','Ho iniziato da poco la mia attività di network marketing','', 'new_networker').segment,'new_networker','A declared beginner networker should match the new-networker segment');
+assert.equal(classify('Profilo personale','Network marketing nel settore wellness','', 'wellness_networker').segment,'unclassified','A generic wellness industry mention is not proof of active networker status');
+
 assert.equal(classify('Profilo personale','Cerco un lavoro extra part-time','', 'side_income').segment,'side_income');
 assert.equal(classify('Profilo personale','Cerco consigli per migliorare la mia alimentazione','', 'customers').kind,'customer');
 assert.equal(classify('Profilo personale','Benessere e stile di vita','', 'customers').confidence,'bassa');
