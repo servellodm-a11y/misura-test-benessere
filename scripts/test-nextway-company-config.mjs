@@ -161,6 +161,14 @@ assert.ok(archiveHtml.includes('meta.identity_keys=[...new Set'));
 assert.ok(searchHtml.includes('identity_keys:identityKeys'));
 assert.ok(archiveHtml.includes("cloud_id:typeof lead.cloud_id==='string'?lead.cloud_id:''"),'CRM index must expose cloud lead IDs for activity matching');
 const cloudHtml=fs.readFileSync('nextway-cloud.js','utf8');
+assert.ok(cloudHtml.includes('function getLocalSearchArchiveIndex(userId)'), 'Cloud bridge must read the authenticated user local archive index');
+assert.ok(cloudHtml.includes('function addSearchLeadToLocalArchive(userId,record)'), 'Cloud bridge must persist a prospect from the search page');
+assert.ok(cloudHtml.includes("localStorage.setItem(key,JSON.stringify(rows))"), 'Search acquisition must persist to the same owner-scoped local archive key');
+assert.ok(searchHtml.includes('getLocalSearchArchiveIndex(s.user.id)'), 'Search must inspect duplicates in the authenticated user archive');
+assert.ok(searchHtml.includes('addSearchLeadToLocalArchive(s.user.id,'), 'Search acquisition must use the cross-page archive bridge');
+assert.ok(!searchHtml.includes('NEXTWAY_LOCAL_ARCHIVE?.addFromSearch'), 'Search page must not call an archive function defined only in another page');
+assert.ok(archiveHtml.includes("window.addEventListener('storage'"), 'An open archive tab must refresh when another tab adds a prospect');
+
 assert.ok(cloudHtml.includes('async function getLeadActivitySummary(cloudIds)'),'Cloud API must expose a bounded CRM activity summary');
 assert.ok(cloudHtml.includes('getLeadActivitySummary,addLeadActivity'),'CRM activity summary must be part of the public cloud API');
 assert.ok(searchHtml.includes('getLeadActivitySummary(crmIds)'),'Prospect search must retrieve real CRM activities');
