@@ -644,6 +644,24 @@ assert.deepEqual(laneScopes,['site:linkedin.com/in','site:instagram.com','site:f
 assert.equal(getProspectSearchLane(0,'facebook.com',true).scope,'site:facebook.com','An explicitly selected source must override the default source lane');
 assert.equal(getProspectSearchLane(4,'',true).label,'Web aperto · contesto aziendale');
 
+
+const boundaryQueueProspect={...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,priority_score:60},source_quality:{quality_score:60,published_at:'2026-11-14T00:00:00.000Z',age_days:730}};
+assert.equal(classifyLeadQueue(boundaryQueueProspect).code,'high','The exact minimum score, source quality and two-year freshness boundary must be accepted');
+assert.equal(classifyLeadQueue({...boundaryQueueProspect,source_quality:{...boundaryQueueProspect.source_quality,age_days:731}}).code,'review','A source older than two years must be reviewed');
+assert.equal(classifyLeadQueue({...boundaryQueueProspect,source_quality:{...boundaryQueueProspect.source_quality,quality_score:59}}).code,'review','A source below the minimum quality threshold must be reviewed');
+assert.equal(classifyLeadQueue({...boundaryQueueProspect,commercial_fit:{...boundaryQueueProspect.commercial_fit,priority_components:{eligible:false,role_documented:true}}}).code,'review','A prospect failing the eligibility gate must not enter high priority');
+assert.equal(classifyLeadQueue({...boundaryQueueProspect,commercial_fit:{...boundaryQueueProspect.commercial_fit,commercial_outcome:'customer_potential',priority_components:{eligible:true,role_documented:false}}}).code,'high','A qualified customer request must not be blocked by the partner-only professional-role requirement');
+
+const productionPriorityStart=searchHtml.indexOf('commercialFit.priority_score=leadPriority.priority_score');
+const productionComponentsStart=searchHtml.indexOf('commercialFit.priority_components=leadPriority',productionPriorityStart);
+const productionCardQueue=searchHtml.indexOf('card.dataset.queue=classifyLeadQueue(',productionComponentsStart);
+const productionDailyEntry=searchHtml.indexOf('const dailyEntry={',productionCardQueue);
+const productionDailyQueue=searchHtml.indexOf('dailyEntry.queue=classifyLeadQueue(dailyEntry)',productionDailyEntry);
+assert.ok(productionPriorityStart>=0&&productionComponentsStart>productionPriorityStart&&productionCardQueue>productionComponentsStart&&productionDailyEntry>productionCardQueue&&productionDailyQueue>productionDailyEntry,'Production prospect flow must assign the computed priority and its components before classifying both the visible card and saved daily prospect');
+assert.ok(searchHtml.slice(productionDailyEntry,productionDailyQueue).includes('commercial_fit:commercialFit'),'The saved daily prospect must retain the same commercial-fit assessment used for queue classification');
+assert.ok(searchHtml.slice(productionDailyEntry,productionDailyQueue).includes('source_quality:sourceQuality'),'The saved daily prospect must retain source-quality evidence for freshness and reliability gates');
+assert.ok(searchHtml.slice(productionDailyEntry,productionDailyQueue).includes('person_confirmed:assessment.individual'),'The saved daily prospect must retain the individual-identity gate');
+
 console.log('NEXTWAY company configuration contract: PASS');
 
 assert.ok(archiveHtml.includes('getIndex(){'));
