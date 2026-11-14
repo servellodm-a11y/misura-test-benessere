@@ -146,9 +146,9 @@ def test_admin_ui():
 
     contains(html, "La creazione registra un nuovo workspace nel database",
              "Avviso scrittura workspace assente")
-    matches(html, r'name="name" required maxlength="160" placeholder="Es\. Zinzino Italia"',
+    matches(html, r'name="name" required maxlength="160" placeholder="Es\. Azienda partner Italia"',
             "Campo nome workspace non conforme")
-    matches(html, r'name="workspace_key" required maxlength="80" pattern="\[a-z0-9\]\[a-z0-9_-\]\{1,79\}" placeholder="Es\. zinzino-italia"',
+    matches(html, r'name="workspace_key" required maxlength="80" pattern="\[a-z0-9\]\[a-z0-9_-\]\{1,79\}" placeholder="Es\. azienda-partner-italia"',
             "Campo chiave workspace non conforme")
     matches(html, r'name="market_country" maxlength="120" placeholder="Es\. Italia"',
             "Campo paese workspace non conforme")
