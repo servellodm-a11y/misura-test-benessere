@@ -109,7 +109,7 @@ assert.ok(searchHtml.includes("card.dataset.personPriority=assessment.individual
 assert.ok(searchHtml.includes("PERSONA IDENTIFICABILE · verifica ruolo e attualità"));
 assert.ok(searchHtml.includes('person_confirmed:assessment.individual'));
 assert.ok(searchHtml.includes('Number(b.person_confirmed)-Number(a.person_confirmed)'));
-assert.ok(searchHtml.includes('(Number(b.dataset.personPriority)||0)-(Number(a.dataset.personPriority)||0)'));
+assert.ok(searchHtml.includes("{high:0,review:1,exclude:2}[a.dataset.queue]"),'Cards must be grouped by high, review, and exclude priority');
 assert.ok(searchHtml.includes('duplicateEntry.daily.sources=duplicateEntry.sources'));
 assert.ok(searchHtml.includes('duplicateEntry.daily.duplicate_count++'));
 assert.ok(searchHtml.includes('dailyProspects.sort('));
