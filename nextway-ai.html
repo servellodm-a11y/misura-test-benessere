@@ -142,7 +142,7 @@ window.NEXTWAY_LOCAL_ARCHIVE={
    created:new Date().toISOString(),local_dirty:true
   };
   const sourceRecords=mergeLeadSourceRecords(record?.sources||[],[{url,title,evidence,snippet:String(record?.evidence||'').slice(0,1200),collected_at:new Date().toISOString(),public_contacts:publicContacts}]);
-  const metadata={sources:sourceRecords,public_contacts:mergeLeadPublicContactSets(publicContacts),identity_keys:incomingIdentityKeys,commercial_qualification:evidenceQuality.commercial_qualification};
+  const metadata={sources:sourceRecords,public_contacts:mergeLeadPublicContactSets(publicContacts),identity_keys:incomingIdentityKeys,prospect_profile:evidenceQuality.prospect_profile,commercial_qualification:evidenceQuality.commercial_qualification};
   lead.public_contacts=metadata.public_contacts;writeProspectMetadata(lead,metadata);
   data.unshift(lead);persist();return {duplicate:false,lead};
  }
@@ -162,6 +162,7 @@ function normalizeSearchProspectProfile(quality,title){
  return {
   name:field(source.name,String(title||'Prospect da verificare').trim().slice(0,160)),
   name_candidate:field(source.name_candidate,''),
+  name_source:field(source.name_source,''),
   profession:field(source.profession,''),
   company_brand:field(source.organization,''),
   location:field(source.location,''),
