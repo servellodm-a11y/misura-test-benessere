@@ -478,6 +478,13 @@ assert.ok(professionalFit.reasons.some(reason=>reason.includes('non prova intere
 const opportunityFit=assessFit('Profilo personale','Cerco un lavoro extra part-time','', 'side_income',{kind:'partner',segment:'side_income',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(opportunityFit.signal_strength,'forte');
 assert.equal(opportunityFit.explicit_intent,'dichiarato');
+assert.equal(opportunityFit.commercial_outcome,'partner_potential','An explicit extra-income declaration must remain a commercial partner prospect');
+const businessOpportunityFit=assessFit('Profilo personale','Cerco un progetto imprenditoriale da sviluppare in proprio','', 'business_seeking',{kind:'partner',segment:'business_seeking',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(businessOpportunityFit.explicit_intent,'dichiarato');
+assert.equal(businessOpportunityFit.commercial_outcome,'partner_potential','An explicit business-seeking declaration must qualify as partner potential');
+const genericOpportunityFit=assessFit('Profilo personale','Cerco un’opportunità interessante','', 'business_seeking',{kind:'partner',segment:'business_seeking',confidence:'media'}, {score:45},{emails:[],phones:[],whatsapp:[],socials:[]});
+assert.equal(genericOpportunityFit.explicit_intent,'non dichiarato','Generic opportunity language must not be treated as explicit business intent');
+assert.notEqual(genericOpportunityFit.commercial_outcome,'partner_potential');
 const genericFit=assessFit('Profilo personale','Benessere e stile di vita','', 'customers',{kind:'unknown',segment:'unclassified',confidence:'bassa'}, {score:25},{emails:[],phones:[],whatsapp:[],socials:[]});
 assert.equal(genericFit.prospect_type,'da qualificare');
 assert.equal(genericFit.commercial_fit_score,0);
