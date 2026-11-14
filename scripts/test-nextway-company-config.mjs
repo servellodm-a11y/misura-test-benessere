@@ -783,7 +783,7 @@ const historySandbox={
  safeUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch{return '';}},
  console
 };
-vm.runInNewContext(searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;',historySandbox);
+vm.runInNewContext("let searchHistoryOwnerId='';"+searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;',historySandbox);
 const historyOwner='123e4567-e89b-42d3-a456-426614174000';
 assert.equal(historySandbox.searchHistoryKey(),null,'History must not write to an unknown owner scope');
 assert.equal(historySandbox.saveSearchHistory([{url:'https://example.com'}]),false,'History save must fail closed until an authenticated owner is known');
