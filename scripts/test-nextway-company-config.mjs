@@ -781,7 +781,7 @@ const historySandbox={
  document:{getElementById(){return null;}},
  $:(id)=>id==='segment'?{value:'wellness_pro'}:id==='area'?{value:'Italia'}:null,
  safeUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch{return '';}},
- canonicalProspectUrl:(value)=>{try{const url=new URL(String(value||''));url.hash='';url.pathname=url.pathname.replace(/\\/+$/,'')||'/';return url.href.replace(/\\/$/,'').toLowerCase();}catch{return ''; }},
+ canonicalProspectUrl:(value)=>{try{const url=new URL(String(value||''));url.hash='';url.pathname=url.pathname.replace(/\/+$/,'')||'/';return url.href.replace(/\/$/,'').toLowerCase();}catch{return ''; }},
  console
 };
 vm.runInNewContext("let searchHistoryOwnerId='';"+searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;this.markSearchHistoryAcquired=markSearchHistoryAcquired;',historySandbox);
