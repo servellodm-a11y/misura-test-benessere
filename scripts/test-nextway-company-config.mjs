@@ -233,6 +233,12 @@ const negatedBusiness=assessOpportunityIntent('Profilo personale','Non voglio av
 assert.equal(negatedBusiness.status,'negated','A denied business-seeking statement must not qualify');
 const entrepreneurOnly=assessOpportunityIntent('Titolare d’impresa','Sono imprenditore e gestisco la mia azienda','');
 assert.equal(entrepreneurOnly.status,'none','An entrepreneur role alone is not evidence of seeking a new business');
+const unrelatedDenial=assessOpportunityIntent('Profilo personale','Non sono interessato al fitness, ma cerco un lavoro extra','');
+assert.equal(unrelatedDenial.status,'side_income','An unrelated denial must not suppress an explicit side-income search');
+const categorySpecificDenial=assessOpportunityIntent('Profilo personale','Non cerco un lavoro extra, ma vorrei avviare un’attività','');
+assert.equal(categorySpecificDenial.status,'business_seeking','A side-income denial must not suppress a separate business-seeking declaration');
+const deniedBusinessOnly=assessOpportunityIntent('Profilo personale','Non voglio avviare un’attività imprenditoriale','');
+assert.equal(deniedBusinessOnly.status,'negated','A business-specific denial must still be respected');
 const genericOpportunity=assessOpportunityIntent('Profilo personale','Opportunità, crescita e nuove sfide','');
 assert.equal(genericOpportunity.status,'none','Generic opportunity language is not an explicit search declaration');
 
