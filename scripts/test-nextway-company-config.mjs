@@ -817,7 +817,7 @@ assert.ok(bridgeMatch,'Search archive bridge implementation must be extractable 
 const bridgeSandbox={
  localStorage:{data:new Map(),getItem(key){return this.data.has(key)?this.data.get(key):null;},setItem(key,value){this.data.set(key,String(value));}},
  Date,Math,URL,
- localArchiveKey:(userId)=>'nextway_ai_records_v1:'+userId,
+ localArchiveKey:(userId)=>{if(typeof userId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId))throw new Error('Profilo non valido per archivio locale.');return 'nextway_ai_records_v1:'+userId;},
  safeHttpUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}},
  canonicalSearchArchiveUrl:(value)=>{try{const url=new URL(String(value||''));if(!['http:','https:'].includes(url.protocol)||url.username||url.password)return '';url.hash='';url.hostname=url.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(key=>url.searchParams.delete(key));url.searchParams.sort();url.pathname=url.pathname.replace(/\/+$/,'')||'/';return url.toString().replace(/\/$/,'');}catch{return '';}},
  readSearchArchiveRows(userId){try{const rows=JSON.parse(this.localStorage.getItem(this.localArchiveKey(userId))||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}},
@@ -837,5 +837,11 @@ assert.equal(bridgeSandbox.readSearchArchiveRows('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaa
 const bridgeDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,url:'https://linkedin.com/in/andrea-fabbri-8039157b',identity_keys:[]});
 assert.equal(bridgeDuplicate.duplicate,true,'Canonical URL matching must detect duplicates across www, tracking parameters, fragments and trailing slashes even without identity keys');
 assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Duplicate acquisition must not create a second lead');
+const identityDuplicate=bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,url:'https://example.org/another-public-page',identity_keys:['linkedin:andrea-fabbri-8039157b']});
+assert.equal(identityDuplicate.duplicate,true,'Stable public identity keys must prevent duplicate acquisition across different source URLs');
+assert.throws(()=>bridgeSandbox.addSearchLeadToLocalArchive('invalid-owner',bridgeRecord),/Profilo non valido/,'Archive acquisition must reject an invalid owner scope');
+assert.throws(()=>bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,url:'javascript:alert(1)'}),/URL della fonte non valido/,'Archive acquisition must reject unsafe source URLs');
+assert.throws(()=>bridgeSandbox.addSearchLeadToLocalArchive(bridgeOwner,{...bridgeRecord,evidence:''}),/non contiene titolo o evidenza/,'Archive acquisition must reject records without public evidence');
+assert.equal(bridgeSandbox.readSearchArchiveRows(bridgeOwner).length,1,'Rejected and duplicate acquisitions must not mutate the local archive');
 
 console.log('NEXTWAY search history persistence contract: PASS');
