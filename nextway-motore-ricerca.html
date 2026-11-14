@@ -609,7 +609,7 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const individual=!!(linkedinPersonProfile||(socialProfile&&((personTitle&&!organizationEvidence)||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence));
  const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationTitle||organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
  const segmentSignals={
-  wellness_pro:/\b(nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|biolog\w+ nutrizionist)\b/i,
+  wellness_pro:/\b(nutrizionist\w*|dietist\w*|naturopat\w*|osteopat\w*|fisioterapist\w*|personal trainer|farmacist\w*|medic\w*|biolog\w+ nutrizionist\w*)\b/i,
   wellness_networker:/\b(network marketing|networker|vendita diretta|brand partner|distributore indipendente)\b/i,
   new_networker:/(ho iniziato da poco|sono all[’']inizio|primi passi nel network|nuov[oa] incaricat[oa]|nuovo distributore|nuova distributrice|sto imparando|new to network marketing|just started network marketing)/i,
   other_networker:/\b(network marketing|networker|vendita diretta|social selling|distributore indipendente)\b/i,
