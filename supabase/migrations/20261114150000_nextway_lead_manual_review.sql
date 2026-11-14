@@ -22,9 +22,9 @@ declare v_review_rpc boolean := coalesce(current_setting('nextway.manual_review_
 begin
  if v_review_rpc then
   if auth.uid() is null or new.manual_reviewed_by is distinct from auth.uid()
-   or new.manual_reviewed_at is null or new.qualification <> 'Qualificato'
-   or new.identity_check <> 'confirmed'
-   or (new.score_fit+new.score_activity+new.score_presence+new.score_interest+new.score_approach)<50 then
+   or new.manual_reviewed_at is null or new.qualification is distinct from 'Qualificato'
+   or new.identity_check is distinct from 'confirmed'
+   or (coalesce(new.score_fit,0)+coalesce(new.score_activity,0)+coalesce(new.score_presence,0)+coalesce(new.score_interest,0)+coalesce(new.score_approach,0))<50 then
    raise exception 'Revisione manuale NEXTWAY non valida.' using errcode='42501';
   end if;
   return new;
@@ -74,8 +74,8 @@ begin
   raise exception 'Non autorizzato a revisionare questo Lead.' using errcode='42501';
  end if;
  if v_lead.archived_at is not null then raise exception 'Un Lead archiviato non può essere qualificato.' using errcode='22023'; end if;
- if v_lead.identity_check <> 'confirmed'
-  or (v_lead.score_fit+v_lead.score_activity+v_lead.score_presence+v_lead.score_interest+v_lead.score_approach)<50 then
+ if v_lead.identity_check is distinct from 'confirmed'
+  or (coalesce(v_lead.score_fit,0)+coalesce(v_lead.score_activity,0)+coalesce(v_lead.score_presence,0)+coalesce(v_lead.score_interest,0)+coalesce(v_lead.score_approach,0))<50 then
   raise exception 'Identità confermata e almeno 50 punti sono necessari.' using errcode='22023';
  end if;
  perform set_config('nextway.manual_review_rpc','on',true);
