@@ -43,7 +43,8 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <div class="field"><label for="extra">Parole chiave aggiuntive</label><input id="extra" placeholder="es. MONAT, team leader, consulente"></div>
 <div class="field"><label for="language">Lingua dei risultati</label><select id="language"><option value="it">Italiano</option><option value="en">Inglese</option><option value="both">Italiano + inglese</option></select></div>
 </div>
-<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui le 5 ricerche sul web</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
+<div class="field"><label for="selected-query">Query da eseguire (una sola per volta)</label><select id="selected-query" disabled><option value="0">Genera prima le query</option></select></div>
+<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui 1 ricerca · max 5 risultati</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
 </section>
 <section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
 <section class="panel" id="live-results"><h2>Risultati trovati</h2><p class="muted">I risultati vengono ordinati per pertinenza documentale: identità individuale (0–40), coerenza con il segmento (0–40) e completezza delle prove pubbliche (0–20). Directory, articoli e pagine aziendali non vengono trattati come persone. Il punteggio non misura interesse, disponibilità o idoneità commerciale. Ogni fonte va aperta e verificata prima dell’acquisizione.</p><div id="daily-summary" class="notice" style="margin:12px 0">La lista giornaliera sarà compilata dopo l’esecuzione della ricerca.</div><div class="panel" id="search-history-panel" style="margin:12px 0"><h3>Storico ricerche su questo browser</h3><p class="muted">Conserva fino a 10 ricerche recenti in questo browser. Non sostituisce l’Archivio Lead cloud: acquisisci manualmente i prospect che vuoi conservare nel CRM.</p><div id="search-history"></div></div><div class="actions"><button class="btn alt" id="exportDaily" disabled>Esporta lista giornaliera CSV</button></div><div id="live-list"></div></section>\n<section class="panel"><h2>Metodo di lavoro consigliato</h2>
@@ -309,6 +310,7 @@ function build(){
  render();
 }
 function render(){
+ const selector=$('selected-query');if(selector){selector.replaceChildren();generated.forEach((entry,index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=(index+1)+'. '+entry.label;selector.append(option);});selector.disabled=generated.length===0;}
  const root=$('results');root.replaceChildren();
  generated.forEach((x,i)=>{const card=document.createElement('article');card.className='query';const head=document.createElement('div');head.className='queryhead';const title=document.createElement('strong');title.textContent=(i+1)+'. '+x.label;const tag=document.createElement('span');tag.className='tag';tag.textContent='Query '+(i+1);head.append(title,tag);const pre=document.createElement('pre');pre.textContent=x.query;const actions=document.createElement('div');actions.className='actions';const open=document.createElement('a');open.className='btn';open.href=x.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Apri ricerca';const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia';copy.addEventListener('click',()=>navigator.clipboard?.writeText(x.query));actions.append(open,copy);card.append(head,pre,actions);root.append(card)});
 }
@@ -320,7 +322,7 @@ async function runSearch(){
  const status=$('searchstatus'),button=$('runsearch'),list=$('live-list');
  try{
   if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
-  button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;status.textContent='Connessione a NEXTWAY e avvio delle 5 ricerche…';list.replaceChildren();
+  button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;const selectedIndex=Math.max(0,Math.min(generated.length-1,Number($('selected-query')?.value||0)));const selectedQuery=generated[selectedIndex];if(!selectedQuery)throw new Error('Genera e seleziona una query prima di avviare la ricerca.');status.textContent='Connessione a NEXTWAY e avvio di 1 ricerca (massimo 5 risultati)…';list.replaceChildren();
   const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();
   const archiveIndex=window.NEXTWAY_LOCAL_ARCHIVE?.getIndex?.()||{urls:[],identity_keys:[]};
   const acquiredUrls=new Set(archiveIndex.urls||[]),acquiredKeys=new Set(archiveIndex.identity_keys||[]),crmProspects=Array.isArray(archiveIndex.prospects)?archiveIndex.prospects:[];
@@ -337,9 +339,9 @@ async function runSearch(){
   try{openCrmFollowups=await window.NEXTWAY_CLOUD.getOpenLeadActivities(100);}
   catch(followupError){status.textContent='Ricerca avviata. Promemoria CRM non disponibili: '+followupError.message;}
 
-  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:generated.map(x=>x.query),max_results:10})});
+  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:[selectedQuery.query],max_results:5})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
-  const groups=payload.results||[];let total=0;
+  const groups=payload.results||[];let total=0;status.textContent='Ricerca completata: '+(payload.queries_completed||groups.length)+' query eseguita · massimo 5 risultati richiesti.';
   const seenProspects=new Map();
   groups.forEach((group,index)=>{
    const matchingQuery=generated.find(entry=>entry.query===group.query);
