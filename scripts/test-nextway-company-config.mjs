@@ -392,7 +392,7 @@ assert.equal(mergedSources[0].snippet,'Seconda acquisizione');
 assert.deepEqual([...mergedSources[0].public_contacts.phones],['+390212345678']);
 
 const duplicateProfileLead={name:'Mario Rossi',profession:'Nutrizionista',company_brand:'',location:'Milano',notes:'Nota manuale'};
-const duplicateProfileMeta={prospect_profile:{name:'Mario Rossi',profession:'Nutrizionista',organization:'',location:'Milano',name_source:'Dichiarazione testuale nella fonte'},identity_keys:['linkedin:mario-rossi'],sources:[{url:'https://example.com/mario',title:'Mario Rossi',evidence:'Prima fonte'}],public_contacts:{emails:['mario@example.com'],phones:[],whatsapp:[],socials:[]}};
+const duplicateProfileMeta={prospect_profile:{name:'Mario Rossi',profession:'Nutrizionista',company_brand:'',location:'Milano',name_source:'Dichiarazione testuale nella fonte'},identity_keys:['linkedin:mario-rossi'],sources:[{url:'https://example.com/mario',title:'Mario Rossi',evidence:'Prima fonte'}],public_contacts:{emails:['mario@example.com'],phones:[],whatsapp:[],socials:[]}};
 const duplicateProfileRecord={evidence_quality:{prospect_profile:{name:'Mario Rossi',name_source:'Dichiarazione testuale nella fonte',identity_status:'Possibile profilo individuale · nominativo estratto, da confermare',profession:'Biologo nutrizionista',organization:'Studio Alfa',location:'Roma',segment:'wellness_pro',confidence:'alta',priority:'Alta · verifica prioritaria'},commercial_qualification:{status:'Da approfondire',action:'Verificare ruolo'}}};
 const duplicateProfileResult=metadataContext.mergeSearchProspectDuplicate(duplicateProfileLead,duplicateProfileMeta,duplicateProfileRecord,['email:mario@example.com']);
 assert.equal(duplicateProfileResult.lead.name,'Mario Rossi','A confirmed existing prospect name must remain stable');
@@ -403,7 +403,7 @@ assert.deepEqual([...duplicateProfileResult.meta.identity_keys].sort(),['email:m
 assert.equal(duplicateProfileResult.meta.commercial_qualification.status,'Da approfondire');
 assert.equal(duplicateProfileResult.meta.commercial_qualification_history.length,1);
 const manuallyEditedLead={name:'Mario Rossi',profession:'Coach indipendente',company_brand:'Studio Manuale',location:'Torino',notes:'Nota personale'};
-const manuallyEditedMeta={prospect_profile:{name:'Mario Rossi',name_source:'Dichiarazione testuale nella fonte',profession:'Nutrizionista',organization:'Studio Alfa',location:'Milano'}};
+const manuallyEditedMeta={prospect_profile:{name:'Mario Rossi',name_source:'Dichiarazione testuale nella fonte',profession:'Nutrizionista',company_brand:'Studio Alfa',location:'Milano'}};
 metadataContext.mergeSearchProspectDuplicate(manuallyEditedLead,manuallyEditedMeta,duplicateProfileRecord,['linkedin:mario-rossi']);
 assert.equal(manuallyEditedLead.profession,'Coach indipendente','Manual profession edits must never be overwritten by a later search');
 assert.equal(manuallyEditedLead.company_brand,'Studio Manuale','Manual organization edits must never be overwritten');
