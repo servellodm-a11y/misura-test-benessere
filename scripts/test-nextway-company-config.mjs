@@ -210,6 +210,28 @@ for(const segment of requiredSegments){
  assert.ok(strategyContext.segmentExclusions[segment],`Missing segment exclusions for ${segment}`);
 }
 assert.ok(strategyContext.refinedItalianQueries.customers.every(([,q])=>/cerco|consigli|informazioni|vorrei|avete/i.test(q)),'Customer queries must use explicit voluntary interest signals');
+
+assert.ok(searchHtml.includes('function assessOpportunityIntent('));
+const opportunityStart=searchHtml.indexOf('function assessOpportunityIntent(');
+const opportunityEnd=searchHtml.indexOf('function assessSearchEvidence(',opportunityStart);
+assert.ok(opportunityStart>=0&&opportunityEnd>opportunityStart,'Explicit opportunity-intent helper must exist');
+const opportunityContext={};
+vm.runInNewContext(searchHtml.slice(opportunityStart,opportunityEnd)+';this.assessOpportunityIntent=assessOpportunityIntent;',opportunityContext);
+const assessOpportunityIntent=opportunityContext.assessOpportunityIntent;
+const seekingExtra=assessOpportunityIntent('Profilo personale','Cerco un lavoro extra part-time','');
+assert.equal(seekingExtra.status,'side_income');
+assert.equal(seekingExtra.source,'Descrizione del risultato');
+const seekingBusiness=assessOpportunityIntent('Profilo personale','Vorrei avviare una mia attività','');
+assert.equal(seekingBusiness.status,'business_seeking');
+const negatedExtra=assessOpportunityIntent('Profilo personale','Non cerco un lavoro extra','');
+assert.equal(negatedExtra.status,'negated','An explicit denial must override matching opportunity words');
+const negatedBusiness=assessOpportunityIntent('Profilo personale','Non voglio avviare una nuova attività','');
+assert.equal(negatedBusiness.status,'negated','A denied business-seeking statement must not qualify');
+const entrepreneurOnly=assessOpportunityIntent('Titolare d’impresa','Sono imprenditore e gestisco la mia azienda','');
+assert.equal(entrepreneurOnly.status,'none','An entrepreneur role alone is not evidence of seeking a new business');
+const genericOpportunity=assessOpportunityIntent('Profilo personale','Opportunità, crescita e nuove sfide','');
+assert.equal(genericOpportunity.status,'none','Generic opportunity language is not an explicit search declaration');
+
 assert.ok(strategyContext.refinedItalianQueries.side_income.every(([,q])=>/cerco|valuto|disponibile/i.test(q)),'Side-income queries must require explicit public declarations');
 assert.ok(strategyContext.refinedItalianQueries.business_seeking.every(([,q])=>/cerco|valuto|voglio|vorrei|sto cercando/i.test(q)),'Business-seeking queries must require explicit declarations');
 assert.ok(strategyContext.refinedItalianQueries.new_networker.some(([,q])=>/iniziato|primi passi|sto imparando/i.test(q)),'Beginner networker queries must include explicit start signals');
