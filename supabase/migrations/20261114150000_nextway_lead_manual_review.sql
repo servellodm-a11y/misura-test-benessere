@@ -3,7 +3,8 @@
 begin;
 alter table public.nextway_leads
   add column if not exists manual_reviewed_at timestamptz,
-  add column if not exists manual_reviewed_by uuid references public.profiles(id) on delete restrict;
+  add column if not exists manual_reviewed_by uuid;
+comment on column public.nextway_leads.manual_reviewed_by is 'UUID immutabile del revisore autenticato; non FK, per conservare l attribuzione storica anche se il profilo viene eliminato.';
 -- Existing qualifications have no stored human-review evidence: return them to review.
 -- Temporarily disable the legacy auto-qualification trigger for this one-time backfill.
 alter table public.nextway_leads disable trigger nextway_qualification_v1;
