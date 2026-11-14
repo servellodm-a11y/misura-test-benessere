@@ -44,7 +44,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <div class="field"><label for="language">Lingua dei risultati</label><select id="language"><option value="it">Italiano</option><option value="en">Inglese</option><option value="both">Italiano + inglese</option></select></div>
 </div>
 <div class="field"><label for="selected-query">Query da eseguire (una sola per volta)</label><select id="selected-query" disabled><option value="0">Genera prima le query</option></select></div>
-<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui 1 ricerca · 1 solo risultato</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
+<div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui 1 ricerca · fino a 10 risultati</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
 </section>
 <section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
 <section class="panel" id="bridge-test-panel">
@@ -422,7 +422,7 @@ async function runSearch(){
   try{openCrmFollowups=await window.NEXTWAY_CLOUD.getOpenLeadActivities(100);}
   catch(followupError){status.textContent='Ricerca avviata. Promemoria CRM non disponibili: '+followupError.message;}
 
-  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:[selectedQuery.query],max_results:1})});
+  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:[selectedQuery.query],max_results:10})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
   const groups=payload.results||[];let total=0;status.textContent='Ricerca completata: '+(payload.queries_completed||groups.length)+' query eseguita · un solo risultato richiesto.';
   const seenProspects=new Map();
