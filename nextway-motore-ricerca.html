@@ -306,7 +306,7 @@ function buildProspectSearchQuery(baseQuery,area,platform,extra,segment,companyT
   if(terms.length)query+=' ('+terms.map(term=>'"'+term.replace(/"/g,'')+'"').join(' OR ')+')';
  }
  query+=segmentExclusions[segment]||'';
- return query.replace(/\\s+/g,' ').trim();
+ return query.replace(/\s+/g,' ').trim();
 }
 function getProspectSearchLane(index,platform,hasCompanyTerms){
  const selected=String(platform||'').trim();
@@ -318,7 +318,7 @@ function getProspectSearchLane(index,platform,hasCompanyTerms){
   {scope:'',label:hasCompanyTerms?'Web aperto · contesto aziendale':'Web aperto · ricerca complementare'}
  ];
  const lane=lanes[Math.max(0,Math.min(lanes.length-1,Number(index)||0))];
- if(selected)return {scope:selected==='linkedin.com'?'site:linkedin.com/in':'site:'+selected,label:selected==='linkedin.com'?'LinkedIn · profili individuali':selected.replace(/\\.com$/,'')+' · ricerca mirata'};
+ if(selected)return {scope:selected==='linkedin.com'?'site:linkedin.com/in':'site:'+selected,label:selected==='linkedin.com'?'LinkedIn · profili individuali':selected.replace(/\.com$/,'')+' · ricerca mirata'};
  return lane;
 }
 function build(){
