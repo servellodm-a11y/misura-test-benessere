@@ -512,3 +512,32 @@ const sourceQualityCard = searchHtml.indexOf("const sourceQualityCard=", prospec
 assert.ok(prospectRenderStart >= 0 && sourceQualityInit > prospectRenderStart && sourceQualityCard > sourceQualityInit,
   "Source quality must be initialized before rendering the prospect source-quality card");
 console.log("Prospect source-quality rendering: initialization precedes UI access: PASS");
+
+
+// NEXTWAY multi-query: each selected segment must require its own documented evidence.
+const targetStart=searchHtml.indexOf("function classifyProspectTarget(");
+const targetEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",targetStart);
+assert.ok(targetStart>=0&&targetEnd>targetStart,"Segment-specific prospect classifier must exist");
+const targetClassifier=new Function(searchHtml.slice(targetStart,targetEnd)+"; return classifyProspectTarget;")();
+const classifyCases=[
+ {segment:"wellness_networker",title:"Network marketing wellness",body:"Sono networker nel settore wellness",expected:"wellness_networker"},
+ {segment:"wellness_networker",title:"Network marketing",body:"Sono networker nel settore immobiliare",expected:"unclassified"},
+ {segment:"other_networker",title:"Network marketing",body:"Sono networker nel settore immobiliare",expected:"other_networker"},
+ {segment:"other_networker",title:"Network marketing wellness",body:"Sono networker nel settore wellness",expected:"unclassified"},
+ {segment:"new_networker",title:"Il mio percorso",body:"Ho iniziato da poco nel network marketing",expected:"new_networker"},
+ {segment:"exnetworker",title:"La mia esperienza",body:"Ho lasciato il network marketing dopo anni",expected:"exnetworker"},
+ {segment:"side_income",title:"Cerco un secondo lavoro",body:"Cerco un secondo lavoro part-time",expected:"side_income"},
+ {segment:"side_income",title:"Benessere e lavoro",body:"Mi piace il benessere e lavoro part-time",expected:"unclassified"},
+ {segment:"business_seeking",title:"Cerco un progetto",body:"Vorrei avviare un'attività e mettermi in proprio",expected:"business_seeking"},
+ {segment:"customers",title:"Richiesta informazioni",body:"Cerco informazioni su un percorso benessere",expected:"customers"},
+ {segment:"customers",title:"Articolo benessere",body:"Il benessere è importante per tutti",expected:"unclassified"}
+];
+for(const item of classifyCases){
+ const result=targetClassifier(item.title,"",item.body,item.segment);
+ assert.equal(result.segment,item.expected,"Wrong segment classification for "+item.segment+": "+item.body);
+ if(item.expected==="unclassified")assert.equal(result.kind,"unknown","A generic or mismatched signal must not become a prospect");
+}
+assert.match(searchHtml,/const segmentEvidenceMatches=/,"Documentary signals must be constrained by selected segment");
+assert.match(searchHtml,/Ricerca esplicita di lavoro extra/);
+assert.match(searchHtml,/Ricerca esplicita di attività imprenditoriale/);
+console.log("NEXTWAY multi-query: 11 segment-specific evidence/classification cases PASS");
