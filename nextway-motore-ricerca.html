@@ -658,9 +658,23 @@ function assessNetworkerActivity(title,snippet,pageContent){
  if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
  return {status,label,excerpt,source,verified:false,disclaimer:'Classificazione basata sul testo disponibile: non dimostra attività commerciale effettiva, continuità, risultati o disponibilità a collaborare.'};
 }
+function assessOpportunityIntent(title,snippet,pageContent){
+ const fields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
+ const sidePattern=/\b(?:cerco|sto cercando|valuto|vorrei trovare|mi interessa trovare|sono disponibile a valutare)\s+(?:un[oa]?\s+)?(?:lavoro extra|secondo lavoro|part.?time|lavoro flessibile|entrata aggiuntiva|reddito integrativo|seconda entrata|attività da affiancare)\b|\b(?:cerco|sto cercando|valuto)\s+(?:un[oa]?\s+)?(?:entrata aggiuntiva|reddito integrativo|seconda entrata)\b/i;
+ const businessPattern=/\b(?:cerco|sto cercando|valuto)\s+(?:un[oa]?\s+)?(?:attività imprenditoriale|progetto di business|progetto imprenditoriale|business da avviare|attività indipendente)\b|\b(?:voglio|vorrei|intendo)\s+(?:mettermi in proprio|avviare|avviare una mia|costruire)\s+(?:una\s+)?(?:attività|impresa|business)?\b|\b(?:cerco|sto cercando)\s+(?:un[oa]?\s+)?business\b/i;
+ const negative=/\bnon\s+(?:(?:sto|sono)\s+)?(?:cercando|cerco|valuto|voglio|vorrei|intendo|interessat[oa]|disponibile)\b/i;
+ for(const [source,value] of fields){
+  const side=value.match(sidePattern),business=value.match(businessPattern),denied=negative.test(value);
+  if(side&&!denied)return {status:'side_income',label:'Ricerca esplicita di lavoro extra o reddito integrativo · da verificare',excerpt:side[0],source,verified:false,disclaimer:'Dichiarazione pubblica rilevata nel testo: non prova disponibilità attuale, requisiti o interesse verso una specifica proposta.'};
+  if(business&&!denied)return {status:'business_seeking',label:'Ricerca esplicita di attività imprenditoriale · da verificare',excerpt:business[0],source,verified:false,disclaimer:'Dichiarazione pubblica rilevata nel testo: non prova disponibilità attuale, capitale, requisiti o interesse verso una specifica proposta.'};
+  if((side||business)&&denied)return {status:'negated',label:'La fonte nega o esclude la ricerca di opportunità',excerpt:(side||business)[0],source,verified:false,disclaimer:'La dichiarazione negativa prevale sul segnale lessicale: non classificare la persona come in ricerca.'};
+ }
+ return {status:'none',label:'Nessuna ricerca esplicita di opportunità documentata',excerpt:'',source:'',verified:false,disclaimer:'Ruolo professionale, imprenditoriale o contenuti generici non dimostrano la ricerca di un lavoro extra o di una nuova attività.'};
+}
 function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const activity=assessProfessionalActivity(title,snippet,pageContent);
  const networkerActivity=assessNetworkerActivity(title,snippet,pageContent);
+ const opportunityIntent=assessOpportunityIntent(title,snippet,pageContent);
  const t=String(title||'').trim(),body=(String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
  const text=(t+' '+body).toLocaleLowerCase('it');
  const host=(()=>{try{return new URL(url).hostname.replace(/^www\./,'').toLowerCase();}catch{return '';}})();
@@ -689,8 +703,8 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const segmentEvidenceMatches={
   wellness_networker:/\b(wellness|benessere|nutrizione|fitness|integrator[ei])\b/i.test(text),
   other_networker:!/\b(wellness|benessere|nutrizione|fitness|integrator[ei])\b/i.test(text),
-  side_income:/\b(cerco|valuto|disponibile|sto cercando)\b/i.test(text),
-  business_seeking:/\b(cerco|voglio|vorrei|sto cercando|valuto)\b/i.test(text)
+  side_income:opportunityIntent.status==='side_income',
+  business_seeking:opportunityIntent.status==='business_seeking'
  };
  const explicitSegmentSignal=(segmentSignals[segment]||/benessere|wellness|professionista/i).test(text)&&
   (segmentEvidenceMatches[segment]===undefined||segmentEvidenceMatches[segment]);; const broadIndustrySignal=/benessere|wellness|nutrizione|fitness|network marketing|vendita diretta|imprenditor/i.test(text);
@@ -734,7 +748,8 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  if(networkerActivity.excerpt&&networkerActivity.status!=='solo_menzione')addEvidence('Segnale di esperienza nel network marketing',networkerActivity.source,networkerActivity.excerpt,networkerActivity.disclaimer);
  if(directoryEvidence)addEvidence('Tipo di fonte','Titolo o dominio',t||host,'Possibile directory, articolo o annuncio: non equivale a un profilo individuale.');
  if(organizationEvidence&&!individual)addEvidence('Contesto organizzativo','Titolo o testo della fonte',t+' '+body,'Sono presenti riferimenti aziendali o organizzativi; non attribuire i nomi citati all’organizzazione come prospect.');
- return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual,evidence,activity_status:activity,networker_activity_status:networkerActivity};
+ if(opportunityIntent.status!=='none')addEvidence('Dichiarazione di ricerca di opportunità',opportunityIntent.source,opportunityIntent.excerpt,opportunityIntent.disclaimer);
+ return {score,identityScore,relevanceScore,evidenceScore,entityType,identity:individual?'Possibile persona · da verificare':entityType,reasons,explicitSegmentSignal,individual,evidence,activity_status:activity,networker_activity_status:networkerActivity,opportunity_intent:opportunityIntent};
 }
 function qualifyCommercialProspect(title,snippet,pageContent,url,contacts,assessment,targetAssessment,profile){
  const directContacts=['emails','phones','whatsapp'].reduce((n,key)=>n+(contacts?.[key]?.length||0),0);
