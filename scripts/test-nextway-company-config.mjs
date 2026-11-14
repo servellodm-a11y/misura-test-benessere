@@ -274,6 +274,9 @@ assert.equal(classify('Profilo personale','Network marketing nel settore wellnes
 assert.equal(classify('Profilo personale','Cerco un lavoro extra part-time','', 'side_income').segment,'side_income');
 assert.equal(classify('Profilo personale','Vorrei arrotondare lo stipendio con un’opportunità di guadagno extra','', 'side_income').segment,'side_income','A clearly stated extra-income goal should qualify');
 assert.equal(classify('Profilo personale','Disponibile a valutare un lavoro part-time','', 'side_income').segment,'side_income','Explicit availability for part-time work should qualify');
+assert.equal(classify('Profilo personale','Non cerco un lavoro extra','', 'side_income').segment,'unclassified','A denied side-income declaration must not qualify the selected segment');
+assert.equal(classify('Profilo personale','Non voglio avviare una nuova attività','', 'business_seeking').segment,'unclassified','A denied business-seeking declaration must not qualify the selected segment');
+assert.equal(classify('Profilo personale','Non cerco un lavoro extra, ma vorrei avviare un’attività','', 'business_seeking').segment,'business_seeking','A denial in another category must not suppress a positive business declaration');
 assert.equal(classify('Profilo personale','Sono titolare di un’impresa e gestisco il mio negozio','', 'side_income').segment,'unclassified','Being an entrepreneur does not imply seeking extra income');
 assert.equal(classify('Profilo personale','Sono imprenditore e titolare di una società','', 'business_seeking').segment,'unclassified','An entrepreneur role does not imply seeking a new business');
 assert.equal(classify('Profilo personale','Cerco un’opportunità imprenditoriale da sviluppare in proprio','', 'business_seeking').segment,'business_seeking','An explicit entrepreneurial opportunity search should qualify');
