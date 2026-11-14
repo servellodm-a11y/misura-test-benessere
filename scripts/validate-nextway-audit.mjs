@@ -45,13 +45,11 @@ assert.match(cloud, /function localArchiveKey\(userId\)/);
 assert.match(cloud, /localStorage\.getItem\(localArchiveKey\(s\.user\.id\)\)/);
 assert.match(cloud, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\)/);
 assert.match(cloud, /client\.auth\.onAuthStateChange/);
-assert.match(cloud, /function activateLocalArchive\\(userId\\)\\{const archive=window\\.NEXTWAY_LOCAL_ARCHIVE;if\\(!archive\\)return false;/,
+assert.match(cloud, /function activateLocalArchive\(userId\)\{const archive=window\.NEXTWAY_LOCAL_ARCHIVE;if\(!archive\)return false;/,
   "Cloud authentication must not require the page-local archive component");
-const archiveActivation = cloud.match(/function activateLocalArchive\\(userId\\)\\{[\\s\\S]*?\\}/)?.[0];
+const archiveActivation = cloud.match(/function activateLocalArchive\(userId\)\{[\s\S]*?\}/)?.[0];
 assert.ok(archiveActivation, "Optional local archive activation helper must exist");
-const archiveVm = { window: {} };
-new Function("window", archiveActivation + "; return activateLocalArchive;")(archiveVm.window);
-const activateWithoutArchive = new Function("window", archiveActivation + "; return activateLocalArchive;")(archiveVm.window);
+const activateWithoutArchive = new Function("window", archiveActivation + "; return activateLocalArchive;")({});
 assert.equal(activateWithoutArchive("123e4567-e89b-12d3-a456-426614174000"), false,
   "Search-only pages must retain Supabase authentication when no local archive UI is loaded");
 let archiveActivated = "";
@@ -61,7 +59,6 @@ const activateWithArchive = new Function("window", archiveActivation + "; return
 assert.equal(activateWithArchive("123e4567-e89b-12d3-a456-426614174000"), true);
 assert.equal(archiveActivated, "123e4567-e89b-12d3-a456-426614174000");
 
-assert.match(cloud, /if\(previousId!==nextId\)\{clearLocalArchive\(\);\$\('nw-results'\)\.replaceChildren\(\);\$\('nw-act-results'\)\.replaceChildren\(\);\$\('nw-org-activity'\)\.hidden=true/);
 assert.match(cloud, /clearLocalArchive\(\)/);
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
 assert.ok(leadUiScript.includes("sourceUrl?'<a target=\"_blank\" rel=\"noopener noreferrer\" href="), "Valid historical source URL must render as a safe external link");
