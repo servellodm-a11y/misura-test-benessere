@@ -498,6 +498,30 @@ assert.equal(classifyLeadQueue({...baseQueueProspect,person_confirmed:false}).co
 assert.equal(classifyLeadQueue({...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,commercial_outcome:'not_suitable'}}).code,'exclude','Unsuitable results must be excluded');
 assert.equal(classifyLeadQueue({...baseQueueProspect,commercial_fit:{...baseQueueProspect.commercial_fit,commercial_outcome:'customer_potential',priority_components:{eligible:true,role_documented:false}}}).code,'high','An explicit customer request does not require a professional role');
 
+
+assert.ok(searchHtml.includes('function buildProspectSearchQuery('));
+assert.ok(searchHtml.includes('function getProspectSearchLane('));
+assert.ok(searchHtml.includes('4 ricerche prospect senza vincolo aziendale'));
+const queryBuilderStart=searchHtml.indexOf('function buildProspectSearchQuery(');
+const queryBuilderEnd=searchHtml.indexOf('function build(){',queryBuilderStart);
+assert.ok(queryBuilderStart>=0&&queryBuilderEnd>queryBuilderStart,'Prospect query builder and source-lane selector must exist');
+const queryBuilderContext={segmentExclusions:{wellness_pro:' -directory -annunci'}};
+vm.runInNewContext(searchHtml.slice(queryBuilderStart,queryBuilderEnd)+';this.buildProspectSearchQuery=buildProspectSearchQuery;this.getProspectSearchLane=getProspectSearchLane;',queryBuilderContext);
+const buildProspectSearchQuery=queryBuilderContext.buildProspectSearchQuery;
+const getProspectSearchLane=queryBuilderContext.getProspectSearchLane;
+const neutralQuery=buildProspectSearchQuery('(nutrizionista OR dietista)','Italia','', '', 'wellness_pro', ['omega-3','BalanceTest'], false, 'site:linkedin.com/in');
+assert.ok(neutralQuery.includes('Italia site:linkedin.com/in'));
+assert.ok(!neutralQuery.includes('omega-3')&&!neutralQuery.includes('BalanceTest'),'Company-specific product terms must not narrow general prospect discovery queries');
+const focusedQuery=buildProspectSearchQuery('(nutrizionista OR dietista)','Milano Lombardia','', 'Zinzino', 'wellness_pro', ['omega-3','BalanceTest'], true, '');
+assert.ok(focusedQuery.includes('"Milano Lombardia"'));
+assert.ok(focusedQuery.includes('("omega-3" OR "BalanceTest")'));
+assert.ok(focusedQuery.includes('-directory -annunci'));
+assert.equal(buildProspectSearchQuery('networker','Italia','linkedin.com','','other_networker',[],false,'').includes('site:linkedin.com/in'),true,'LinkedIn searches must target individual profile URLs, not company pages');
+const laneScopes=[0,1,2,3,4].map(index=>getProspectSearchLane(index,'',true).scope);
+assert.deepEqual(laneScopes,['site:linkedin.com/in','site:instagram.com','site:facebook.com','','']);
+assert.equal(getProspectSearchLane(0,'facebook.com',true).scope,'site:facebook.com','An explicitly selected source must override the default source lane');
+assert.equal(getProspectSearchLane(4,'',true).label,'Web aperto · contesto aziendale');
+
 console.log('NEXTWAY company configuration contract: PASS');
 
 assert.ok(archiveHtml.includes('getIndex(){'));
