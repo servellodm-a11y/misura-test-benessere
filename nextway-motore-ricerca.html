@@ -47,6 +47,12 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <div class="actions"><button class="btn" id="generate">Genera 5 ricerche</button><button class="btn" id="runsearch">Esegui 1 ricerca · 1 solo risultato</button><button class="btn alt" id="copyall">Copia tutte le query</button><button class="btn alt" id="download">Esporta query CSV</button></div><p id="searchstatus" class="muted" aria-live="polite">Per eseguire le ricerche devi aver effettuato l’accesso a NEXTWAY nell’archivio Lead.</p>
 </section>
 <section class="panel"><h2>Ricerche generate</h2><p class="muted" id="summary">Imposta i criteri e genera la batteria di ricerca.</p><div id="results"></div></section>
+<section class="panel" id="bridge-test-panel">
+<h2>Test tecnico acquisizione locale</h2>
+<p class="muted">Prova controllata del collegamento con l’Archivio Lead. Inserisce un solo record sintetico contrassegnato TEST TECNICO, escluso dai conteggi. Non esegue ricerche web e non scrive su Supabase. Dopo averlo visualizzato nell’altra scheda, torna qui e rimuovilo con il pulsante dedicato.</p>
+<div class="actions"><button class="btn" id="run-bridge-test" type="button" disabled>Esegui test locale</button><button class="btn alt" id="clean-bridge-test" type="button" disabled>Rimuovi record di test</button></div>
+<p id="bridge-test-status" class="muted" aria-live="polite">Verifica accesso in corso…</p>
+</section>
 <section class="panel" id="live-results"><h2>Risultati trovati</h2><p class="muted">I risultati vengono ordinati per pertinenza documentale: identità individuale (0–40), coerenza con il segmento (0–40) e completezza delle prove pubbliche (0–20). Directory, articoli e pagine aziendali non vengono trattati come persone. Il punteggio non misura interesse, disponibilità o idoneità commerciale. Ogni fonte va aperta e verificata prima dell’acquisizione.</p><div id="daily-summary" class="notice" style="margin:12px 0">La lista giornaliera sarà compilata dopo l’esecuzione della ricerca.</div><div class="panel" id="search-history-panel" style="margin:12px 0"><h3>Storico ricerche su questo browser</h3><p class="muted">Conserva fino a 10 ricerche recenti in questo browser. Non sostituisce l’Archivio Lead cloud: acquisisci manualmente i prospect che vuoi conservare nel CRM.</p><div id="search-history"></div></div><div class="actions"><button class="btn alt" id="exportDaily" disabled>Esporta lista giornaliera CSV</button></div><div id="live-list"></div></section>\n<section class="panel"><h2>Metodo di lavoro consigliato</h2>
 <ol>
 <li>Apri una ricerca alla volta e seleziona solo risultati con un segnale professionale chiaro.</li>
@@ -80,6 +86,36 @@ function saveSearchHistory(prospects){
  }catch(error){console.warn('NEXTWAY: impossibile salvare lo storico locale.',error);return false;}
 }
 async function initializeSearchHistory(){try{if(!window.NEXTWAY_CLOUD?.active)return false;const {s}=await window.NEXTWAY_CLOUD.active();return s?.user?.id?setSearchHistoryOwner(s.user.id):false;}catch(error){console.warn('NEXTWAY: storico non disponibile finché non viene effettuato l’accesso.',error);return false;}}
+const BRIDGE_TEST_ID_KEY='nextway_search_bridge_test_v1:';
+function bridgeTestArchiveKey(){return searchHistoryKey()?.replace('nextway_search_history_v1:','nextway_ai_records_v1:')||null;}
+function bridgeTestMarkerKey(){return searchHistoryOwnerId?BRIDGE_TEST_ID_KEY+searchHistoryOwnerId:null;}
+function refreshBridgeTestControls(){const run=$('run-bridge-test'),clean=$('clean-bridge-test'),marker=bridgeTestMarkerKey();if(!run||!clean)return;run.disabled=!searchHistoryOwnerId||!!(marker&&localStorage.getItem(marker));clean.disabled=!marker||!localStorage.getItem(marker);}
+function removeBridgeTestRecord(){
+ const marker=bridgeTestMarkerKey(),archiveKey=bridgeTestArchiveKey();if(!marker||!archiveKey)return false;
+ const id=localStorage.getItem(marker);if(!id)return false;
+ const oldValue=localStorage.getItem(archiveKey);
+ try{const rows=JSON.parse(oldValue||'[]');if(!Array.isArray(rows))throw new Error('Archivio locale non leggibile.');
+ const next=rows.filter(row=>!(row&&row.id===id&&row.is_test===true));
+ if(next.length===rows.length)throw new Error('Record di test non trovato: nessun dato è stato modificato.');
+ localStorage.setItem(archiveKey,JSON.stringify(next));localStorage.removeItem(marker);refreshBridgeTestControls();$('bridge-test-status').textContent='Test rimosso. Archivio locale ripristinato; i Lead reali sono stati preservati.';return true;
+ }catch(error){$('bridge-test-status').textContent='Pulizia non completata: '+error.message;return false;}
+}
+$('run-bridge-test').addEventListener('click',()=>{
+ const status=$('bridge-test-status'),archiveKey=bridgeTestArchiveKey(),marker=bridgeTestMarkerKey();
+ try{
+  if(!searchHistoryOwnerId||!archiveKey||!window.NEXTWAY_CLOUD?.addSearchLeadToLocalArchive)throw new Error('Accesso o collegamento Archivio non disponibile.');
+  if(marker&&localStorage.getItem(marker))throw new Error('Esiste già un test da rimuovere. Usa prima il pulsante di pulizia.');
+  const before=JSON.parse(localStorage.getItem(archiveKey)||'[]');if(!Array.isArray(before))throw new Error('Archivio locale non leggibile.');
+  const result=window.NEXTWAY_CLOUD.addSearchLeadToLocalArchive(searchHistoryOwnerId,{title:'TEST TECNICO NEXTWAY — NON È UN PROSPECT',evidence:'Record sintetico creato esclusivamente per verificare il trasferimento dal Motore di ricerca all’Archivio Lead. Non rappresenta una persona o un’opportunità reale.',url:'https://example.com/nextway-bridge-test',category:'research_result',is_test:true,evidence_quality:{score:0,identityScore:0,relevanceScore:0,evidenceScore:0,identity:'Record tecnico sintetico',entityType:'Test tecnico',prospect_profile:{name:'TEST TECNICO NEXTWAY',profession:'Verifica collegamento locale',company_brand:'',location:'Nessuna'}}});
+  if(!result||result.duplicate||!result.lead?.id||result.lead.is_test!==true)throw new Error('Il bridge non ha restituito un record tecnico valido.');
+  const after=JSON.parse(localStorage.getItem(archiveKey)||'[]');
+  if(!Array.isArray(after)||!after.some(row=>row.id===result.lead.id&&row.is_test===true))throw new Error('Il record non è stato ritrovato nell’archivio locale.');
+  localStorage.setItem(marker,result.lead.id);refreshBridgeTestControls();
+  status.textContent='TEST SUPERATO: record sintetico scritto e riletto nell’archivio locale. Ora passa alla scheda Archivio Lead: deve comparire con etichetta TEST TECNICO.';
+ }catch(error){status.textContent='Test non superato: '+error.message;}
+});
+$('clean-bridge-test').addEventListener('click',removeBridgeTestRecord);
+
 function markSearchHistoryAcquired(url,identityKeys=[]){const key=searchHistoryKey();if(!key)return;const canonical=canonicalProspectUrl(url);const keys=new Set(identityKeys);const history=readSearchHistory();let changed=false;history.forEach(entry=>(entry.prospects||[]).forEach(p=>{if(canonicalProspectUrl(p.url)===canonical||(p.identity_keys||[]).some(value=>keys.has(value))){if(p.archive_status!=='acquired'){p.archive_status='acquired';changed=true;}}}));if(changed){localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();}}
 function renderSearchHistory(){const root=$('search-history');if(!root)return;root.replaceChildren();const history=readSearchHistory();if(!history.length){const empty=document.createElement('p');empty.className='muted';empty.textContent=searchHistoryKey()?'Nessuna ricerca salvata. Lo storico viene creato dopo la prima ricerca completata.':'Accedi all’Archivio Lead per visualizzare lo storico personale su questo browser.';root.append(empty);return;}history.forEach(entry=>{const row=document.createElement('article');row.style.cssText='padding:10px 0;border-top:1px solid #dfe5ef';const title=document.createElement('strong');title.textContent=new Date(entry.date).toLocaleString('it-IT')+' · '+(entry.segment||'segmento non indicato')+' · '+(entry.area||'area non indicata');const detail=document.createElement('p');detail.className='muted';const acquired=(entry.prospects||[]).filter(p=>p.archive_status==='acquired').length,followup=(entry.prospects||[]).filter(p=>p.archive_status==='followup').length;detail.textContent=(entry.count||0)+' risultati unici · '+acquired+' già acquisiti · '+followup+' in follow-up · '+Math.max(0,(entry.prospects||[]).length-acquired-followup)+' nuovi/non acquisiti nel CRM';const links=document.createElement('div');links.className='actions';(entry.prospects||[]).slice(0,8).forEach(p=>{const a=document.createElement('a');a.href=safeUrl(p.url)||'#';a.target='_blank';a.rel='noopener noreferrer';a.textContent=p.name+' · '+(p.role||p.qualification_status||'da verificare')+' · '+(Number(p.priority_score)||0)+'/100';links.append(a);});row.append(title,detail,links);root.append(row);});}
 renderSearchHistory();
@@ -1095,4 +1131,4 @@ $('copyall').addEventListener('click',()=>{if(!generated.length)build();navigato
 $('download').addEventListener('click',()=>{if(!generated.length)build();const rows=[['numero','categoria','query','url'],...generated.map((x,i)=>[i+1,x.label,x.query,x.url])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='nextway-batteria-ricerche.csv';a.click();URL.revokeObjectURL(a.href)});
 build();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script>if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeSearchHistory,{once:true});else initializeSearchHistory();</script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/nextway-cloud.js"></script><script>if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',async()=>{await initializeSearchHistory();refreshBridgeTestControls();},{once:true});else initializeSearchHistory().then(refreshBridgeTestControls);</script></body></html>
