@@ -744,7 +744,9 @@ function buildProspectProfile(title,snippet,pageContent,url,contacts,assessment,
   if(!name){
    const head=String(title||'').split(/\s+[|–—-]\s+|[|–—]/)[0].trim()
     .replace(/^(?:dott(?:ore|oressa|\.)?|dr\.?|prof(?:essore|essoressa|\.)?|ing\.?|avv\.?)\s+/i,'');
-   if(new RegExp("^"+namePattern+"$").test(head)){name=head;nameSource='Titolo della pagina';}
+   // Evita di scambiare il nome di un'attività o di un'organizzazione per una persona.
+   const organizationTitle=/^(?:centro|studio|azienda|società|associazione|fondazione|clinica|palestra|farmacia|gruppo|team|network|servizi|agenzia|istituto|ospedale|poliambulatorio|laboratorio|hotel|ristorante)\b/i;
+   if(!organizationTitle.test(head)&&new RegExp("^"+namePattern+"$").test(head)){name=head;nameSource='Titolo della pagina';}
   }
   // Alcune pagine espongono il nominativo in un campo etichettato, non nel titolo.
   if(!name){
