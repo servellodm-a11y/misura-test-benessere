@@ -759,3 +759,45 @@ assert.ok(archiveHtml.includes("prospects};"));
 assert.ok(searchHtml.includes("crm_status:crmMatch?.status||''"));
 assert.ok(searchHtml.includes("DA RICONTATTARE · IN FOLLOW-UP"));
 assert.ok(searchHtml.includes("followupCount"));
+
+
+// Search-history persistence regression: authenticated owner, refresh-safe snapshots and isolation.
+
+assert.ok(searchHtml.includes("function searchHistoryKey(ownerId=searchHistoryOwnerId)"), 'Search history must be scoped directly to the authenticated owner id');
+assert.ok(!searchHtml.includes("window.NEXTWAY_LOCAL_ARCHIVE?.getOwner?.()"), 'Search history must not depend on the archive page global');
+assert.ok(searchHtml.includes('async function initializeSearchHistory()'), 'Search history owner must be initialized after the cloud client loads');
+assert.ok(searchHtml.indexOf('<script src="/nextway-cloud.js"></script>') < searchHtml.indexOf('<script>initializeSearchHistory();</script>'), 'Search history initialization must run after the cloud client is loaded');
+assert.ok(searchHtml.includes('setSearchHistoryOwner(s.user.id)'), 'A completed search must set the authenticated owner before saving history');
+assert.ok(searchHtml.includes('function snapshotSearchHistoryProspect(p)'), 'Search history must preserve a recoverable prospect snapshot');
+assert.ok(searchHtml.includes('source_evidence:sourceEvidence'), 'Saved prospects must retain source evidence for later review');
+assert.ok(searchHtml.includes("if(!saveSearchHistory(dailyProspects))"), 'A failed local save must be reported instead of silently ignored');
+
+const historyStart=searchHtml.indexOf('const SEARCH_HISTORY_LIMIT=10;');
+const historyEnd=searchHtml.indexOf('function classifyNextBestAction(',historyStart);
+assert.ok(historyStart>=0&&historyEnd>historyStart,'Search history implementation block must be extractable for regression tests');
+const historySandbox={
+ window:{},
+ localStorage:{data:new Map(),getItem(key){return this.data.has(key)?this.data.get(key):null;},setItem(key,value){this.data.set(key,String(value));}},
+ document:{getElementById(){return null;}},
+ $:(id)=>id==='segment'?{value:'wellness_pro'}:id==='area'?{value:'Italia'}:null,
+ safeUrl:(value)=>{try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch{return '';}},
+ console
+};
+vm.runInNewContext(searchHtml.slice(historyStart,historyEnd)+';this.searchHistoryKey=searchHistoryKey;this.setSearchHistoryOwner=setSearchHistoryOwner;this.readSearchHistory=readSearchHistory;this.saveSearchHistory=saveSearchHistory;this.snapshotSearchHistoryProspect=snapshotSearchHistoryProspect;',historySandbox);
+const historyOwner='123e4567-e89b-42d3-a456-426614174000';
+assert.equal(historySandbox.searchHistoryKey(),null,'History must not write to an unknown owner scope');
+assert.equal(historySandbox.saveSearchHistory([{url:'https://example.com'}]),false,'History save must fail closed until an authenticated owner is known');
+assert.equal(historySandbox.localStorage.data.size,0,'No owner-scoped history key must be written before authentication');
+assert.equal(historySandbox.setSearchHistoryOwner(historyOwner),true,'Authenticated owner id must initialize history');
+const historyProspect={title:'Andrea Fabbri · Nutrizionista',url:'https://www.linkedin.com/in/andrea-fabbri-8039157b',identity_keys:['linkedin:andrea-fabbri-8039157b'],profile:{name:'Andrea Fabbri',profession:'Nutrizionista',location:'Roma'},role:'Nutrizionista',qualification_status:'Prospect interessante · da verificare',commercial_fit:{priority_score:42},source_evidence:[{url:'https://www.linkedin.com/in/andrea-fabbri-8039157b',title:'Andrea Fabbri',snippet:'Profilo professionale',evidence:'Nutrizionista · Roma'}],emails:[],phones:[],socials:[]};
+assert.equal(historySandbox.saveSearchHistory([historyProspect]),true,'A completed search must persist the prospect snapshot');
+const savedHistory=historySandbox.readSearchHistory();
+assert.equal(savedHistory.length,1);
+assert.equal(savedHistory[0].prospects[0].name,'Andrea Fabbri');
+assert.equal(savedHistory[0].prospects[0].role,'Nutrizionista');
+assert.equal(savedHistory[0].prospects[0].profile.location,'Roma');
+assert.equal(savedHistory[0].prospects[0].source_evidence[0].evidence,'Nutrizionista · Roma','History must preserve source evidence needed to re-evaluate a prospect after refresh');
+assert.equal(historySandbox.searchHistoryKey('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),'nextway_search_history_v1:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+assert.equal(historySandbox.readSearchHistory('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').length,0,'Search history must remain isolated by authenticated owner');
+
+console.log('NEXTWAY search history persistence contract: PASS');
