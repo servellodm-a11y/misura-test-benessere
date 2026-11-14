@@ -466,3 +466,10 @@ for (const item of prospectCases) {
   if (item.profession) assert.equal(profile.profession, item.profession);
 }
 console.log("Prospect identity extraction: 7 controlled cases PASS (including organization false-positive guards)");
+
+// Prospect acquisition: unsuitable directory/article/organization results cannot be saved as Leads.
+assert.match(searchHtml, /const notSuitable=qualification\.status==='Non adatto · da scartare'/);
+assert.match(searchHtml, /capture\.disabled=alreadyAcquired\|\|notSuitable/);
+assert.match(searchHtml, /if\(notSuitable\)\{status\.textContent=/);
+assert.match(searchHtml, /Non adatto · non acquisibile/);
+console.log("Prospect acquisition guard: unsuitable results disabled and protected by a click-time check: PASS");
