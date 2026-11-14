@@ -430,7 +430,7 @@ assert.equal(crmReview2026Profile.priority,'Da approfondire');
 assert.ok(archiveHtml.includes('function renderLeadProspectAssessment(lead)'),'CRM must render a dedicated prospect review panel');
 assert.ok(archiveHtml.includes('const prospectAssessmentPanel=renderLeadProspectAssessment(x)'),'Prospect review panel must be attached to each Lead card');
 assert.ok(archiveHtml.includes('Nome citato nella fonte, non attribuito al prospect:'),'Un unconfirmed name candidate must be labelled as not attributed');
-assert.ok(archiveHtml.includes('meta.target_classification=evidenceQuality.target_classification'),'New Leads must retain target classification');
+assert.ok(archiveHtml.includes('target_classification:evidenceQuality.target_classification'),'New Leads must retain target classification');
 assert.ok(archiveHtml.includes('meta.target_classification=incomingQuality.target_classification'),'Duplicate enrichment must refresh target classification');
 
 
