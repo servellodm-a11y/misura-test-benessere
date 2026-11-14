@@ -211,6 +211,17 @@ for(const segment of requiredSegments){
 }
 assert.ok(strategyContext.refinedItalianQueries.customers.every(([,q])=>/cerco|consigli|informazioni|vorrei|avete/i.test(q)),'Customer queries must use explicit voluntary interest signals');
 
+assert.ok(searchHtml.includes('function assessCustomerIntent('));
+const customerIntentStart=searchHtml.indexOf('function assessCustomerIntent(');
+const customerIntentEnd=searchHtml.indexOf('function assessOpportunityIntent(',customerIntentStart);
+assert.ok(customerIntentStart>=0&&customerIntentEnd>customerIntentStart,'Shared customer-intent helper must exist');
+const customerIntentContext={};
+vm.runInNewContext(searchHtml.slice(customerIntentStart,customerIntentEnd)+';this.assessCustomerIntent=assessCustomerIntent;',customerIntentContext);
+const assessCustomerIntent=customerIntentContext.assessCustomerIntent;
+assert.equal(assessCustomerIntent('Profilo personale','Non cerco un nutrizionista',''),false,'A denied customer request must not be classified as explicit interest');
+assert.equal(assessCustomerIntent('Profilo personale','Non sono interessato al fitness, ma cerco un nutrizionista',''),true,'An unrelated denial must not suppress a customer request');
+assert.equal(assessCustomerIntent('Profilo personale','Non cerco un nutrizionista, ma vorrei una consulenza',''),true,'A positive customer request in a separate clause must be retained');
+assert.equal(assessCustomerIntent('Profilo personale','Benessere e stile di vita',''),false,'Generic wellness content is not customer intent');
 assert.ok(searchHtml.includes('function assessOpportunityIntent('));
 const opportunityStart=searchHtml.indexOf('function assessOpportunityIntent(');
 const opportunityEnd=searchHtml.indexOf('function assessSearchEvidence(',opportunityStart);
