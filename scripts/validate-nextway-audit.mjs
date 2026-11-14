@@ -483,6 +483,15 @@ const companyLinkedIn = assessSearchEvidence("Aurora Wellness", "Team e servizi"
 assert.equal(companyLinkedIn.individual, false, "LinkedIn company pages must not be treated as personal profiles");
 const personPage = assessSearchEvidence("Dott. Marco Verdi – Nutrizionista", "", "", "https://example.test/marco-verdi", {}, "wellness_pro");
 assert.equal(personPage.individual, true, "Named professional page should remain an individual candidate");
+assert.ok(Array.isArray(personPage.evidence), "Identity assessment must expose structured source evidence");
+assert.ok(personPage.evidence.some(item => item.kind === "Nominativo nel titolo" && item.source === "Titolo della pagina"), "Person name evidence must identify the title as its source");
+assert.ok(personPage.evidence.some(item => item.kind === "Ruolo o professione" && /Nutrizionista/i.test(item.excerpt)), "Professional-role evidence must include the matching source phrase");
+const selfIntroEvidence = assessSearchEvidence("Profilo professionale", "Mi chiamo Giulia Neri, sono biologa nutrizionista.", "", "https://example.test/giulia", {}, "wellness_pro");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Autopresentazione" && item.source === "Estratto del testo"), "Self-introduction evidence must preserve its source excerpt");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Corrispondenza al segmento"), "Segment evidence must identify its matching phrase");
+assert.ok(companyPage.evidence.some(item => item.kind === "Contesto organizzativo"), "Organization evidence must be visible in the evidence list");
+assert.match(searchHtml, /Prove rilevate nella fonte · da verificare/);
+assert.match(searchHtml, /assessment\.evidence/);
 assert.match(searchHtml, /const personConfirmed=assessment\?\.individual===true/);
 assert.match(searchHtml, /Pagina aziendale\/organizzazione · persona non confermata/);
 assert.match(searchHtml, /Nome citato nella pagina, ma non confermato come prospect individuale/);
