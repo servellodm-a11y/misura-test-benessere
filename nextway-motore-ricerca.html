@@ -600,7 +600,7 @@ function assessSearchEvidence(title,snippet,pageContent,url,contacts,segment){
  const organizationTitle=/^(?:centro|studio|azienda|società|associazione|fondazione|clinica|palestra|farmacia|gruppo|team|network|servizi|agenzia|istituto|ospedale|poliambulatorio|laboratorio|hotel|ristorante)\b/i.test(t)||linkedinCompanyPage;
  const organizationEvidence=/\b(srl|s\.r\.l|spa|s\.p\.a|azienda|società|company|centro|studio associato|team ufficiale|contatti|chi siamo)\b/i.test(t+' '+body);
  const directoryEvidence=/directory|elenco professionisti|trova un professionista|portale|catalogo|annuario|pagine gialle|job board|offerte di lavoro|annunci di lavoro|articolo|blog|news|magazine/i.test(t+' '+host);
- const individual=!!(linkedinPersonProfile||(socialProfile&&(personTitle||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence));
+ const individual=!!(linkedinPersonProfile||(socialProfile&&((personTitle&&!organizationEvidence)||(selfIdentification&&!organizationTitle&&!organizationEvidence)))||(personTitle&&roleEvidence&&!directoryEvidence)||(selfIdentification&&!directoryEvidence&&!organizationTitle&&!organizationEvidence));
  const entityType=individual?'Possibile profilo individuale':directoryEvidence?'Directory / articolo / annuncio':organizationTitle||organizationEvidence?'Azienda o organizzazione':'Identità individuale non confermata';
  const segmentSignals={
   wellness_pro:/nutrizionist|dietist|naturopat|osteopat|fisioterap|personal trainer|farmacist|medic|coach|studio.*benessere/i,
