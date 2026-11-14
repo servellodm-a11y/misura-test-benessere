@@ -27,10 +27,10 @@ assert.match(migration,/security definer set search_path='pg_catalog','public'/i
 assert.match(migration,/alter function public\.nextway_confirm_lead_manual_review\(uuid\) owner to postgres/i);
 assert.match(migration,/revoke all on function public\.nextway_confirm_lead_manual_review\(uuid\) from public,anon/i);
 assert.match(migration,/grant execute on function public\.nextway_confirm_lead_manual_review\(uuid\) to authenticated/i);
-assert.match(rpcScopeFix,/perform set_config\\('nextway\\.manual_review_rpc','on',true\\)/i);
-assert.match(rpcScopeFix,/perform set_config\\('nextway\\.manual_review_rpc','off',true\\)/i);
-assert.match(rpcScopeFix,/alter function public\\.nextway_confirm_lead_manual_review\\(uuid\\) owner to postgres/i);
-assert.match(rpcScopeFix,/security definer[\\s\\S]*?set search_path='pg_catalog','public'/i);
+assert.match(rpcScopeFix,/perform set_config\('nextway\.manual_review_rpc','on',true\)/i);
+assert.match(rpcScopeFix,/perform set_config\('nextway\.manual_review_rpc','off',true\)/i);
+assert.match(rpcScopeFix,/alter function public\.nextway_confirm_lead_manual_review\(uuid\) owner to postgres/i);
+assert.match(rpcScopeFix,/security definer[\s\S]*?set search_path='pg_catalog','public'/i);
 const enableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','on',true)");
 const guardedUpdate=rpcScopeFix.indexOf('update public.nextway_leads',enableFlag);
 const disableFlag=rpcScopeFix.indexOf("perform set_config('nextway.manual_review_rpc','off',true)",guardedUpdate);
