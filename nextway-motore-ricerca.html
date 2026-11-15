@@ -1001,7 +1001,7 @@ function assessProspectDimensions(commercialFit,sourceQuality,targetAssessment,a
 function assessProspectFieldEvidence(profile,title,snippet,pageContent){
  const fields=[['Nominativo',profile?.name,'name'],['Professione / ruolo',profile?.profession,'profession'],['Organizzazione',profile?.organization,'organization'],['Località',profile?.location,'location']];
  const sources=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto della pagina',String(pageContent||'')]];
- const normalize=value=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
+ const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
  return fields.map(([label,value,key])=>{
   const normalized=normalize(value);
   if(!normalized||/^(non rilevato con certezza|non confermata|non rilevata)$/.test(normalized))return {key,label,value:value||'Non rilevato',status:'non_rilevato',source:'',excerpt:'',note:'La fonte esaminata non fornisce un valore utilizzabile per questo campo.'};
