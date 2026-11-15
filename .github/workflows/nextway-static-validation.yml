@@ -77,6 +77,7 @@ on:
       - "scripts/test-nextway-prospect-dimensions.mjs"
       - "scripts/test-nextway-prospect-deduplication.mjs"
       - "scripts/test-nextway-prospect-contactability.mjs"
+      - "scripts/test-nextway-prospect-field-evidence.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
