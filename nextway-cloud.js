@@ -349,6 +349,7 @@ async function getLeadForConflict(cloudId){
    if(reviewError)throw new Error('Dati locali aggiornati in cloud, ma la revisione manuale non è stata completata. Il Lead resta "Da approfondire": aggiorna il confronto e ripeti la scelta dopo aver verificato identità e punteggio. Dettaglio: '+reviewError.message);
    saved={...data,...review,updated_at:review.updated_at||data.updated_at};
   }
+  // The human-review checkbox is a one-shot local confirmation, not a persistent cloud flag.
   const record=fromCloud(saved);record.manual_review_confirmed=false;
   return {record,updated_at:saved.updated_at};
  }
