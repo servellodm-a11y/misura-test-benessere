@@ -126,4 +126,4 @@ assert.throws(() => addSearchLeadToLocalArchive('user-fixture', {
 }), /URL della fonte non valido/);
 assert.equal(rows.length, 1, 'invalid source URLs must not write a CRM draft');
 
-console.log('NEXTWAY prospect capture pipeline: 19 integration assertions passed.');
+console.log('NEXTWAY prospect capture pipeline: 21 integration assertions passed.');
