@@ -560,6 +560,12 @@ function validateImport(rows){
   x.manual_review_confirmed=false;
   delete x.manual_reviewed_at;
   delete x.manual_reviewed_by;
+  // Imports are additive only: never reuse cloud identity/version from a backup.
+  delete x.cloud_id;
+  delete x.cloud_updated_at;
+  delete x.owner_profile_id;
+  delete x._sync_conflict;
+  x.local_dirty=true;
   x.status=statuses.includes(x.status)?x.status:(x.qualification==='Escluso'?'Escluso':'Da verificare');
   x.id='imp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);x.created=x.created||new Date().toISOString();valid.push(x);
  });
