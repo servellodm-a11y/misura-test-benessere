@@ -76,6 +76,7 @@ on:
       - "scripts/test-nextway-prospect-search-coverage.mjs"
       - "scripts/test-nextway-prospect-dimensions.mjs"
       - "scripts/test-nextway-prospect-deduplication.mjs"
+      - "scripts/test-nextway-prospect-contactability.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -204,6 +205,8 @@ jobs:
         run: node scripts/test-nextway-prospect-dimensions.mjs
       - name: Test NEXTWAY conservative cross-source prospect deduplication
         run: node scripts/test-nextway-prospect-deduplication.mjs
+      - name: Test NEXTWAY prospect contactability evidence
+        run: node scripts/test-nextway-prospect-contactability.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
