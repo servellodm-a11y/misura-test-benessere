@@ -74,6 +74,7 @@ on:
       - "scripts/test-nextway-prospect-search-contract.mjs"
       - "scripts/test-nextway-prospect-classification.mjs"
       - "scripts/test-nextway-prospect-search-coverage.mjs"
+      - "scripts/test-nextway-prospect-dimensions.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -198,6 +199,8 @@ jobs:
         run: node scripts/test-nextway-prospect-classification.mjs
       - name: Validate NEXTWAY prospect search coverage by segment
         run: node scripts/test-nextway-prospect-search-coverage.mjs
+      - name: Test NEXTWAY explainable prospect assessment dimensions
+        run: node scripts/test-nextway-prospect-dimensions.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
