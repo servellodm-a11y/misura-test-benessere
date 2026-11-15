@@ -2,6 +2,18 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const cloud = readFileSync('nextway-cloud.js', 'utf8');
+const payloadStart = cloud.indexOf('function leadPayload(x){');
+const payloadEnd = cloud.indexOf('async function resolveLeadConflict(', payloadStart);
+assert.ok(payloadStart >= 0 && payloadEnd > payloadStart, 'leadPayload must exist');
+const payloadSource = cloud.slice(payloadStart, payloadEnd).trim();
+const leadPayload = new Function(`return (${payloadSource.replace(/^function leadPayload/, 'function')})`)();
+for (const category of ['potential_partner', 'final_customer', 'wellness_professional', 'research_result']) {
+  assert.equal(leadPayload({ category }).category, category,
+    `CRM sync must preserve the ${category} category`);
+}
+assert.equal(leadPayload({ category: 'unknown_category' }).category, 'research_result',
+  'unknown categories must fail safely into research_result, never potential_partner');
+
 const syncStart = cloud.indexOf('async function syncLocal()');
 const syncEnd = cloud.indexOf('async function pullCloud()', syncStart);
 assert.ok(syncStart >= 0 && syncEnd > syncStart, 'syncLocal and pullCloud must exist');
@@ -66,4 +78,4 @@ assert.match(conflict, /reviewError.*?Il Lead resta "Da approfondire"/s,
 assert.match(conflict, /record\.manual_review_confirmed=false/,
   'successful conflict resolution must clear the transient local review checkbox state');
 
-console.log('NEXTWAY Lead sync contract: 22 checks passed.');
+console.log('NEXTWAY Lead sync contract: 27 checks passed.');
