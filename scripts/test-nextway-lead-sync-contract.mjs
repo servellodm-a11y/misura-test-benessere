@@ -63,5 +63,7 @@ assert.ok(conflict.indexOf(".update(leadPayload(safeRecord))") < conflict.indexO
   'manual-review RPC must run only after the safe conflict update succeeds');
 assert.match(conflict, /reviewError.*?Il Lead resta "Da approfondire"/s,
   'failed manual review must leave the Lead safely unqualified and report the partial outcome');
+assert.match(conflict, /record\.manual_review_confirmed=false/,
+  'successful conflict resolution must clear the transient local review checkbox state');
 
-console.log('NEXTWAY Lead sync contract: 21 checks passed.');
+console.log('NEXTWAY Lead sync contract: 22 checks passed.');
