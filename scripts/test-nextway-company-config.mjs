@@ -178,6 +178,7 @@ assert.ok(archiveHtml.includes("x.category==='research_result'?'Completa classif
 assert.ok(cloudHtml.includes("localStorage.setItem(key,JSON.stringify(rows))"), 'Search acquisition must persist to the same owner-scoped local archive key');
 assert.ok(searchHtml.includes('getLocalSearchArchiveIndex(s.user.id)'), 'Search must inspect duplicates in the authenticated user archive');
 assert.ok(searchHtml.includes('addSearchLeadToLocalArchive(s.user.id,'), 'Search acquisition must use the cross-page archive bridge');
+assert.ok(searchHtml.includes('Apri Archivio Lead, premi “Completa classificazione”')&&searchHtml.includes('Sincronizza archivio locale'),'Search acquisition must guide the operator through manual CRM classification and synchronization');
 assert.ok(!searchHtml.includes('NEXTWAY_LOCAL_ARCHIVE?.addFromSearch'), 'Search page must not call an archive function defined only in another page');
 assert.ok(archiveHtml.includes("window.addEventListener('storage'"), 'An open archive tab must refresh when another tab adds a prospect');
 
