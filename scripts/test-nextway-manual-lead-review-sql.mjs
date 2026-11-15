@@ -46,7 +46,7 @@ assert.match(archive,/Le qualificazioni importate richiedono una nuova revisione
 assert.match(archive,/delete x\.cloud_id;[\s\S]*?delete x\.cloud_updated_at;[\s\S]*?delete x\.owner_profile_id;/,'Imported backups must not reuse cloud identity, version, or ownership');
 assert.match(archive,/x\.local_dirty=true;/,'Imported records must be marked for local-to-cloud synchronization');
 assert.match(cloud,/nextway_confirm_lead_manual_review/);
-assert.equal((cloud.match(/x\.manual_review_confirmed&&payload\.qualification==='Qualificato'/g)||[]).length,2,'Both insert and update sync paths must invoke explicit review after the database scoring trigger runs');
+assert.equal((cloud.match(/if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/g)||[]).length,2,'Both insert and update sync paths must write safely first, then invoke the explicit manual-review RPC');
 assert.match(cloud,/manual_reviewed_at/);
 assert.match(cloud,/manual_reviewed_by/);
 console.log('NEXTWAY manual lead review contract: PASS');
