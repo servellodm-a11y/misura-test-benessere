@@ -2,17 +2,32 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const cloud = readFileSync('nextway-cloud.js', 'utf8');
-const payloadStart = cloud.indexOf('function leadPayload(x){');
+const payloadStart = cloud.indexOf('const CRM_LEAD_CATEGORIES=');
 const payloadEnd = cloud.indexOf('async function resolveLeadConflict(', payloadStart);
-assert.ok(payloadStart >= 0 && payloadEnd > payloadStart, 'leadPayload must exist');
+assert.ok(payloadStart >= 0 && payloadEnd > payloadStart, 'CRM category and sync guards must exist');
 const payloadSource = cloud.slice(payloadStart, payloadEnd).trim();
-const leadPayload = new Function(`return (${payloadSource.replace(/^function leadPayload/, 'function')})`)();
-for (const category of ['potential_partner', 'final_customer', 'wellness_professional', 'research_result']) {
+const helpers = new Function(`${payloadSource}; return {leadPayload,leadSyncReadiness};`)();
+const {leadPayload,leadSyncReadiness}=helpers;
+for (const category of ['potential_partner', 'final_customer', 'wellness_professional']) {
   assert.equal(leadPayload({ category }).category, category,
     `CRM sync must preserve the ${category} category`);
 }
-assert.equal(leadPayload({ category: 'unknown_category' }).category, 'research_result',
-  'unknown categories must fail safely into research_result, never potential_partner');
+assert.equal(leadPayload({ category: 'research_result' }).category, null,
+  'research-only results must never be mapped to a CRM partner category');
+assert.equal(leadPayload({ category: 'unknown_category' }).category, null,
+  'unknown categories must fail closed instead of becoming potential partners');
+assert.equal(leadPayload({ qualification: 'Qualificato' }).qualification, 'Da approfondire',
+  'qualified records must be sent to the database only as Da approfondire before the review RPC');
+const baseLead={category:'potential_partner',qualification:'Da approfondire',identity_check:'pending',fit:0,activity:0,presence:0,interest:0,approach:0,manual_review_confirmed:false};
+assert.equal(leadSyncReadiness({...baseLead,category:'research_result'}),'category_requires_manual_review');
+assert.equal(leadSyncReadiness(baseLead),'ready',
+  'a manually categorized prospect may sync before qualification as Da approfondire');
+const qualified={...baseLead,qualification:'Qualificato',identity_check:'confirmed',fit:30,activity:10,presence:10,interest:5,approach:5,manual_review_confirmed:true};
+assert.equal(leadSyncReadiness(qualified),'ready',
+  'qualified sync requires identity, score >=50 and an explicit human-review confirmation');
+assert.equal(leadSyncReadiness({...qualified,manual_review_confirmed:false}),'manual_review_required');
+assert.equal(leadSyncReadiness({...qualified,identity_check:'pending'}),'manual_review_required');
+assert.equal(leadSyncReadiness({...qualified,fit:10,activity:0,presence:0,interest:0,approach:0}),'manual_review_required');
 
 const syncStart = cloud.indexOf('async function syncLocal()');
 const syncEnd = cloud.indexOf('async function pullCloud()', syncStart);
@@ -47,7 +62,7 @@ assert.match(sync, /\.eq\('updated_at',x\.cloud_updated_at\)/,
   'cloud updates must be guarded by the version previously read');
 assert.match(sync, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\),JSON\.stringify\(rows\)\)/,
   'the local archive state must be persisted after the sync pass');
-assert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
+assert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/,\n  'manual review must be executed through the database RPC after the safe write');\nassert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/,\n  'manual review must run after the initial safe update or insert');\nassert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
   'a local record may be marked clean only after the cloud operation and any required review succeed');
 
 const pullStart = cloud.indexOf('async function pullCloud()');
@@ -78,4 +93,4 @@ assert.match(conflict, /reviewError.*?Il Lead resta "Da approfondire"/s,
 assert.match(conflict, /record\.manual_review_confirmed=false/,
   'successful conflict resolution must clear the transient local review checkbox state');
 
-console.log('NEXTWAY Lead sync contract: 27 checks passed.');
+console.log('NEXTWAY Lead sync contract: 36 checks passed.');
