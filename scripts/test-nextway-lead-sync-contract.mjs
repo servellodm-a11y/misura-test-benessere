@@ -15,6 +15,8 @@ assert.match(sync, /\.eq\('owner_profile_id',s\.user\.id\)/,
   'duplicate reconciliation must be scoped to the authenticated owner');
 assert.match(sync, /\.eq\('source_url',payload\.source_url\)/,
   'duplicate reconciliation must require the exact source URL');
+assert.ok(sync.indexOf(".eq('source_url',payload.source_url)") < sync.indexOf(".insert(insertPayload)"),
+  'cloud URL reconciliation must happen before inserting an unlinked Lead');
 assert.match(sync, /matches\?\.length===1/,
   'a duplicate may be linked only when exactly one matching cloud row exists');
 assert.match(sync, /reason:'duplicate_import_match'/,
