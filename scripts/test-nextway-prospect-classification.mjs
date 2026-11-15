@@ -41,4 +41,4 @@ assert.equal(classify('Cerco un nutrizionista', '', '', 'customers').kind, 'cust
 assert.equal(classify('Articolo sul network marketing', 'Il network marketing è un modello di vendita diretta', '', 'wellness_networker').kind, 'unknown',
   'An industry article must not be classified as an active networker');
 
-console.log('NEXTWAY prospect classification contract: 8 checks passed.');
+console.log('NEXTWAY prospect classification contract: 11 checks passed.');
