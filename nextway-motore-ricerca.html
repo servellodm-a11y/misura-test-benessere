@@ -522,7 +522,7 @@ async function runSearch(){
      ];
      const professionalSection=reviewSection('Profilo professionale · evidenze e attualità',professionalItems,item=>item.label+': '+item.value.value+' · '+statusText(item.value)+(item.sources.length?' · fonti: '+item.sources.join(', '):''),'Nessun dato professionale disponibile.');
      const activity=document.createElement('p');activity.className='muted';activity.textContent='Stato temporale: '+professional.activity.label+(professional.activity.excerpt?' · segnale: '+professional.activity.excerpt:'');
-     const concordance=document.createElement('p');concordance.className='muted';concordance.textContent='Concordanza tra fonti: '+professional.source_concordance.status+'. Data fonte: '+(professional.source_freshness.published_at?new Date(professional.source_freshness.published_at).toLocaleDateString('it-IT')+' · '+professional.source_freshness.status:'non rilevata');
+     const concordance=document.createElement('p');concordance.className='muted';concordance.textContent='Distribuzione delle evidenze tra titolo, descrizione e contenuto: '+professional.source_concordance.status+'. Data fonte: '+(professional.source_freshness.published_at?new Date(professional.source_freshness.published_at).toLocaleDateString('it-IT')+' · '+professional.source_freshness.status:'non rilevata');
      const review=document.createElement('p');review.className='muted';review.textContent=professional.manual_review_required?'Revisione manuale necessaria: '+professional.missing_evidence.concat(professional.source_concordance.status==='segnali_discordanti'?['Le fonti contengono segnali discordanti']:[]).join('; '):'Nessuna criticità automatica rilevata; la verifica umana resta obbligatoria.';
      professionalSection.append(activity,concordance,review);
      const disclaimer=document.createElement('p');disclaimer.className='muted';disclaimer.textContent=professional.disclaimer;
@@ -1020,7 +1020,7 @@ function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sou
  const roleEvidence=profession?occurrences(profession):[];
  const organizationEvidence=organization?occurrences(organization):[];
  const locationEvidence=location?occurrences(location):[];
- const combined=sources.map(([,value])=>value).join(' ').replace(/\s+/g,' ').trim();
+ const combined=sources.map(([,value])=>value).join(' ').replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('it').trim();
  const pastPattern=/\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato|non lavoro piu|non collaboro piu|in passato|precedentemente|anni fa|era titolare|e stato titolare|ha cessato|attivita cessata|chiuso definitivamente|non esercita piu)\b/i;
  const currentPattern=/\b(attualmente|oggi|dal 20\d{2}|lavoro come|mi occupo di|ricevo su appuntamento|prenotazioni aperte|prenota online|per appuntamenti|contattami per|studio aperto|attivita attiva|operativo dal|svolgo la professione|esercito come|sono titolare|sono founder|sono amministratore)\b/i;
  const pastMatch=combined.match(pastPattern),currentMatch=combined.match(currentPattern);
@@ -1047,7 +1047,7 @@ function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sou
   location:{value:location||'Non rilevata',status:!location?'non_rilevato':locationEvidence.length?'presente_nella_fonte':'estratto_non_rintracciato',sources:locationEvidence},
   activity:{status:activityStatus,label:activityLabel,excerpt:activityExcerpt,verified:false},
   source_freshness:{status:freshness,published_at:validDate?publishedDate.toISOString():null,age_days:ageDays},
-  source_concordance:{status:conflicts?'segnali_temporali_discordanti':supportingSources.length>1?'evidenze_presenti_in_fonti_multiple':supportingSources.length===1?'evidenze_presenti_in_una_fonte':'evidenze_insufficienti',supporting_sources:supportingSources,role_sources:roleEvidence,organization_sources:organizationEvidence,location_sources:locationEvidence},
+  source_concordance:{status:conflicts?'segnali_temporali_discordanti':supportingSources.length>1?'evidenze_in_sezioni_multiple':supportingSources.length===1?'evidenze_in_una_sezione':'evidenze_insufficienti',supporting_sources:supportingSources,role_sources:roleEvidence,organization_sources:organizationEvidence,location_sources:locationEvidence},
   missing_evidence:missing,
   manual_review_required:manualReviewRequired,
   disclaimer:'Ruolo, organizzazione e località sono estratti da contenuti pubblici: la presenza testuale non prova che siano attuali o corretti. I segnali temporali sono lessicali e richiedono apertura e verifica della fonte originale.'
