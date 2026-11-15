@@ -69,6 +69,8 @@ on:
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-manual-lead-review-sql.mjs"
       - "scripts/test-nextway-company-config.mjs"
+      - "scripts/test-nextway-lead-sync-contract.mjs"
+      - "scripts/test-nextway-lead-conflict-resolution.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
