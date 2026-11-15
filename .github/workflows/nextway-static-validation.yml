@@ -73,6 +73,7 @@ on:
       - "scripts/test-nextway-lead-conflict-resolution.mjs"
       - "scripts/test-nextway-prospect-search-contract.mjs"
       - "scripts/test-nextway-prospect-classification.mjs"
+      - "scripts/test-nextway-prospect-search-coverage.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -195,6 +196,8 @@ jobs:
         run: node scripts/test-nextway-prospect-search-contract.mjs
       - name: Test NEXTWAY prospect classification evidence gates
         run: node scripts/test-nextway-prospect-classification.mjs
+      - name: Validate NEXTWAY prospect search coverage by segment
+        run: node scripts/test-nextway-prospect-search-coverage.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
