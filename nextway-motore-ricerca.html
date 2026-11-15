@@ -481,6 +481,8 @@ async function runSearch(){
     commercialFit.priority_tier=leadPriority.priority_tier;
     commercialFit.priority_gate=leadPriority.gate_reason;
     commercialFit.priority_components=leadPriority;
+    const prospectAssessment=assessProspectDimensions(commercialFit,sourceQuality,targetAssessment,assessment,profile,leadPriority);
+    commercialFit.prospect_assessment=prospectAssessment;
     commercialFit.reasons.push(...leadPriority.reasons);
     card.dataset.segmentPriority=String(commercialFit.priority_score);card.dataset.segmentTier=commercialFit.priority_tier;card.dataset.queue=classifyLeadQueue({person_confirmed:assessment.individual,commercial_fit:commercialFit,source_quality:sourceQuality,qualification_status:qualification.status}).code;
     const outcomeCard=document.createElement('p');outcomeCard.className='tag';outcomeCard.textContent='Esito commerciale: '+commercialFit.commercial_outcome_label+'. '+(commercialFit.commercial_outcome==='generic_result'?'Non classificarlo come cliente o partner.':commercialFit.commercial_outcome==='insufficient_evidence'?'Non acquisire come prospect qualificato.':commercialFit.commercial_outcome==='not_suitable'?'Non acquisire come prospect individuale.':'La dichiarazione va comunque verificata sulla fonte originale.');
@@ -492,7 +494,7 @@ async function runSearch(){
     const profileCandidate=document.createElement('p');profileCandidate.className='muted';if(profile.name_candidate){profileCandidate.textContent='Nome citato nella pagina, ma non confermato come prospect individuale: '+profile.name_candidate+'. Non usare questo nominativo per acquisire o contattare una persona senza verifica.';}
     const profilePriority=document.createElement('p');profilePriority.className='tag';profilePriority.textContent='Priorità di verifica: '+profile.priority+'. '+profile.priority_reason+' Non equivale a interesse commerciale.';
     profileCard.append(profileTitle,profileDetails,profileIdentity);if(profile.name_candidate)profileCard.append(profileCandidate);profileCard.append(profilePriority);
-    const evidenceReview=buildEvidenceReview(assessment,item.title,item.snippet,pageContent,profile,targetAssessment,sourceQuality);
+    const evidenceReview=buildEvidenceReview(assessment,item.title,item.snippet,pageContent,profile,targetAssessment,sourceQuality,prospectAssessment);
     const reviewSection=(heading,items,formatter,emptyText)=>{
      const section=document.createElement('section');section.style.cssText='margin-top:10px;padding-top:8px;border-top:1px solid #e2e7ef;';
      const h=document.createElement('strong');h.textContent=heading;section.append(h);
@@ -502,6 +504,19 @@ async function runSearch(){
      section.append(ul);return section;
     };
     const documentedSection=reviewSection('1. Documentato nella fonte · citazione testuale',evidenceReview.documented,item=>item.kind+' · '+item.field+': “'+item.excerpt+'” — '+item.statement,'Nessuna citazione testuale verificabile nei campi restituiti. Aprire la fonte originale.');
+    const dimensions=evidenceReview.prospect_assessment;
+    if(dimensions){
+     const dimensionItems=[
+      {kind:'Attendibilità della fonte',value:dimensions.source_reliability.score+'/100 · '+dimensions.source_reliability.label,reason:dimensions.source_reliability.reason},
+      {kind:'Attualità della fonte',value:dimensions.freshness.score+'/100 · '+dimensions.freshness.label,reason:dimensions.freshness.reason},
+      {kind:'Pertinenza del segmento',value:dimensions.segment_relevance.score+'/100 · '+dimensions.segment_relevance.label,reason:dimensions.segment_relevance.reason},
+      {kind:'Opportunità commerciale',value:dimensions.commercial_opportunity.score+'/100 · '+dimensions.commercial_opportunity.label,reason:dimensions.commercial_opportunity.reason}
+     ];
+     const dimensionSection=reviewSection('Valutazioni separate · non sommare questi indicatori',dimensionItems,item=>item.kind+': '+item.value+' — '+item.reason,'Valutazioni non disponibili.');
+     const missingSection=reviewSection('Elementi mancanti per una valutazione più solida',dimensions.missing_evidence.map(value=>({value})),item=>item.value,'Nessun elemento mancante rilevato automaticamente.');
+     profileCard.append(dimensionSection,missingSection);
+     const dimensionNote=document.createElement('p');dimensionNote.className='muted';dimensionNote.textContent=dimensions.disclaimer;profileCard.append(dimensionNote);
+    }
     const inferredItems=[...evidenceReview.inference,...evidenceReview.interpreted];
     const inferredSection=reviewSection('2. Interpretazione NEXTWAY · non è un fatto accertato',inferredItems,item=>item.kind+': '+(item.value||item.statement)+(item.reason?' — '+item.reason:''),'Nessuna interpretazione automatica aggiuntiva.');
     const verifySection=reviewSection('3. Da verificare manualmente',evidenceReview.verify.map(value=>({value})),item=>item.value,'Nessuna verifica richiesta.');
@@ -925,7 +940,41 @@ function assessSourceQuality(item,url,pageContent){
  else if(host){sourceType='Sito web';reliabilityScore=55;reliabilityLabel='Fonte diretta non classificata · verificare autore e data';}
  return {host,source_type:sourceType,reliability_score:reliabilityScore,reliability_label:reliabilityLabel,freshness_score:freshnessScore,freshness_label:freshnessLabel,published_at:sourceDate?sourceDate.toISOString():null,age_days:ageDays,date_source:dateSource||'non rilevata',quality_score:Math.round(reliabilityScore*.4+freshnessScore*.6),verification_note:'La classificazione automatica orienta la verifica: non certifica veridicità, identità o attualità del recapito.'};
 }
-function buildEvidenceReview(assessment,title,snippet,pageContent,profile,targetAssessment,sourceQuality){
+function assessProspectDimensions(commercialFit,sourceQuality,targetAssessment,assessment,profile,leadPriority){
+ const reliability=Math.max(0,Math.min(100,Number(sourceQuality?.reliability_score)||0));
+ const freshness=Math.max(0,Math.min(100,Number(sourceQuality?.freshness_score)||0));
+ const hasDate=!!sourceQuality?.published_at&&Number(sourceQuality?.age_days)>=0;
+ const segmentMatch=commercialFit?.segment_match===true;
+ const segmentConfidence=targetAssessment?.confidence==='alta'?100:targetAssessment?.confidence==='media'?70:targetAssessment?.confidence==='bassa'?30:0;
+ const segmentScore=segmentMatch?Math.round(Math.max(70,segmentConfidence)):0;
+ const outcome=String(commercialFit?.commercial_outcome||'');
+ const explicitIntent=['partner_potential','customer_potential'].includes(outcome);
+ const profileOnly=['generic_result'].includes(outcome)&&assessment?.individual===true;
+ const intentScore=explicitIntent?100:profileOnly?25:0;
+ const reasons=[];
+ const missing=[];
+ if(reliability<60)reasons.push('Attendibilità della fonte non ancora sufficiente: controllare autore, titolarità e fonte originale.');
+ if(!hasDate)reasons.push('La data della fonte non è verificabile: l’attualità resta incerta.');
+ if(!segmentMatch)reasons.push('Il risultato non dimostra una corrispondenza con il segmento selezionato.');
+ if(!explicitIntent)reasons.push('Non è presente una dichiarazione esplicita di interesse commerciale.');
+ if(!assessment?.individual)missing.push('Identità individuale confermata');
+ if(!targetAssessment?.segment||targetAssessment.segment==='unclassified'||!segmentMatch)missing.push('Ruolo/segmento coerente con la ricerca');
+ if(!hasDate)missing.push('Data di pubblicazione o aggiornamento');
+ if(!explicitIntent)missing.push('Dichiarazione personale di interesse o disponibilità');
+ if(!profile?.name||/non rilevat|non confermat/i.test(String(profile.name)))missing.push('Nominativo attribuibile con certezza');
+ const dimension=(score,label,reason)=>({score,label,reason});
+ return {
+  source_reliability:dimension(reliability,reliability>=75?'Buona · da verificare':reliability>=60?'Intermedia · verifica necessaria':'Debole o non determinabile',sourceQuality?.reliability_label||'Attendibilità non determinabile'),
+  freshness:dimension(freshness,hasDate?(freshness>=80?'Recente':freshness>=55?'Da aggiornare':'Datata'):'Non verificata',sourceQuality?.freshness_label||'Data non rilevata'),
+  segment_relevance:dimension(segmentScore,segmentMatch?'Coerente con il segmento':'Non confermata',targetAssessment?.reason||'Nessuna corrispondenza dimostrata'),
+  commercial_opportunity:dimension(intentScore,explicitIntent?'Interesse dichiarato':profileOnly?'Interesse non dichiarato':'Nessun segnale commerciale',commercialFit?.commercial_outcome_label||'Nessun esito commerciale esplicito'),
+  priority_score:Number(leadPriority?.priority_score)||0,
+  reasons,missing_evidence:[...new Set(missing)],
+  disclaimer:'Valutazioni automatiche di supporto: non certificano identità, veridicità, qualifica o disponibilità della persona.'
+ };
+}
+
+function buildEvidenceReview(assessment,title,snippet,pageContent,profile,targetAssessment,sourceQuality,prospectAssessment){
  const sourceFields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
  const normalize=value=>String(value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('it');
  const documented=[],interpreted=[];
@@ -955,7 +1004,7 @@ function buildEvidenceReview(assessment,title,snippet,pageContent,profile,target
   'Validità e titolarità dei recapiti pubblicati',
   'Data e attualità delle informazioni'
  ];
- return {documented,interpreted,inference,verify,source_date:sourceQuality?.published_at||null,source_date_label:sourceQuality?.published_at?'Data indicata dalla fonte: '+new Date(sourceQuality.published_at).toLocaleDateString('it-IT'):'Data della fonte non rilevata · da verificare',source_url:sourceQuality?.host||''};
+ return {documented,interpreted,inference,verify,prospect_assessment:prospectAssessment||null,source_date:sourceQuality?.published_at||null,source_date_label:sourceQuality?.published_at?'Data indicata dalla fonte: '+new Date(sourceQuality.published_at).toLocaleDateString('it-IT'):'Data della fonte non rilevata · da verificare',source_url:sourceQuality?.host||''};
 }
 function classifyLeadQueue(prospect){
  const fit=prospect?.commercial_fit||{};
