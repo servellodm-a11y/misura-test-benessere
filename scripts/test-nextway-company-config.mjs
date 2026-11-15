@@ -199,6 +199,8 @@ assert.ok(searchHtml.includes('attività aperte · '),'Daily agenda must summari
 assert.ok(searchHtml.includes('const duplicateCandidates=[...new Set(dedupeKeys.map(key=>seenProspects.get(key)).filter(Boolean))]'));
 assert.ok(searchHtml.includes('duplicateCandidates.length===1?duplicateCandidates[0]:null'),'Multiple matching identity keys must not silently merge two distinct prospect records');
 assert.ok(searchHtml.includes('if(ambiguousDuplicate)'),'Ambiguous duplicate matches must be exposed for manual review');
+assert.ok(searchHtml.includes('if(ambiguousDuplicate)dedupeKeys.forEach(key=>seenProspects.set(key,null))'),'Conflicting identity keys must be quarantined from future automatic merges');
+assert.ok(searchHtml.includes("else seenProspects.set('url:'+canonicalProspectUrl(url),prospectEntry)"),'An ambiguous prospect may only be indexed by its own canonical URL');
 assert.ok(searchHtml.includes('dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry))'));
 assert.ok(searchHtml.includes('const seenProspects=new Map()'));
 const resultLoopStart=searchHtml.indexOf('rankedResults.forEach(item=>{');
