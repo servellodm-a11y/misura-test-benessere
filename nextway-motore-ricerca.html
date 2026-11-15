@@ -692,7 +692,8 @@ function assessProfessionalActivity(title,snippet,pageContent){
  const past=text.match(/\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato|non lavoro più|non collaboro più|in passato|precedentemente|anni fa|era titolare|è stato titolare|ha cessato|attività cessata|chiuso definitivamente)\b/i);
  const current=text.match(/\b(attualmente|lavoro come|mi occupo di|ricevo su appuntamento|prenotazioni aperte|prenota online|per appuntamenti|contattami per|studio aperto|attività attiva|operativo dal|dal 20\d{2}|oggi svolgo)\b/i);
  let status='non_documentata',label='Attività attuale non documentata',excerpt='',source='';
- if(past){status='possibile_attivita_passata';label='Possibile attività passata o cessata · verificare';excerpt=past[0];}
+ if(past&&current){status='segnali_temporali_misti';label='Segnali di attività passata e attuale · verifica manuale necessaria';excerpt=past[0]+' / '+current[0];}
+ else if(past){status='possibile_attivita_passata';label='Possibile attività passata o cessata · verificare';excerpt=past[0];}
  else if(current){status='segnale_attivita_attuale';label='Segnale testuale di attività attuale · da confermare';excerpt=current[0];}
  if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
  return {status,label,excerpt,source,verified:false,disclaimer:'Indicatore lessicale: non certifica che l’attività sia oggi effettivamente operativa.'};
@@ -705,7 +706,8 @@ function assessNetworkerActivity(title,snippet,pageContent){
  const active=/\b(?:sono (?:un[oa]? )?(?:networker|distributore indipendente|brand partner)|lavoro (?:nel|con il|con la) network marketing|faccio network marketing|mi occupo di network marketing|collaboro (?:attualmente )?con [A-ZÀ-ÖØ-Þ][\wÀ-ÿ&.-]+|sviluppo (?:la mia|un')? attività (?:di network marketing|di vendita diretta)|gestisco (?:un team|una rete) (?:di vendita|di network)|seguo (?:un team|clienti) (?:nel|per il) network|attualmente (?:sono|lavoro|collaboro) (?:nel|con il|con la) network marketing)\b/i;
  const pastMatch=combined.match(past),activeMatch=combined.match(active),mentioned=context.test(combined);
  let status='non_documentata',label='Attività nel network marketing non documentata',excerpt='',source='';
- if(pastMatch){status='possibile_attivita_passata';label='Possibile esperienza passata nel network marketing · verificare';excerpt=pastMatch[0];}
+ if(pastMatch&&activeMatch){status='segnali_temporali_misti';label='Segnali di esperienza passata e attività attuale · verifica manuale necessaria';excerpt=pastMatch[0]+' / '+activeMatch[0];}
+ else if(pastMatch){status='possibile_attivita_passata';label='Possibile esperienza passata nel network marketing · verificare';excerpt=pastMatch[0];}
  else if(activeMatch&&mentioned){status='dichiarazione_attivita_attuale';label='Dichiarazione di attività attuale nel network marketing · da confermare';excerpt=activeMatch[0];}
  else if(mentioned){status='solo_menzione';label='Il network marketing è soltanto menzionato';excerpt=combined.match(context)?.[0]||'';}
  if(excerpt){const found=fields.find(([,value])=>value.toLocaleLowerCase('it').includes(excerpt.toLocaleLowerCase('it')));if(found)source=found[0];}
@@ -1112,6 +1114,8 @@ function classifyProspectTarget(title,snippet,pageContent,selectedSegment){
 function classifyNetworkerStage(value){
  const t=String(value||'').toLocaleLowerCase('it');
  const has=patterns=>patterns.some(p=>p.test(t));
+ const activity=assessNetworkerActivity('','',t);
+ if(activity.status==='segnali_temporali_misti')return 'Attività da verificare · segnali temporali discordanti';
  if(has([/\bex[- ]?networker\b/,/ex distributore/,/ex incaricat[oa]/,/ho lasciato il network marketing/,/former network marketer/]))return 'Ex-networker';
  if(has([/ho iniziato da poco/,/sono all[’']inizio/,/primi passi nel network/,/nuov[oa] incaricat[oa]/,/nuovo distributore|nuova distributrice/,/new to network marketing/,/just started network marketing/,/beginner training/,/sto imparando/]))return 'Alle prime armi · segnale esplicito';
  if(has([/team leader/,/leader di team/,/costruisco il mio team/,/sviluppo team/,/gestione team/,/formazione del team/,/team builder/,/network marketing da [0-9]+ anni/]))return 'Esperienza / leadership · segnale esplicito';
