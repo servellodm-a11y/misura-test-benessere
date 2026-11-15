@@ -70,6 +70,7 @@ const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searc
 const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 const activeCompany=companyConfig?.active||null;
 const SEARCH_HISTORY_LIMIT=10;
+const SEARCH_MAX_RESULTS=10;
 function searchHistoryKey(ownerId=searchHistoryOwnerId){return typeof ownerId==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(ownerId)?'nextway_search_history_v1:'+ownerId:null;}
 function setSearchHistoryOwner(ownerId){searchHistoryOwnerId=typeof ownerId==='string'?ownerId:'';renderSearchHistory();return !!searchHistoryKey();}
 function readSearchHistory(ownerId=searchHistoryOwnerId){const key=searchHistoryKey(ownerId);if(!key)return [];try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value.filter(item=>item&&Array.isArray(item.prospects)).slice(0,SEARCH_HISTORY_LIMIT):[]}catch{return []}}
@@ -405,7 +406,7 @@ async function runSearch(){
  const status=$('searchstatus'),button=$('runsearch'),list=$('live-list');
  try{
   if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
-  button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;const selectedIndex=Math.max(0,Math.min(generated.length-1,Number($('selected-query')?.value||0)));const selectedQuery=generated[selectedIndex];if(!selectedQuery)throw new Error('Genera e seleziona una query prima di avviare la ricerca.');status.textContent='Connessione a NEXTWAY e avvio di 1 ricerca (massimo 5 risultati)…';list.replaceChildren();
+  button.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;const selectedIndex=Math.max(0,Math.min(generated.length-1,Number($('selected-query')?.value||0)));const selectedQuery=generated[selectedIndex];if(!selectedQuery)throw new Error('Genera e seleziona una query prima di avviare la ricerca.');status.textContent='Connessione a NEXTWAY e avvio di 1 ricerca (massimo '+SEARCH_MAX_RESULTS+' risultati)…';list.replaceChildren();
   const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();setSearchHistoryOwner(s.user.id);
   const archiveIndex=window.NEXTWAY_CLOUD.getLocalSearchArchiveIndex(s.user.id);
   const acquiredUrls=new Set(archiveIndex.urls||[]),acquiredKeys=new Set(archiveIndex.identity_keys||[]),crmProspects=Array.isArray(archiveIndex.prospects)?archiveIndex.prospects:[];
@@ -422,9 +423,9 @@ async function runSearch(){
   try{openCrmFollowups=await window.NEXTWAY_CLOUD.getOpenLeadActivities(100);}
   catch(followupError){status.textContent='Ricerca avviata. Promemoria CRM non disponibili: '+followupError.message;}
 
-  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:[selectedQuery.query],max_results:10})});
+  const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:[selectedQuery.query],max_results:SEARCH_MAX_RESULTS})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
-  const groups=payload.results||[];let total=0;status.textContent='Ricerca completata: '+(payload.queries_completed||groups.length)+' query eseguita · un solo risultato richiesto.';
+  const groups=payload.results||[];let total=0;status.textContent='Ricerca completata: '+(payload.queries_completed||groups.length)+' query eseguita · massimo '+SEARCH_MAX_RESULTS+' risultati per query.';
   const seenProspects=new Map();
   groups.forEach((group,index)=>{
    const matchingQuery=generated.find(entry=>entry.query===group.query);
