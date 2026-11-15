@@ -35,4 +35,4 @@ const accented=assess({name:'José Bianchi',profession:'Nutrizionista',organizat
 assert.equal(accented[0].status,'presente_nella_fonte');
 assert.equal(accented[2].status,'presente_nella_fonte');
 assert.equal(accented[3].status,'presente_nella_fonte');
-console.log('NEXTWAY prospect profile-field provenance contract: 16 checks passed.');
+console.log('NEXTWAY prospect profile-field provenance contract: 18 checks passed.');
