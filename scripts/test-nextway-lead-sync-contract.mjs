@@ -26,4 +26,4 @@ assert.match(sync, /x\.local_dirty=true/,
 assert.doesNotMatch(sync, /if\(error\)\{if\(error\.code==='23505'\)\{skipped\+\+;continue;\}/,
   'a duplicate must not be silently counted as skipped');
 
-console.log('NEXTWAY Lead sync contract: 8 checks passed.');
+console.log('NEXTWAY Lead sync contract: 9 checks passed.');
