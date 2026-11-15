@@ -580,7 +580,7 @@ async function runSearch(){
       dailyEntry.archive_status='acquired';markSearchHistoryAcquired(url,identityKeys);
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
       capture.disabled=true;
-      capture.title=result.duplicate?'Questo URL è già registrato.':'Lead salvato in locale; sincronizzazione cloud manuale dall’Archivio Lead.';
+      capture.title=result.duplicate?'Questo URL è già registrato.':result.lead?.category==='research_result'?'Risultato salvato in locale. Apri Archivio Lead, premi “Completa classificazione”, assegna una categoria verificata e poi sincronizza.':'Prospect salvato in locale. Apri Archivio Lead e usa “Sincronizza archivio locale” per trasferirlo nel CRM come Da approfondire.';
      }catch(error){status.textContent='Acquisizione non riuscita: '+error.message;}
     });
     card.append(title,snippet,targetSummary,quality,outcomeCard,profileCard,qualificationCard,contactSummary,reasons,messagePanel,document.createElement('br'),link,copy,capture);if(ambiguousDuplicate){const dedupeNote=document.createElement('p');dedupeNote.className='muted';dedupeNote.textContent='Possibile duplicato ambiguo: le chiavi di identità rimandano a più schede diverse. NEXTWAY mantiene questo risultato separato e richiede confronto manuale.';card.append(dedupeNote);}list.append(card);
