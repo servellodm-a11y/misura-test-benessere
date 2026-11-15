@@ -62,7 +62,12 @@ assert.match(sync, /\.eq\('updated_at',x\.cloud_updated_at\)/,
   'cloud updates must be guarded by the version previously read');
 assert.match(sync, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\),JSON\.stringify\(rows\)\)/,
   'the local archive state must be persisted after the sync pass');
-assert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/,\n  'manual review must be executed through the database RPC after the safe write');\nassert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/,\n  'manual review must run after the initial safe update or insert');\nassert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
+assert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewError\}=await c\.rpc\('nextway_confirm_lead_manual_review'/,
+  'manual review must be executed through the database RPC after the safe write');
+assert.ok(sync.indexOf(".update(payload)") < sync.indexOf("rpc('nextway_confirm_lead_manual_review'"),
+  'the safe unqualified update must precede the manual-review RPC');
+assert.ok(sync.indexOf(".insert(insertPayload)") < sync.lastIndexOf("rpc('nextway_confirm_lead_manual_review'"),
+  'the safe unqualified insert must precede the manual-review RPC');\nassert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
   'a local record may be marked clean only after the cloud operation and any required review succeed');
 
 const pullStart = cloud.indexOf('async function pullCloud()');
