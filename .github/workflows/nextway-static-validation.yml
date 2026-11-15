@@ -207,6 +207,8 @@ jobs:
         run: node scripts/test-nextway-prospect-deduplication.mjs
       - name: Test NEXTWAY prospect contactability evidence
         run: node scripts/test-nextway-prospect-contactability.mjs
+      - name: Test NEXTWAY prospect profile-field source evidence
+        run: node scripts/test-nextway-prospect-field-evidence.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
