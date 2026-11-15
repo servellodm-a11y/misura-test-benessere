@@ -6,7 +6,7 @@ const html=fs.readFileSync('nextway-motore-ricerca.html','utf8');
 const start=html.indexOf('function normalizeProspectIdentityPart(');
 const end=html.indexOf('function buildProspectDedupeKey(',start);
 assert.ok(start>=0&&end>start,'identity-key helpers must be present');
-const sandbox={canonicalProspectUrl:value=>{try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');return u.toString().replace(/\/$/,'');}catch{return String(value||'').toLowerCase();}}};
+const sandbox={canonicalProspectUrl:value=>{try{const u=new URL(value);u.hash='';if(u.hostname.toLowerCase().startsWith('www.'))u.hostname=u.hostname.slice(4).toLowerCase();const normalized=u.toString();return normalized.endsWith('/')?normalized.slice(0,-1):normalized;}catch{return String(value||'').toLowerCase();}}};
 vm.runInNewContext(html.slice(start,end)+';this.buildProspectIdentityKeys=buildProspectIdentityKeys;',sandbox);
 const keys=sandbox.buildProspectIdentityKeys;
 const profile={name:'Mario Rossi',profession:'Nutrizionista',organization:'Studio Salute',location:'Milano'};
