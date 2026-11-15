@@ -26,4 +26,25 @@ assert.match(sync, /x\.local_dirty=true/,
 assert.doesNotMatch(sync, /if\(error\)\{if\(error\.code==='23505'\)\{skipped\+\+;continue;\}/,
   'a duplicate must not be silently counted as skipped');
 
-console.log('NEXTWAY Lead sync contract: 9 checks passed.');
+// Retry and conflict-safety checks: transient failures must leave local data dirty.
+assert.match(sync, /if\(error\)\{failed\+\+;continue;\}/,
+  'a failed cloud update must not mark the local record clean');
+assert.match(sync, /if\(error\)\{failed\+\+;continue;\}if\(!data\)\{conflicts\+\+/,
+  'optimistic update must detect a remote version change');
+assert.match(sync, /\.eq\('updated_at',x\.cloud_updated_at\)/,
+  'cloud updates must be guarded by the version previously read');
+assert.match(sync, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\),JSON\.stringify\(rows\)\)/,
+  'the local archive state must be persisted after the sync pass');
+assert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
+  'a local record may be marked clean only after the cloud operation and any required review succeed');
+
+const pullStart = cloud.indexOf('async function pullCloud()');
+const pullEnd = cloud.indexOf("$('nw-sync').onclick", pullStart);
+assert.ok(pullStart >= 0 && pullEnd > pullStart, 'pullCloud must exist');
+const pull = cloud.slice(pullStart, pullEnd);
+assert.match(pull, /if\(existing\.local_dirty\).*?continue;/s,
+  'cloud refresh must preserve dirty local records rather than overwrite them');
+assert.match(pull, /existing\.cloud_updated_at!==r\.updated_at/,
+  'cloud refresh must flag concurrent remote changes');
+
+console.log('NEXTWAY Lead sync contract: 16 checks passed.');
