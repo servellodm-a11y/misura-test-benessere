@@ -6,7 +6,7 @@ const cloud = readFileSync('nextway-cloud.js', 'utf8');
 function extractFunction(source, declaration, nextDeclaration) {
   const start = source.indexOf(declaration);
   const end = source.indexOf(nextDeclaration, start);
-  assert.ok(start >= 0 && end > start, `Could not locate ${declaration}`);
+  assert.ok(start >= 0 && end > start, 'Could not locate ' + declaration);
   return source.slice(start, end).trim();
 }
 
@@ -26,23 +26,24 @@ const safeHttpUrl = value => {
 const canonicalSearchArchiveUrl = value => {
   const url = new URL(value);
   url.hash = '';
-  url.hostname = url.hostname.toLowerCase().replace(/^www\\./, '');
+  if (url.hostname.toLowerCase().startsWith('www.')) url.hostname = url.hostname.slice(4).toLowerCase();
   ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(key => url.searchParams.delete(key));
-  url.pathname = url.pathname.replace(/\\/+$/, '') || '/';
-  return url.toString().replace(/\\/$/, '');
+  while (url.pathname.length > 1 && url.pathname.endsWith('/')) url.pathname = url.pathname.slice(0, -1);
+  const normalized = url.toString();
+  return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized;
 };
-const addSource = extractFunction(cloud, 'function addSearchLeadToLocalArchive(userId,record){', '\\n let client=null');
+const addSource = extractFunction(cloud, 'function addSearchLeadToLocalArchive(userId,record){', 'let client=null');
 const addSearchLeadToLocalArchive = new Function(
   'localArchiveKey', 'safeHttpUrl', 'readSearchArchiveRows',
   'canonicalSearchArchiveUrl', 'readSearchArchiveMeta', 'localStorage',
-  `return (${addSource.replace(/^function addSearchLeadToLocalArchive/, 'function')});`
+  'return (' + addSource.replace(/^function addSearchLeadToLocalArchive/, 'function') + ');'
 )(
   userId => 'nextway_ai_records_v1:' + userId,
   safeHttpUrl,
   () => rows,
   canonicalSearchArchiveUrl,
   lead => {
-    const marker = '\\n\\n[NEXTWAY_PROSPECT_METADATA_V1]\\n';
+    const marker = String.fromCharCode(10, 10) + '[NEXTWAY_PROSPECT_METADATA_V1]' + String.fromCharCode(10);
     const notes = String(lead.notes || '');
     const index = notes.indexOf(marker);
     if (index < 0) return {};
@@ -53,7 +54,7 @@ const addSearchLeadToLocalArchive = new Function(
 
 const payloadSource = extractFunction(cloud, 'function leadPayload(x){', 'async function resolveLeadConflict(');
 const leadPayload = new Function(
-  `return (${payloadSource.replace(/^function leadPayload/, 'function')});`
+  'return (' + payloadSource.replace(/^function leadPayload/, 'function') + ');'
 )();
 
 const fixture = {
