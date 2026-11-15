@@ -183,6 +183,8 @@ jobs:
         run: node scripts/test-nextway-company-config.mjs
       - name: Validate NEXTWAY manual Lead review contract
         run: node scripts/test-nextway-manual-lead-review-sql.mjs
+      - name: Validate NEXTWAY Lead sync duplicate reconciliation contract
+        run: node scripts/test-nextway-lead-sync-contract.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
