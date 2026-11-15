@@ -185,6 +185,8 @@ jobs:
         run: node scripts/test-nextway-manual-lead-review-sql.mjs
       - name: Validate NEXTWAY Lead sync duplicate reconciliation contract
         run: node scripts/test-nextway-lead-sync-contract.mjs
+      - name: Test NEXTWAY Lead conflict resolution with mocked Supabase
+        run: node scripts/test-nextway-lead-conflict-resolution.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
