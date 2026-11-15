@@ -571,7 +571,7 @@ el('previewBackup').addEventListener('click',async()=>{
  if(file.size>10*1024*1024){el('backupReport').textContent='File troppo grande: massimo 10 MB.';return}
  try{const obj=JSON.parse(await file.text());if(obj.format!=='NEXTWAY_BACKUP_V1'||!Array.isArray(obj.records))throw new Error('Formato non riconosciuto');
  const report=validateImport(obj.records);backupRows=report.valid;
- el('backupReport').textContent='Backup riconosciuto · Record validi: '+report.valid.length+' · Già presenti: '+report.duplicates+' · Non validi: '+report.invalid+'. Nessun dato è stato ancora ripristinato.';
+ el('backupReport').textContent='Backup riconosciuto · Record validi: '+report.valid.length+' · Già presenti: '+report.duplicates+' · Non validi: '+report.invalid+'. Le qualificazioni importate richiedono una nuova revisione manuale. Nessun dato è stato ancora ripristinato.';
  el('restoreBackup').disabled=!report.valid.length;
  }catch(err){backupRows=[];el('restoreBackup').disabled=true;el('backupReport').textContent='Backup non valido o illeggibile. Nessun dato modificato.'}
 });
@@ -587,7 +587,7 @@ el('previewImport').addEventListener('click',async()=>{
  if(file.size>5*1024*1024){el('importReport').textContent='File troppo grande: massimo 5 MB.';return}
  try{const parsed=parseCSV((await file.text()).replace(/^\uFEFF/,''));
  const report=validateImport(parsed);importRows=report.valid;
- el('importReport').textContent='Righe lette: '+report.total+' · Pronte: '+report.valid.length+' · Duplicati URL: '+report.duplicates+' · Non valide: '+report.invalid+'. Nessun dato è stato ancora importato.';
+ el('importReport').textContent='Righe lette: '+report.total+' · Pronte: '+report.valid.length+' · Duplicati URL: '+report.duplicates+' · Non valide: '+report.invalid+'. Le qualificazioni importate richiedono una nuova revisione manuale. Nessun dato è stato ancora importato.';
  el('confirmImport').disabled=!report.valid.length;
  }catch(err){importRows=[];el('confirmImport').disabled=true;el('importReport').textContent='Impossibile leggere il CSV. Verifica che sia UTF-8 con intestazioni NEXTWAY.'}
 });
