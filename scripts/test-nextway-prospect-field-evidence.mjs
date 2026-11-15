@@ -43,7 +43,7 @@ assert.ok(profileStart>=0&&profileEnd>profileStart,'professional profile evidenc
 const profileSandbox={Date};
 vm.runInNewContext(html.slice(profileStart,profileEnd)+';this.assessProfessionalProfileEvidence=assessProfessionalProfileEvidence;',profileSandbox);
 const assessProfile=profileSandbox.assessProfessionalProfileEvidence;
-const professional=assessProfile({profession:'Nutrizionista',organization:'Studio Salute',location:'Milano'},'Mario Rossi | Nutrizionista','Riceve a Milano presso Studio Salute','', {published_at:'2026-10-01T00:00:00Z'});
+const professional=assessProfile({profession:'Nutrizionista',organization:'Studio Salute',location:'Milano'},'Mario Rossi | Nutrizionista','Ricevo su appuntamento a Milano presso Studio Salute','', {published_at:'2026-10-01T00:00:00Z'});
 assert.equal(professional.role.status,'presente_nella_fonte');
 assert.deepEqual(Array.from(professional.role.sources),['Titolo della pagina']);
 assert.equal(professional.organization.status,'presente_nella_fonte');
