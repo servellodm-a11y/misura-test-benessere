@@ -196,7 +196,9 @@ assert.ok(searchHtml.includes('getOpenLeadActivities(100)'),'Daily agenda must i
 assert.ok(searchHtml.includes('Follow-up aperti nel CRM · agenda generale'),'Daily agenda must show the CRM-wide follow-up queue');
 assert.ok(searchHtml.includes('attività aperte · '),'Daily agenda must summarize overdue, due-today and future follow-ups');
 
-assert.ok(searchHtml.includes('dedupeKeys.map(key=>seenProspects.get(key)).find(Boolean)'));
+assert.ok(searchHtml.includes('const duplicateCandidates=[...new Set(dedupeKeys.map(key=>seenProspects.get(key)).filter(Boolean))]'));
+assert.ok(searchHtml.includes('duplicateCandidates.length===1?duplicateCandidates[0]:null'),'Multiple matching identity keys must not silently merge two distinct prospect records');
+assert.ok(searchHtml.includes('if(ambiguousDuplicate)'),'Ambiguous duplicate matches must be exposed for manual review');
 assert.ok(searchHtml.includes('dedupeKeys.forEach(key=>seenProspects.set(key,prospectEntry))'));
 assert.ok(searchHtml.includes('const seenProspects=new Map()'));
 const resultLoopStart=searchHtml.indexOf('rankedResults.forEach(item=>{');
