@@ -2958,7 +2958,7 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - MASTER su main, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** per questa operazione documentale.
 - HEAD main e diff del commit precedente: **COMPLETATO E VERIFICATO**; nessuna modifica applicativa successiva osservata su main.
 - PR #1: **BLOCCATO** per divergenza 727 ahead/9 behind, base SHA non allineato all'attuale main, `mergeable=false` e rischio di sovrascrittura del MASTER.
-- PR #2: **ESEGUITO MA NON VERIFICATO** quanto alla proposta e alla CI statica storicamente registrata; resta una PR aperta basata sulla PR #1, non integrata in main.
+- PR #2: **COMPLETATO E VERIFICATO** quanto a metadati, file e CI statica #715 già documentata nella sezione del 14 novembre; **DA COMPLETARE** per la verifica runtime PostgreSQL e l'integrazione controllata nella catena PR. Resta aperta e non integrata in main.
 - PR #3: **COMPLETATO E VERIFICATO** quanto a file, metadati e CI statica #798; **DA COMPLETARE** per revisione funzionale, test runtime, integrazione controllata nella catena PR e verifica live.
 - PR #4: **COMPLETATO E VERIFICATO** quanto al diff e alla CI generale #799; **DA COMPLETARE** per un test di regressione specifico del retry e prova browser/runtime; PR ancora draft e non integrata.
 - CI statica PR #3 (#798) e PR #4 (#799): **COMPLETATO E VERIFICATO** per gli step effettivamente eseguiti; non equivale a test runtime o deploy.
