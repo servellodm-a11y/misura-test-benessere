@@ -71,6 +71,7 @@ on:
       - "scripts/test-nextway-company-config.mjs"
       - "scripts/test-nextway-lead-sync-contract.mjs"
       - "scripts/test-nextway-lead-conflict-resolution.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -189,6 +190,8 @@ jobs:
         run: node scripts/test-nextway-lead-sync-contract.mjs
       - name: Test NEXTWAY Lead conflict resolution with mocked Supabase
         run: node scripts/test-nextway-lead-conflict-resolution.mjs
+      - name: Validate NEXTWAY prospect search result-limit contract
+        run: node scripts/test-nextway-prospect-search-contract.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
