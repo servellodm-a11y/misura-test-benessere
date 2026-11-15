@@ -47,4 +47,21 @@ assert.match(pull, /if\(existing\.local_dirty\).*?continue;/s,
 assert.match(pull, /existing\.cloud_updated_at!==r\.updated_at/,
   'cloud refresh must flag concurrent remote changes');
 
-console.log('NEXTWAY Lead sync contract: 16 checks passed.');
+
+const conflictStart = cloud.indexOf('async function resolveLeadConflict(');
+const conflictEnd = cloud.indexOf('window.NEXTWAY_CLOUD=', conflictStart);
+assert.ok(conflictStart >= 0 && conflictEnd > conflictStart,
+  'resolveLeadConflict must exist');
+const conflict = cloud.slice(conflictStart, conflictEnd);
+assert.match(conflict, /requiresManualReview=localRecord\?\.qualification==='Qualificato'/,
+  'conflict resolution must detect locally qualified records');
+assert.match(conflict, /localRecord\.manual_review_confirmed!==true/,
+  'conflict resolution must require explicit renewed human review');
+assert.match(conflict, /requiresManualReview\?\{\.\.\.localRecord,qualification:'Da approfondire'\}:localRecord/,
+  'conflict resolution must never send Qualified directly in its update payload');
+assert.ok(conflict.indexOf(".update(leadPayload(safeRecord))") < conflict.indexOf("rpc('nextway_confirm_lead_manual_review'"),
+  'manual-review RPC must run only after the safe conflict update succeeds');
+assert.match(conflict, /reviewError.*?Il Lead resta \\"Da approfondire\\"/s,
+  'failed manual review must leave the Lead safely unqualified and report the partial outcome');
+
+console.log('NEXTWAY Lead sync contract: 21 checks passed.');
