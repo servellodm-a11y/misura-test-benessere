@@ -89,7 +89,7 @@ const base = { name: 'Lead test', qualification: 'Da approfondire', manual_revie
 
 {
   const h = makeHarness({ updateError: { message: 'network error' } });
-  await assert.rejects(() => h.resolve('lead-1', 'v1', base), /network error/);
+  await assert.rejects(() => h.resolve('lead-1', 'v1', base), error => error?.message === 'network error');
   assert.equal(h.calls.rpc.length, 0, 'a failed update must never trigger manual review');
 }
 
