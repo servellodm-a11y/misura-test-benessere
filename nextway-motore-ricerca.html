@@ -1013,10 +1013,11 @@ function assessProspectFieldEvidence(profile,title,snippet,pageContent){
 function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sourceQuality){
  const sources=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
  const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
+ const fieldValue=value=>/^(?:non rilevato(?: con certezza)?|non rilevata|non confermato|non confermata|non confermati|non confermate)$/.test(normalize(value))?'':String(value||'').trim();
  const occurrences=value=>sources.filter(([,text])=>normalize(text).includes(normalize(value))).map(([label])=>label);
- const profession=String(profile?.profession||'').trim();
- const organization=String(profile?.organization||'').trim();
- const location=String(profile?.location||'').trim();
+ const profession=fieldValue(profile?.profession);
+ const organization=fieldValue(profile?.organization);
+ const location=fieldValue(profile?.location);
  const roleEvidence=profession?occurrences(profession):[];
  const organizationEvidence=organization?occurrences(organization):[];
  const locationEvidence=location?occurrences(location):[];
