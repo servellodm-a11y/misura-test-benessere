@@ -39,6 +39,9 @@ assert.ok(enableFlag>=0 && guardedUpdate>enableFlag && disableFlag>guardedUpdate
 assert.match(archive,/name="manual_review_confirmed" id="manualReviewConfirmed"/);
 assert.match(archive,/values\.manual_review_confirmed=el\('manualReviewConfirmed'\)\.checked/);
 assert.match(archive,/values\.qualification==='Qualificato'&&!values\.manual_review_confirmed/);
+assert.match(archive,/if\(x\.qualification==='Qualificato'\)\{x\.qualification='Da approfondire';\}/,'Imported or restored Qualified records must be downgraded pending human review');
+assert.match(archive,/x\.manual_review_confirmed=false;/,'Imported or restored records must never carry a manual-review attestation');
+assert.match(archive,/delete x\.manual_reviewed_at;[\s\S]*?delete x\.manual_reviewed_by;/,'Imported review timestamps and reviewer IDs must be discarded');
 assert.match(cloud,/nextway_confirm_lead_manual_review/);
 assert.equal((cloud.match(/x\.manual_review_confirmed&&payload\.qualification==='Qualificato'/g)||[]).length,2,'Both insert and update sync paths must invoke explicit review after the database scoring trigger runs');
 assert.match(cloud,/manual_reviewed_at/);
