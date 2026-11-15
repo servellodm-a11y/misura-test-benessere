@@ -78,6 +78,7 @@ on:
       - "scripts/test-nextway-prospect-deduplication.mjs"
       - "scripts/test-nextway-prospect-contactability.mjs"
       - "scripts/test-nextway-prospect-field-evidence.mjs"
+      - "scripts/test-nextway-prospect-capture-pipeline.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
@@ -210,6 +211,8 @@ jobs:
         run: node scripts/test-nextway-prospect-contactability.mjs
       - name: Test NEXTWAY prospect profile-field source evidence
         run: node scripts/test-nextway-prospect-field-evidence.mjs
+      - name: Test NEXTWAY prospect capture pipeline with mocked archive and CRM payload
+        run: node scripts/test-nextway-prospect-capture-pipeline.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
