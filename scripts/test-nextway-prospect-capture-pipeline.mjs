@@ -116,6 +116,18 @@ assert.equal(cloudPayload.category, null,
   'research-only results must never be written as a CRM partner category');
 assert.equal(leadSyncReadiness(lead), 'category_requires_manual_review',
   'research results must remain local until a human assigns a CRM category');
+const manuallyCategorized={...lead,category:'potential_partner'};
+assert.equal(leadSyncReadiness(manuallyCategorized),'ready',
+  'a human-assigned CRM category may sync while the Lead remains unqualified');
+assert.equal(leadPayload(manuallyCategorized).category,'potential_partner');
+assert.equal(leadPayload(manuallyCategorized).qualification,'Da approfondire',
+  'manual categorization must not silently qualify a prospect');
+const manuallyQualified={...manuallyCategorized,qualification:'Qualificato',identity_check:'confirmed',fit:30,activity:10,presence:5,interest:5,approach:5,manual_review_confirmed:true};
+assert.equal(leadSyncReadiness(manuallyQualified),'ready',
+  'a qualified Lead may proceed only after identity, score and explicit review gates');
+assert.equal(leadPayload(manuallyQualified).qualification,'Da approfondire',
+  'the cloud write must remain unqualified until the manual-review RPC succeeds');
+assert.equal(leadSyncReadiness({...manuallyQualified,manual_review_confirmed:false}),'manual_review_required');
 assert.equal(cloudPayload.qualification, 'Da approfondire');
 assert.equal(cloudPayload.identity_check, 'pending');
 assert.equal(cloudPayload.status, 'Da verificare');
@@ -132,4 +144,4 @@ assert.throws(() => addSearchLeadToLocalArchive('user-fixture', {
 }), /URL della fonte non valido/);
 assert.equal(rows.length, 1, 'invalid source URLs must not write a CRM draft');
 
-console.log('NEXTWAY prospect capture pipeline: 22 integration assertions passed.');
+console.log('NEXTWAY prospect capture pipeline: 28 integration assertions passed.');
