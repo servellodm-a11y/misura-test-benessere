@@ -67,7 +67,8 @@ assert.match(sync, /if\(needsManualReview\)\{const \{data:review,error:reviewErr
 assert.ok(sync.indexOf(".update(payload)") < sync.indexOf("rpc('nextway_confirm_lead_manual_review'"),
   'the safe unqualified update must precede the manual-review RPC');
 assert.ok(sync.indexOf(".insert(insertPayload)") < sync.lastIndexOf("rpc('nextway_confirm_lead_manual_review'"),
-  'the safe unqualified insert must precede the manual-review RPC');\nassert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
+  'the safe unqualified insert must precede the manual-review RPC');
+assert.match(sync, /x\.manual_review_confirmed=false;x\.local_dirty=false/,
   'a local record may be marked clean only after the cloud operation and any required review succeed');
 
 const pullStart = cloud.indexOf('async function pullCloud()');
