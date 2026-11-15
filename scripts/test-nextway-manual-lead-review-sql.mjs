@@ -43,6 +43,8 @@ assert.match(archive,/if\(x\.qualification==='Qualificato'\)\{x\.qualification='
 assert.match(archive,/x\.manual_review_confirmed=false;/,'Imported or restored records must never carry a manual-review attestation');
 assert.match(archive,/delete x\.manual_reviewed_at;[\s\S]*?delete x\.manual_reviewed_by;/,'Imported review timestamps and reviewer IDs must be discarded');
 assert.match(archive,/Le qualificazioni importate richiedono una nuova revisione manuale/i,'Import and backup previews must explain the manual-review reset');
+assert.match(archive,/delete x\.cloud_id;[\s\S]*?delete x\.cloud_updated_at;[\s\S]*?delete x\.owner_profile_id;/,'Imported backups must not reuse cloud identity, version, or ownership');
+assert.match(archive,/x\.local_dirty=true;/,'Imported records must be marked for local-to-cloud synchronization');
 assert.match(cloud,/nextway_confirm_lead_manual_review/);
 assert.equal((cloud.match(/x\.manual_review_confirmed&&payload\.qualification==='Qualificato'/g)||[]).length,2,'Both insert and update sync paths must invoke explicit review after the database scoring trigger runs');
 assert.match(cloud,/manual_reviewed_at/);
