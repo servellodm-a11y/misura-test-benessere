@@ -570,9 +570,9 @@ console.log("NEXTWAY segment evidence scoring: 10 explicit-vs-generic cases PASS
 
 
 // Source evidence review: only exact excerpts from the declared source field are documented.
-const reviewStart=searchHtml.indexOf("function buildEvidenceReview(");
+const reviewStart=searchHtml.indexOf("function assessProspectFieldEvidence(");
 const reviewEnd=searchHtml.indexOf("\nfunction buildProspectProfile",reviewStart);
-assert.ok(reviewStart>=0&&reviewEnd>reviewStart,"Evidence review helper must exist before prospect profile extraction");
+assert.ok(reviewStart>=0&&reviewEnd>reviewStart,"Profile and evidence review helper chain must exist before prospect profile extraction");
 const reviewHelper=searchHtml.slice(reviewStart,reviewEnd);
 const reviewFn=new Function(reviewHelper+"; return buildEvidenceReview;")();
 const reviewed=reviewFn(
