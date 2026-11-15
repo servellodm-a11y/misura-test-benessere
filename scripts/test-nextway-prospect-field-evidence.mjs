@@ -66,4 +66,4 @@ assert.equal(unknown.role.status,'non_rilevato');
 assert.equal(unknown.organization.status,'non_rilevato');
 assert.equal(unknown.location.status,'non_rilevato');
 assert.equal(unknown.manual_review_required,true);
-console.log('NEXTWAY professional profile evidence contract: 18 checks passed.');
+console.log('NEXTWAY professional profile evidence contract: 20 checks passed.');
