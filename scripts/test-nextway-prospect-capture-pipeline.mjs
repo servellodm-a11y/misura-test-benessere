@@ -52,9 +52,12 @@ const addSearchLeadToLocalArchive = new Function(
   localStorage
 );
 
-const payloadSource = extractFunction(cloud, 'function leadPayload(x){', 'async function resolveLeadConflict(');
-const leadPayload = new Function(
-  'return (' + payloadSource.replace(/^function leadPayload/, 'function') + ');'
+const payloadStart = cloud.indexOf('const CRM_LEAD_CATEGORIES=');
+const payloadEnd = cloud.indexOf('async function resolveLeadConflict(', payloadStart);
+assert.ok(payloadStart >= 0 && payloadEnd > payloadStart, 'CRM sync guard and payload must exist');
+const payloadSource = cloud.slice(payloadStart, payloadEnd).trim();
+const { leadPayload, leadSyncReadiness } = new Function(
+  payloadSource + '; return { leadPayload, leadSyncReadiness };'
 )();
 
 const fixture = {
@@ -109,8 +112,10 @@ assert.match(lead.notes, /NEXTWAY_PROSPECT_METADATA_V1/);
 assert.match(lead.notes, /linkedin:profilo-esempio/);
 
 const cloudPayload = leadPayload(lead);
-assert.equal(cloudPayload.category, 'research_result',
-  'cloud payload must preserve the research-only category');
+assert.equal(cloudPayload.category, null,
+  'research-only results must never be written as a CRM partner category');
+assert.equal(leadSyncReadiness(lead), 'category_requires_manual_review',
+  'research results must remain local until a human assigns a CRM category');
 assert.equal(cloudPayload.qualification, 'Da approfondire');
 assert.equal(cloudPayload.identity_check, 'pending');
 assert.equal(cloudPayload.status, 'Da verificare');
@@ -127,4 +132,4 @@ assert.throws(() => addSearchLeadToLocalArchive('user-fixture', {
 }), /URL della fonte non valido/);
 assert.equal(rows.length, 1, 'invalid source URLs must not write a CRM draft');
 
-console.log('NEXTWAY prospect capture pipeline: 21 integration assertions passed.');
+console.log('NEXTWAY prospect capture pipeline: 22 integration assertions passed.');
