@@ -265,7 +265,7 @@ assert.match(leadUiScript, /data\.some\(y=>y!==existing&&!y\.is_test&&y\.url&&va
 assert.match(leadUiScript, /if\(existing\)\{const metadata=readProspectMetadata\(existing\);Object\.assign\(existing,values\);if\(Object\.keys\(metadata\)\.length\)writeProspectMetadata\(existing,metadata\)/, "Editing a Lead must preserve its prospect metadata");
 assert.match(leadUiScript, /existing\.local_dirty=true/);
 assert.match(leadUiScript, /values\.id=Date\.now\(\)\.toString\(36\)/);
-assert.match(leadUiScript, /edit\.textContent='Modifica Lead'/);
+assert.match(leadUiScript, /edit\.textContent=x\.category==='research_result'\?'Completa classificazione':'Modifica Lead'/);
 assert.match(leadUiScript, /edit\.disabled=!!x\.archived_at\|\|!!x\._sync_conflict/);
 assert.match(leadUiScript, /bar\.append\(edit,archive,sel,del\)/);
 console.log("NEXTWAY CRM Lead editing: edit form, duplicate protection, existing-record update and sync dirty flag: PASS");
