@@ -335,10 +335,21 @@ async function getLeadForConflict(cloudId){
  async function resolveLeadConflict(cloudId,expectedRemoteUpdatedAt,localRecord){
   if(!cloudId||!expectedRemoteUpdatedAt)throw new Error('Manca la versione cloud di confronto. Ricarica il conflitto.');
   const {c}=await active();
-  const {data,error}=await c.from('nextway_leads').update(leadPayload(localRecord)).eq('id',cloudId).eq('updated_at',expectedRemoteUpdatedAt).select('*').maybeSingle();
+  const requiresManualReview=localRecord?.qualification==='Qualificato';
+  if(requiresManualReview&&localRecord.manual_review_confirmed!==true)throw new Error('Per mantenere la qualificazione devi confermare nuovamente la revisione manuale del Lead.');
+  // Never write "Qualificato" directly: the database trigger reserves that
+  // transition for nextway_confirm_lead_manual_review().
+  const safeRecord=requiresManualReview?{...localRecord,qualification:'Da approfondire'}:localRecord;
+  const {data,error}=await c.from('nextway_leads').update(leadPayload(safeRecord)).eq('id',cloudId).eq('updated_at',expectedRemoteUpdatedAt).select('*').maybeSingle();
   if(error)throw error;
   if(!data)throw new Error('Il cloud è cambiato ancora durante la risoluzione. Nessuna modifica applicata: ricarica il confronto.');
-  return {record:fromCloud(data),updated_at:data.updated_at};
+  let saved=data;
+  if(requiresManualReview){
+   const {data:review,error:reviewError}=await c.rpc('nextway_confirm_lead_manual_review',{p_lead_id:cloudId});
+   if(reviewError)throw new Error('Dati locali aggiornati in cloud, ma la revisione manuale non è stata completata. Il Lead resta "Da approfondire": aggiorna il confronto e ripeti la scelta dopo aver verificato identità e punteggio. Dettaglio: '+reviewError.message);
+   saved={...data,...review,updated_at:review.updated_at||data.updated_at};
+  }
+  return {record:fromCloud(saved),updated_at:saved.updated_at};
  }
  window.NEXTWAY_CLOUD={active,getConfig,getLocalSearchArchiveIndex,addSearchLeadToLocalArchive,createLeadConversionRequest,getLeadConversionRequest,getLeadConversionQueue,reviewLeadConversionRequest,archiveLead:(id,reason,updatedAt)=>setLeadArchived(id,true,reason,updatedAt),restoreLead:(id,updatedAt)=>setLeadArchived(id,false,'',updatedAt),getLeadForConflict,getLeadById,getLeadHistory,getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity,setLeadActivityStatus,resolveLeadConflict};
  function fromCloud(r){return {id:r.id,cloud_id:r.id,owner_profile_id:r.owner_profile_id,name:r.display_name,profession:r.profession||'',company_brand:r.company_brand||'',location:r.location||'',category:r.category,partner_type:r.partner_type||'',mode:r.discovery_mode||'',signal_type:r.public_signal||'',source:r.source_name,url:r.source_url,evidence:r.public_evidence,verified_at:r.verified_at||'',identity_check:r.identity_check,qualification:r.qualification,manual_reviewed_at:r.manual_reviewed_at||null,manual_reviewed_by:r.manual_reviewed_by||null,fit:r.score_fit,activity:r.score_activity,presence:r.score_presence,interest:r.score_interest,approach:r.score_approach,status:r.status,notes:r.notes||'',created:r.created_at,archived_at:r.archived_at||null,archive_reason:r.archive_reason||'',cloud_updated_at:r.updated_at,local_dirty:false};}
