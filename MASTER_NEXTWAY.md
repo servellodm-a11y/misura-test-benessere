@@ -2889,3 +2889,91 @@ Le seguenti attività sono state riscontrate nei commit, nei file e nei document
 ### Registro cronologico del MASTER
 
 - 14-11-2026, 19:23 Europe/Rome — aggiornati HEAD main e commit recenti; verificati stato e confronto PR #1/#2, file e migrazione di revisione manuale Lead, run GitHub Actions #712/#714/#715 e relativi risultati; registrato il JSON CRM live fornito dall'utente, la correzione della diagnostica 42P01 e la nuova diagnostica prerequisiti ancora da eseguire; annotati assenza di connettori Supabase/Netlify e protezione branch main disattivata. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
+
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 15 NOVEMBRE 2026, ORE 19:14 (Europe/Rome)
+
+### Repository, branch main e fonti effettivamente verificate
+
+- Recuperato questo MASTER da GitHub `main` prima della modifica: blob SHA di partenza `37ac329668ea642e9738854db7893d71694069f5`; documento di 2892 righe. L'aggiornamento viene aggiunto in coda senza riscrivere le registrazioni precedenti.
+- HEAD di `main` verificato tramite endpoint branch: `1686fd5ec7014479e1a88dc8a614aba0005d8a90`, commit del 14-11-2026 18:25:07 UTC, messaggio `docs(nextway): update MASTER continuity for 14 Nov 19:23`. Il diff di questo commit modifica esclusivamente `MASTER_NEXTWAY.md`. Non risultano nuovi commit su `main` dopo tale aggiornamento documentale.
+- I commit recenti consultati confermano la sequenza documentale su `main` (1686fd5, d8b900c, 7bb8883 e precedenti). Le modifiche applicative più recenti osservate sono su branch di pull request, non sul branch principale.
+- Il workflow su `main` `.github/workflows/nextway-static-validation.yml` è stato recuperato (blob SHA `07380290955939d265a739fe6ebb2f9cfb766eae`). Il workflow attiva validazioni su push a main e pull request in base ai percorsi dichiarati. Il branch PR #3 propone un'estensione dei percorsi e dei test per il motore prospect.
+- L'endpoint Actions filtrato per `branch=main,event=push` restituisce come ultima run push su main la #251, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`, creata il 12-11-2026. Non risultano run push più recenti su main nell'elenco restituito. Le run #798 e #799 descritte sotto sono eventi pull_request, non validazioni del branch main.
+- Il connettore GitHub ha consentito di leggere file, branch, commit, confronti, pull request, workflow, job e log. Non è disponibile un connettore Supabase o Netlify in questa sessione; non è stato effettuato accesso diretto ai rispettivi servizi. Sono state usate le informazioni della conversazione corrente e le registrazioni già presenti nel MASTER; non si presume accesso a tutte le chat storiche.
+
+### Pull request aperte e relazioni tra branch
+
+Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono metadati GitHub al momento della lettura.
+
+**PR #1 — NEXTWAY: verifica integrazione AI Setter governance**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/1
+- OPEN, DRAFT, non merged; base `main`, head `fix/nextway-password-recovery`.
+- Head `f76044111ae2ecd8c45d23dd8dfdb4c2660c8154`; base SHA ancora indicato dalla PR `a3fbec076221f0f043d60373e2864d7d07db30d7`, quindi non coincide con l'attuale HEAD main `1686fd5`.
+- Metadati PR: 727 commit, 87 file modificati, 12.159 aggiunte e 109 cancellazioni. Il confronto aggiornato `main...fix/nextway-password-recovery` è DIVERGED: 727 commit ahead, 9 behind; GitHub indica `mergeable=false`.
+- Rimane il rischio documentale già segnalato: il diff della PR include una versione di `MASTER_NEXTWAY.md` che potrebbe sovrascrivere registrazioni successive su main. Nessun merge o riallineamento è stato eseguito.
+
+**PR #2 — Fix NEXTWAY manual review RPC flag scope**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/2
+- OPEN, non draft, non merged; base `fix/nextway-password-recovery` (head PR #1), head `fix/nextway-manual-review-rpc-scope`.
+- Head `7451f22b4d04359d4a28f7230a61136fbc971b07`; 28 commit, 7 file modificati, 331 aggiunte e 7 cancellazioni. Il confronto con il branch base restituisce 28 ahead e 0 behind; GitHub indica mergeable=true rispetto a quel base branch, non rispetto a main.
+- La proposta riguarda la correzione del perimetro del flag transazionale della RPC di revisione manuale Lead, con relativo test SQL statico. La migrazione resta candidata nel branch PR e non è prova di applicazione sul database live.
+
+**PR #3 — NEXTWAY: migliora qualità e verifica temporale dei prospect**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/3
+- OPEN, DRAFT, non merged; base `fix/nextway-manual-review-rpc-scope` (head PR #2), head `feat/nextway-prospect-search-accuracy`.
+- Head `786b5e26d3f15696df815ebf03163c6dea9646a5`; 68 commit, 16 file modificati, 711 aggiunte e 37 cancellazioni. Il confronto con il base branch restituisce 68 ahead e 0 behind; mergeable=true rispetto al base branch indicato, non rispetto a main.
+- File modificati/aggiunti nel confronto: `nextway-motore-ricerca.html`, `nextway-cloud.js`, `nextway-ai.html`, workflow static validation, test di sincronizzazione Lead e numerosi nuovi test per pipeline, classificazione, contattabilità, deduplicazione, dimensioni di valutazione, provenienza dei campi, copertura ricerca e limiti risultati.
+- La descrizione PR dichiara: limite unificato di 10 risultati; copertura di 9 segmenti con query italiane e inglesi; distinzione tra menzioni e interesse esplicito; verifica manuale in caso di segnali temporali discordanti; valutazioni separate di attendibilità fonte, attualità, pertinenza e opportunità; deduplicazione prudente che non fonde record sul solo nome; contattabilità basata su evidenze senza presumere consenso; tracciabilità della provenienza dei campi professionali e località.
+- La descrizione PR dichiara inoltre un flusso Ricerca → CRM in cui il risultato resta `research_result` locale finché l'operatore non assegna una categoria valida; la sincronizzazione avviene come Lead `Da approfondire`, senza qualificazione automatica. La qualificazione cloud è descritta in due fasi: prima salvataggio non qualificato, poi RPC `nextway_confirm_lead_manual_review`; identità confermata, punteggio minimo 50 e conferma manuale sono richiesti. Se la RPC fallisce, il cloud resta non qualificato. Queste sono descrizioni della proposta e dei test del branch, non verifiche runtime.
+- La PR dichiara che non sono state eseguite ricerche web prospect, non sono stati consumati crediti Tavily e non sono stati modificati dati CRM reali; non è stato eseguito un controllo diretto dei consumi o dei servizi esterni in questa sessione.
+
+**PR #4 — Fix AI Setter retry after prospect creation**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/4
+- OPEN, DRAFT, non merged; base `main`, head `fix/nextway-setter-retry-validation`.
+- Head `cbcad32999be1d74d52fd2c21fdce9267f68d6b0`; 1 commit, 1 file modificato (`nextway-setter.js`), 19 aggiunte e 0 cancellazioni. Il confronto con main restituisce 1 ahead e 0 behind; GitHub indica mergeable=true, ma la PR è ancora draft.
+- File recuperato sul branch PR: blob SHA `33895c175cc4a3690307283f2fd395f4e184092d`. La modifica imposta `form.noValidate = true` durante il submit, sposta la validazione manuale dei campi obbligatori nel percorso di creazione di un nuovo prospect e fa precedere il retry al controllo dei campi che `form.reset()` può avere svuotato. Il ramo retry riutilizza l'ID conversazione e la chiave idempotenza pendenti; pulisce i riferimenti pending solo dopo generazione riuscita.
+- La PR non aggiunge un file di test dedicato: il confronto mostra soltanto `nextway-setter.js`. La CI generale superata non costituisce da sola una prova specifica end-to-end del retry AI Setter.
+
+### GitHub Actions — risultati e log esaminati
+
+- **PR #4, run #799**, ID `43732767922`, URL https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43732767922: SUCCESS sul commit `cbcad32999be`. Job `validate` concluso SUCCESS; 32 step riportati, tutti SUCCESS. Sono passati validatore audit, contratti di sicurezza provisioning/Edge Functions, rate limit e idempotenza SQL, contratti Knowledge Base/Upload/Ingest, workspace, script browser e cinque type-check Deno. Nessuno step del workflow ha un nome che dimostri un test specifico del nuovo retry.
+- **PR #3, run #798**, ID `43716121072`, URL https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43716121072: SUCCESS sul commit `786b5e26d3f1`. Job `validate` concluso SUCCESS; 58 step riportati, tutti SUCCESS. Tra gli step superati: test di classificazione, copertura segmenti, dimensioni di valutazione, deduplicazione prudente, contattabilità, provenienza campi, pipeline di acquisizione con mock, controlli browser e type-check delle Edge Functions, inclusa `nextway-search`.
+- La run PR #3 #797, ID `43716080830`, è SUCCESS sul commit `9eee6c60c9cb`; la #796, ID `43715420348`, è SUCCESS sul commit `cd7678b285fa`.
+- **Failure intermedia PR #3, run #795**, ID `43715122609`, commit `66c485d90348`: il job fallisce allo step `Validate NEXTWAY Lead sync duplicate reconciliation contract`. Il log mostra una `SyntaxError: Invalid or unexpected token` in `scripts/test-nextway-lead-sync-contract.mjs`, riga 70, nella regex/asserzione con un'interruzione di riga non valida. Il commit successivo `cd7678b` è intitolato `Fix CRM sync contract test line break` e la run #796 sul relativo commit risulta SUCCESS. La correzione osservata riguarda la sintassi del test; non va descritta come correzione di un difetto runtime CRM.
+- I log #798 e #799 riportano avvisi non bloccanti relativi alla deprecazione del modulo Node `punycode` e all'esecuzione di alcune GitHub Actions che usano Node.js 20. Le run sono comunque SUCCESS.
+- **Main:** ultima run push osservata #251 SUCCESS del 12-11-2026 sul commit `b2ce72e`. Le run PR #798/#799 non validano il branch main e non provano l'applicazione di migrazioni o il comportamento runtime Supabase.
+
+### Supabase, CRM e Netlify — stato invariato, nessuna nuova lettura live
+
+- Nessuna interrogazione diretta Supabase è stata eseguita: il connettore non è disponibile. Resta valido l'ultimo JSON fornito dall'utente e già registrato: `public.nextway_leads` presente con RLS attivo, FORCE RLS non attivo e quattro policy proprietario/`platform_admin`; `nextway_lead_activities` e `nextway_lead_conversion_requests` assenti al momento della query.
+- Non è stato ricevuto un nuovo risultato di esecuzione per `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`. Colonne archive, vincoli di stato, tabella idempotenza e firme RPC live restano DA COMPLETARE. Non dedurre lo stato delle migrazioni dallo storico non disponibile né dalla sola presenza dei file nel repository.
+- Nessuna modifica a Supabase, account Auth, record CRM, Storage, RPC, Edge Functions deployate o configurazioni.
+- Nessuna lettura diretta Netlify: stato dei deploy live non verificato. Le PR e i workflow letti non dimostrano un deploy in produzione.
+
+### Matrice di stato al 15 novembre 2026
+
+- MASTER su main, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** per questa operazione documentale.
+- HEAD main e diff del commit precedente: **COMPLETATO E VERIFICATO**; nessuna modifica applicativa successiva osservata su main.
+- PR #1: **BLOCCATO** per divergenza 727 ahead/9 behind, base SHA non allineato all'attuale main, `mergeable=false` e rischio di sovrascrittura del MASTER.
+- PR #2: **ESEGUITO MA NON VERIFICATO** quanto alla proposta e alla CI statica storicamente registrata; resta una PR aperta basata sulla PR #1, non integrata in main.
+- PR #3: **COMPLETATO E VERIFICATO** quanto a file, metadati e CI statica #798; **DA COMPLETARE** per revisione funzionale, test runtime, integrazione controllata nella catena PR e verifica live.
+- PR #4: **COMPLETATO E VERIFICATO** quanto al diff e alla CI generale #799; **DA COMPLETARE** per un test di regressione specifico del retry e prova browser/runtime; PR ancora draft e non integrata.
+- CI statica PR #3 (#798) e PR #4 (#799): **COMPLETATO E VERIFICATO** per gli step effettivamente eseguiti; non equivale a test runtime o deploy.
+- CRM live: **COMPLETATO E VERIFICATO** solo per il risultato JSON utente già acquisito; diagnostica prerequisiti e tabelle correlate restano **DA COMPLETARE**.
+- Applicazione migrazioni CRM, test PostgreSQL/Auth/concorrenza, backup/restore verificato, staging e deploy Edge Functions/Netlify: **DA COMPLETARE/BLOCCATO** secondo i gate precedenti.
+- Nessun codice applicativo, database, impostazione, segreto, configurazione o deploy è stato modificato in questa attività.
+
+### Prossimi passi operativi precisi
+
+1. Eseguire in Supabase la diagnostica read-only `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo; non applicare ancora migrazioni.
+2. Per PR #4 aggiungere un test di regressione mirato al caso retry dopo `form.reset()`, dimostrando che l'ID conversazione e la chiave idempotenza sono riutilizzati e che i riferimenti pending non vengono cancellati prima della generazione riuscita.
+3. Per PR #3 mantenere obbligatoria la revisione umana; verificare in staging il flusso Ricerca → classificazione → sincronizzazione Lead e la gestione dei conflitti/deduplicazione prima di qualsiasi uso con dati reali.
+4. Prima di un merge della catena PR #1/#2/#3, riallineare i branch in modo controllato e riconciliare `MASTER_NEXTWAY.md`; non integrare la versione documentale obsoleta presente nel diff PR #1.
+5. Mantenere backup/restore verificato e staging isolato come gate per ogni modifica Supabase o deploy.
+
+### Registro cronologico del MASTER
+
+- 15-11-2026, 19:14 Europe/Rome — verificati HEAD main `1686fd5`, workflow principale e ultima run push main #251; aggiornati metadati e confronti delle PR #1–#4; esaminati i file modificati delle PR #3/#4, le run e i log #795–#799, inclusa la causa della failure sintattica del test Lead sync e il successivo passaggio; registrate le nuove funzionalità di ricerca prospect e la correzione del retry AI Setter distinguendo descrizioni PR, controlli statici e assenza di prove runtime. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
