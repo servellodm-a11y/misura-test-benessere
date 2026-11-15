@@ -509,6 +509,9 @@ async function runSearch(){
      section.append(ul);return section;
     };
     const documentedSection=reviewSection('1. Documentato nella fonte · citazione testuale',evidenceReview.documented,item=>item.kind+' · '+item.field+': “'+item.excerpt+'” — '+item.statement,'Nessuna citazione testuale verificabile nei campi restituiti. Aprire la fonte originale.');
+    const fieldItems=evidenceReview.profile_fields||[];
+    const fieldSection=reviewSection('Qualità dei dati anagrafici · provenienza di ogni campo',fieldItems,item=>item.label+': '+item.value+' · '+(item.status==='presente_nella_fonte'?'presente nella fonte':item.status==='estratto_non_rintracciato'?'estrazione da confermare':'non rilevato')+(item.source?' · '+item.source:'')+' — '+item.note,'Nessun campo disponibile.');
+    profileCard.append(fieldSection);
     const dimensions=evidenceReview.prospect_assessment;
     if(dimensions){
      const dimensionItems=[
@@ -979,7 +982,20 @@ function assessProspectDimensions(commercialFit,sourceQuality,targetAssessment,a
  };
 }
 
+function assessProspectFieldEvidence(profile,title,snippet,pageContent){
+ const fields=[['Nominativo',profile?.name,'name'],['Professione / ruolo',profile?.profession,'profession'],['Organizzazione',profile?.organization,'organization'],['Località',profile?.location,'location']];
+ const sources=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto della pagina',String(pageContent||'')]];
+ const normalize=value=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
+ return fields.map(([label,value,key])=>{
+  const normalized=normalize(value);
+  if(!normalized||/^(non rilevato con certezza|non confermata|non rilevata)$/.test(normalized))return {key,label,value:value||'Non rilevato',status:'non_rilevato',source:'',excerpt:'',note:'La fonte esaminata non fornisce un valore utilizzabile per questo campo.'};
+  const match=sources.find(([source,text])=>normalize(text).includes(normalized));
+  if(match)return {key,label,value,status:'presente_nella_fonte',source:match[0],excerpt:match[1].slice(Math.max(0,normalize(match[1]).indexOf(normalized)-90),Math.min(match[1].length,Math.max(0,normalize(match[1]).indexOf(normalized)-90)+260)),note:'Valore rintracciato nel testo indicato; presenza nella fonte, non verifica indipendente.'};
+  return {key,label,value,status:'estratto_non_rintracciato',source:'',excerpt:'',note:'Valore prodotto dall’estrazione automatica ma non ritrovato come testo corrispondente nei campi disponibili. Confermare o correggere manualmente.'};
+ });
+}
 function buildEvidenceReview(assessment,title,snippet,pageContent,profile,targetAssessment,sourceQuality,prospectAssessment){
+ const profileFields=assessProspectFieldEvidence(profile,title,snippet,pageContent);
  const sourceFields=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
  const normalize=value=>String(value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('it');
  const documented=[],interpreted=[];
@@ -1009,7 +1025,7 @@ function buildEvidenceReview(assessment,title,snippet,pageContent,profile,target
   'Validità e titolarità dei recapiti pubblicati',
   'Data e attualità delle informazioni'
  ];
- return {documented,interpreted,inference,verify,prospect_assessment:prospectAssessment||null,source_date:sourceQuality?.published_at||null,source_date_label:sourceQuality?.published_at?'Data indicata dalla fonte: '+new Date(sourceQuality.published_at).toLocaleDateString('it-IT'):'Data della fonte non rilevata · da verificare',source_url:sourceQuality?.host||''};
+ return {documented,interpreted,inference,verify,profile_fields:profileFields,prospect_assessment:prospectAssessment||null,source_date:sourceQuality?.published_at||null,source_date_label:sourceQuality?.published_at?'Data indicata dalla fonte: '+new Date(sourceQuality.published_at).toLocaleDateString('it-IT'):'Data della fonte non rilevata · da verificare',source_url:sourceQuality?.host||''};
 }
 function classifyLeadQueue(prospect){
  const fit=prospect?.commercial_fit||{};
