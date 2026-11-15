@@ -174,6 +174,7 @@ assert.ok(cloudHtml.includes("da qualificare, non sincronizzati: '+deferred"),'C
 assert.ok(cloudHtml.includes('I risultati da qualificare restano locali e non vengono trasformati in Potenziali Partner.'),'The sync status must explain why unqualified research results are deferred');
 assert.ok(cloudHtml.includes('function getLocalSearchArchiveIndex(userId)'), 'Cloud bridge must read the authenticated user local archive index');
 assert.ok(cloudHtml.includes('function addSearchLeadToLocalArchive(userId,record)'), 'Cloud bridge must persist a prospect from the search page');
+assert.ok(archiveHtml.includes("x.category==='research_result'?'Completa classificazione':'Modifica Lead'"),'Research-only records must expose an explicit CRM classification action');
 assert.ok(cloudHtml.includes("localStorage.setItem(key,JSON.stringify(rows))"), 'Search acquisition must persist to the same owner-scoped local archive key');
 assert.ok(searchHtml.includes('getLocalSearchArchiveIndex(s.user.id)'), 'Search must inspect duplicates in the authenticated user archive');
 assert.ok(searchHtml.includes('addSearchLeadToLocalArchive(s.user.id,'), 'Search acquisition must use the cross-page archive bridge');
