@@ -355,6 +355,24 @@ async function getLeadForConflict(cloudId){
    x.manual_review_confirmed=false;x.local_dirty=false;delete x._sync_conflict;updated++;continue;
  }
  const insertPayload={...payload,owner_profile_id:s.user.id};
+ // Reconcile exact owner + source URL before attempting an insert. This also
+ // works when the database has no URL uniqueness constraint.
+ const {data:existingMatches,error:lookupError}=await c.from('nextway_leads')
+  .select('id,updated_at')
+  .eq('owner_profile_id',s.user.id)
+  .eq('source_url',payload.source_url)
+  .limit(2);
+ if(lookupError){failed++;continue;}
+ if(existingMatches?.length){
+  if(existingMatches.length===1){
+   x.cloud_id=existingMatches[0].id;
+   x.cloud_updated_at=existingMatches[0].updated_at;
+   x.local_dirty=true;
+   x._sync_conflict={reason:'duplicate_import_match',detected_at:new Date().toISOString()};
+   conflicts++;
+  }else failed++;
+  continue;
+ }
  const {data,error}=await c.from('nextway_leads').insert(insertPayload).select('id,updated_at,qualification,manual_reviewed_at,manual_reviewed_by').single();
  if(error){
    if(error.code==='23505'){
