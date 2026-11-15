@@ -447,9 +447,12 @@ async function runSearch(){
     if(publicContacts.whatsapp.length)contactParts.push('Link WhatsApp: '+publicContacts.whatsapp.join(', '));
     if(publicContacts.socials.length)contactParts.push('Profili social: '+publicContacts.socials.join(', '));
     const targetAssessment=classifyProspectTarget(item.title,item.snippet,pageContent,$('segment').value);
-    const identityKeys=buildProspectIdentityKeys(url,publicContacts);
+    const profile=buildProspectProfile(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment);
+    const identityKeys=buildProspectIdentityKeys(url,publicContacts,profile,assessment,targetAssessment);
     const dedupeKeys=[...new Set([...identityKeys,'url:'+canonicalProspectUrl(url)])];
-    const duplicateEntry=dedupeKeys.map(key=>seenProspects.get(key)).find(Boolean);
+    const duplicateCandidates=[...new Set(dedupeKeys.map(key=>seenProspects.get(key)).filter(Boolean))];
+    const duplicateEntry=duplicateCandidates.length===1?duplicateCandidates[0]:null;
+    const ambiguousDuplicate=duplicateCandidates.length>1;
     if(duplicateEntry){
       duplicateEntry.sources=[...new Set([...duplicateEntry.sources,url])];
       duplicateEntry.daily.sources=duplicateEntry.sources;
@@ -471,7 +474,6 @@ async function runSearch(){
     const sourceQuality=assessSourceQuality(item,url,pageContent);
     const sourceQualityCard=document.createElement('p');sourceQualityCard.className='muted';sourceQualityCard.textContent='Fonte: '+sourceQuality.source_type+' · '+sourceQuality.reliability_score+'/100. Attualità: '+sourceQuality.freshness_label+' · qualità complessiva fonte: '+sourceQuality.quality_score+'/100. '+sourceQuality.verification_note;
     contactSummary.textContent=(['wellness_networker','new_networker','other_networker','exnetworker'].includes($('segment').value)?'Classificazione provvisoria: '+networkerStage+'. ':'')+(contactParts.length?'Recapiti e profili rilevati nella pagina (da verificare): '+contactParts.join(' · '):'Nessun recapito o profilo social rilevato nel testo estratto.');
-    const profile=buildProspectProfile(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment);
     const qualification=qualifyCommercialProspect(item.title,item.snippet,pageContent,url,publicContacts,assessment,targetAssessment,profile);
     const commercialFit=assessCommercialFit(item.title,item.snippet,pageContent,$('segment').value,targetAssessment,assessment,publicContacts);
     commercialFit.source_quality_score=sourceQuality.quality_score;
@@ -1097,10 +1099,16 @@ function canonicalProspectUrl(value){
  try{const u=new URL(value);u.hash='';u.hostname=u.hostname.toLowerCase().replace(/^www\./,'');['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','source'].forEach(k=>u.searchParams.delete(k));u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.toString().replace(/\/$/,'');}
  catch{return String(value||'').trim().toLowerCase();}
 }
-function buildProspectIdentityKeys(url,contacts){
+function normalizeProspectIdentityPart(value){
+ return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('it').replace(/&/g,' e ').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+}
+function buildProspectIdentityKeys(url,contacts,profile,assessment,targetAssessment){
  const normalized=canonicalProspectUrl(url),keys=[];
  const linkedin=normalized.match(/linkedin\.com\/in\/([^/?]+)/i);
  if(linkedin)keys.push('linkedin:'+linkedin[1].toLowerCase());
+ for(const social of (contacts?.socials||[])){
+  try{const u=new URL(social);const match=u.pathname.match(/^\/(?:in|@)([^/]+)/i);if(match&&/linkedin\.com$/i.test(u.hostname))keys.push('linkedin:'+match[1].toLowerCase());}catch{}
+ }
  for(const email of (contacts?.emails||[])){
   const value=String(email||'').trim().toLowerCase(),local=value.split('@')[0]||'';
   const generic=/^(info|contact|contatti|support|office|hello|amministrazione|segreteria|sales|marketing|booking|reception|studio)([._+-].*)?$/.test(local);
@@ -1111,6 +1119,17 @@ function buildProspectIdentityKeys(url,contacts){
   const italianMobile=/^3\d{8,10}$/.test(value)||/^393\d{8,10}$/.test(value);
   if(italianMobile)keys.push('phone:'+value);
  }
+ const name=normalizeProspectIdentityPart(profile?.name);
+ const profession=normalizeProspectIdentityPart(profile?.profession);
+ const organization=normalizeProspectIdentityPart(profile?.organization);
+ const location=normalizeProspectIdentityPart(profile?.location);
+ const validName=assessment?.individual===true&&name.split(' ').length>=2&&name!=='non rilevato con certezza';
+ const validProfession=profession&&profession!=='non confermata';
+ const validOrganization=organization&&organization!=='non rilevata';
+ const validLocation=location&&location!=='non rilevata';
+ // Nome da solo non basta: il composite key richiede anche un contesto professionale e organizzativo/geografico.
+ if(validName&&validProfession&&validOrganization)keys.push('person-role-org:'+name+'|'+profession+'|'+organization);
+ else if(validName&&validProfession&&validLocation)keys.push('person-role-location:'+name+'|'+profession+'|'+location);
  return [...new Set(keys)];
 }
 function buildProspectDedupeKey(url,title,assessment,target,contacts){
