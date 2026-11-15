@@ -1012,7 +1012,7 @@ function assessProspectFieldEvidence(profile,title,snippet,pageContent){
 }
 function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sourceQuality){
  const sources=[['Titolo della pagina',String(title||'')],['Descrizione del risultato',String(snippet||'')],['Contenuto estratto della pagina',String(pageContent||'')]];
- const normalize=value=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
+ const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('it').replace(/[^a-z0-9]+/g,' ').trim();
  const occurrences=value=>sources.filter(([,text])=>normalize(text).includes(normalize(value))).map(([label])=>label);
  const profession=String(profile?.profession||'').trim();
  const organization=String(profile?.organization||'').trim();
@@ -1020,9 +1020,9 @@ function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sou
  const roleEvidence=profession?occurrences(profession):[];
  const organizationEvidence=organization?occurrences(organization):[];
  const locationEvidence=location?occurrences(location):[];
- const combined=sources.map(([,value])=>value).join(' ').replace(/\\s+/g,' ').trim();
- const pastPattern=/\\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato|non lavoro piu|non collaboro piu|in passato|precedentemente|anni fa|era titolare|e stato titolare|ha cessato|attivita cessata|chiuso definitivamente|non esercita piu)\\b/i;
- const currentPattern=/\\b(attualmente|oggi|dal 20\\d{2}|lavoro come|mi occupo di|ricevo su appuntamento|prenotazioni aperte|prenota online|per appuntamenti|contattami per|studio aperto|attivita attiva|operativo dal|svolgo la professione|esercito come|sono titolare|sono founder|sono amministratore)\\b/i;
+ const combined=sources.map(([,value])=>value).join(' ').replace(/\s+/g,' ').trim();
+ const pastPattern=/\b(ex[- ]?networker|ex distributore|ex incaricat[oa]|ho lasciato|non lavoro piu|non collaboro piu|in passato|precedentemente|anni fa|era titolare|e stato titolare|ha cessato|attivita cessata|chiuso definitivamente|non esercita piu)\b/i;
+ const currentPattern=/\b(attualmente|oggi|dal 20\d{2}|lavoro come|mi occupo di|ricevo su appuntamento|prenotazioni aperte|prenota online|per appuntamenti|contattami per|studio aperto|attivita attiva|operativo dal|svolgo la professione|esercito come|sono titolare|sono founder|sono amministratore)\b/i;
  const pastMatch=combined.match(pastPattern),currentMatch=combined.match(currentPattern);
  let activityStatus='attivita_non_documentata',activityLabel='Attività attuale non documentata',activityExcerpt='';
  if(pastMatch&&currentMatch){activityStatus='segnali_temporali_misti';activityLabel='Segnali di attività passata e attuale in conflitto';activityExcerpt=pastMatch[0]+' / '+currentMatch[0];}
@@ -1033,20 +1033,21 @@ function assessProfessionalProfileEvidence(profile,title,snippet,pageContent,sou
  const validDate=publishedDate&&!Number.isNaN(publishedDate.getTime());
  const ageDays=validDate?Math.max(0,Math.floor((Date.now()-publishedDate.getTime())/86400000)):null;
  const freshness=ageDays===null?'data_non_rilevata':ageDays<=365?'entro_12_mesi':ageDays<=730?'tra_12_e_24_mesi':'oltre_24_mesi';
- const conflicts=(roleEvidence.length>1&&new Set(roleEvidence).size>1)||(organizationEvidence.length>1&&new Set(organizationEvidence).size>1)||(locationEvidence.length>1&&new Set(locationEvidence).size>1)||activityStatus==='segnali_temporali_misti';
+ const conflicts=activityStatus==='segnali_temporali_misti';
+ const supportingSources=[...new Set([...roleEvidence,...organizationEvidence,...locationEvidence])];
  const missing=[];
  if(!profession||!roleEvidence.length)missing.push('Ruolo/professione non rintracciato testualmente nella fonte');
  if(!organization||!organizationEvidence.length)missing.push('Organizzazione non documentata testualmente');
  if(!location||!locationEvidence.length)missing.push('Località non documentata testualmente');
  if(!validDate)missing.push('Data di pubblicazione della fonte non rilevata');
- const manualReviewRequired=conflicts||missing.length>0||activityStatus!=='segnale_attivita_attuale'||freshness==='oltre_24_mesi';
+ const manualReviewRequired=true;
  return {
   role:{value:profession||'Non rilevato',status:!profession?'non_rilevato':roleEvidence.length?'presente_nella_fonte':'estratto_non_rintracciato',sources:roleEvidence},
   organization:{value:organization||'Non rilevata',status:!organization?'non_rilevato':organizationEvidence.length?'presente_nella_fonte':'estratto_non_rintracciato',sources:organizationEvidence},
   location:{value:location||'Non rilevata',status:!location?'non_rilevato':locationEvidence.length?'presente_nella_fonte':'estratto_non_rintracciato',sources:locationEvidence},
   activity:{status:activityStatus,label:activityLabel,excerpt:activityExcerpt,verified:false},
   source_freshness:{status:freshness,published_at:validDate?publishedDate.toISOString():null,age_days:ageDays},
-  source_concordance:{status:conflicts?'segnali_discordanti':roleEvidence.length+organizationEvidence.length+locationEvidence.length?'concordanza_parziale':'evidenze_insufficienti',role_sources:roleEvidence,organization_sources:organizationEvidence,location_sources:locationEvidence},
+  source_concordance:{status:conflicts?'segnali_temporali_discordanti':supportingSources.length>1?'evidenze_presenti_in_fonti_multiple':supportingSources.length===1?'evidenze_presenti_in_una_fonte':'evidenze_insufficienti',supporting_sources:supportingSources,role_sources:roleEvidence,organization_sources:organizationEvidence,location_sources:locationEvidence},
   missing_evidence:missing,
   manual_review_required:manualReviewRequired,
   disclaimer:'Ruolo, organizzazione e località sono estratti da contenuti pubblici: la presenza testuale non prova che siano attuali o corretti. I segnali temporali sono lessicali e richiedono apertura e verifica della fonte originale.'
