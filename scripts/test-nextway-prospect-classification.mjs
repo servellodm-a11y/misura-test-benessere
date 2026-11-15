@@ -15,7 +15,8 @@ const helpers = [
   extract('function assessNetworkerActivity(', 'function assessCustomerIntent('),
   extract('function assessCustomerIntent(', 'function assessOpportunityIntent('),
   extract('function assessOpportunityIntent(', 'function assessSearchEvidence('),
-  extract('function classifyProspectTarget(', 'function classifyNetworkerStage(')
+  extract('function classifyProspectTarget(', 'function classifyNetworkerStage('),
+  extract('function classifyNetworkerStage(', 'function extractPublicContacts(')
 ].join('\n');
 const sandbox = {};
 vm.runInNewContext(helpers + `
