@@ -74,7 +74,7 @@ assert.doesNotMatch(search, /Access-Control-Allow-Origin["']?\s*:\s*["']\*["']/i
 assert.match(search, /req\.method !== "POST"/);
 assert.match(search, /Authorization/);
 assert.match(search, /auth\.getUser\(token\)/);
-assert.match(search, /totalBytes > 98_304/);
+assert.match(search, /totalBytes > 262_144/);
 assert.match(search, /body\.queries\.length < 1 \|\| body\.queries\.length > 5/);
 assert.match(search, /query\.length === 0 \|\| query\.length > 400/);
 assert.match(search, /p_scope: "public_search", p_units: uncached\.length/);
