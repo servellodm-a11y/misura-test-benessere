@@ -12,6 +12,10 @@ assert.equal((migration.match(/create or replace function public\.nextway_merge_
   "the identity merge RPC must be defined exactly once");
 assert.match(migration, /alter function public\.nextway_merge_prospect_identity\([\s\S]*owner to postgres/,
   "identity merge must execute under the trusted database owner");
+assert.match(migration, /alter function public\.nextway_lookup_prospect_crm_matches\(uuid,text\[\]\) owner to postgres/,
+  "CRM duplicate lookup must execute under the trusted database owner");
+assert.match(migration, /alter function public\.nextway_store_search_query_cache\([\s\S]*owner to postgres/,
+  "query cache writes must execute under the trusted database owner");
 
 const cacheRead = edge.indexOf('.from("nextway_search_query_cache")');
 const rateLimit = edge.indexOf('"nextway_consume_api_rate_limit"');
