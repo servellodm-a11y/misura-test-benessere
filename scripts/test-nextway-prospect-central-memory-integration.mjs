@@ -6,6 +6,8 @@ const ui = readFileSync("nextway-motore-ricerca.html", "utf8");
 const schemaMigration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
 const rpcMigration = readFileSync("supabase/migrations/20261116120000_nextway_prospect_identity_memory_rpcs.sql", "utf8");
 const workspaceMigration = readFileSync("supabase/migrations/20261116130000_nextway_list_accessible_workspaces.sql", "utf8");
+const membershipMigration = readFileSync("supabase/migrations/20261111220000_nextway_workspace_memberships.sql", "utf8");
+const workspaceAdmin = readFileSync("supabase/functions/nextway-workspace-admin/index.ts", "utf8");
 assert.equal((schemaMigration.match(/\bcommit;/gi) || []).length, 1,
   "the schema migration must be one atomic transaction");
 assert.equal((rpcMigration.match(/\bcommit;/gi) || []).length, 1,
@@ -44,6 +46,22 @@ assert.match(workspaceMigration, /revoke all on function public\.nextway_list_ac
   "anonymous users must not enumerate workspaces");
 assert.doesNotMatch(workspaceMigration, /insert into public\.|update public\.|delete from public\./,
   "the workspace listing migration must not modify workspace or membership data");
+assert.match(membershipMigration, /public\.nextway_is_platform_admin\(\)\s*or\s*\(/,
+  "platform administrators must pass workspace access checks without a membership row");
+assert.match(membershipMigration, /m\.membership_status = 'active'[\s\S]*w\.status = 'active'/,
+  "non-admin workspace access must require an active membership and active workspace");
+assert.match(workspaceAdmin, /profile\?\.role !== "platform_admin"/,
+  "workspace lifecycle administration must be restricted to platform administrators");
+assert.match(workspaceAdmin, /workspace_key: key,[\s\S]*status: "draft"/,
+  "new workspaces must start in draft state and never become searchable automatically");
+assert.match(workspaceAdmin, /if \(!\["draft", "active", "archived"\]\.includes\(String\(body\.status\)\)\)/,
+  "workspace activation must use the explicit admin status transition");
+assert.match(workspaceAdmin, /body\.membership_status === "active" && workspace\.status !== "active"/,
+  "a normal membership cannot be activated before its workspace is active");
+assert.match(workspaceAdmin, /!authUser\.user\.email_confirmed_at/,
+  "normal user membership activation must require a confirmed account");
+assert.match(workspaceAdmin, /!existing \|\| !\["invited", "active"\]\.includes/,
+  "normal user membership activation must follow an existing invitation");
 assert.match(rpcMigration, /nextway_merge_prospect_identity[\s\S]*commit;\s*$/,
   "the identity merge RPC must be created before the single final transaction commit");
 assert.equal((rpcMigration.match(/create or replace function public\.nextway_merge_prospect_identity/g) || []).length, 1,
