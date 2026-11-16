@@ -692,7 +692,14 @@ async function runSearch(runAll=false){
      const lookupPayload=await lookupResponse.json();
      if(!lookupResponse.ok)throw new Error(lookupPayload.error||('Errore HTTP '+lookupResponse.status));
      (lookupPayload.matches||[]).forEach(match=>{
-      const prospect=dailyProspects[match.index];if(!prospect||!match.record)return;
+      const prospect=dailyProspects[match.index];if(!prospect)return;
+      if(match.ambiguous){
+       prospect.central_identity_ambiguous=true;
+       const card=[...list.querySelectorAll('article.query')].find(item=>item.dataset.canonicalUrl===canonicalProspectUrl(prospect.url));
+       if(card){const note=document.createElement('p');note.className='notice central-identity-ambiguous';note.textContent='ATTENZIONE · '+match.matched_records+' schede centrali corrispondono a questa identità. Verifica manualmente prima di acquisire o contattare.';card.append(note);const captureButton=card.querySelector('.prospect-capture-button');if(captureButton){captureButton.disabled=true;captureButton.textContent='Duplicato centrale da verificare';captureButton.title='Acquisizione bloccata: più schede centrali corrispondono a questa identità.';}}
+       return;
+      }
+      if(!match.record)return;
       const record=match.record;
       prospect.history_seen_before=true;
       prospect.history_first_seen=record.first_seen_at||prospect.history_first_seen;
