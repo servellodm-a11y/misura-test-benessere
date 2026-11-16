@@ -35,11 +35,11 @@ assert.match(edge, /nextway_lookup_prospect_crm_matches/,
   "existing CRM Leads must be checked before permitting acquisition");
 assert.match(edge, /crm_match:\s*true/,
   "a matching existing CRM Lead must be returned as an acquired identity");
-assert.match(rpcMigration, /create or replace function public\\.nextway_lookup_prospect_crm_matches/,
+assert.match(rpcMigration, /create or replace function public\.nextway_lookup_prospect_crm_matches/,
   "the CRM duplicate lookup must be implemented as a protected database RPC");
-assert.match(rpcMigration, /lower\\(btrim\\(l\\.source_url\\)\\) = lower\\(btrim\\(u\\.url\\)\\)/,
+assert.match(rpcMigration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
   "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
-assert.match(rpcMigration, /l\\.workspace_id is null and l\.owner_profile_id = auth\.uid\(\)/,
+assert.match(rpcMigration, /l\.workspace_id is null and l\.owner_profile_id = auth\.uid\(\)/,
   "legacy owner-scoped CRM Leads must also be recognized without crossing user boundaries");
 assert.match(rpcMigration, /v_effective_archive_status := 'acquired'/,
   "the database, not the browser, must derive acquired status from an existing CRM Lead");
@@ -53,17 +53,17 @@ assert.match(rpcMigration, /p_archive_status is distinct from 'seen'/,
   "authenticated clients must not self-assert acquired or reviewed status");
 assert.match(rpcMigration, /array_position\(coalesce\(p_identity_fingerprints/,
   "the merge RPC must reject null identity fingerprints");
-assert.match(rpcMigration, /jsonb_array_elements\\(case when jsonb_typeof\\(coalesce\\(p_public_contacts -> 'emails'/,
+assert.match(rpcMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_public_contacts -> 'emails'/,
   "public contact arrays must be validated safely before merging");
-assert.match(rpcMigration, /jsonb_array_elements\\(case when jsonb_typeof\\(coalesce\\(p_source_evidence/,
+assert.match(rpcMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_source_evidence/,
   "source evidence validation must not throw on malformed scalar JSON");
-assert.match(schemaMigration, /jsonb_array_elements\\(case when jsonb_typeof\\(coalesce\\(p_results/,
+assert.match(schemaMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
   "cache result validation must not throw on malformed scalar JSON");
-assert.match(schemaMigration, /coalesce\\(jsonb_typeof\\(item\.value -> 'score'\), ''\) <> 'number'/,
+assert.match(schemaMigration, /coalesce\(jsonb_typeof\(item\.value -> 'score'\), ''\) <> 'number'/,
   "cached search results must contain numeric relevance scores");
-assert.match(schemaMigration, /jsonb_array_length\\(case when jsonb_typeof\\(source_evidence\) = 'array'/,
+assert.match(schemaMigration, /jsonb_array_length\(case when jsonb_typeof\(source_evidence\) = 'array'/,
   "source evidence table constraints must safely handle malformed JSON");
-assert.match(schemaMigration, /jsonb_array_length\\(case when jsonb_typeof\\(results\) = 'array'/,
+assert.match(schemaMigration, /jsonb_array_length\(case when jsonb_typeof\(results\) = 'array'/,
   "query cache table constraints must safely handle malformed JSON");
 assert.match(rpcMigration, /nextway_leads.*workspace_id.*source_url/s,
   "migration prerequisites must include workspace-scoped Lead source URLs");
