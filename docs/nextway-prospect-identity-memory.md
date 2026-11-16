@@ -115,10 +115,11 @@ La cache e i payload di identità sono convalidati prima del salvataggio: array 
 
 Per mantenere immutabili le migrazioni già applicate, lo schema e le RPC sono distribuiti in due file distinti:
 
-1. `20261116100000_nextway_prospect_identity_memory.sql`: tabelle, indici, RLS e RPC di persistenza della cache.
-2. `20261116120000_nextway_prospect_identity_memory_rpcs.sql`: verifica Lead CRM, merge identità e stato acquisito derivato dal database.
+1. `20261116100000_nextway_prospect_identity_memory.sql`: tabelle, indici, RLS, guard di immutabilità e RPC di persistenza della cache e merge identità.
+2. `20261116120000_nextway_prospect_identity_memory_rpcs.sql`: verifica Lead CRM e preflight server-only dei prerequisiti e dei privilegi.
+3. `20261116130000_nextway_list_accessible_workspaces.sql`: RPC read-only che alimenta il selettore dei workspace attivi autorizzati.
 
-La seconda migrazione verifica preventivamente la presenza delle tabelle e delle colonne `nextway_leads.workspace_id` e `source_url`. Non modifica i dati esistenti e non deve essere applicata prima della prima migrazione.
+La seconda migrazione verifica preventivamente la presenza delle tabelle e delle colonne `nextway_leads.workspace_id` e `source_url`. La terza richiede le tabelle multi-workspace/membership e il helper `nextway_is_platform_admin()`. Tutte e tre sono candidate, transazionali e senza seed o modifiche ai dati esistenti; devono essere applicate nell'ordine indicato solo dopo l'approvazione della catena precedente.
 
 
 ## Scritture centrali: confine server-only
