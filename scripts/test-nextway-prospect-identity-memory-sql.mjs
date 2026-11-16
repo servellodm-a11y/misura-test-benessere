@@ -83,8 +83,6 @@ assert.match(normalized, /create policy nextway_search_query_cache_update[\s\S]*
   'active workspace members must be able to refresh expired shared cache rows');
 
 console.log('NEXTWAY central prospect identity memory SQL: contract checks passed.');
-\)/,
-  'the merge RPC must validate complete SHA-256 fingerprints with correctly closed SQL string quoting');
 assert.match(normalized, /commit;\s*$/,
   'the transaction commit must be the final SQL statement with no orphaned code after it');
 
