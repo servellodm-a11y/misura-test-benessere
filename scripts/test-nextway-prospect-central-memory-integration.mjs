@@ -21,8 +21,10 @@ assert.match(edge, /"url:"\s*\+\s*url/,
   "canonical source URLs must contribute to identity deduplication");
 assert.match(edge, /action === "archive_prospects"/,
   "the Edge Function must expose the authenticated central archive action");
-assert.match(edge, /expires_at:\s*new Date\(Date\.now\(\)\s*\+\s*7\s*\*\s*24\s*\*\s*60\s*\*\s*60\s*\*\s*1000\)/,
-  "successful provider results must be cached for no more than seven days");
+assert.match(edge, /const expiresAt = new Date\(Date\.parse\(fetchedAt\) \+ 7 \* 24 \* 60 \* 60 \* 1000\)/,
+  "cache expiry must be calculated from the exact fetched_at value to satisfy the SQL seven-day cap");
+assert.match(edge, /expires_at: expiresAt/,
+  "the exact seven-day expiry must be persisted with the cached result");
 assert.match(edge, /central_cache_unavailable/,
   "if central cache is unavailable, paid external search must stop safely");
 assert.match(edge, /p_target_type:\s*targetType/,
