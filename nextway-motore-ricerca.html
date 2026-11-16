@@ -690,7 +690,7 @@ async function runSearch(runAll=false){
      const archiveResponse=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({action:'archive_prospects',workspace_id:searchWorkspaceId,prospects:archiveRows})});
      const archivePayload=await archiveResponse.json();
      if(!archiveResponse.ok||archivePayload.failed_count)throw new Error(archivePayload.error||('Archiviazione parziale: '+(archivePayload.failed_count||0)+' record non salvati.'));
-     status.textContent='Ricerca completata · '+archivePayload.archived_count+' identità aggiornate nella memoria centrale del workspace.';
+     status.textContent='Ricerca completata · '+archivePayload.archived_count+' identità aggiornate nella memoria centrale del workspace.'+(Number(freshPayload.cache_write_failures)>0?' Attenzione: '+freshPayload.cache_write_failures+' risultati non sono stati salvati nella cache condivisa.':'');
     }
    }catch(archiveError){status.textContent='Ricerca completata; memoria locale aggiornata, ma archivio centrale non completato: '+archiveError.message;}
 
