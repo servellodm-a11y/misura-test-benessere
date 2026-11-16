@@ -124,7 +124,7 @@ async function parseBody(req: Request): Promise<Record<string, unknown> | Respon
     const { done, value } = await reader.read();
     if (done) break;
     totalBytes += value.byteLength;
-    if (totalBytes > 98_304) {
+    if (totalBytes > 262_144) {
       await reader.cancel();
       return new Response("body-too-large", { status: 413 });
     }
