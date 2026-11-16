@@ -58,7 +58,7 @@ create table if not exists public.nextway_prospect_identity_archive (
       )
     ),
   constraint nextway_identity_canonical_url_check
-    check (canonical_url is null or canonical_url ~* '^https?://')
+    check (canonical_url is null or canonical_url ~* '^https?://(\[[0-9a-f:.]+\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)')
 );
 
 create index if not exists nextway_prospect_identity_workspace_seen_idx
@@ -211,6 +211,7 @@ comment on table public.nextway_search_query_cache is
 
 
 create or replace function public.nextway_store_search_query_cache(
+  p_actor_id uuid,
   p_workspace_id uuid,
   p_query_fingerprint text,
   p_query_text text,
@@ -223,12 +224,18 @@ returns uuid
 language plpgsql
 security definer
 set search_path = pg_catalog, public
-as $$
+as $
 declare
-  v_user_id uuid := auth.uid();
+  v_user_id uuid;
   v_id uuid;
   v_now timestamptz := clock_timestamp();
 begin
+  if auth.role() is distinct from 'service_role' or p_actor_id is null then
+    raise exception 'Scrittura cache consentita solo al servizio NEXTWAY autenticato.' using errcode = '42501';
+  end if;
+  perform set_config('request.jwt.claim.sub', p_actor_id::text, true);
+  v_user_id := p_actor_id;
+
   if v_user_id is null or p_workspace_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
     array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
@@ -277,8 +284,8 @@ begin
 end;
 $$;
 
-alter function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) owner to postgres;
-revoke all on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) from public, anon;
-grant execute on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) to authenticated;
+alter function public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb) owner to postgres;
+revoke all on function public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb) from public, anon, authenticated;
+grant execute on function public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb) to service_role;
 
 commit;
