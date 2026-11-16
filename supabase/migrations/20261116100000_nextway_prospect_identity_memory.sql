@@ -84,7 +84,7 @@ create or replace function public.nextway_guard_prospect_memory_scope()
 returns trigger
 language plpgsql
 set search_path = pg_catalog, public
-as $
+as $$
 begin
   if public.nextway_is_platform_admin() then
     return new;
@@ -112,7 +112,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 revoke all on function public.nextway_guard_prospect_memory_scope() from public, anon, authenticated;
 
@@ -298,7 +298,7 @@ create or replace function public.nextway_list_accessible_workspaces()
 returns table (workspace_id uuid, workspace_name text, workspace_role text)
 language sql stable security definer
 set search_path = pg_catalog, public
-as $
+as $$
   select w.id, w.name,
     case when public.nextway_is_platform_admin() then 'platform_admin' else m.workspace_role end
   from public.nextway_workspaces w
@@ -307,7 +307,7 @@ as $
   where auth.uid() is not null and w.status = 'active'
     and (public.nextway_is_platform_admin() or m.id is not null)
   order by w.name, w.id;
-$;
+$$;
 
 revoke all on function public.nextway_list_accessible_workspaces() from public, anon;
 grant execute on function public.nextway_list_accessible_workspaces() to authenticated;
@@ -321,7 +321,7 @@ create or replace function public.nextway_merge_prospect_identity(
 returns uuid
 language plpgsql security definer
 set search_path = pg_catalog, public
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_existing public.nextway_prospect_identity_archive%rowtype;
@@ -344,9 +344,11 @@ begin
 )
      or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
      or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
-     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array'
-     or jsonb_array_length(coalesce(p_source_evidence, '[]'::jsonb)) > 12 then
+     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array' then
     raise exception 'Dati della memoria prospect non validi.' using errcode = '22023';
+  end if;
+  if jsonb_array_length(coalesce(p_source_evidence, '[]'::jsonb)) > 12 then
+    raise exception 'Troppe fonti nella memoria prospect.' using errcode = '22023';
   end if;
   if p_target_type not in ('potential_customer','potential_partner','unknown')
      or (p_partner_segment is not null and p_partner_segment not in (
@@ -420,7 +422,7 @@ begin
   end if;
   return v_id;
 end;
-$;
+$$;
 
 revoke all on function public.nextway_merge_prospect_identity(
   uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
