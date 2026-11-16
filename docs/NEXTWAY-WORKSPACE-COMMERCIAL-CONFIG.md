@@ -19,6 +19,11 @@ La proprietà `settings.commercial` contiene:
     "country": "Italia",
     "language": "it"
   },
+  "brand_terms": ["zinzino", "balancetest", "balance test", "balance oil"],
+  "search_queries": {
+    "it": {"customers": [["Clienti", "omega 3 BalanceTest"], "interesse per misurazione del benessere"]},
+    "en": {"customers": ["omega 3 BalanceTest customer interest"]}
+  },
   "search_modifiers": {
     "customers": [["omega 3", "BalanceTest"]],
     "wellness_pro": ["nutrizione", "test acidi grassi"],
@@ -69,7 +74,7 @@ La migrazione candidata `20261116140000_nextway_workspace_commercial_config.sql`
 - non restituisce l'intero oggetto `settings`, ma soltanto `settings.commercial`;
 - non crea o modifica workspace, membership o configurazioni.
 
-Il browser normalizza la risposta tramite `nextway-workspace-commercial-config.js`. Una configurazione mancante o incompleta deve bloccare la ricerca, mai attivare silenziosamente la configurazione di un'altra azienda.
+Il browser normalizza la risposta tramite `nextway-workspace-commercial-config.js`. Il contratto supporta anche `brand_terms` e `search_queries.it/en` per personalizzare il lessico e le query per segmento, senza modificare il motore. Una configurazione mancante o incompleta deve bloccare la ricerca, mai attivare silenziosamente la configurazione di un'altra azienda.
 
 ## Segmenti
 
