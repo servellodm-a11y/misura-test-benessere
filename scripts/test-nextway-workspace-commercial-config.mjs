@@ -34,6 +34,20 @@ assert.throws(()=>api.normalize({workspace_name:'Senza ID',commercial_config:{co
 const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',commercial_config:{company:{id:'brand-x',name:'Brand X'},search_modifiers:{customers:['keyword']},consultant_channels:{bad:{url:'javascript:alert(1)'}}}});
 assert.equal(Object.keys(badUrl.consultantChannels).length,0);
 
+const seed=JSON.parse(fs.readFileSync('docs/companies/zinzino/workspace-commercial-settings.json','utf8'));
+const seedWorkspace=api.normalize({
+  workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
+  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:seed
+});
+for(const segment of api.segments){
+  assert.ok(seedWorkspace.searchModifiers[segment].length>0, 'Missing Zinzino modifiers: '+segment);
+  assert.equal(seedWorkspace.searchQueries.it[segment].length,5,'Expected five Italian queries for '+segment);
+  assert.equal(seedWorkspace.searchQueries.en[segment].length,5,'Expected five English queries for '+segment);
+}
+assert.equal(Object.keys(seedWorkspace.officialMaterials).length,5);
+assert.ok(Object.values(seedWorkspace.officialMaterials).every(item=>item.status==='da_caricare'));
+assert.ok(seedWorkspace.guardrails.some(rule=>rule.includes('promesse di reddito')));
+
 const sql=fs.readFileSync('supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql','utf8');
 assert.match(sql,/security definer/i);
 assert.match(sql,/set search_path = pg_catalog, public/i);
