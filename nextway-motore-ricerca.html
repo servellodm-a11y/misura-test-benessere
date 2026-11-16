@@ -66,11 +66,9 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <p class="small muted">Collegamenti: <a href="/nextway-ricerca.html">Ricerca assistita</a> · <a href="/nextway-ai.html">Archivio Lead</a></p>
 </section>
 </main>
-<script src="/nextway-company-config.js"></script>
 <script src="/nextway-workspace-commercial-config.js"></script>
 <script>
 const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searchHistoryOwnerId='',searchWorkspaceId='';
-const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 let activeCompany=null;
 function setWorkspaceCommercialStatus(message,ready=false){const context=$('company-context');if(context)context.textContent=message;['generate','runsearch','runallsearch'].forEach(id=>{const button=$(id);if(button)button.disabled=!ready;});}
 const SEARCH_HISTORY_LIMIT=10;
@@ -451,17 +449,19 @@ function getProspectSearchLane(index,platform,hasCompanyTerms){
 }
 function build(){
  const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
- const base=templates[seg],refined=refinedItalianQueries[seg]||base;
+ const base=templates[seg],configuredItalian=activeCompany?.searchQueries?.it?.[seg],configuredEnglish=activeCompany?.searchQueries?.en?.[seg];
+ const refined=configuredItalian?.length?configuredItalian:(refinedItalianQueries[seg]||base);
+ const englishQueries=configuredEnglish?.length?configuredEnglish:(refinedEnglishQueries[seg]||enTerms[seg]);
  let terms=refined.map(x=>Array.isArray(x)?x[1]:x);
- if(lang==='en')terms=refinedEnglishQueries[seg]||enTerms[seg];
- if(lang==='both')terms=terms.slice(0,3).concat((refinedEnglishQueries[seg]||enTerms[seg]).slice(0,2));
+ if(lang==='en')terms=englishQueries.map(x=>Array.isArray(x)?x[1]:x);
+ if(lang==='both')terms=terms.slice(0,3).concat(englishQueries.slice(0,2).map(x=>Array.isArray(x)?x[1]:x));
  const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
  generated=terms.slice(0,5).map((q,i)=>{
    const lane=getProspectSearchLane(i,platform,companyTerms.length>0);
    const includeCompanyContext=i===4&&companyTerms.length>0;
    const modifier=includeCompanyContext?companyTerms[(i-4+companyTerms.length)%companyTerms.length]:[];
    const full=buildProspectSearchQuery(q,area,platform,extra,seg,modifier,includeCompanyContext,lane.scope);
-   const baseLabel=lang==='en'?((Array.isArray(refinedEnglishQueries[seg])?refinedEnglishQueries[seg][i]:null)?.[0]||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?('English search '+(i-2)):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
+   const baseLabel=lang==='en'?((Array.isArray(englishQueries[i])?englishQueries[i][0]:null)||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?((Array.isArray(englishQueries[i-3])?englishQueries[i-3][0]:null)||('English search '+(i-2))):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
    const label=baseLabel+' · '+lane.label+(includeCompanyContext?' · focus '+(activeCompany?.name||'azienda'):'');
    return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full),source_lane:lane.label,company_context:includeCompanyContext};
  });
@@ -847,7 +847,8 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  const audience=segmentLabels[segment]||'un potenziale contatto';
  const rawEvidence=(String(title||'')+' '+String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
  const evidence=rawEvidence.toLocaleLowerCase('it');
- const explicitZinzinoInterest=/zinzino|balancetest|balance test|balance oil|zinzino products/.test(evidence);
+ const configuredBrandTerms=Array.isArray(activeCompany?.brandTerms)?activeCompany.brandTerms:[];
+  const explicitZinzinoInterest=configuredBrandTerms.some(term=>term&&evidence.includes(String(term).toLocaleLowerCase('it')));
  const recommended=segment==='customers'||segment==='wellness_pro'?'general':explicitZinzinoInterest?'replica':'none';
  linkSelect.value=recommended;
  const recommendation=document.createElement('p');recommendation.className='muted';
