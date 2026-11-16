@@ -28,6 +28,8 @@ assert.match(normalized, /partner_segment in \(/,
   'the five partner segments must be represented distinctly');
 assert.match(normalized, /workspace_id uuid references public\.nextway_workspaces\(id\)/,
   'identity memory must be workspace-scoped');
+assert.ok(sql.includes("canonical_url ~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+  'canonical identity URLs must contain a valid domain or IP host');
 assert.match(normalized, /nextway_has_workspace_access\(/,
   'workspace reads and writes must require active membership');
 assert.match(normalized, /nextway_is_platform_admin\(\)/,
@@ -55,6 +57,10 @@ assert.match(normalized, /revoke insert, update, delete on public\.nextway_searc
   'authenticated clients must not modify central cache rows directly');
 assert.match(normalized, /create or replace function public\.nextway_store_search_query_cache/,
   'query cache writes must pass through a validated server-side RPC');
+assert.match(normalized, /revoke all on function public\.nextway_store_search_query_cache\([\s\S]*from public, anon, authenticated/,
+  'authenticated clients must not be able to poison the shared cache');
+assert.match(normalized, /grant execute on function public\.nextway_store_search_query_cache\([\s\S]*to service_role/,
+  'only the trusted Edge Function role may write shared cache rows');
 assert.match(normalized, /p_provider_key is distinct from 'tavily'/,
   'the cache RPC must validate the provider');
 assert.match(normalized, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
