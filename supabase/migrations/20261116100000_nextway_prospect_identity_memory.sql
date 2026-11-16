@@ -288,7 +288,6 @@ alter function public.nextway_store_search_query_cache(uuid,text,text,text,text,
 revoke all on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) from public, anon;
 grant execute on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) to authenticated;
 
-commit;
 
 create or replace function public.nextway_lookup_prospect_crm_matches(
   p_workspace_id uuid,
@@ -564,9 +563,6 @@ begin
 end;
 $$;
 
-alter function public.nextway_merge_prospect_identity(
-  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
-) owner to postgres;
 alter function public.nextway_merge_prospect_identity(
   uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
 ) owner to postgres;
