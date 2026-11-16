@@ -42,6 +42,12 @@ assert.match(edge, /central_cache_unavailable/,
   "if central cache is unavailable, paid external search must stop safely");
 assert.match(edge, /p_target_type:\s*targetType/,
   "archive records must preserve customer/partner/unknown classification");
+assert.match(edge, /classification\.includes\("cliente"\)/,
+  "Italian customer classification must map to potential_customer");
+assert.match(edge, /new_networker: "other_networker"/,
+  "new networkers must map into the supported other-networker archive segment");
+assert.match(edge, /exnetworker: "other_networker"/,
+  "former networkers must map into the supported other-networker archive segment");
 assert.doesNotMatch(edge, /SUPABASE_SERVICE_ROLE_KEY/,
   "the search Edge Function must not bypass workspace RLS with a service key");
 
