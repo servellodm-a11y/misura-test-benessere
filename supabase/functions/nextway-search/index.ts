@@ -317,8 +317,8 @@ Deno.serve(async (req: Request) => {
       const targetType = classification.includes("partner") ? "potential_partner" :
         (classification.includes("client") || classification.includes("cliente")) ? "potential_customer" : "unknown";
       const status = cleanString(prospect.archive_status, 40);
-      // Automated identity assessment is not a human review.
-      const archiveStatus = status === "acquired" ? "acquired" : "seen";
+      // CRM records, including active follow-ups, are already acquired; automated identity assessment alone is not human review.
+      const archiveStatus = status === "acquired" || status === "followup" ? "acquired" : "seen";
       const rpcArgs = {
         p_workspace_id: workspaceId,
         p_identity_fingerprints: fingerprints,
