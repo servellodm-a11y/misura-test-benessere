@@ -34,7 +34,8 @@ function safeUrl(value: unknown): string {
       .forEach((key) => url.searchParams.delete(key));
     url.searchParams.sort();
     url.pathname = url.pathname.replace(/\/+$/, "") || "/";
-    return url.toString().replace(/\/$/, "");
+    const normalized = url.toString().replace(/\/$/, "");
+    return normalized.length <= 2048 ? normalized : "";
   } catch {
     return "";
   }
