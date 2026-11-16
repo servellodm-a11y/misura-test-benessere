@@ -23,6 +23,8 @@ assert.match(page, /Ricerche non completate/,
   'the UI must visibly identify incomplete search queries');
 assert.match(page, /reasonLabels\[failure\.reason\]/,
   'provider failure codes must be translated into readable Italian explanations');
+assert.match(page, /if\(partialFailureNotice\)rankingContainer\.append\(partialFailureNotice\)/,
+  'the partial-failure notice must survive the final results re-render');
 assert.match(page, /queriesToRun\.length\*SEARCH_MAX_RESULTS/,
   'the in-progress status must communicate the maximum combined result count');
 assert.match(page, /massimo '\+SEARCH_MAX_RESULTS\+' risultati per query/,
