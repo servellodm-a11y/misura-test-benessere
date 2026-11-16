@@ -99,3 +99,12 @@ Il confronto avviene prima della scrittura/merge dei risultati appena trovati, c
 ### Scritture protette dell'archivio identità
 
 I client autenticati hanno accesso diretto in sola lettura alla tabella centrale. Inserimenti e aggiornamenti passano esclusivamente dalla RPC `nextway_merge_prospect_identity`, che verifica la membership attiva, convalida impronte e payload e serializza i merge. In questo modo un client non può modificare direttamente lo stato `acquired` o alterare le identità condivise fuori dal percorso controllato.
+
+
+## Verifica autorevole dei Lead CRM
+
+Il confronto non si limita all'archivio identità: la Edge Function invoca `nextway_lookup_prospect_crm_matches` prima di abilitare l'acquisizione. La RPC cerca i source URL nel workspace selezionato e nei Lead legacy non ancora associati a un workspace ma appartenenti all'utente autenticato. Se trova un Lead, la UI riceve lo stato acquisito; se trova più record, il risultato viene trattato come ambiguo e l'acquisizione resta bloccata.
+
+La RPC di merge accetta dai client soltanto nuove osservazioni `seen`. Lo stato `acquired` viene derivato nel database esclusivamente dalla presenza effettiva di un Lead corrispondente. Il client non può attribuirsi da solo l'acquisizione o la revisione umana.
+
+La cache e i payload di identità sono convalidati prima del salvataggio: array di contatti, oggetti fonte, impronte, URL, risultati e score. Se il confronto CRM non è disponibile, la ricerca si arresta prima dell'acquisizione.
