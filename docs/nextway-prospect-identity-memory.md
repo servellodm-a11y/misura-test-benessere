@@ -94,3 +94,8 @@ La UI segnala:
 - identità già acquisite nel CRM del workspace, per impedire una seconda acquisizione.
 
 Il confronto avviene prima della scrittura/merge dei risultati appena trovati, così il primo inserimento non viene confuso con un nominativo già noto. L'archivio non modifica né crea Lead durante la sola lettura.
+
+
+### Scritture protette dell'archivio identità
+
+I client autenticati hanno accesso diretto in sola lettura alla tabella centrale. Inserimenti e aggiornamenti passano esclusivamente dalla RPC `nextway_merge_prospect_identity`, che verifica la membership attiva, convalida impronte e payload e serializza i merge. In questo modo un client non può modificare direttamente lo stato `acquired` o alterare le identità condivise fuori dal percorso controllato.
