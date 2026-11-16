@@ -251,11 +251,12 @@ Deno.serve(async (req: Request) => {
       for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
     }
     const matches = inputs.flatMap(input => {
-      const candidates = [...records.values()].filter(record =>
-        (!!input.url && record.canonical_url === input.url) ||
-        (Array.isArray(record.identity_fingerprints) &&
-          input.fingerprints.some(fingerprint => record.identity_fingerprints.includes(fingerprint)) )
-      );
+      const candidates = [...records.values()].filter(record => {
+        const storedFingerprints = record.identity_fingerprints;
+        return (!!input.url && record.canonical_url === input.url) ||
+          (Array.isArray(storedFingerprints) &&
+            input.fingerprints.some(fingerprint => (storedFingerprints as string[]).includes(fingerprint)));
+      });
       if (!candidates.length) return [];
       if (candidates.length > 1) {
         return [{ index: input.index, ambiguous: true, matched_records: candidates.length }];
