@@ -53,6 +53,12 @@ assert.match(normalized, /expires_at <= fetched_at \+ interval '7 days'/,
   'query cache lifetime must be capped at seven days');
 assert.match(normalized, /create policy nextway_search_query_cache_read/,
   'query cache must have an explicit workspace read policy');
+assert.match(normalized, /current_setting\('nextway\.cache_write_rpc', true\) is distinct from 'on'/,
+  'only the protected cache RPC may update the last-fetch actor');
+assert.match(normalized, /perform set_config\('nextway\.cache_write_rpc', 'on', true\)/,
+  'the trusted cache RPC must scope its permitted fetched_by update');
+assert.match(normalized, /fetched_by = excluded\.fetched_by/,
+  'cache provenance must identify the latest successful fetcher');
 assert.match(normalized, /revoke insert, update, delete on public\.nextway_search_query_cache from authenticated/,
   'authenticated clients must not modify central cache rows directly');
 assert.match(normalized, /create or replace function public\.nextway_store_search_query_cache/,
