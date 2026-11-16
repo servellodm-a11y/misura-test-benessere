@@ -218,19 +218,18 @@ Deno.serve(async (req: Request) => {
     if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
       return json({ error: "Richiesta di confronto non valida: massimo 25 prospect." }, 400, responseOrigin);
     }
-    const inputs = body.prospects.map((item, index) => {
+    const inputs = await Promise.all(body.prospects.map(async (item, index) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return { index, url: "", fingerprints: [] as string[] };
       const prospect = item as Record<string, unknown>;
       const url = safeUrl(prospect.url);
       const keys = stringArray(prospect.identity_keys, 19, 500).map((key) =>
-        key.normalize("NFKC").toLocaleLowerCase("it").replace(/\s+/g, " ").trim()
+        key.normalize("NFKC").toLocaleLowerCase("it").replace(/\\s+/g, " ").trim()
       );
-      return { index, url, keys };
-    });
+      const normalizedKeys = [...new Set([...(url ? ["url:" + url] : []), ...keys])];
+      return { index, url, fingerprints: await Promise.all(normalizedKeys.map(sha256)) };
+    }));
     const urls = [...new Set(inputs.map(item => item.url).filter(Boolean))];
-    const fingerprints = [...new Set(await Promise.all(inputs.flatMap(item =>
-      [...(item.url ? ["url:" + item.url] : []), ...item.keys].map(sha256)
-    )))];
+    const fingerprints = [...new Set(inputs.flatMap(item => item.fingerprints))];
     const columns = "id,canonical_url,identity_fingerprints,display_name,company_name,target_type,partner_segment,archive_status,first_seen_at,last_seen_at,seen_count,last_acquired_at";
     const records = new Map<string, Record<string, unknown>>();
     if (urls.length) {
@@ -255,7 +254,7 @@ Deno.serve(async (req: Request) => {
       const match = [...records.values()].find(record =>
         (!!input.url && record.canonical_url === input.url) ||
         (Array.isArray(record.identity_fingerprints) &&
-          input.keys.some(key => record.identity_fingerprints.includes(key)) )
+          input.fingerprints.some(fingerprint => record.identity_fingerprints.includes(fingerprint)) )
       );
       if (!match) return [];
       return [{
