@@ -82,7 +82,7 @@ const fixture = {
     prospect_profile: {
       name: 'Persona Esempio',
       profession: 'Consulente benessere',
-      company_brand: 'Studio Esempio',
+      organization: 'Studio Esempio',
       location: 'Milano'
     },
     target_classification: { segment: 'wellness_pro' },
@@ -108,6 +108,8 @@ assert.equal(lead.status, 'Da verificare');
 assert.equal(lead.local_dirty, true, 'new capture must remain queued for deliberate CRM sync');
 assert.equal(lead.name, 'Persona Esempio');
 assert.equal(lead.profession, 'Consulente benessere');
+assert.equal(lead.company_brand, 'Studio Esempio',
+  'the prospect organization extracted by the search engine must be preserved as the CRM company field');
 assert.match(lead.notes, /NEXTWAY_PROSPECT_METADATA_V1/);
 assert.match(lead.notes, /linkedin:profilo-esempio/);
 
