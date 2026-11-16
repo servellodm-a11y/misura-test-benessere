@@ -161,6 +161,12 @@ assert.match(ui, /schede provvisorie dai contenuti restituiti dal servizio di ri
   "the UI must disclose that public search content is analyzed into provisional profiles");
 assert.match(ui, /non contatta persone e non invia messaggi/,
   "the UI must state that no prospect is contacted automatically");
+assert.match(ui, /Le identità e le fonti vengono registrate nella memoria centrale del workspace/,
+  "the UI must disclose that identity-only central memory is updated after a search");
+assert.match(ui, /l'acquisizione del prospect nel CRM richiede un tuo clic e la verifica manuale/,
+  "the UI must distinguish central memory from explicit CRM acquisition");
+assert.doesNotMatch(ui, /I risultati acquisiti vengono salvati solo nel tuo archivio locale/,
+  "the UI must not falsely describe central memory writes as local-only");
 assert.doesNotMatch(ui, /non estrae automaticamente profili/,
   "the UI must not deny the actual preliminary profile extraction performed on search results");
 assert.doesNotMatch(ui, /1\.000 identità storiche|non sostituisce un archivio cloud condiviso/,
