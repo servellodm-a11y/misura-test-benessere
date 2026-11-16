@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const page = readFileSync('nextway-motore-ricerca.html', 'utf8');
 
 assert.match(page, /SEARCH_IDENTITY_ARCHIVE_LIMIT=500/,
-  'identity memory must retain up to 1,000 prospects independently of the ten-session display history');
+  'identity memory must retain up to 500 prospects independently of the ten-session display history');
 assert.match(page, /nextway_prospect_identity_archive_v1:/,
   'identity memory must use a separate account-scoped local archive');
 assert.match(page, /function rememberProspectIdentities\(prospects\)/,
@@ -29,7 +29,9 @@ assert.match(page, /GIÀ INDIVIDUATO IN PRECEDENZA/,
   'previously seen identities must be visibly marked in search results');
 assert.match(page, /history_seen_before:!!historicalIdentity/,
   'search results must preserve whether the identity was already present in historical memory');
-assert.match(page, /function markSearchHistoryAcquired[\\s\\S]*searchIdentityArchiveKey\(\)/,\n  'CRM acquisition must update the long-lived identity archive as well');\nassert.match(page, /rememberProspectIdentities\(prospects\)/,
+assert.match(page, /function markSearchHistoryAcquired[\s\S]*searchIdentityArchiveKey\(\)/,
+  'CRM acquisition must update the long-lived identity archive as well');
+assert.match(page, /rememberProspectIdentities\(prospects\)/,
   'identity memory must be written together with the completed search history');
 
-console.log('NEXTWAY prospect identity memory and query cache: 13 checks passed.');
+console.log('NEXTWAY prospect identity memory and query cache: 14 checks passed.');
