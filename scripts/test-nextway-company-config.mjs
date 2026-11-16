@@ -36,7 +36,7 @@ for (const key of ['productCatalogue', 'compensationPlan', 'productTraining', 'c
 
 const searchHtml = fs.readFileSync('nextway-motore-ricerca.html', 'utf8');
 const archiveHtml = fs.readFileSync('nextway-ai.html', 'utf8');
-assert.ok(searchHtml.includes('<script src="/nextway-company-config.js"></script>'));
+assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
 assert.ok(searchHtml.includes('let activeCompany=null;'));
 assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
 assert.ok(searchHtml.includes("clientSession.rpc('nextway_get_workspace_commercial_config'"));
