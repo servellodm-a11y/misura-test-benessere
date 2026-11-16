@@ -78,6 +78,49 @@ create unique index if not exists nextway_prospect_identity_personal_url_uidx
   on public.nextway_prospect_identity_archive(owner_user_id, canonical_url)
   where workspace_id is null and canonical_url is not null;
 
+-- Workspace and owner scope are immutable for ordinary members. This prevents
+-- moving identity/contact data between tenants by editing workspace_id directly.
+create or replace function public.nextway_guard_prospect_memory_scope()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $
+begin
+  if public.nextway_is_platform_admin() then
+    return new;
+  end if;
+
+  if to_jsonb(new) -> 'workspace_id' is distinct from to_jsonb(old) -> 'workspace_id' then
+    raise exception 'Solo platform_admin può trasferire dati della memoria tra workspace.'
+      using errcode = '42501';
+  end if;
+
+  if tg_table_name = 'nextway_prospect_identity_archive'
+     and to_jsonb(new) -> 'owner_user_id' is distinct from to_jsonb(old) -> 'owner_user_id' then
+    raise exception 'Il proprietario della memoria identità non può essere modificato.'
+      using errcode = '42501';
+  end if;
+
+  if tg_table_name = 'nextway_search_query_cache'
+     and (
+       to_jsonb(new) -> 'fetched_by' is distinct from to_jsonb(old) -> 'fetched_by'
+       or to_jsonb(new) -> 'query_fingerprint' is distinct from to_jsonb(old) -> 'query_fingerprint'
+     ) then
+    raise exception 'Identità e autore della query cache non possono essere modificati.'
+      using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$;
+
+revoke all on function public.nextway_guard_prospect_memory_scope() from public, anon, authenticated;
+
+drop trigger if exists nextway_prospect_identity_scope_guard on public.nextway_prospect_identity_archive;
+create trigger nextway_prospect_identity_scope_guard
+  before update on public.nextway_prospect_identity_archive
+  for each row execute function public.nextway_guard_prospect_memory_scope();
+
 alter table public.nextway_prospect_identity_archive enable row level security;
 revoke all on public.nextway_prospect_identity_archive from public, anon;
 grant select, insert, update, delete on public.nextway_prospect_identity_archive to authenticated;
@@ -201,6 +244,11 @@ create unique index if not exists nextway_search_query_cache_scope_uidx
   on public.nextway_search_query_cache(workspace_id, query_fingerprint, segment_key, market_key, provider_key);
 create index if not exists nextway_search_query_cache_expiry_idx
   on public.nextway_search_query_cache(workspace_id, expires_at);
+drop trigger if exists nextway_search_query_cache_scope_guard on public.nextway_search_query_cache;
+create trigger nextway_search_query_cache_scope_guard
+  before update on public.nextway_search_query_cache
+  for each row execute function public.nextway_guard_prospect_memory_scope();
+
 alter table public.nextway_search_query_cache enable row level security;
 revoke all on public.nextway_search_query_cache from public, anon;
 grant select, insert, update on public.nextway_search_query_cache to authenticated;
@@ -234,13 +282,21 @@ create policy nextway_search_query_cache_update
   on public.nextway_search_query_cache
   for update to authenticated
   using (
-    public.nextway_has_workspace_access(
+    (
+      fetched_by = auth.uid()
+      or public.nextway_can_manage_workspace(workspace_id)
+    )
+    and public.nextway_has_workspace_access(
       workspace_id,
       array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
     )
   )
   with check (
-    public.nextway_has_workspace_access(
+    (
+      fetched_by = auth.uid()
+      or public.nextway_can_manage_workspace(workspace_id)
+    )
+    and public.nextway_has_workspace_access(
       workspace_id,
       array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
     )
