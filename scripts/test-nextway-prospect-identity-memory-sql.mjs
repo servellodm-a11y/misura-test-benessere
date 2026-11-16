@@ -85,6 +85,12 @@ assert.doesNotMatch(normalized, /create policy nextway_search_query_cache_(inser
   'cache write policies must not permit client-side cache poisoning');
 assert.match(normalized, /begin;[\s\S]*commit;/,
   'migration must be transactional');
+assert.equal((sql.match(/\$\$/g) || []).length % 2, 0,
+  'all SQL dollar-quoted bodies must have matching delimiters');
+assert.doesNotMatch(sql, /^\s*as \$(?!\$)/m,
+  'function bodies must not use an unterminated single-dollar opener');
+assert.doesNotMatch(sql, /^\s*\$;\s*$/m,
+  'function bodies must close with a matching double-dollar delimiter');
 assert.doesNotMatch(normalized, /insert into public\.nextway_prospect_identity_archive/,
   'migration must not seed or import prospect identities');
 assert.match(normalized, /insert into public\.nextway_search_query_cache[\s\S]*on conflict/,
