@@ -65,3 +65,8 @@ La tabella cache evita nuove chiamate solo quando la query e il relativo contest
 - Nessuna migrazione applicata.
 - Nessun dato importato o modificato.
 - Nessun deploy o chiamata Tavily eseguita.
+
+
+## Scritture e integrità della cache
+
+Le tabelle centrali sono in sola lettura per i client autenticati. La cache delle query può essere aggiornata solo tramite la RPC SECURITY DEFINER `nextway_store_search_query_cache`, che verifica membership, impronta, provider, dimensione e struttura dei risultati e imposta data di acquisizione e scadenza sul database. Le scritture dell'archivio identità sono demandate alla RPC di merge introdotta nell'integrazione successiva; nessun client può inserire o modificare direttamente righe identità.
