@@ -83,7 +83,7 @@ create or replace function public.nextway_merge_prospect_identity(
 returns uuid
 language plpgsql security definer
 set search_path = pg_catalog, public
-as $
+as $$
 declare
   v_user_id uuid;
   v_existing public.nextway_prospect_identity_archive%rowtype;
@@ -316,7 +316,7 @@ returns boolean
 language plpgsql
 security definer
 set search_path = pg_catalog, public
-as $
+as $$
 begin
   if auth.role() is distinct from 'service_role'
      or p_actor_id is null
@@ -364,7 +364,7 @@ begin
 
   return true;
 end;
-$;
+$$;
 
 alter function public.nextway_check_prospect_memory_ready(uuid, uuid) owner to postgres;
 revoke all on function public.nextway_check_prospect_memory_ready(uuid, uuid) from public, anon, authenticated;
