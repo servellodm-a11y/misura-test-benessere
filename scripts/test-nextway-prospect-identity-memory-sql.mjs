@@ -54,8 +54,9 @@ assert.match(normalized, /create policy nextway_search_query_cache_update/,
   'query cache updates must be restricted to active non-viewer members');
 assert.match(normalized, /begin;[\s\S]*commit;/,
   'migration must be transactional');
-assert.doesNotMatch(normalized, /insert into public\.(nextway_prospect_identity_archive|nextway_search_query_cache)/,
-  'migration must not seed or import prospect data');
+const ddlOnly = normalized.replace(/as \$\$[\s\S]*?\$\$;/g, '');
+assert.doesNotMatch(ddlOnly, /insert into public\.(nextway_prospect_identity_archive|nextway_search_query_cache)/,
+  'migration must not seed or import prospect data outside its callable RPCs');
 assert.doesNotMatch(normalized, /drop table|truncate table|delete from public\./,
   'migration must not delete operational data');
 
