@@ -237,6 +237,17 @@ begin
     raise exception 'Scrittura cache consentita solo al servizio NEXTWAY autenticato.' using errcode = '42501';
   end if;
   perform set_config('request.jwt.claim.sub', p_actor_id::text, true);
+  perform set_config(
+    'request.jwt.claims',
+    jsonb_set(
+      coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb),
+      '{sub}', to_jsonb(p_actor_id::text), true
+    )::text,
+    true
+  );
+  if auth.uid() is distinct from p_actor_id then
+    raise exception 'Identità attore NEXTWAY non coerente.' using errcode = '42501';
+  end if;
   v_user_id := p_actor_id;
 
   if v_user_id is null or p_workspace_id is null or not public.nextway_has_workspace_access(
