@@ -403,7 +403,44 @@ begin
         end,
         company_name = coalesce(nullif(left(btrim(p_company_name), 240), ''), company_name),
         profile_data = profile_data || coalesce(p_profile_data, '{}'::jsonb),
-        public_contacts = public_contacts || coalesce(p_public_contacts, '{}'::jsonb),
+        public_contacts = jsonb_build_object(
+          'emails', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'emails', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'emails', '[]'::jsonb)
+              ) limit 10
+            ) merged_emails
+          ), '[]'::jsonb),
+          'phones', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'phones', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'phones', '[]'::jsonb)
+              ) limit 10
+            ) merged_phones
+          ), '[]'::jsonb),
+          'whatsapp', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'whatsapp', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)
+              ) limit 10
+            ) merged_whatsapp
+          ), '[]'::jsonb),
+          'socials', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'socials', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'socials', '[]'::jsonb)
+              ) limit 10
+            ) merged_socials
+          ), '[]'::jsonb)
+        ),
         source_evidence = v_sources,
         target_type = case when target_type = 'unknown' then p_target_type else target_type end,
         partner_segment = coalesce(partner_segment, p_partner_segment),
