@@ -74,11 +74,21 @@ assert.doesNotMatch(search, /Access-Control-Allow-Origin["']?\s*:\s*["']\*["']/i
 assert.match(search, /req\.method !== "POST"/);
 assert.match(search, /Authorization/);
 assert.match(search, /auth\.getUser\(token\)/);
-assert.match(search, /totalBytes > 16_384/);
+assert.match(search, /totalBytes > 98_304/);
 assert.match(search, /body\.queries\.length < 1 \|\| body\.queries\.length > 5/);
-assert.match(search, /q\.length === 0 \|\| q\.length > 400/);
-assert.match(search, /p_scope: "public_search", p_units: queries\.length/);
+assert.match(search, /query\.length === 0 \|\| query\.length > 400/);
+assert.match(search, /p_scope: "public_search", p_units: uncached\.length/);
 assert.match(search, /if \(!rateLimit\.allowed\)/);
+
+assert.match(search, /nextway_has_workspace_access/,
+  "search must be scoped to an active authorized workspace");
+assert.match(search, /nextway_search_query_cache/,
+  "search must consult the shared cache");
+assert.match(search, /central_cache_unavailable/,
+  "search must stop if the central cache cannot be read");
+assert.match(search, /nextway_merge_prospect_identity/,
+  "prospect identity writes must use the protected merge RPC");
+
 assert.match(search, /AbortSignal\.timeout\(20000\)/);
 assert.match(search, /api\.tavily\.com\/search/);
 assert.match(search, /provider_rate_limited/);
