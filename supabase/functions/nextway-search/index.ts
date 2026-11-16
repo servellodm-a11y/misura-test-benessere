@@ -488,8 +488,6 @@ Deno.serve(async (req: Request) => {
       });
       results.push({ query: entry.query, results: safeItems, cached: false });
 
-      const fetchedAt = new Date().toISOString();
-      const expiresAt = new Date(Date.parse(fetchedAt) + 7 * 24 * 60 * 60 * 1000).toISOString();
       const cacheWrite = await supabase.rpc("nextway_store_search_query_cache", {
         p_workspace_id: workspaceId,
         p_query_fingerprint: entry.fingerprint,
