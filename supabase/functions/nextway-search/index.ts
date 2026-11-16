@@ -223,7 +223,7 @@ Deno.serve(async (req: Request) => {
       const prospect = item as Record<string, unknown>;
       const url = safeUrl(prospect.url);
       const keys = stringArray(prospect.identity_keys, 19, 500).map((key) =>
-        key.normalize("NFKC").toLocaleLowerCase("it").replace(/\\s+/g, " ").trim()
+        key.normalize("NFKC").toLocaleLowerCase("it").replace(/\s+/g, " ").trim()
       );
       const normalizedKeys = [...new Set([...(url ? ["url:" + url] : []), ...keys])];
       return { index, url, fingerprints: await Promise.all(normalizedKeys.map(sha256)) };
