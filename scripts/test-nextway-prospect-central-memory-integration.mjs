@@ -73,6 +73,8 @@ assert.match(ui, /Attendi il confronto con la memoria condivisa prima di acquisi
   "capture buttons must be disabled while the central duplicate lookup is pending");
 assert.match(ui, /centralIdentityBlocked/,
   "central acquired or ambiguous identities must remain blocked after lookup completes");
+assert.match(ui, /acquisizione CRM bloccata finché la memoria condivisa non è aggiornata/,
+  "CRM capture must also fail closed if central archive persistence fails");
 
 assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_prospects'"),
   "central duplicate lookup must run before merging newly found identities");
