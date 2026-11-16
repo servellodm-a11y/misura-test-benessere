@@ -57,6 +57,10 @@ assert.match(normalized, /revoke insert, update, delete on public\.nextway_searc
   'authenticated clients must not modify central cache rows directly');
 assert.match(normalized, /create or replace function public\.nextway_store_search_query_cache/,
   'query cache writes must pass through a validated server-side RPC');
+assert.match(normalized, /revoke all on function public\.nextway_store_search_query_cache\([\s\S]*from public, anon, authenticated/,
+  'authenticated clients must not be able to poison the shared cache');
+assert.match(normalized, /grant execute on function public\.nextway_store_search_query_cache\([\s\S]*to service_role/,
+  'only the trusted Edge Function role may write shared cache rows');
 assert.match(normalized, /p_provider_key is distinct from 'tavily'/,
   'the cache RPC must validate the provider');
 assert.match(normalized, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
