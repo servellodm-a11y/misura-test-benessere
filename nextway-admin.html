@@ -56,8 +56,22 @@
     <div id="workspace-list" class="muted">Nessun elenco caricato.</div>
   </section>
 
+  <section class="panel" id="workspace-commercial-config">
+    <h2>2. Configurazione commerciale del workspace</h2>
+    <p class="muted">La configurazione viene salvata nelle impostazioni del workspace selezionato. Puoi caricare il modello Zinzino oppure incollare il JSON di un'altra azienda. Il salvataggio avviene soltanto quando premi il pulsante e confermi.</p>
+    <div class="row">
+      <button class="btn alt" id="load-zinzino-commercial-seed" type="button">Carica configurazione Zinzino</button>
+      <span class="muted" id="commercial-config-current">Seleziona un workspace.</span>
+    </div>
+    <label>Configurazione commerciale JSON<textarea id="commercial-config-json" maxlength="40000" rows="14" spellcheck="false" placeholder="Carica il modello Zinzino o incolla qui un oggetto JSON commerciale."></textarea></label>
+    <div class="row">
+      <button class="btn" id="save-commercial-config" type="button">Salva configurazione nel workspace</button>
+    </div>
+    <div id="commercial-config-status" class="muted" aria-live="polite">Nessuna modifica salvata.</div>
+  </section>
+
   <section class="panel">
-    <h2>2. Membri e ruoli</h2>
+    <h2>3. Membri e ruoli</h2>
     <label>Workspace selezionato<select id="selected-workspace"><option value="">Carica prima i workspace</option></select></label>
     <div class="grid">
       <label>Profilo già registrato<select id="member-profile"><option value="">Carica i profili</option></select></label>
@@ -129,6 +143,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/nextway-admin-archive-bridge.js"></script>
 <script src="/nextway-cloud.js"></script>
+<script src="/nextway-workspace-commercial-config.js"></script>
 <script src="/nextway-admin.js"></script>
 </body>
 </html>
