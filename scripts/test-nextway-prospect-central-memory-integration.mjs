@@ -57,6 +57,13 @@ assert.match(ui, /action:'archive_prospects'/,
   "classified search results must be sent to the central archive");
 assert.match(ui, /action:'lookup_prospects'/,
   "search results must be checked against the shared identity archive before writing");
+assert.match(ui, /offset<dailyProspects\.length;offset\+=25/,
+  "all search results must be checked in bounded batches, not only the first 25");
+assert.match(ui, /slice\(offset,offset\+25\)/,
+  "all central archive writes must cover the complete result set in bounded batches");
+assert.match(ui, /acquisizione CRM bloccata finché la memoria condivisa non è verificata/,
+  "CRM capture must fail closed if shared duplicate lookup is unavailable");
+
 assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_prospects'"),
   "central duplicate lookup must run before merging newly found identities");
 assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
