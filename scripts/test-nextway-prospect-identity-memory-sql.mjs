@@ -73,7 +73,8 @@ assert.match(normalized, /nextway_merge_prospect_identity/,
   'central identity writes must use the transactional merge RPC');
 assert.equal((normalized.match(/create or replace function public\.nextway_merge_prospect_identity/g) || []).length, 1,
   'the migration must define exactly one central identity merge RPC');
-assert.match(normalized, /array_to_string\(p_identity_fingerprints, ','\) !~ '\^\[a-f0-9\]\{64\}\(,\[a-f0-9\]\{64\}\)\*\
+assert.ok(normalized.includes("and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*$')"),
+  'the merge RPC must validate complete SHA-256 fingerprints with correctly closed SQL string quoting');
 assert.match(normalized, /pg_advisory_xact_lock/,
   'concurrent identity merges must serialize on stable identity material');
 assert.match(normalized, /grant execute on function public\.nextway_merge_prospect_identity[\s\S]*?to authenticated/,
