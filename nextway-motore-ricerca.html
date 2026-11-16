@@ -654,6 +654,7 @@ async function runSearch(runAll=false){
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Nome: '+profile.name+'\\nIdentità: '+profile.identity_status+'\\nOrigine nominativo: '+profile.name_source+'\\nProfessione: '+profile.profession+'\\nAzienda: '+profile.organization+'\\nLocalità: '+profile.location+'\\nCategoria: '+targetAssessment.primary+'\\nSegmento: '+targetAssessment.segment+'\\nPriorità verifica: '+profile.priority+'\\nMotivazione: '+targetAssessment.reason+'\\nFonte: '+url+'\\nDOCUMENTATO NELLA FONTE: '+evidenceReview.documented.map(e=>e.kind+' ['+e.field+']: '+e.excerpt).join(' | ')+'\\nINTERPRETAZIONE NEXTWAY (non accertata): '+evidenceReview.inference.map(e=>e.kind+': '+e.value+' — '+e.reason).join(' | ')+'\\nDA VERIFICARE: '+evidenceReview.verify.join('; ')));
     const capture=document.createElement('button');capture.className='btn alt prospect-capture-button';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisisci prospect qualificato':'Acquisisci come ricerca da qualificare';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisizione manuale di un prospect con dichiarazione esplicita; verificare comunque la fonte.':'Acquisizione manuale come risultato di ricerca, non come cliente o partner qualificato.';
+    capture.dataset.initialDisabled=String(capture.disabled);capture.dataset.initialText=capture.textContent;capture.dataset.initialTitle=capture.title;
     capture.addEventListener('click',()=>{
      if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
      try{
@@ -685,6 +686,7 @@ async function runSearch(runAll=false){
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
   if(!saveSearchHistory(dailyProspects))status.textContent='Ricerca completata, ma lo storico locale delle identità non è stato salvato.';
    let centralLookupFailed=false;
+   list.querySelectorAll('.prospect-capture-button').forEach(button=>{button.disabled=true;button.textContent='Verifica duplicati centrali…';button.title='Attendi il confronto con la memoria condivisa prima di acquisire.';});
    try{
     let centralMatches=0;
     for(let offset=0;offset<dailyProspects.length;offset+=25){
@@ -699,7 +701,7 @@ async function runSearch(runAll=false){
       if(match.ambiguous){
        prospect.central_identity_ambiguous=true;
        const card=[...list.querySelectorAll('article.query')].find(item=>item.dataset.canonicalUrl===canonicalProspectUrl(prospect.url));
-       if(card){const note=document.createElement('p');note.className='notice central-identity-ambiguous';note.textContent='ATTENZIONE · '+match.matched_records+' schede centrali corrispondono a questa identità. Verifica manualmente prima di acquisire o contattare.';card.append(note);const captureButton=card.querySelector('.prospect-capture-button');if(captureButton){captureButton.disabled=true;captureButton.textContent='Duplicato centrale da verificare';captureButton.title='Acquisizione bloccata: più schede centrali corrispondono a questa identità.';}}
+       if(card){const note=document.createElement('p');note.className='notice central-identity-ambiguous';note.textContent='ATTENZIONE · '+match.matched_records+' schede centrali corrispondono a questa identità. Verifica manualmente prima di acquisire o contattare.';card.append(note);const captureButton=card.querySelector('.prospect-capture-button');if(captureButton){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Duplicato centrale da verificare';captureButton.title='Acquisizione bloccata: più schede centrali corrispondono a questa identità.';}}
        return;
       }
       if(!match.record)return;
@@ -717,10 +719,11 @@ async function runSearch(runAll=false){
        const note=document.createElement('p');note.className='muted central-identity-match';note.textContent=(record.archive_status==='acquired'?'GIÀ ACQUISITO NEL CRM DEL WORKSPACE':record.archive_status==='ignored'?'GIÀ ESAMINATO · ESCLUSO IN PRECEDENZA':'GIÀ PRESENTE NELLA MEMORIA CONDIVISA')+' · prima rilevazione: '+(record.first_seen_at?new Date(record.first_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+' · ultima rilevazione: '+(record.last_seen_at?new Date(record.last_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+'.';
        card.append(note);
        const captureButton=card.querySelector('.prospect-capture-button');
-       if(captureButton&&record.archive_status==='acquired'){captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
+       if(captureButton&&record.archive_status==='acquired'){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
       }
      });
     }
+    list.querySelectorAll('.prospect-capture-button').forEach(button=>{if(button.dataset.centralIdentityBlocked==='true')return;button.disabled=button.dataset.initialDisabled==='true';button.textContent=button.dataset.initialText||button.textContent;button.title=button.dataset.initialTitle||'';});
     if(centralMatches)status.textContent+=' · '+centralMatches+' già presenti nella memoria condivisa.';
    }catch(lookupError){centralLookupFailed=true;status.textContent='Confronto con memoria centrale non completato: '+lookupError.message+'. La ricerca non viene considerata nuova; acquisizione CRM bloccata finché la memoria condivisa non è verificata.';list.querySelectorAll('.prospect-capture-button').forEach(button=>{button.disabled=true;button.textContent='Verifica memoria centrale necessaria';button.title='Acquisizione sospesa: non è stato possibile verificare i duplicati nel workspace.';});}
    try{
