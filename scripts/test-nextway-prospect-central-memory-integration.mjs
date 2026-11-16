@@ -41,6 +41,10 @@ assert.ok(cacheRead >= 0 && rateLimit > cacheRead && providerCall > rateLimit,
   "central cache lookup must happen before rate-limit consumption and Tavily");
 assert.match(edge, /p_units:\s*uncached\.length/,
   "only cache-miss queries may consume provider units");
+assert.ok(edge.indexOf("if (uncached.length > 0) {") < edge.indexOf("if (!trustedWriter)"),
+  "the external search path must require a trusted writer before consuming credits");
+assert.ok(edge.indexOf("if (!trustedWriter)") < edge.indexOf('"nextway_consume_api_rate_limit"'),
+  "paid search must be blocked before rate-limit consumption when central writes are unavailable");
 assert.match(edge, /nextway_has_workspace_access/,
   "the Edge Function must validate active workspace membership");
 assert.match(edge, /nextway_merge_prospect_identity/,
