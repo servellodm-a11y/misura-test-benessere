@@ -25,7 +25,7 @@ function init(){
   const duplicate=rows.find(lead=>!lead.is_test&&(canonicalSearchArchiveUrl(lead.url)===canonical||(identityKeys.length&&identityKeys.some(k=>(readSearchArchiveMeta(lead).identity_keys||[]).includes(k)))));
   if(duplicate)return {duplicate:true,lead:duplicate};
   const quality=record?.evidence_quality&&typeof record.evidence_quality==='object'?record.evidence_quality:{},raw=quality.prospect_profile&&typeof quality.prospect_profile==='object'?quality.prospect_profile:{};
-  const profile={name:String(raw.name||title).trim().slice(0,120),profession:String(raw.profession||'').trim().slice(0,180),company_brand:String(raw.company_brand||'').trim().slice(0,180),location:String(raw.location||'').trim().slice(0,180)};
+  const profile={name:String(raw.name||title).trim().slice(0,120),profession:String(raw.profession||'').trim().slice(0,180),company_brand:String(raw.company_brand||raw.organization||'').trim().slice(0,180),location:String(raw.location||'').trim().slice(0,180)};
   const rawContacts=record?.public_contacts&&typeof record.public_contacts==='object'?record.public_contacts:{},publicContacts={emails:[],phones:[],whatsapp:[],socials:[]};
   for(const field of Object.keys(publicContacts))publicContacts[field]=Array.isArray(rawContacts[field])?rawContacts[field].filter(x=>typeof x==='string').slice(0,10):[];
   const contactNotes=[...publicContacts.emails.map(x=>'Email pubblicata: '+x),...publicContacts.phones.map(x=>'Telefono pubblicato: '+x),...publicContacts.whatsapp.map(x=>'Link WhatsApp pubblicato: '+x),...publicContacts.socials.map(x=>'Profilo social pubblicato: '+x)];
