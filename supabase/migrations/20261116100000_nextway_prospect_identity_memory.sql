@@ -123,7 +123,8 @@ create trigger nextway_prospect_identity_scope_guard
 
 alter table public.nextway_prospect_identity_archive enable row level security;
 revoke all on public.nextway_prospect_identity_archive from public, anon;
-grant select, insert, update, delete on public.nextway_prospect_identity_archive to authenticated;
+revoke insert, update, delete on public.nextway_prospect_identity_archive from authenticated;
+grant select on public.nextway_prospect_identity_archive to authenticated;
 grant all on public.nextway_prospect_identity_archive to service_role;
 
 drop policy if exists nextway_prospect_identity_read on public.nextway_prospect_identity_archive;
@@ -141,73 +142,7 @@ create policy nextway_prospect_identity_read
     )
   );
 
-drop policy if exists nextway_prospect_identity_insert on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_insert
-  on public.nextway_prospect_identity_archive
-  for insert to authenticated
-  with check (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and owner_user_id = auth.uid()
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-    )
-  );
-
-drop policy if exists nextway_prospect_identity_update on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_update
-  on public.nextway_prospect_identity_archive
-  for update to authenticated
-  using (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-    )
-  )
-  with check (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-    )
-  );
-
-drop policy if exists nextway_prospect_identity_delete on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_delete
-  on public.nextway_prospect_identity_archive
-  for delete to authenticated
-  using (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager']::text[]
-      )
-    )
-  );
+-- Authenticated clients may read the archive; writes are delegated to the protected merge RPC in the integration layer.
 
 comment on table public.nextway_prospect_identity_archive is
   'NEXTWAY central prospect identity memory. Workspace-scoped; stores only public/professional prospect evidence. No automatic CRM promotion.';
