@@ -28,6 +28,8 @@ assert.match(normalized, /partner_segment in \(/,
   'the five partner segments must be represented distinctly');
 assert.match(normalized, /workspace_id uuid references public\.nextway_workspaces\(id\)/,
   'identity memory must be workspace-scoped');
+assert.ok(sql.includes("canonical_url ~* '^https?://(\\\\[[0-9a-f:.]+\\\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+  'canonical identity URLs must contain a valid domain or IP host');
 assert.match(normalized, /nextway_has_workspace_access\(/,
   'workspace reads and writes must require active membership');
 assert.match(normalized, /nextway_is_platform_admin\(\)/,
