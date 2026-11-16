@@ -141,6 +141,8 @@ assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_
   "central duplicate lookup must run before merging newly found identities");
 assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
   "the UI must label identities already present in the shared workspace");
+assert.match(ui, /record\.crm_match===true&&!record\.first_seen_at\?' · GIÀ ACQUISITO NEL CRM'/,
+  "CRM-only legacy matches must not be mislabeled as previously archived identities");
 assert.match(ui, /Già acquisito nel CRM/,
   "the UI must prevent reacquiring identities already acquired in the shared CRM");
 assert.match(ui, /central_identity_ambiguous/,
