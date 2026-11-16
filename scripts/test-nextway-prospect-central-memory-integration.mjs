@@ -232,7 +232,7 @@ assert.match(ui, /non contatta persone e non invia messaggi/,
   "the UI must state that no prospect is contacted automatically");
 assert.match(ui, /Le identità e le fonti vengono registrate nella memoria centrale del workspace/,
   "the UI must disclose that identity-only central memory is updated after a search");
-assert.match(ui, /l'acquisizione del prospect nel CRM richiede un tuo clic e la verifica manuale/,
+assert.match(ui, /l’acquisizione del prospect nel CRM richiede un tuo clic e la verifica manuale/,
   "the UI must distinguish central memory from explicit CRM acquisition");
 assert.doesNotMatch(ui, /I risultati acquisiti vengono salvati solo nel tuo archivio locale/,
   "the UI must not falsely describe central memory writes as local-only");
