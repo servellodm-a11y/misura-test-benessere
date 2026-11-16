@@ -330,7 +330,7 @@ declare
   v_id uuid;
   v_fingerprint text;
 begin
-  if v_user_id is null or not public.nextway_has_workspace_access(
+  if p_workspace_id is null or v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
     array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
   ) then
