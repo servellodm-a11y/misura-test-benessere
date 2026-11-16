@@ -261,9 +261,65 @@
     async function loadSelectedWorkspace() {
       const workspace = selectedWorkspace();
       const moduleInput = $("knowledge-upload").elements.namedItem("module_key");
+      const commercialEditor = $("commercial-config-json");
+      const commercialCurrent = $("commercial-config-current");
       if (workspace && moduleInput && !moduleInput.value.trim()) moduleInput.value = workspace.workspace_key.slice(0, 64);
+      if (commercialEditor) commercialEditor.value = workspace?.settings?.commercial ? JSON.stringify(workspace.settings.commercial, null, 2) : "";
+      if (commercialCurrent) commercialCurrent.textContent = workspace?.settings?.commercial ? "Configurazione commerciale presente · " + workspace.name : (workspace ? "Configurazione commerciale non ancora impostata · " + workspace.name : "Seleziona un workspace.");
       await Promise.all([loadMemberships(), loadDocuments(), loadGovernance()]);
     }
+
+    $("load-zinzino-commercial-seed").addEventListener("click", async () => {
+      const target = $("commercial-config-status");
+      const button = $("load-zinzino-commercial-seed");
+      button.disabled = true;
+      try {
+        const response = await fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("File seed Zinzino non disponibile (HTTP " + response.status + ").");
+        const seed = await response.json();
+        $("commercial-config-json").value = JSON.stringify(seed, null, 2);
+        target.textContent = "Modello Zinzino caricato nell'editor. Non è stato ancora salvato.";
+      } catch (error) {
+        target.textContent = "Caricamento non riuscito: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("save-commercial-config").addEventListener("click", async () => {
+      const button = $("save-commercial-config");
+      const target = $("commercial-config-status");
+      const workspace = selectedWorkspace();
+      if (!workspace) { target.textContent = "Seleziona prima un workspace."; return; }
+      button.disabled = true;
+      try {
+        const commercial = JSON.parse($("commercial-config-json").value || "{}");
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) throw new Error("Validatore della configurazione commerciale non caricato.");
+        const normalized = normalizer.normalize({
+          workspace_id: workspace.id,
+          workspace_key: workspace.workspace_key,
+          workspace_name: workspace.name,
+          partner_name: workspace.partner_name,
+          market_country: workspace.market_country,
+          language_code: workspace.language_code,
+          commercial_config: commercial
+        });
+        const missingSegments = normalizer.segments.filter(segment => !normalized.searchModifiers[segment]?.length);
+        if (missingSegments.length) throw new Error("Criteri mancanti per: " + missingSegments.join(", "));
+        if (!confirm("Salvare la configurazione commerciale " + normalized.name + " nel workspace " + workspace.name + "?")) return;
+        const settings = { ...(workspace.settings || {}), commercial };
+        await adminAction({ action: "update_workspace", workspace_id: workspace.id, settings });
+        await loadWorkspaces();
+        target.textContent = "Configurazione commerciale salvata nel workspace " + workspace.name + ". La ricerca la leggerà al prossimo caricamento.";
+        status("Configurazione commerciale aggiornata.");
+      } catch (error) {
+        target.textContent = "Configurazione non salvata: " + error.message;
+        status("Salvataggio configurazione commerciale non completato: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     $("workspace-create").addEventListener("submit", async (event) => {
       event.preventDefault();
