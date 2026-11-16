@@ -305,7 +305,15 @@ as $$
   left join public.nextway_workspace_memberships m
     on m.workspace_id = w.id and m.user_id = auth.uid() and m.membership_status = 'active'
   where auth.uid() is not null and w.status = 'active'
-    and (public.nextway_is_platform_admin() or m.id is not null)
+    and (
+      public.nextway_is_platform_admin()
+      or (
+        m.id is not null
+        and m.workspace_role = any(array[
+          'workspace_owner','workspace_admin','workspace_manager','workspace_member'
+        ]::text[])
+      )
+    )
   order by w.name, w.id;
 $$;
 
