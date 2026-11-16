@@ -18,6 +18,10 @@ assert.match(normalized, /array_to_string\(identity_fingerprints, ','\).*\{64\}/
   'fingerprints must be SHA-256 hex strings');
 assert.match(normalized, /public_contacts jsonb/,
   'professional public contact details must be retained');
+assert.match(normalized, /jsonb_array_length\(case when jsonb_typeof\(source_evidence\) = 'array'/,
+  'source evidence table constraints must not throw on malformed scalar JSON');
+assert.match(normalized, /jsonb_array_length\(case when jsonb_typeof\(results\) = 'array'/,
+  'query cache table constraints must not throw on malformed scalar JSON');
 assert.match(normalized, /source_evidence jsonb/,
   'source evidence must be retained');
 assert.match(normalized, /partner_segment in \(/,
