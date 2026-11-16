@@ -452,6 +452,9 @@ Deno.serve(async (req: Request) => {
   let cacheWriteFailures = 0;
 
   if (uncached.length > 0) {
+    if (!trustedWriter) {
+      return json({ error: "Servizio di scrittura centrale non configurato: ricerca esterna bloccata per evitare consumo di crediti senza archiviazione affidabile." }, 503, responseOrigin);
+    }
     const tavilyKey = Deno.env.get("TAVILY_API_KEY");
     if (!tavilyKey) {
       return json({ error: "TAVILY_API_KEY non configurata: nessuna ricerca esterna è stata avviata." }, 503, responseOrigin);
