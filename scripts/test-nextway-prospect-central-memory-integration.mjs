@@ -5,10 +5,31 @@ const edge = readFileSync("supabase/functions/nextway-search/index.ts", "utf8");
 const ui = readFileSync("nextway-motore-ricerca.html", "utf8");
 const schemaMigration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
 const rpcMigration = readFileSync("supabase/migrations/20261116120000_nextway_prospect_identity_memory_rpcs.sql", "utf8");
+const workspaceMigration = readFileSync("supabase/migrations/20261116130000_nextway_list_accessible_workspaces.sql", "utf8");
 assert.equal((schemaMigration.match(/\bcommit;/gi) || []).length, 1,
   "the schema migration must be one atomic transaction");
 assert.equal((rpcMigration.match(/\bcommit;/gi) || []).length, 1,
   "the dependent RPC migration must be one atomic transaction");
+assert.equal((workspaceMigration.match(/\bcommit;/gi) || []).length, 1,
+  "the accessible-workspaces migration must be one atomic transaction");
+assert.match(workspaceMigration, /create or replace function public\.nextway_list_accessible_workspaces\(\)/,
+  "the search UI must have a database RPC to list authorized workspaces");
+assert.match(workspaceMigration, /security definer[\s\S]*set search_path = pg_catalog, public/,
+  "the workspace listing RPC must use a fixed search path");
+assert.match(workspaceMigration, /public\.nextway_is_platform_admin\(\)/,
+  "platform administrators must be able to select active workspaces without a membership row");
+assert.match(workspaceMigration, /w\.status = 'active'/,
+  "only active workspaces may be listed for prospect search");
+assert.match(workspaceMigration, /m\.membership_status = 'active'/,
+  "ordinary users must have an active membership to see a workspace");
+assert.match(workspaceMigration, /workspace_owner','workspace_admin','workspace_manager','workspace_member/,
+  "only roles permitted to search may be listed; viewers must not receive a search workspace");
+assert.match(workspaceMigration, /grant execute on function public\.nextway_list_accessible_workspaces\(\) to authenticated/,
+  "the read-only workspace listing RPC must be available to authenticated users");
+assert.match(workspaceMigration, /revoke all on function public\.nextway_list_accessible_workspaces\(\) from public, anon/,
+  "anonymous users must not enumerate workspaces");
+assert.doesNotMatch(workspaceMigration, /insert into public\.|update public\.|delete from public\./,
+  "the workspace listing migration must not modify workspace or membership data");
 assert.match(rpcMigration, /nextway_merge_prospect_identity[\s\S]*commit;\s*$/,
   "the identity merge RPC must be created before the single final transaction commit");
 assert.equal((rpcMigration.match(/create or replace function public\.nextway_merge_prospect_identity/g) || []).length, 1,
