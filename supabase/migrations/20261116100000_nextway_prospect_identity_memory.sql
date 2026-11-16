@@ -84,7 +84,7 @@ create or replace function public.nextway_guard_prospect_memory_scope()
 returns trigger
 language plpgsql
 set search_path = pg_catalog, public
-as $$
+as $
 begin
   if public.nextway_is_platform_admin() then
     return new;
@@ -112,7 +112,7 @@ begin
 
   return new;
 end;
-$$;
+$;
 
 revoke all on function public.nextway_guard_prospect_memory_scope() from public, anon, authenticated;
 
@@ -123,8 +123,7 @@ create trigger nextway_prospect_identity_scope_guard
 
 alter table public.nextway_prospect_identity_archive enable row level security;
 revoke all on public.nextway_prospect_identity_archive from public, anon;
-revoke insert, update, delete on public.nextway_prospect_identity_archive from authenticated;
-grant select on public.nextway_prospect_identity_archive to authenticated;
+grant select, insert, update, delete on public.nextway_prospect_identity_archive to authenticated;
 grant all on public.nextway_prospect_identity_archive to service_role;
 
 drop policy if exists nextway_prospect_identity_read on public.nextway_prospect_identity_archive;
@@ -142,8 +141,73 @@ create policy nextway_prospect_identity_read
     )
   );
 
--- All authenticated writes go through the validated SECURITY DEFINER merge RPC.
--- Direct table insert/update/delete privileges and policies are intentionally absent.
+drop policy if exists nextway_prospect_identity_insert on public.nextway_prospect_identity_archive;
+create policy nextway_prospect_identity_insert
+  on public.nextway_prospect_identity_archive
+  for insert to authenticated
+  with check (
+    public.nextway_is_platform_admin()
+    or (
+      workspace_id is not null
+      and owner_user_id = auth.uid()
+      and public.nextway_has_workspace_access(
+        workspace_id,
+        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+      )
+    )
+  );
+
+drop policy if exists nextway_prospect_identity_update on public.nextway_prospect_identity_archive;
+create policy nextway_prospect_identity_update
+  on public.nextway_prospect_identity_archive
+  for update to authenticated
+  using (
+    public.nextway_is_platform_admin()
+    or (
+      workspace_id is not null
+      and (
+        owner_user_id = auth.uid()
+        or public.nextway_can_manage_workspace(workspace_id)
+      )
+      and public.nextway_has_workspace_access(
+        workspace_id,
+        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+      )
+    )
+  )
+  with check (
+    public.nextway_is_platform_admin()
+    or (
+      workspace_id is not null
+      and public.nextway_has_workspace_access(
+        workspace_id,
+        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+      )
+      and (
+        owner_user_id = auth.uid()
+        or public.nextway_can_manage_workspace(workspace_id)
+      )
+    )
+  );
+
+drop policy if exists nextway_prospect_identity_delete on public.nextway_prospect_identity_archive;
+create policy nextway_prospect_identity_delete
+  on public.nextway_prospect_identity_archive
+  for delete to authenticated
+  using (
+    public.nextway_is_platform_admin()
+    or (
+      workspace_id is not null
+      and (
+        owner_user_id = auth.uid()
+        or public.nextway_can_manage_workspace(workspace_id)
+      )
+      and public.nextway_has_workspace_access(
+        workspace_id,
+        array['workspace_owner','workspace_admin','workspace_manager']::text[]
+      )
+    )
+  );
 
 comment on table public.nextway_prospect_identity_archive is
   'NEXTWAY central prospect identity memory. Workspace-scoped; stores only public/professional prospect evidence. No automatic CRM promotion.';
@@ -187,7 +251,8 @@ create trigger nextway_search_query_cache_scope_guard
 
 alter table public.nextway_search_query_cache enable row level security;
 revoke all on public.nextway_search_query_cache from public, anon;
-grant select, insert, update on public.nextway_search_query_cache to authenticated;
+revoke insert, update, delete on public.nextway_search_query_cache from authenticated;
+grant select on public.nextway_search_query_cache to authenticated;
 grant all on public.nextway_search_query_cache to service_role;
 
 drop policy if exists nextway_search_query_cache_read on public.nextway_search_query_cache;
@@ -201,60 +266,121 @@ create policy nextway_search_query_cache_read
     )
   );
 
-drop policy if exists nextway_search_query_cache_insert on public.nextway_search_query_cache;
-create policy nextway_search_query_cache_insert
-  on public.nextway_search_query_cache
-  for insert to authenticated
-  with check (
-    fetched_by = auth.uid()
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  );
-
-drop policy if exists nextway_search_query_cache_update on public.nextway_search_query_cache;
-create policy nextway_search_query_cache_update
-  on public.nextway_search_query_cache
-  for update to authenticated
-  using (public.nextway_has_workspace_access(
-    workspace_id,
-    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-  ))
-  with check (public.nextway_has_workspace_access(
-    workspace_id,
-    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-  ));
+-- Authenticated clients may read the cache, but may not poison or rewrite it.
+-- Cache writes are serialized and validated by nextway_store_search_query_cache.
 
 comment on table public.nextway_search_query_cache is
   'NEXTWAY workspace-scoped cache of successful public search responses. Maximum TTL is seven days; only explicit query execution may populate it.';
 
 
-create or replace function public.nextway_list_accessible_workspaces()
-returns table (workspace_id uuid, workspace_name text, workspace_role text)
-language sql stable security definer
+create or replace function public.nextway_store_search_query_cache(
+  p_workspace_id uuid,
+  p_query_fingerprint text,
+  p_query_text text,
+  p_segment_key text,
+  p_market_key text,
+  p_provider_key text,
+  p_results jsonb
+)
+returns uuid
+language plpgsql
+security definer
 set search_path = pg_catalog, public
 as $$
-  select w.id, w.name,
-    case when public.nextway_is_platform_admin() then 'platform_admin' else m.workspace_role end
-  from public.nextway_workspaces w
-  left join public.nextway_workspace_memberships m
-    on m.workspace_id = w.id and m.user_id = auth.uid() and m.membership_status = 'active'
-  where auth.uid() is not null and w.status = 'active'
-    and (
-      public.nextway_is_platform_admin()
-      or (
-        m.id is not null
-        and m.workspace_role = any(array[
-          'workspace_owner','workspace_admin','workspace_manager','workspace_member'
-        ]::text[])
-      )
-    )
-  order by w.name, w.id;
+declare
+  v_user_id uuid := auth.uid();
+  v_id uuid;
+  v_now timestamptz := clock_timestamp();
+begin
+  if v_user_id is null or p_workspace_id is null or not public.nextway_has_workspace_access(
+    p_workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership attiva richiesta per aggiornare la cache di ricerca.' using errcode = '42501';
+  end if;
+
+  if p_query_fingerprint is null or p_query_fingerprint !~ '^[a-f0-9]{64}$'
+     or p_query_text is null or length(btrim(p_query_text)) not between 1 and 400
+     or p_segment_key is null or length(btrim(p_segment_key)) not between 1 and 80
+     or p_market_key is null or length(p_market_key) > 120
+     or p_provider_key is distinct from 'tavily'
+     or jsonb_typeof(coalesce(p_results, '[]'::jsonb)) <> 'array'
+     or jsonb_array_length(coalesce(p_results, '[]'::jsonb)) > 10
+     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304 then
+    raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
+  end if;
+
+  insert into public.nextway_search_query_cache (
+    workspace_id, query_fingerprint, query_text, segment_key, market_key,
+    provider_key, results, fetched_by, fetched_at, expires_at, updated_at
+  ) values (
+    p_workspace_id, p_query_fingerprint, btrim(p_query_text), btrim(p_segment_key),
+    p_market_key, p_provider_key, coalesce(p_results, '[]'::jsonb),
+    v_user_id, v_now, v_now + interval '7 days', v_now
+  )
+  on conflict (workspace_id, query_fingerprint, segment_key, market_key, provider_key)
+  do update set
+    query_text = excluded.query_text,
+    results = excluded.results,
+    fetched_at = excluded.fetched_at,
+    expires_at = excluded.expires_at,
+    updated_at = excluded.updated_at
+  returning id into v_id;
+
+  return v_id;
+end;
 $$;
 
-revoke all on function public.nextway_list_accessible_workspaces() from public, anon;
-grant execute on function public.nextway_list_accessible_workspaces() to authenticated;
+alter function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) owner to postgres;
+revoke all on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) from public, anon;
+grant execute on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) to authenticated;
+
+commit;
+
+create or replace function public.nextway_lookup_prospect_crm_matches(
+  p_workspace_id uuid,
+  p_source_urls text[]
+)
+returns table (
+  canonical_url text,
+  display_name text,
+  company_name text,
+  category text,
+  lead_status text,
+  archived_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if auth.uid() is null or p_workspace_id is null or not public.nextway_has_workspace_access(
+    p_workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership attiva richiesta per verificare i Lead del workspace.' using errcode = '42501';
+  end if;
+  if coalesce(cardinality(p_source_urls), 0) > 25
+     or exists (
+       select 1 from unnest(coalesce(p_source_urls, '{}'::text[])) as u(url)
+       where url is null or length(url) > 2048 or url !~* '^https?://'
+     ) then
+    raise exception 'Elenco URL per la verifica CRM non valido.' using errcode = '22023';
+  end if;
+
+  return query
+  select u.url, l.display_name, l.company_brand, l.category, l.status, l.archived_at
+  from unnest(coalesce(p_source_urls, '{}'::text[])) as u(url)
+  join public.nextway_leads l
+    on l.workspace_id = p_workspace_id
+   and lower(btrim(l.source_url)) = lower(btrim(u.url))
+  order by u.url, l.created_at desc;
+end;
+$$;
+
+alter function public.nextway_lookup_prospect_crm_matches(uuid,text[]) owner to postgres;
+revoke all on function public.nextway_lookup_prospect_crm_matches(uuid,text[]) from public, anon;
+grant execute on function public.nextway_lookup_prospect_crm_matches(uuid,text[]) to authenticated;
 
 create or replace function public.nextway_merge_prospect_identity(
   p_workspace_id uuid, p_identity_fingerprints text[], p_canonical_url text,
@@ -273,6 +399,8 @@ declare
   v_sources jsonb;
   v_id uuid;
   v_fingerprint text;
+  v_effective_archive_status text := 'seen';
+  v_match_count integer;
 begin
   if p_workspace_id is null or v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
@@ -297,7 +425,7 @@ begin
   if p_target_type not in ('potential_customer','potential_partner','unknown')
      or (p_partner_segment is not null and p_partner_segment not in (
        'wellness_professional','wellness_networker','other_networker','entrepreneur','extra_income'))
-     or p_archive_status not in ('seen','reviewed','acquired','ignored') then
+     or p_archive_status is distinct from 'seen' then
     raise exception 'Classificazione della memoria prospect non valida.' using errcode = '22023';
   end if;
 
@@ -311,6 +439,24 @@ begin
       p_workspace_id::text || ':identity:' || v_fingerprint, 0
     ));
   end loop;
+
+  select count(*) into v_match_count
+  from public.nextway_prospect_identity_archive a
+  where a.workspace_id = p_workspace_id
+    and (a.canonical_url = p_canonical_url
+      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
+          and a.identity_fingerprints && p_identity_fingerprints));
+  if v_match_count > 1 then
+    raise exception 'Identità già presenti in più record: revisione manuale necessaria.' using errcode = '23505';
+  end if;
+
+  if exists (
+    select 1 from public.nextway_leads l
+    where l.workspace_id = p_workspace_id
+      and lower(btrim(l.source_url)) = lower(btrim(p_canonical_url))
+  ) then
+    v_effective_archive_status := 'acquired';
+  end if;
 
   select * into v_existing
   from public.nextway_prospect_identity_archive a
@@ -388,12 +534,12 @@ begin
         target_type = case when target_type = 'unknown' then p_target_type else target_type end,
         partner_segment = coalesce(partner_segment, p_partner_segment),
         archive_status = case
-          when archive_status = 'acquired' or p_archive_status = 'acquired' then 'acquired'
+          when archive_status = 'acquired' or v_effective_archive_status = 'acquired' then 'acquired'
           when archive_status = 'ignored' then 'ignored'
           when archive_status = 'reviewed' or p_archive_status = 'reviewed' then 'reviewed'
           else 'seen' end,
         last_seen_at = now(), seen_count = seen_count + 1,
-        last_acquired_at = case when p_archive_status = 'acquired' then now() else last_acquired_at end,
+        last_acquired_at = case when v_effective_archive_status = 'acquired' then coalesce(last_acquired_at, now()) else last_acquired_at end,
         updated_at = now()
     where id = v_existing.id returning id into v_id;
   else
@@ -406,8 +552,8 @@ begin
       p_canonical_url, left(btrim(p_display_name), 240),
       nullif(left(btrim(p_company_name), 240), ''), coalesce(p_profile_data, '{}'::jsonb),
       coalesce(p_public_contacts, '{}'::jsonb), coalesce(p_source_evidence, '[]'::jsonb),
-      p_target_type, p_partner_segment, p_archive_status,
-      case when p_archive_status = 'acquired' then now() else null end
+      p_target_type, p_partner_segment, v_effective_archive_status,
+      case when v_effective_archive_status = 'acquired' then now() else null end
     ) returning id into v_id;
   end if;
   return v_id;
