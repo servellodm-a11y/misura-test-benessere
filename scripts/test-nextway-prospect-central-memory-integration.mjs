@@ -54,6 +54,22 @@ assert.match(rpcMigration, /set_config\('request\.jwt\.claims'/,
   "the identity merge must bind the verified actor in both Supabase claim settings");
 assert.match(rpcMigration, /auth\.uid\(\) is distinct from p_actor_id/,
   "the identity merge must fail closed if the verified actor cannot be resolved");
+assert.match(rpcMigration, /create or replace function public\.nextway_check_prospect_memory_ready/,
+  "the Edge Function must have a server-only readiness preflight before paid search");
+assert.match(rpcMigration, /to_regprocedure\('public\.nextway_merge_prospect_identity/,
+  "readiness preflight must verify that the identity merge RPC is installed");
+assert.match(rpcMigration, /has_function_privilege\('authenticated'[\s\S]*nextway_lookup_prospect_crm_matches/,
+  "readiness preflight must verify the user-scoped CRM lookup privilege");
+assert.match(rpcMigration, /has_function_privilege\('service_role'[\s\S]*nextway_merge_prospect_identity/,
+  "readiness preflight must verify the server-only merge privilege");
+assert.match(edge, /trustedWriter\.rpc\([\s\S]*nextway_check_prospect_memory_ready/,
+  "the search Edge Function must run the readiness preflight using the trusted writer");
+assert.match(edge, /p_source_urls:\s*\[\]/,
+  "the CRM lookup must be exercised read-only before any external search");
+assert.match(edge, /from\("nextway_prospect_identity_archive"\)[\s\S]*select\("id"\)/,
+  "the user-scoped archive read policy must be checked before paid search");
+assert.ok(edge.indexOf("Memoria centrale o permessi non pronti") < edge.indexOf('"nextway_consume_api_rate_limit"'),
+  "all central memory prerequisites must be checked before consuming Tavily quota");
 assert.match(schemaMigration, /set_config\('request\.jwt\.claims'/,
   "the cache write RPC must bind the verified actor in both Supabase claim settings");
 assert.match(schemaMigration, /auth\.uid\(\) is distinct from p_actor_id/,
