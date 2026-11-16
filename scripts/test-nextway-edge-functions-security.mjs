@@ -57,7 +57,7 @@ assert.match(setter, /if \(stagedOutput\)/);
 assert.match(setter, /if \(completeError\)/);
 assert.match(setter, /return respond\(completedResponse, 200, responseOrigin\)/);
 assert.match(setter, /error: "Operazione non completata"/);
-assert.doesNotMatch(setter, /Deno\.env\.get\(["'](?:SUPABASE_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
+assert.doesNotMatch(setter, /Deno\.env\.get\(["'](?:NEXTWAY_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
 assert.doesNotMatch(setter, /fetch\(["']https?:\/\/[^"']*(?:whatsapp|twilio|sendgrid)[^"']*["']/i);
 assert.match(setter, /Non inviarla: deve rimanere una bozza/);
 
@@ -97,8 +97,8 @@ assert.match(search, /queries_requested/);
 assert.match(search, /queries_completed/);
 assert.match(search, /queries_failed/);
 assert.match(search, /partial/);
-assert.match(search, /Deno\.env\.get\(["']SUPABASE_SERVICE_ROLE_KEY["']\)/);
-assert.ok(search.indexOf("supabase.auth.getUser(token)") < search.indexOf('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'),
+assert.match(search, /Deno\.env\.get\(["']NEXTWAY_SERVICE_ROLE_KEY["']\)/);
+assert.ok(search.indexOf("supabase.auth.getUser(token)") < search.indexOf('Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY")'),
   "the search function must authenticate the caller before initializing its server-only writer");
 assert.match(search, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/);
 assert.match(search, /trustedWriter\.rpc\("nextway_store_search_query_cache"/);
