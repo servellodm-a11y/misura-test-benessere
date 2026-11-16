@@ -17,6 +17,12 @@ assert.match(page, /queries:queriesToRun\.map\(entry=>entry\.query\)/,
   'the Edge Function must receive either the selected query or the explicit batch');
 assert.match(page, /runallsearch'\)\.addEventListener\('click',\(\)=>runSearch\(true\)\)/,
   'the all-search button must invoke the explicit batch path');
+assert.match(page, /Array\.isArray\(payload\.failures\)/,
+  'partial provider failures must be handled explicitly');
+assert.match(page, /Ricerche non completate/,
+  'the UI must visibly identify incomplete search queries');
+assert.match(page, /reasonLabels\[failure\.reason\]/,
+  'provider failure codes must be translated into readable Italian explanations');
 assert.match(page, /queriesToRun\.length\*SEARCH_MAX_RESULTS/,
   'the in-progress status must communicate the maximum combined result count');
 assert.match(page, /massimo '\+SEARCH_MAX_RESULTS\+' risultati per query/,
