@@ -129,6 +129,12 @@ assert.match(ui, /query già presenti nella cache centrale non vengono inviate/,
   "the UI must explain that central cache hits do not consume external search units");
 assert.match(ui, /non crea né qualifica Lead nel CRM/,
   "the UI must distinguish central identity memory from CRM Lead creation");
+assert.match(ui, /schede provvisorie dai contenuti restituiti dal servizio di ricerca/,
+  "the UI must disclose that public search content is analyzed into provisional profiles");
+assert.match(ui, /non contatta persone e non invia messaggi/,
+  "the UI must state that no prospect is contacted automatically");
+assert.doesNotMatch(ui, /non estrae automaticamente profili/,
+  "the UI must not deny the actual preliminary profile extraction performed on search results");
 assert.doesNotMatch(ui, /1\.000 identità storiche|non sostituisce un archivio cloud condiviso/,
   "the UI must not describe stale local-only memory limits or deny the shared archive");
 assert.match(ui, /workspace_id:searchWorkspaceId/,
