@@ -123,6 +123,10 @@ assert.match(ui, /confronta i risultati con la memoria condivisa e con i Lead gi
   "the UI must explain the authoritative shared and CRM duplicate checks");
 assert.match(ui, /fino a 500 identità e 20 query/,
   "the UI must accurately describe the browser-local archive capacity");
+assert.match(ui, /può consumare fino a 5 unità Tavily/,
+  "the UI must describe the batch search as a maximum cost, not a guaranteed charge");
+assert.match(ui, /query già presenti nella cache centrale non vengono inviate/,
+  "the UI must explain that central cache hits do not consume external search units");
 assert.match(ui, /non crea né qualifica Lead nel CRM/,
   "the UI must distinguish central identity memory from CRM Lead creation");
 assert.doesNotMatch(ui, /1\.000 identità storiche|non sostituisce un archivio cloud condiviso/,
