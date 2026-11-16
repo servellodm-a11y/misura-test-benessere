@@ -28,7 +28,7 @@ stable
 security definer
 set search_path = pg_catalog, public
 as $$
-  select w.id, w.name, 'platform_admin'::text
+  select w.id as workspace_id, w.name as workspace_name, 'platform_admin'::text as workspace_role
   from public.nextway_workspaces w
   where auth.uid() is not null
     and w.status = 'active'
@@ -36,7 +36,7 @@ as $$
 
   union all
 
-  select w.id, w.name, m.workspace_role
+  select w.id as workspace_id, w.name as workspace_name, m.workspace_role as workspace_role
   from public.nextway_workspaces w
   join public.nextway_workspace_memberships m
     on m.workspace_id = w.id
@@ -48,7 +48,7 @@ as $$
     and m.workspace_role = any(array[
       'workspace_owner','workspace_admin','workspace_manager','workspace_member'
     ]::text[])
-  order by workspace_name, workspace_id;
+  order by 2, 1;
 $$;
 
 alter function public.nextway_list_accessible_workspaces() owner to postgres;
