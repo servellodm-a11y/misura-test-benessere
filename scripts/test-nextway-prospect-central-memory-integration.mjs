@@ -50,6 +50,14 @@ assert.match(rpcMigration, /auth\.role\(\) is distinct from 'service_role'/,
   "the identity merge RPC must reject calls without the trusted server role");
 assert.match(rpcMigration, /set_config\('request\.jwt\.claim\.sub', p_actor_id::text, true\)/,
   "the server-only identity merge must restore the verified actor identity for membership checks");
+assert.match(rpcMigration, /set_config\('request\.jwt\.claims'/,
+  "the identity merge must bind the verified actor in both Supabase claim settings");
+assert.match(rpcMigration, /auth\.uid\(\) is distinct from p_actor_id/,
+  "the identity merge must fail closed if the verified actor cannot be resolved");
+assert.match(schemaMigration, /set_config\('request\.jwt\.claims'/,
+  "the cache write RPC must bind the verified actor in both Supabase claim settings");
+assert.match(schemaMigration, /auth\.uid\(\) is distinct from p_actor_id/,
+  "the cache write RPC must fail closed if the verified actor cannot be resolved");
 assert.match(schemaMigration, /revoke all on function public\.nextway_store_search_query_cache\([\s\S]*from public, anon, authenticated/,
   "ordinary authenticated clients must not call the cache write RPC directly");
 assert.match(schemaMigration, /grant execute on function public\.nextway_store_search_query_cache\([\s\S]*to service_role/,
