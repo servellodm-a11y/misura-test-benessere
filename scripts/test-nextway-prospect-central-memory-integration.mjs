@@ -27,6 +27,8 @@ assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprints\)/,
   "central lookup must match shared identities by server-side hashed fingerprints");
 assert.match(edge, /input\.fingerprints\.some\(fingerprint => record\.identity_fingerprints\.includes\(fingerprint\)\)/,
   "lookup results must be correlated using the same fingerprints persisted in the archive");
+assert.match(edge, /candidates\.length > 1/,
+  "multiple central identity matches must be flagged as ambiguous, never silently selected");
 assert.match(edge, /\.eq\("workspace_id", workspaceId\)/,
   "central identity lookup must remain strictly workspace-scoped");
 
@@ -59,6 +61,10 @@ assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
   "the UI must label identities already present in the shared workspace");
 assert.match(ui, /Già acquisito nel CRM/,
   "the UI must prevent reacquiring identities already acquired in the shared CRM");
+assert.match(ui, /central_identity_ambiguous/,
+  "ambiguous shared identity matches must be surfaced to the operator");
+assert.match(ui, /Duplicato centrale da verificare/,
+  "CRM capture must be blocked for ambiguous shared identity matches");
 
 assert.match(ui, /archivePayload\.archived_count/,
   "the UI must report successful central identity updates");
