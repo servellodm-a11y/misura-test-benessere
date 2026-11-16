@@ -74,6 +74,8 @@ on:
       - "scripts/test-nextway-prospect-search-contract.mjs"
       - "scripts/test-nextway-prospect-classification.mjs"
       - "scripts/test-nextway-prospect-search-coverage.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-prospect-dimensions.mjs"
       - "scripts/test-nextway-prospect-deduplication.mjs"
       - "scripts/test-nextway-prospect-contactability.mjs"
