@@ -249,10 +249,10 @@ begin
      or p_market_key is null or length(p_market_key) > 120
      or p_provider_key is distinct from 'tavily'
      or jsonb_typeof(coalesce(p_results, '[]'::jsonb)) <> 'array'
-     or jsonb_array_length(coalesce(p_results, '[]'::jsonb)) > 10
+     or jsonb_array_length(case when jsonb_typeof(coalesce(p_results, '[]'::jsonb)) = 'array' then coalesce(p_results, '[]'::jsonb) else '[]'::jsonb end) > 10
      or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_results, '[]'::jsonb)) item(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_results, '[]'::jsonb)) = 'array' then coalesce(p_results, '[]'::jsonb) else '[]'::jsonb end) item(value)
        where jsonb_typeof(item.value) <> 'object'
          or coalesce(item.value ->> 'url', '') !~* '^https?://[^/[:space:]]'
          or length(coalesce(item.value ->> 'title', '')) > 300
@@ -380,24 +380,24 @@ begin
      or jsonb_typeof(coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)) <> 'array'
      or jsonb_typeof(coalesce(p_public_contacts -> 'socials', '[]'::jsonb)) <> 'array'
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'emails', '[]'::jsonb)) c(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_public_contacts -> 'emails', '[]'::jsonb)) = 'array' then coalesce(p_public_contacts -> 'emails', '[]'::jsonb) else '[]'::jsonb end) c(value)
        where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 500
      )
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'phones', '[]'::jsonb)) c(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_public_contacts -> 'phones', '[]'::jsonb)) = 'array' then coalesce(p_public_contacts -> 'phones', '[]'::jsonb) else '[]'::jsonb end) c(value)
        where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 100
      )
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)) c(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)) = 'array' then coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb) else '[]'::jsonb end) c(value)
        where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 100
      )
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'socials', '[]'::jsonb)) c(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_public_contacts -> 'socials', '[]'::jsonb)) = 'array' then coalesce(p_public_contacts -> 'socials', '[]'::jsonb) else '[]'::jsonb end) c(value)
        where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 500
      )
      or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array'
      or exists (
-       select 1 from jsonb_array_elements(coalesce(p_source_evidence, '[]'::jsonb)) e(value)
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) = 'array' then coalesce(p_source_evidence, '[]'::jsonb) else '[]'::jsonb end) e(value)
        where jsonb_typeof(e.value) <> 'object'
      ) then
     raise exception 'Dati della memoria prospect non validi.' using errcode = '22023';
