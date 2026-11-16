@@ -126,4 +126,6 @@ Le RPC `nextway_store_search_query_cache` e `nextway_merge_prospect_identity` so
 
 Se la credenziale server non è disponibile, la ricerca può restituire i risultati già ottenuti, ma non può scrivere la cache condivisa; l'archiviazione centrale fallisce in modo chiuso e l'interfaccia mantiene bloccata l'acquisizione CRM.
 
-3. `20261116130000_nextway_list_accessible_workspaces.sql`: RPC read-only per elencare i workspace attivi visibili al motore di ricerca. I platform_admin vedono tutti i workspace attivi; gli altri utenti vedono solo quelli con membership attiva e ruolo abilitato alla ricerca.
+## Elenco dei workspace accessibili
+
+`20261116130000_nextway_list_accessible_workspaces.sql` aggiunge una RPC read-only per elencare i workspace attivi visibili al motore di ricerca. I platform_admin vedono tutti i workspace attivi; gli altri utenti vedono solo quelli con membership attiva e ruolo abilitato alla ricerca.
