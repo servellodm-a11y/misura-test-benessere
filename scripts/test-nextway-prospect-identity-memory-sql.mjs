@@ -59,4 +59,20 @@ assert.doesNotMatch(normalized, /insert into public\.(nextway_prospect_identity_
 assert.doesNotMatch(normalized, /drop table|truncate table|delete from public\./,
   'migration must not delete operational data');
 
-console.log('NEXTWAY central prospect identity memory SQL: 25 checks passed.');
+
+assert.match(normalized, /as \$\$[\s\S]*?end;\s*\$\$;/,
+  'PL/pgSQL trigger/function bodies must use valid dollar quoting');
+assert.doesNotMatch(normalized, /as \$(?!\$)/,
+  'single-dollar function delimiters are invalid');
+assert.match(normalized, /nextway_list_accessible_workspaces/,
+  'the authenticated UI must be able to list only accessible active workspaces');
+assert.match(normalized, /nextway_merge_prospect_identity/,
+  'central identity writes must use the transactional merge RPC');
+assert.match(normalized, /pg_advisory_xact_lock/,
+  'concurrent identity merges must serialize on stable identity material');
+assert.match(normalized, /grant execute on function public\.nextway_merge_prospect_identity[\s\S]*?to authenticated/,
+  'identity merge RPC must be callable by authenticated members');
+assert.match(normalized, /create policy nextway_search_query_cache_update[\s\S]*?nextway_has_workspace_access/,
+  'active workspace members must be able to refresh expired shared cache rows');
+
+console.log('NEXTWAY central prospect identity memory SQL: contract checks passed.');
