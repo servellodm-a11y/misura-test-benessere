@@ -519,7 +519,7 @@ begin
         archive_status = case
           when archive_status = 'acquired' or v_effective_archive_status = 'acquired' then 'acquired'
           when archive_status = 'ignored' then 'ignored'
-          when archive_status = 'reviewed' or p_archive_status = 'reviewed' then 'reviewed'
+          when archive_status = 'reviewed' then 'reviewed'
           else 'seen' end,
         last_seen_at = now(), seen_count = seen_count + 1,
         last_acquired_at = case when v_effective_archive_status = 'acquired' then coalesce(last_acquired_at, now()) else last_acquired_at end,
