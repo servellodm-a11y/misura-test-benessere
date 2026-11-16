@@ -41,7 +41,8 @@ create table if not exists public.nextway_prospect_identity_archive (
   public_contacts jsonb not null default '{}'::jsonb
     check (jsonb_typeof(public_contacts) = 'object' and pg_column_size(public_contacts) <= 8192),
   source_evidence jsonb not null default '[]'::jsonb
-    check (jsonb_typeof(source_evidence) = 'array' and jsonb_array_length(source_evidence) <= 12
+    check (jsonb_typeof(source_evidence) = 'array'
+      and jsonb_array_length(case when jsonb_typeof(source_evidence) = 'array' then source_evidence else '[]'::jsonb end) <= 12
       and pg_column_size(source_evidence) <= 24576),
   target_type text not null default 'unknown'
     check (target_type in ('potential_customer','potential_partner','unknown')),
@@ -173,7 +174,8 @@ create table if not exists public.nextway_search_query_cache (
   market_key text not null default '' check (length(market_key) <= 120),
   provider_key text not null default 'tavily' check (provider_key in ('tavily')),
   results jsonb not null default '[]'::jsonb
-    check (jsonb_typeof(results) = 'array' and jsonb_array_length(results) <= 10
+    check (jsonb_typeof(results) = 'array'
+      and jsonb_array_length(case when jsonb_typeof(results) = 'array' then results else '[]'::jsonb end) <= 10
       and pg_column_size(results) <= 98304),
   fetched_by uuid not null references auth.users(id) on delete restrict,
   fetched_at timestamptz not null default now(),
