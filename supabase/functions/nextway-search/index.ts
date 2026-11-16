@@ -319,9 +319,9 @@ Deno.serve(async (req: Request) => {
       const classification = cleanString(prospect.classification, 80).toLocaleLowerCase("it");
       const targetType = classification.includes("partner") ? "potential_partner" :
         (classification.includes("client") || classification.includes("cliente")) ? "potential_customer" : "unknown";
-      const status = cleanString(prospect.archive_status, 40);
-      // CRM records, including active follow-ups, are already acquired; automated identity assessment alone is not human review.
-      const archiveStatus = status === "acquired" || status === "followup" ? "acquired" : "seen";
+      // The client cannot attest CRM acquisition or human review. The protected RPC accepts only "seen";
+      // existing trusted states (acquired/reviewed/ignored) are preserved by the database merge.
+      const archiveStatus = "seen";
       const rpcArgs = {
         p_workspace_id: workspaceId,
         p_identity_fingerprints: fingerprints,
@@ -371,7 +371,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const cachedGroups: SearchGroup[] = [];
-  const uncached: Array<{ query: string; fingerprint: string; existingId: string | null }> = [];
+  const uncached: Array<{ query: string; fingerprint: string }> = [];
   const now = new Date();
   for (const query of queries) {
     const normalized = query.normalize("NFKC").toLocaleLowerCase("it").replace(/\s+/g, " ").trim();
@@ -397,7 +397,7 @@ Deno.serve(async (req: Request) => {
     if (cacheRow && Date.parse(String(cacheRow.expires_at)) > now.getTime() && Array.isArray(cacheRow.results)) {
       cachedGroups.push({ query, results: cacheRow.results as SearchResult[], cached: true });
     } else {
-      uncached.push({ query, fingerprint, existingId: cacheRow?.id ? String(cacheRow.id) : null });
+      uncached.push({ query, fingerprint });
     }
   }
 
@@ -490,25 +490,16 @@ Deno.serve(async (req: Request) => {
 
       const fetchedAt = new Date().toISOString();
       const expiresAt = new Date(Date.parse(fetchedAt) + 7 * 24 * 60 * 60 * 1000).toISOString();
-      const cacheValues = {
-        results: safeItems,
-        fetched_at: fetchedAt,
-        expires_at: expiresAt,
-        updated_at: fetchedAt,
-      };
-      const cacheWrite = entry.existingId
-        ? await supabase.from("nextway_search_query_cache").update(cacheValues).eq("id", entry.existingId)
-        : await supabase.from("nextway_search_query_cache").insert({
-          workspace_id: workspaceId,
-          query_fingerprint: entry.fingerprint,
-          query_text: entry.query,
-          segment_key: segmentKey,
-          market_key: marketKey,
-          provider_key: "tavily",
-          ...cacheValues,
-          fetched_by: userData.user.id,
-        });
-      if (cacheWrite.error) {
+      const cacheWrite = await supabase.rpc("nextway_store_search_query_cache", {
+        p_workspace_id: workspaceId,
+        p_query_fingerprint: entry.fingerprint,
+        p_query_text: entry.query,
+        p_segment_key: segmentKey,
+        p_market_key: marketKey,
+        p_provider_key: "tavily",
+        p_results: safeItems,
+      });
+      if (cacheWrite.error || typeof cacheWrite.data !== "string") {
         cacheWriteFailures++;
         console.error("NEXTWAY central query cache write failed:", cacheWrite.error.code ?? "unknown");
       }
