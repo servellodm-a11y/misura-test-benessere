@@ -124,7 +124,7 @@ La seconda migrazione verifica preventivamente la presenza delle tabelle e delle
 
 Le RPC `nextway_store_search_query_cache` e `nextway_merge_prospect_identity` sono eseguibili soltanto dal ruolo server `service_role`; i ruoli `public`, `anon` e `authenticated` non possono invocarle direttamente. La Edge Function autentica prima il chiamante con il suo JWT, verifica la membership attiva usando il client con permessi dell'utente e usa il client server esclusivamente per queste due RPC. Le RPC ricevono l'ID dell'attore verificato e ripetono il controllo della membership nel database. Le letture di workspace, cache e archivio restano sul client JWT dell'utente: la chiave server non viene usata per letture generiche.
 
-Se la credenziale server non è disponibile, la ricerca può restituire i risultati già ottenuti, ma non può scrivere la cache condivisa; l'archiviazione centrale fallisce in modo chiuso e l'interfaccia mantiene bloccata l'acquisizione CRM.
+Se la credenziale server non è disponibile, la ricerca può restituire i risultati già ottenuti, ma non può scrivere la cache condivisa; l'archiviazione centrale fallisce in modo chiuso e l'interfaccia mantiene bloccata l'acquisizione CRM. Prima di consumare unità Tavily, la Edge Function esegue inoltre un preflight server-only che verifica l'identità dell'attore, la membership, la presenza delle tabelle e delle RPC necessarie e i relativi permessi. Esegue anche una verifica CRM a URL vuoto e una lettura dell'archivio con il JWT dell'utente. Se uno di questi controlli fallisce, la ricerca esterna non parte.
 
 ## Elenco dei workspace accessibili
 
