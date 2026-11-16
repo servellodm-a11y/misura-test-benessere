@@ -349,7 +349,7 @@ begin
      or p_display_name is null or length(btrim(p_display_name)) not between 1 and 240
      or coalesce(cardinality(p_identity_fingerprints), 0) > 20
      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
-         and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*
+         and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*$')
      or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
      or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
      or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array' then
