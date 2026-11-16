@@ -112,6 +112,8 @@ assert.doesNotMatch(edge, /SUPABASE_SERVICE_ROLE_KEY/,
 
 assert.match(ui, /nextway_list_accessible_workspaces/,
   "the UI must load only workspaces available to the signed-in user");
+assert.match(ui, /confronta i risultati con la memoria condivisa e con i Lead già presenti nel CRM/,
+  "the UI must explain the authoritative shared and CRM duplicate checks");
 assert.match(ui, /workspace_id:searchWorkspaceId/,
   "search requests must carry the selected workspace scope");
 assert.match(ui, /segment_key:\$\('segment'\)\.value/,
