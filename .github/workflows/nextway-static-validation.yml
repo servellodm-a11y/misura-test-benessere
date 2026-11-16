@@ -76,6 +76,7 @@ on:
       - "scripts/test-nextway-prospect-search-coverage.mjs"
       - "scripts/test-nextway-prospect-identity-memory.mjs"
       - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
       - "scripts/test-nextway-prospect-dimensions.mjs"
       - "scripts/test-nextway-prospect-deduplication.mjs"
       - "scripts/test-nextway-prospect-contactability.mjs"
@@ -209,6 +210,8 @@ jobs:
         run: node scripts/test-nextway-prospect-identity-memory.mjs
       - name: Validate NEXTWAY central prospect identity memory SQL and RLS
         run: node scripts/test-nextway-prospect-identity-memory-sql.mjs
+      - name: Validate NEXTWAY central prospect cache and archive integration
+        run: node scripts/test-nextway-prospect-central-memory-integration.mjs
       - name: Test NEXTWAY explainable prospect assessment dimensions
         run: node scripts/test-nextway-prospect-dimensions.mjs
       - name: Test NEXTWAY conservative cross-source prospect deduplication
