@@ -85,7 +85,7 @@ create or replace function public.nextway_guard_prospect_memory_scope()
 returns trigger
 language plpgsql
 set search_path = pg_catalog, public
-as $
+as $$
 begin
   if public.nextway_is_platform_admin() then
     return new;
@@ -116,7 +116,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 revoke all on function public.nextway_guard_prospect_memory_scope() from public, anon, authenticated;
 
@@ -227,7 +227,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = pg_catalog, public
-as $
+as $$
 declare
   v_user_id uuid;
   v_id uuid;
