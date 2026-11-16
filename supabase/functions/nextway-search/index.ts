@@ -404,7 +404,7 @@ Deno.serve(async (req: Request) => {
           title: cleanString(record.title, 300),
           url,
           snippet: cleanString(record.content, 1200),
-          page_content: cleanString(record.raw_content, 5000),
+          page_content: cleanString(record.raw_content, 2500),
           score: Number.isFinite(score) ? score : 0,
           published_date: cleanString(record.published_date, 40) || null,
         }];
