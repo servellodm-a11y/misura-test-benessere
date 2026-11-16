@@ -205,6 +205,8 @@ jobs:
         run: node scripts/test-nextway-prospect-search-coverage.mjs
       - name: Test NEXTWAY prospect identity memory and query cache
         run: node scripts/test-nextway-prospect-identity-memory.mjs
+      - name: Validate NEXTWAY central prospect identity memory SQL and RLS
+        run: node scripts/test-nextway-prospect-identity-memory-sql.mjs
       - name: Test NEXTWAY explainable prospect assessment dimensions
         run: node scripts/test-nextway-prospect-dimensions.mjs
       - name: Test NEXTWAY conservative cross-source prospect deduplication
