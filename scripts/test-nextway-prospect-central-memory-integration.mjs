@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const edge = readFileSync("supabase/functions/nextway-search/index.ts", "utf8");
 const ui = readFileSync("nextway-motore-ricerca.html", "utf8");
+const migration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
 
 const cacheRead = edge.indexOf('.from("nextway_search_query_cache")');
 const rateLimit = edge.indexOf('"nextway_consume_api_rate_limit"');
@@ -15,6 +16,20 @@ assert.match(edge, /nextway_has_workspace_access/,
   "the Edge Function must validate active workspace membership");
 assert.match(edge, /nextway_merge_prospect_identity/,
   "central identity updates must use the protected merge RPC");
+assert.match(edge, /nextway_lookup_prospect_crm_matches/,
+  "existing CRM Leads must be checked before permitting acquisition");
+assert.match(edge, /crm_match:\s*true/,
+  "a matching existing CRM Lead must be returned as an acquired identity");
+assert.match(migration, /create or replace function public\.nextway_lookup_prospect_crm_matches/,
+  "the CRM duplicate lookup must be implemented as a protected database RPC");
+assert.match(migration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
+  "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
+assert.match(migration, /v_effective_archive_status := 'acquired'/,
+  "the database, not the browser, must derive acquired status from an existing CRM Lead");
+assert.match(migration, /p_archive_status is distinct from 'seen'/,
+  "authenticated clients must not self-assert acquired or reviewed status");
+assert.match(migration, /nextway_leads.*workspace_id.*source_url/s,
+  "migration prerequisites must include workspace-scoped Lead source URLs");
 assert.match(edge, /p_archive_status:\s*archiveStatus/,
   "the central merge RPC must receive only the server-enforced seen status");
 assert.match(edge, /p_results:\s*safeItems/,
