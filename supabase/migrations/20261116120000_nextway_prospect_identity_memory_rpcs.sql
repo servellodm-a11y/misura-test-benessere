@@ -307,4 +307,67 @@ grant execute on function public.nextway_merge_prospect_identity(
   uuid, uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
 ) to service_role;
 
+
+create or replace function public.nextway_check_prospect_memory_ready(
+  p_actor_id uuid,
+  p_workspace_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $
+begin
+  if auth.role() is distinct from 'service_role'
+     or p_actor_id is null
+     or p_workspace_id is null then
+    raise exception 'Preflight memoria NEXTWAY consentito solo al servizio autenticato.' using errcode = '42501';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', p_actor_id::text, true);
+  perform set_config(
+    'request.jwt.claims',
+    jsonb_set(
+      coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb),
+      '{sub}', to_jsonb(p_actor_id::text), true
+    )::text,
+    true
+  );
+  if auth.uid() is distinct from p_actor_id then
+    raise exception 'Identità attore NEXTWAY non coerente.' using errcode = '42501';
+  end if;
+
+  if not public.nextway_has_workspace_access(
+    p_workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership attiva non valida per il workspace selezionato.' using errcode = '42501';
+  end if;
+
+  if to_regclass('public.nextway_prospect_identity_archive') is null
+     or to_regclass('public.nextway_search_query_cache') is null
+     or to_regclass('public.nextway_leads') is null
+     or to_regprocedure('public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb)') is null
+     or to_regprocedure('public.nextway_lookup_prospect_crm_matches(uuid,text[])') is null
+     or to_regprocedure('public.nextway_merge_prospect_identity(uuid,uuid,text[],text,text,text,jsonb,jsonb,jsonb,text,text,text)') is null then
+    raise exception 'Memoria centrale NEXTWAY non completamente installata.' using errcode = '55000';
+  end if;
+
+  if not has_function_privilege('service_role',
+       'public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb)', 'EXECUTE')
+     or not has_function_privilege('service_role',
+       'public.nextway_lookup_prospect_crm_matches(uuid,text[])', 'EXECUTE')
+     or not has_function_privilege('service_role',
+       'public.nextway_merge_prospect_identity(uuid,uuid,text[],text,text,text,jsonb,jsonb,jsonb,text,text,text)', 'EXECUTE') then
+    raise exception 'Permessi RPC memoria centrale NEXTWAY incompleti.' using errcode = '42501';
+  end if;
+
+  return true;
+end;
+$;
+
+alter function public.nextway_check_prospect_memory_ready(uuid, uuid) owner to postgres;
+revoke all on function public.nextway_check_prospect_memory_ready(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.nextway_check_prospect_memory_ready(uuid, uuid) to service_role;
+
 commit;
