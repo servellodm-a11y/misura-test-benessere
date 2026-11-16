@@ -583,7 +583,7 @@ Deno.serve(async (req: Request) => {
         : { data: null, error: { code: "trusted_writer_unavailable" } };
       if (cacheWrite.error || typeof cacheWrite.data !== "string") {
         cacheWriteFailures++;
-        console.error("NEXTWAY central query cache write failed:", cacheWrite.error.code ?? "unknown");
+        console.error("NEXTWAY central query cache write failed:", cacheWrite.error?.code ?? "unknown");
       }
     }
   }
