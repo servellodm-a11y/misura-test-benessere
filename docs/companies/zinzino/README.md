@@ -64,3 +64,8 @@ Questa cartella è il punto di raccolta della documentazione ufficiale da cui ri
 ## Fuori perimetro del primo collegamento
 
 L'attuale integrazione rende Zinzino il contesto di ricerca attivo e conserva l'associazione aziendale nel Lead. Non equivale ancora a un archivio documentale completo né a un AI Setter che consulta l'intero catalogo e piano compensi. Queste funzioni richiedono l'acquisizione e l'indicizzazione dei documenti ufficiali.
+
+
+## Configurazione commerciale workspace
+
+Il file [workspace-commercial-settings.json](./workspace-commercial-settings.json) contiene la configurazione Zinzino pronta per essere inserita in `nextway_workspaces.settings.commercial`: nove segmenti, 45 query italiane, 45 query inglesi, termini del brand, canali personali, materiali ufficiali da acquisire e regole di conformità. È un file di preparazione: non crea workspace e non scrive dati su Supabase.
