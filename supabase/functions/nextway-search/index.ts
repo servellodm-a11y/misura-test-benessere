@@ -214,6 +214,72 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Non hai una membership attiva con permessi di ricerca in questo workspace." }, 403, responseOrigin);
   }
 
+  if (action === "lookup_prospects") {
+    if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
+      return json({ error: "Richiesta di confronto non valida: massimo 25 prospect." }, 400, responseOrigin);
+    }
+    const inputs = body.prospects.map((item, index) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return { index, url: "", fingerprints: [] as string[] };
+      const prospect = item as Record<string, unknown>;
+      const url = safeUrl(prospect.url);
+      const keys = stringArray(prospect.identity_keys, 19, 500).map((key) =>
+        key.normalize("NFKC").toLocaleLowerCase("it").replace(/\s+/g, " ").trim()
+      );
+      return { index, url, keys };
+    });
+    const urls = [...new Set(inputs.map(item => item.url).filter(Boolean))];
+    const fingerprints = [...new Set(await Promise.all(inputs.flatMap(item =>
+      [...(item.url ? ["url:" + item.url] : []), ...item.keys].map(sha256)
+    )))];
+    const columns = "id,canonical_url,identity_fingerprints,display_name,company_name,target_type,partner_segment,archive_status,first_seen_at,last_seen_at,seen_count,last_acquired_at";
+    const records = new Map<string, Record<string, unknown>>();
+    if (urls.length) {
+      const { data, error } = await supabase.from("nextway_prospect_identity_archive")
+        .select(columns).eq("workspace_id", workspaceId).in("canonical_url", urls);
+      if (error) {
+        console.error("NEXTWAY central identity URL lookup failed:", error.code ?? "unknown");
+        return json({ error: "Archivio centrale non leggibile: confronto identità non completato.", reason: "central_identity_lookup_failed" }, 503, responseOrigin);
+      }
+      for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
+    }
+    if (fingerprints.length) {
+      const { data, error } = await supabase.from("nextway_prospect_identity_archive")
+        .select(columns).eq("workspace_id", workspaceId).overlaps("identity_fingerprints", fingerprints);
+      if (error) {
+        console.error("NEXTWAY central identity fingerprint lookup failed:", error.code ?? "unknown");
+        return json({ error: "Archivio centrale non leggibile: confronto identità non completato.", reason: "central_identity_lookup_failed" }, 503, responseOrigin);
+      }
+      for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
+    }
+    const matches = inputs.flatMap(input => {
+      const match = [...records.values()].find(record =>
+        (!!input.url && record.canonical_url === input.url) ||
+        (Array.isArray(record.identity_fingerprints) &&
+          input.keys.some(key => record.identity_fingerprints.includes(key)) )
+      );
+      if (!match) return [];
+      return [{
+        index: input.index,
+        record: {
+          display_name: match.display_name,
+          company_name: match.company_name,
+          target_type: match.target_type,
+          partner_segment: match.partner_segment,
+          archive_status: match.archive_status,
+          first_seen_at: match.first_seen_at,
+          last_seen_at: match.last_seen_at,
+          seen_count: match.seen_count,
+          last_acquired_at: match.last_acquired_at,
+        },
+      }];
+    });
+    return json({
+      matches,
+      matched_count: matches.length,
+      note: "Confronto limitato al workspace selezionato; nessun Lead viene creato o modificato.",
+    }, 200, responseOrigin);
+  }
+
   if (action === "archive_prospects") {
     if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
       return json({ error: "Archivio non valido: inviare al massimo 25 prospect per volta." }, 400, responseOrigin);
