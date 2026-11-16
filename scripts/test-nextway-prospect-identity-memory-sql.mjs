@@ -57,6 +57,10 @@ assert.match(normalized, /create or replace function public\.nextway_store_searc
   'query cache writes must pass through a validated server-side RPC');
 assert.match(normalized, /p_provider_key is distinct from 'tavily'/,
   'the cache RPC must validate the provider');
+assert.match(normalized, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
+  'the cache RPC must safely validate each result object');
+assert.match(normalized, /coalesce\(jsonb_typeof\(item\.value -> 'score'\), ''\) <> 'number'/,
+  'the cache RPC must reject results without a numeric relevance score');
 assert.match(normalized, /v_now \+ interval '7 days'/,
   'the cache RPC must set expiry server-side');
 assert.doesNotMatch(normalized, /create policy nextway_search_query_cache_(insert|update)/,
