@@ -216,6 +216,10 @@ assert.match(edge, /p_target_type:\s*targetType/,
   "archive records must preserve customer/partner/unknown classification");
 assert.match(edge, /classification\.includes\("cliente"\)/,
   "Italian customer classification must map to potential_customer");
+assert.match(ui, /target_type:p\.commercial_fit\?\.commercial_outcome===\'partner_potential\'\?\'potential_partner\':p\.commercial_fit\?\.commercial_outcome===\'customer_potential\'\?\'potential_customer\':\'unknown\'/,
+  "the UI must pass the explicit commercial outcome to central identity storage");
+assert.match(edge, /requestedTargetType === "potential_partner" \|\| requestedTargetType === "potential_customer"/,
+  "the Edge Function must prefer a validated explicit prospect type and retain legacy classification fallback");
 assert.match(edge, /new_networker: "other_networker"/,
   "new networkers must map into the supported other-networker archive segment");
 assert.match(edge, /exnetworker: "other_networker"/,
