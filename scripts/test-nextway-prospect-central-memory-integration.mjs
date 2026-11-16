@@ -121,6 +121,12 @@ assert.match(ui, /nextway_list_accessible_workspaces/,
   "the UI must load only workspaces available to the signed-in user");
 assert.match(ui, /confronta i risultati con la memoria condivisa e con i Lead già presenti nel CRM/,
   "the UI must explain the authoritative shared and CRM duplicate checks");
+assert.match(ui, /fino a 500 identità e 20 query/,
+  "the UI must accurately describe the browser-local archive capacity");
+assert.match(ui, /non crea né qualifica Lead nel CRM/,
+  "the UI must distinguish central identity memory from CRM Lead creation");
+assert.doesNotMatch(ui, /1\.000 identità storiche|non sostituisce un archivio cloud condiviso/,
+  "the UI must not describe stale local-only memory limits or deny the shared archive");
 assert.match(ui, /workspace_id:searchWorkspaceId/,
   "search requests must carry the selected workspace scope");
 assert.match(ui, /segment_key:\$\('segment'\)\.value/,
