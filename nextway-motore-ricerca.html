@@ -426,7 +426,22 @@ async function runSearch(runAll=false){
 
   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:queriesToRun.map(entry=>entry.query),max_results:SEARCH_MAX_RESULTS})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
-  const groups=payload.results||[];let total=0;status.textContent='Ricerca completata: '+(payload.queries_completed||groups.length)+'/'+queriesToRun.length+' query · massimo '+SEARCH_MAX_RESULTS+' risultati per query.';
+  const groups=payload.results||[];let total=0;
+  const failedQueries=Array.isArray(payload.failures)?payload.failures:[];
+  status.textContent='Ricerca completata: '+(payload.queries_completed??groups.length)+'/'+queriesToRun.length+' query · massimo '+SEARCH_MAX_RESULTS+' risultati per query.'+(failedQueries.length?' · '+failedQueries.length+' non completate':'');
+  if(failedQueries.length){
+   const warning=document.createElement('section');warning.className='notice';warning.style.cssText='margin:10px 0;padding:12px;border:1px solid #d69b32;border-radius:10px;';
+   const warningTitle=document.createElement('strong');warningTitle.textContent='Ricerche non completate · nessun risultato da queste query';warning.append(warningTitle);
+   const failedList=document.createElement('ul');
+   const reasonLabels={timeout:'tempo di attesa superato',provider_unreachable:'servizio di ricerca non raggiungibile',provider_rate_limited:'limite temporaneo del servizio di ricerca',provider_error:'errore del servizio di ricerca',invalid_provider_json:'risposta non leggibile dal servizio',invalid_provider_payload:'risposta non valida del servizio'};
+   failedQueries.forEach(failure=>{
+    const item=document.createElement('li');
+    const matching=generated.find(entry=>entry.query===failure.query);
+    item.textContent=(matching?.label||'Query non identificata')+' · '+(reasonLabels[failure.reason]||'errore non classificato')+(Number.isInteger(failure.provider_status)?' (HTTP '+failure.provider_status+')':'');
+    failedList.append(item);
+   });
+   warning.append(failedList);list.append(warning);
+  }
   const seenProspects=new Map();
   groups.forEach((group,index)=>{
    const matchingQuery=generated.find(entry=>entry.query===group.query);
