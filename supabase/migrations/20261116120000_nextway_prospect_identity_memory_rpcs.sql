@@ -52,7 +52,7 @@ begin
   if coalesce(cardinality(p_source_urls), 0) > 25
      or exists (
        select 1 from unnest(coalesce(p_source_urls, '{}'::text[])) as u(url)
-       where url is null or length(url) > 2048 or url !~* '^https?://'
+       where url is null or length(url) > 2048 or url !~* '^https?://[^/[:space:]]'
      ) then
     raise exception 'Elenco URL per la verifica CRM non valido.' using errcode = '22023';
   end if;
@@ -101,7 +101,7 @@ begin
     raise exception 'Membership attiva richiesta per aggiornare la memoria prospect.' using errcode = '42501';
   end if;
 
-  if p_canonical_url is null or p_canonical_url !~* '^https?://' or length(p_canonical_url) > 2048
+  if p_canonical_url is null or p_canonical_url !~* '^https?://[^/[:space:]]' or length(p_canonical_url) > 2048
      or p_display_name is null or length(btrim(p_display_name)) not between 1 and 240
      or coalesce(cardinality(p_identity_fingerprints), 0) > 20
      or array_position(coalesce(p_identity_fingerprints, '{}'::text[]), null) is not null
