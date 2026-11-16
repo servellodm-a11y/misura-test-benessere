@@ -44,6 +44,10 @@ assert.match(migration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\
   "cache result validation must not throw on malformed scalar JSON");
 assert.match(migration, /coalesce\(jsonb_typeof\(item\.value -> 'score'\), ''\) <> 'number'/,
   "cached search results must contain numeric relevance scores");
+assert.match(migration, /jsonb_array_length\(case when jsonb_typeof\(source_evidence\) = 'array'/,
+  "source evidence table constraints must safely handle malformed JSON");
+assert.match(migration, /jsonb_array_length\(case when jsonb_typeof\(results\) = 'array'/,
+  "query cache table constraints must safely handle malformed JSON");
 assert.match(migration, /nextway_leads.*workspace_id.*source_url/s,
   "migration prerequisites must include workspace-scoped Lead source URLs");
 assert.match(edge, /p_archive_status:\s*archiveStatus/,
