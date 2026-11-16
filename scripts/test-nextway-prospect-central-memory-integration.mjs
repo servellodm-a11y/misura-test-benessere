@@ -21,6 +21,15 @@ assert.match(edge, /"url:"\s*\+\s*url/,
   "canonical source URLs must contribute to identity deduplication");
 assert.match(edge, /action === "archive_prospects"/,
   "the Edge Function must expose the authenticated central archive action");
+assert.match(edge, /action === "lookup_prospects"/,
+  "the Edge Function must expose the authenticated central identity lookup");
+assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprints\)/,
+  "central lookup must match shared identities by server-side hashed fingerprints");
+assert.match(edge, /input\.fingerprints\.some\(fingerprint => record\.identity_fingerprints\.includes\(fingerprint\)\)/,
+  "lookup results must be correlated using the same fingerprints persisted in the archive");
+assert.match(edge, /\.eq\("workspace_id", workspaceId\)/,
+  "central identity lookup must remain strictly workspace-scoped");
+
 assert.match(edge, /const expiresAt = new Date\(Date\.parse\(fetchedAt\) \+ 7 \* 24 \* 60 \* 60 \* 1000\)/,
   "cache expiry must be calculated from the exact fetched_at value to satisfy the SQL seven-day cap");
 assert.match(edge, /expires_at: expiresAt/,
@@ -42,6 +51,15 @@ assert.match(ui, /market_key:\$\('area'\)\.value/,
   "cache keys must be segmented by market");
 assert.match(ui, /action:'archive_prospects'/,
   "classified search results must be sent to the central archive");
+assert.match(ui, /action:'lookup_prospects'/,
+  "search results must be checked against the shared identity archive before writing");
+assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_prospects'"),
+  "central duplicate lookup must run before merging newly found identities");
+assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
+  "the UI must label identities already present in the shared workspace");
+assert.match(ui, /Già acquisito nel CRM/,
+  "the UI must prevent reacquiring identities already acquired in the shared CRM");
+
 assert.match(ui, /archivePayload\.archived_count/,
   "the UI must report successful central identity updates");
 assert.match(ui, /if\(!searchWorkspaceId\)throw new Error/,
