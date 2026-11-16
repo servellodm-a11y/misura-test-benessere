@@ -316,7 +316,10 @@ begin
   select u.url, l.display_name, l.company_brand, l.category, l.status, l.archived_at
   from unnest(coalesce(p_source_urls, '{}'::text[])) as u(url)
   join public.nextway_leads l
-    on l.workspace_id = p_workspace_id
+    on (
+      l.workspace_id = p_workspace_id
+      or (l.workspace_id is null and l.owner_profile_id = auth.uid())
+    )
    and lower(btrim(l.source_url)) = lower(btrim(u.url))
   order by u.url, l.created_at desc;
 end;
@@ -398,7 +401,10 @@ begin
 
   if exists (
     select 1 from public.nextway_leads l
-    where l.workspace_id = p_workspace_id
+    where (
+        l.workspace_id = p_workspace_id
+        or (l.workspace_id is null and l.owner_profile_id = v_user_id)
+      )
       and lower(btrim(l.source_url)) = lower(btrim(p_canonical_url))
   ) then
     v_effective_archive_status := 'acquired';
