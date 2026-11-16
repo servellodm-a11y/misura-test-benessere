@@ -31,6 +31,8 @@ assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprintBatch\)/,
   "central lookup must match shared identities by server-side hashed fingerprints");
 assert.match(edge, /offset < fingerprints\.length; offset \+= 80/,
   "fingerprint lookups must be split into bounded URL query batches");
+assert.match(edge, /offset < urls\.length; offset \+= 5/,
+  "canonical URL lookups must also use bounded batches");
 assert.match(edge, /input\.fingerprints\.some\(fingerprint => \(storedFingerprints as string\[\]\)\.includes\(fingerprint\)\)/,
   "lookup results must be correlated using the same fingerprints persisted in the archive");
 assert.match(edge, /candidates\.length > 1/,
