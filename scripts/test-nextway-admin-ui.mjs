@@ -65,6 +65,11 @@ assert.doesNotMatch(js, /\.innerHTML\s*=/, "Untrusted admin data must not be ren
 assert.doesNotMatch(js, /service[_-]?role|SUPABASE_SERVICE_ROLE_KEY/i, "Service-role credentials must never appear in browser code");
 assert.match(js, /Nessuna email o invito è stato inviato/);
 assert.ok(html.includes('nextway-workspace-commercial-config.js'), 'Admin must load the commercial config validator');
+assert.ok(html.includes('workspace-readiness-panel'), 'Admin must expose a read-only workspace readiness preflight');
+assert.match(js, /function renderWorkspaceReadiness\(\)/);
+assert.match(js, /commercial_config: workspace\.settings\?\.commercial/);
+assert.match(js, /approvedDocuments > 0/);
+assert.match(js, /Prerequisiti essenziali della ricerca soddisfatti/);
 for (const id of ['workspace-commercial-config','load-zinzino-commercial-seed','commercial-config-json','save-commercial-config','commercial-config-status']) {
   assert.ok(html.includes(id), 'Admin page missing commercial configuration control ' + id);
 }
