@@ -65,3 +65,19 @@ La tabella cache evita nuove chiamate solo quando la query e il relativo contest
 - Nessuna migrazione applicata.
 - Nessun dato importato o modificato.
 - Nessun deploy o chiamata Tavily eseguita.
+
+
+## Integrazione centrale proposta (PR di integrazione)
+
+La Edge Function `nextway-search` ora è predisposta per due operazioni autenticate:
+
+1. **Ricerca:** richiede un workspace attivo, un segmento e un mercato. Cerca prima la query nella tabella `nextway_search_query_cache`; soltanto le query mancanti vengono inviate a Tavily e conteggiate dalla RPC di rate limit.
+2. **Memoria identità:** dopo l'analisi locale, il browser invia fino a 25 prospect alla stessa Edge Function con l'azione `archive_prospects`. La funzione normalizza gli URL, calcola sul server gli SHA-256 delle chiavi identità e invoca `nextway_merge_prospect_identity`.
+
+La RPC di merge serializza gli aggiornamenti per workspace, URL e impronte identità, consolida fonti e recapiti professionali pubblici e mantiene lo stato `acquired` se già presente. Non crea Lead e non assegna automaticamente lo stato Qualified.
+
+La UI carica i workspace accessibili tramite `nextway_list_accessible_workspaces`. Se non esiste un workspace attivo o l'utente non ne ha accesso, la ricerca esterna viene bloccata: non deve essere possibile spendere unità Tavily senza poter controllare la cache condivisa.
+
+La cache è separata per workspace, segmento, mercato, azienda e numero massimo di risultati; i record hanno TTL massimo di sette giorni. Le query già in cache non consumano unità di ricerca. Se la lettura della cache centrale fallisce, la funzione si arresta senza chiamare Tavily.
+
+**Stato:** codice e migrazione candidati in PR, non applicati. Prima di abilitare l'uso reale occorrono CI verde, revisione della migrazione e applicazione esplicitamente autorizzata. Nessuna ricerca Tavily è stata eseguita durante la preparazione.
