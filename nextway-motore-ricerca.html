@@ -738,7 +738,7 @@ async function runSearch(runAll=false){
     if(dailyProspects.length){
      if(!centralLookupFailed)status.textContent='Ricerca completata · '+archivedCount+' identità aggiornate nella memoria centrale del workspace.'+(Number(freshPayload.cache_write_failures)>0?' Attenzione: '+freshPayload.cache_write_failures+' risultati non sono stati salvati nella cache condivisa.':'');else status.textContent+=' La memoria è stata aggiornata, ma il confronto non è riuscito: acquisizione CRM resta bloccata.';
     }
-   }catch(archiveError){status.textContent='Ricerca completata; memoria locale aggiornata, ma archivio centrale non completato: '+archiveError.message+(centralLookupFailed?' · acquisizione CRM resta bloccata perché il confronto centrale non è riuscito.':'');}
+   }catch(archiveError){status.textContent='Ricerca completata; memoria locale aggiornata, ma archivio centrale non completato: '+archiveError.message+' · acquisizione CRM bloccata finché la memoria condivisa non è aggiornata.';list.querySelectorAll('.prospect-capture-button').forEach(button=>{button.disabled=true;button.textContent='Archivio centrale da verificare';button.title='Acquisizione sospesa: il salvataggio della memoria condivisa non è stato confermato.';});}
 
   dailyProspects.sort((a,b)=>(Number(a.crm_activity?.next_best_action?.priority??50)-Number(b.crm_activity?.next_best_action?.priority??50))||(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0));
   const agenda=document.createElement('section');agenda.className='panel';agenda.style.cssText='margin:14px 0;padding:14px;border:1px solid var(--border,#ddd);border-radius:12px;';
