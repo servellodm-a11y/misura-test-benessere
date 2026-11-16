@@ -281,28 +281,152 @@ drop policy if exists nextway_search_query_cache_update on public.nextway_search
 create policy nextway_search_query_cache_update
   on public.nextway_search_query_cache
   for update to authenticated
-  using (
-    (
-      fetched_by = auth.uid()
-      or public.nextway_can_manage_workspace(workspace_id)
-    )
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  )
-  with check (
-    (
-      fetched_by = auth.uid()
-      or public.nextway_can_manage_workspace(workspace_id)
-    )
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  );
+  using (public.nextway_has_workspace_access(
+    workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ))
+  with check (public.nextway_has_workspace_access(
+    workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ));
 
 comment on table public.nextway_search_query_cache is
   'NEXTWAY workspace-scoped cache of successful public search responses. Maximum TTL is seven days; only explicit query execution may populate it.';
+
+
+create or replace function public.nextway_list_accessible_workspaces()
+returns table (workspace_id uuid, workspace_name text, workspace_role text)
+language sql stable security definer
+set search_path = pg_catalog, public
+as $
+  select w.id, w.name,
+    case when public.nextway_is_platform_admin() then 'platform_admin' else m.workspace_role end
+  from public.nextway_workspaces w
+  left join public.nextway_workspace_memberships m
+    on m.workspace_id = w.id and m.user_id = auth.uid() and m.membership_status = 'active'
+  where auth.uid() is not null and w.status = 'active'
+    and (public.nextway_is_platform_admin() or m.id is not null)
+  order by w.name, w.id;
+$;
+
+revoke all on function public.nextway_list_accessible_workspaces() from public, anon;
+grant execute on function public.nextway_list_accessible_workspaces() to authenticated;
+
+create or replace function public.nextway_merge_prospect_identity(
+  p_workspace_id uuid, p_identity_fingerprints text[], p_canonical_url text,
+  p_display_name text, p_company_name text, p_profile_data jsonb,
+  p_public_contacts jsonb, p_source_evidence jsonb, p_target_type text,
+  p_partner_segment text, p_archive_status text
+)
+returns uuid
+language plpgsql security definer
+set search_path = pg_catalog, public
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_existing public.nextway_prospect_identity_archive%rowtype;
+  v_fingerprints text[];
+  v_sources jsonb;
+  v_id uuid;
+begin
+  if v_user_id is null or not public.nextway_has_workspace_access(
+    p_workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership attiva richiesta per aggiornare la memoria prospect.' using errcode = '42501';
+  end if;
+
+  if p_canonical_url is null or p_canonical_url !~* '^https?://' or length(p_canonical_url) > 2048
+     or p_display_name is null or length(btrim(p_display_name)) not between 1 and 240
+     or coalesce(cardinality(p_identity_fingerprints), 0) > 20
+     or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
+         and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*
+)
+     or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
+     or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
+     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array'
+     or jsonb_array_length(coalesce(p_source_evidence, '[]'::jsonb)) > 12 then
+    raise exception 'Dati della memoria prospect non validi.' using errcode = '22023';
+  end if;
+  if p_target_type not in ('potential_customer','potential_partner','unknown')
+     or (p_partner_segment is not null and p_partner_segment not in (
+       'wellness_professional','wellness_networker','other_networker','entrepreneur','extra_income'))
+     or p_archive_status not in ('seen','reviewed','acquired','ignored') then
+    raise exception 'Classificazione della memoria prospect non valida.' using errcode = '22023';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended(
+    p_workspace_id::text || ':' || p_canonical_url || ':' ||
+    array_to_string(coalesce(p_identity_fingerprints, '{}'::text[]), ','), 0
+  ));
+
+  select * into v_existing
+  from public.nextway_prospect_identity_archive a
+  where a.workspace_id = p_workspace_id
+    and (a.canonical_url = p_canonical_url
+      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
+          and a.identity_fingerprints && p_identity_fingerprints))
+  order by case when a.canonical_url = p_canonical_url then 0 else 1 end, a.last_seen_at desc
+  limit 1 for update;
+
+  if found then
+    select coalesce(array_agg(fp order by fp), '{}'::text[]) into v_fingerprints
+    from (select distinct unnest(
+      coalesce(v_existing.identity_fingerprints, '{}'::text[]) ||
+      coalesce(p_identity_fingerprints, '{}'::text[])
+    ) as fp order by fp limit 20) merged;
+
+    select coalesce(jsonb_agg(source_value order by source_order desc), '[]'::jsonb)
+      into v_sources
+    from (
+      select value as source_value, ordinality as source_order
+      from jsonb_array_elements(coalesce(v_existing.source_evidence, '[]'::jsonb) ||
+        coalesce(p_source_evidence, '[]'::jsonb)) with ordinality
+      order by ordinality desc limit 12
+    ) recent;
+
+    update public.nextway_prospect_identity_archive
+    set identity_fingerprints = v_fingerprints,
+        canonical_url = p_canonical_url,
+        display_name = left(btrim(p_display_name), 240),
+        company_name = coalesce(nullif(left(btrim(p_company_name), 240), ''), company_name),
+        profile_data = profile_data || coalesce(p_profile_data, '{}'::jsonb),
+        public_contacts = public_contacts || coalesce(p_public_contacts, '{}'::jsonb),
+        source_evidence = v_sources,
+        target_type = case when target_type = 'unknown' then p_target_type else target_type end,
+        partner_segment = coalesce(partner_segment, p_partner_segment),
+        archive_status = case
+          when archive_status = 'acquired' or p_archive_status = 'acquired' then 'acquired'
+          when archive_status = 'ignored' then 'ignored'
+          when p_archive_status = 'reviewed' then 'reviewed'
+          else 'seen' end,
+        last_seen_at = now(), seen_count = seen_count + 1,
+        last_acquired_at = case when p_archive_status = 'acquired' then now() else last_acquired_at end,
+        updated_at = now()
+    where id = v_existing.id returning id into v_id;
+  else
+    insert into public.nextway_prospect_identity_archive (
+      workspace_id, owner_user_id, identity_fingerprints, canonical_url, display_name,
+      company_name, profile_data, public_contacts, source_evidence, target_type,
+      partner_segment, archive_status, last_acquired_at
+    ) values (
+      p_workspace_id, v_user_id, coalesce(p_identity_fingerprints, '{}'::text[]),
+      p_canonical_url, left(btrim(p_display_name), 240),
+      nullif(left(btrim(p_company_name), 240), ''), coalesce(p_profile_data, '{}'::jsonb),
+      coalesce(p_public_contacts, '{}'::jsonb), coalesce(p_source_evidence, '[]'::jsonb),
+      p_target_type, p_partner_segment, p_archive_status,
+      case when p_archive_status = 'acquired' then now() else null end
+    ) returning id into v_id;
+  end if;
+  return v_id;
+end;
+$;
+
+revoke all on function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) from public, anon;
+grant execute on function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) to authenticated;
 
 commit;
