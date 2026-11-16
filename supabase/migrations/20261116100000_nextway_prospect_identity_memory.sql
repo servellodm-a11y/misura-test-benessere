@@ -16,6 +16,15 @@ begin
      or to_regprocedure('public.nextway_is_platform_admin()') is null then
     raise exception 'NEXTWAY workspace authorization helpers are missing.';
   end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'nextway_leads'
+      and column_name in ('workspace_id','source_url')
+    group by table_schema, table_name
+    having count(distinct column_name) = 2
+  ) then
+    raise exception 'NEXTWAY Lead workspace_id/source_url columns are required for authoritative CRM duplicate detection.';
+  end if;
 end;
 $$;
 
@@ -560,6 +569,9 @@ begin
 end;
 $$;
 
+alter function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) owner to postgres;
 revoke all on function public.nextway_merge_prospect_identity(
   uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
 ) from public, anon;
