@@ -63,6 +63,10 @@ assert.match(ui, /slice\(offset,offset\+25\)/,
   "all central archive writes must cover the complete result set in bounded batches");
 assert.match(ui, /acquisizione CRM bloccata finché la memoria condivisa non è verificata/,
   "CRM capture must fail closed if shared duplicate lookup is unavailable");
+assert.match(ui, /Attendi il confronto con la memoria condivisa prima di acquisire/,
+  "capture buttons must be disabled while the central duplicate lookup is pending");
+assert.match(ui, /centralIdentityBlocked/,
+  "central acquired or ambiguous identities must remain blocked after lookup completes");
 
 assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_prospects'"),
   "central duplicate lookup must run before merging newly found identities");
