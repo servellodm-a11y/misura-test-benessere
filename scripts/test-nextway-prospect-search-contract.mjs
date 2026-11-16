@@ -33,3 +33,18 @@ assert.doesNotMatch(page, /massimo 5 risultati|un solo risultato richiesto/,
   'stale five-result and single-result status messages must not return');
 
 console.log('NEXTWAY prospect search contract: 10 checks passed.');
+
+assert.match(page, /function normalizeSearchQuerySignature\\(query,segment,area\\)/,
+  'search history must create stable signatures from query, segment and area');
+assert.match(page, /query_signatures:\\[\\.\\.\\.new Set\\(queries\\.map\\(query=>normalizeSearchQuerySignature/,
+  'completed searches must persist their query signatures in personal history');
+assert.match(page, /previousQuerySignatures=new Set\\(readSearchHistory\\(\\)\\.flatMap/,
+  'the search module must consult previous personal search history before spending provider units');
+assert.match(page, /queriesToRun=queriesToRun\\.filter\\(entry=>!previousQuerySignatures\\.has/,
+  'previously completed identical searches must be removed from the outgoing batch');
+assert.match(page, /if\\(!queriesToRun\\.length\\)\\{status\\.textContent='Ricerca non avviata/,
+  'an all-repeated search must stop before the provider request');
+assert.match(page, /Nessuna unità di ricerca è stata consumata/,
+  'the user must be told that blocked repeated queries consumed no search units');
+assert.match(page, /saveSearchHistory\\(dailyProspects,queriesToRun\\.map\\(entry=>entry\\.query\\)\\)/,
+  'only actually executed queries must be saved in search history');
