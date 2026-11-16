@@ -4,9 +4,9 @@ import assert from "node:assert/strict";
 const edge = readFileSync("supabase/functions/nextway-search/index.ts", "utf8");
 const ui = readFileSync("nextway-motore-ricerca.html", "utf8");
 const migration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
-assert.equal((migration.match(/\\bcommit;/gi) || []).length, 1,
+assert.equal((migration.match(/\bcommit;/gi) || []).length, 1,
   "all central memory tables and RPCs must be created inside one atomic transaction");
-assert.match(migration, /nextway_merge_prospect_identity[\\s\\S]*commit;\\s*$/,
+assert.match(migration, /nextway_merge_prospect_identity[\s\S]*commit;\s*$/,
   "the identity merge RPC must be created before the single final transaction commit");
 
 const cacheRead = edge.indexOf('.from("nextway_search_query_cache")');
