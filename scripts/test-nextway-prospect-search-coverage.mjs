@@ -24,5 +24,6 @@ for(const segment of ['side_income','business_seeking']){
   const text=sandbox.it[segment].map(item=>item[1]).join(' ').toLowerCase();
   assert.match(text,/cerco|valuto|voglio|vorrei/,`Intent-led Italian query language required for ${segment}`);
 }
-assert.ok(html.includes('una sola per volta'),'The UI must disclose that live searches are executed one at a time');
+assert.ok(html.includes('Seleziona la query per la ricerca singola'),'The UI must label the selector as single-query mode');
+assert.ok(html.includes('Esegui tutte le 5 ricerche'),'The UI must also expose the explicit five-query batch mode');
 console.log('NEXTWAY prospect search coverage contract: 28 checks passed.');
