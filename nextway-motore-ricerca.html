@@ -36,6 +36,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <option value="customers">Potenziali clienti interessati al benessere</option>
 </select></div>
 <div class="field"><label for="area">Area geografica</label><input id="area" value="Italia" placeholder="Italia, regione, città o provincia"></div>
+<div class="field"><label for="workspace-select">Archivio centrale · workspace</label><select id="workspace-select" disabled><option value="">Caricamento workspace autorizzati…</option></select></div>
 <div class="field"><label for="platform">Fonte</label><select id="platform">
 <option value="">Tutto il web</option><option value="linkedin.com">LinkedIn</option><option value="facebook.com">Facebook</option><option value="instagram.com">Instagram</option><option value="youtube.com">YouTube</option>
 </select></div>
@@ -66,7 +67,7 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 </main>
 <script src="/nextway-company-config.js"></script>
 <script>
-const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searchHistoryOwnerId='';
+const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searchHistoryOwnerId='',searchWorkspaceId='';
 const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
 const activeCompany=companyConfig?.active||null;
 const SEARCH_HISTORY_LIMIT=10;
@@ -122,7 +123,33 @@ function saveSearchHistory(prospects){
   const history=readSearchHistory();history.unshift(record);localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();return true;
  }catch(error){console.warn('NEXTWAY: impossibile salvare lo storico locale.',error);return false;}
 }
-async function initializeSearchHistory(){try{if(!window.NEXTWAY_CLOUD?.active)return false;const {s}=await window.NEXTWAY_CLOUD.active();return s?.user?.id?setSearchHistoryOwner(s.user.id):false;}catch(error){console.warn('NEXTWAY: storico non disponibile finché non viene effettuato l’accesso.',error);return false;}}
+async function initializeSearchHistory(){
+ try{
+  if(!window.NEXTWAY_CLOUD?.active)return false;
+  const {s}=await window.NEXTWAY_CLOUD.active();
+  if(!s?.user?.id)return false;
+  setSearchHistoryOwner(s.user.id);
+  const select=$('workspace-select');
+  const {data,error}=await s.rpc('nextway_list_accessible_workspaces');
+  if(error||!Array.isArray(data))throw new Error(error?.message||'Elenco workspace non disponibile.');
+  select.replaceChildren();
+  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=data.length?'Seleziona il workspace di lavoro':'Nessun workspace attivo autorizzato';select.append(placeholder);
+  data.forEach(item=>{const option=document.createElement('option');option.value=item.workspace_id;option.textContent=String(item.workspace_name||'Workspace')+' · '+String(item.workspace_role||'membro');select.append(option);});
+  select.disabled=data.length===0;
+  if(data.length===1){select.value=data[0].workspace_id;searchWorkspaceId=data[0].workspace_id;}
+  else{searchWorkspaceId='';}
+  select.addEventListener('change',()=>{searchWorkspaceId=select.value;});
+  if(data.length===0)$('searchstatus').textContent='Ricerca sospesa: prima occorre attivare o assegnare un workspace. Nessuna chiamata esterna verrà eseguita.';
+  else if(data.length>1)$('searchstatus').textContent='Seleziona il workspace corretto prima di eseguire una ricerca.';
+  else $('searchstatus').textContent='Workspace centrale pronto. Le query già presenti in cache non consumeranno unità Tavily.';
+  return true;
+ }catch(error){
+  $('workspace-select').disabled=true;
+  $('workspace-select').replaceChildren(new Option('Workspace non disponibile',''));
+  $('searchstatus').textContent='Archivio centrale non pronto: '+error.message+'. La ricerca esterna resta bloccata per proteggere i crediti.';
+  console.warn('NEXTWAY: workspace non disponibile.',error);return false;
+ }
+}
 const BRIDGE_TEST_ID_KEY='nextway_search_bridge_test_v1:';
 function bridgeTestArchiveKey(){return searchHistoryKey()?.replace('nextway_search_history_v1:','nextway_ai_records_v1:')||null;}
 function bridgeTestMarkerKey(){return searchHistoryOwnerId?BRIDGE_TEST_ID_KEY+searchHistoryOwnerId:null;}
@@ -442,7 +469,7 @@ async function runSearch(runAll=false){
  if(!generated.length)build();
  const status=$('searchstatus'),button=$('runsearch'),allButton=$('runallsearch'),list=$('live-list');
  try{
-  if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');
+  if(!window.NEXTWAY_CLOUD?.active||!window.NEXTWAY_CLOUD?.getConfig)throw new Error('Connessione NEXTWAY non pronta. Apri prima l’Archivio Lead, accedi e poi torna a questo modulo.');if(!searchWorkspaceId)throw new Error('Seleziona un workspace attivo prima della ricerca.');
   button.disabled=true;if(allButton)allButton.disabled=true;dailyProspects=[];$('daily-summary').textContent='Ricerca in corso: la lista giornaliera verrà composta con fonte, recapiti, motivazione e bozza di primo contatto.';$('exportDaily').disabled=true;const selectedIndex=Math.max(0,Math.min(generated.length-1,Number($('selected-query')?.value||0)));const selectedQuery=generated[selectedIndex];if(!selectedQuery)throw new Error('Genera e seleziona una query prima di avviare la ricerca.');const queriesToRun=runAll?generated.slice(0,5):[selectedQuery];if(!queriesToRun.length||queriesToRun.length>5)throw new Error('Il numero di query selezionate non è valido.');status.textContent='Connessione a NEXTWAY e avvio di '+queriesToRun.length+' '+(queriesToRun.length===1?'ricerca':'ricerche')+' (massimo '+(queriesToRun.length*SEARCH_MAX_RESULTS)+' risultati complessivi)…';list.replaceChildren();
   const {s}=await window.NEXTWAY_CLOUD.active(),cfg=window.NEXTWAY_CLOUD.getConfig();setSearchHistoryOwner(s.user.id);
   const archiveIndex=window.NEXTWAY_CLOUD.getLocalSearchArchiveIndex(s.user.id);
@@ -464,7 +491,7 @@ async function runSearch(runAll=false){
   queriesToRun.forEach(entry=>{const cached=getFreshCachedQuery(normalizedSearchQueryKey(entry));if(cached!==null)cachedGroups.push({query:entry.query,results:cached,cached:true});else queriesToFetch.push(entry);});
   let freshPayload={results:[],failures:[],queries_completed:0};
   if(queriesToFetch.length){
-   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:queriesToFetch.map(entry=>entry.query),max_results:SEARCH_MAX_RESULTS})});
+   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({workspace_id:searchWorkspaceId,segment_key:$('segment').value,market_key:$('area').value.trim()||'Italia',company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:queriesToFetch.map(entry=>entry.query),max_results:SEARCH_MAX_RESULTS})});
    freshPayload=await response.json();if(!response.ok)throw new Error(freshPayload.error||('Errore HTTP '+response.status));
    storeSearchQueryResults(freshPayload.results||[]);
   }
@@ -656,7 +683,16 @@ async function runSearch(runAll=false){
   queueGroups.forEach(group=>{const section=document.createElement('section');section.style.cssText='margin:14px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;';const heading=document.createElement('h3');heading.textContent=group.title;section.append(heading);const members=sortedCards.filter(card=>card.dataset.queue===group.code);const count=document.createElement('p');count.className='muted';count.textContent=members.length+' risultati';section.append(count);if(!members.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='Nessun risultato in questo gruppo.';section.append(empty);}members.forEach(card=>section.append(card));rankingContainer.append(section);});
   list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
-  if(!saveSearchHistory(dailyProspects))status.textContent='Ricerca completata, ma lo storico locale delle identità non è stato salvato. Verifica lo spazio disponibile nel browser e riprova dopo aver effettuato l’accesso.';
+  if(!saveSearchHistory(dailyProspects))status.textContent='Ricerca completata, ma lo storico locale delle identità non è stato salvato.';
+   try{
+    const archiveRows=dailyProspects.slice(0,25).map(p=>({url:p.url,title:p.title,identity_keys:p.identity_keys||[],profile:p.profile||{},emails:p.emails||[],phones:p.phones||[],whatsapp:p.whatsapp||[],socials:p.socials||[],source_evidence:p.source_evidence||[],evidence_summary:p.profile?.evidence_summary||p.reason||'',reason:p.reason||'',classification:p.classification||'',segment:p.segment||'',person_confirmed:!!p.person_confirmed,archive_status:p.archive_status||''}));
+    if(archiveRows.length){
+     const archiveResponse=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({action:'archive_prospects',workspace_id:searchWorkspaceId,prospects:archiveRows})});
+     const archivePayload=await archiveResponse.json();
+     if(!archiveResponse.ok||archivePayload.failed_count)throw new Error(archivePayload.error||('Archiviazione parziale: '+(archivePayload.failed_count||0)+' record non salvati.'));
+     status.textContent='Ricerca completata · '+archivePayload.archived_count+' identità aggiornate nella memoria centrale del workspace.';
+    }
+   }catch(archiveError){status.textContent='Ricerca completata; memoria locale aggiornata, ma archivio centrale non completato: '+archiveError.message;}
 
   dailyProspects.sort((a,b)=>(Number(a.crm_activity?.next_best_action?.priority??50)-Number(b.crm_activity?.next_best_action?.priority??50))||(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0));
   const agenda=document.createElement('section');agenda.className='panel';agenda.style.cssText='margin:14px 0;padding:14px;border:1px solid var(--border,#ddd);border-radius:12px;';
