@@ -243,9 +243,10 @@ Deno.serve(async (req: Request) => {
       }
       for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
     }
-    if (fingerprints.length) {
+    for (let offset = 0; offset < fingerprints.length; offset += 80) {
+      const fingerprintBatch = fingerprints.slice(offset, offset + 80);
       const { data, error } = await supabase.from("nextway_prospect_identity_archive")
-        .select(columns).eq("workspace_id", workspaceId).overlaps("identity_fingerprints", fingerprints);
+        .select(columns).eq("workspace_id", workspaceId).overlaps("identity_fingerprints", fingerprintBatch);
       if (error) {
         console.error("NEXTWAY central identity fingerprint lookup failed:", error.code ?? "unknown");
         return json({ error: "Archivio centrale non leggibile: confronto identità non completato.", reason: "central_identity_lookup_failed" }, 503, responseOrigin);
