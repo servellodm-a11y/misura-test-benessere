@@ -81,3 +81,16 @@ La UI carica i workspace accessibili tramite `nextway_list_accessible_workspaces
 La cache è separata per workspace, segmento, mercato, azienda e numero massimo di risultati; i record hanno TTL massimo di sette giorni. Le query già in cache non consumano unità di ricerca. Se la lettura della cache centrale fallisce, la funzione si arresta senza chiamare Tavily.
 
 **Stato:** codice e migrazione candidati in PR, non applicati. Prima di abilitare l'uso reale occorrono CI verde, revisione della migrazione e applicazione esplicitamente autorizzata. Nessuna ricerca Tavily è stata eseguita durante la preparazione.
+
+
+## Lettura della memoria condivisa prima dell'acquisizione
+
+Prima di consolidare i nuovi risultati, la UI invia alla Edge Function fino a 25 identità candidate. La funzione verifica URL canonici e impronte SHA-256 nello stesso workspace, applicando RLS e membership attiva.
+
+La UI segnala:
+- identità già presenti nella memoria condivisa;
+- data della prima e dell'ultima rilevazione;
+- numero di rilevazioni;
+- identità già acquisite nel CRM del workspace, per impedire una seconda acquisizione.
+
+Il confronto avviene prima della scrittura/merge dei risultati appena trovati, così il primo inserimento non viene confuso con un nominativo già noto. L'archivio non modifica né crea Lead durante la sola lettura.
