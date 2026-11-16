@@ -75,7 +75,7 @@ revoke all on function public.nextway_lookup_prospect_crm_matches(uuid,text[]) f
 grant execute on function public.nextway_lookup_prospect_crm_matches(uuid,text[]) to authenticated;
 
 create or replace function public.nextway_merge_prospect_identity(
-  p_workspace_id uuid, p_identity_fingerprints text[], p_canonical_url text,
+  p_actor_id uuid, p_workspace_id uuid, p_identity_fingerprints text[], p_canonical_url text,
   p_display_name text, p_company_name text, p_profile_data jsonb,
   p_public_contacts jsonb, p_source_evidence jsonb, p_target_type text,
   p_partner_segment text, p_archive_status text
@@ -83,9 +83,9 @@ create or replace function public.nextway_merge_prospect_identity(
 returns uuid
 language plpgsql security definer
 set search_path = pg_catalog, public
-as $$
+as $
 declare
-  v_user_id uuid := auth.uid();
+  v_user_id uuid;
   v_existing public.nextway_prospect_identity_archive%rowtype;
   v_fingerprints text[];
   v_sources jsonb;
@@ -94,6 +94,12 @@ declare
   v_effective_archive_status text := 'seen';
   v_match_count integer;
 begin
+  if auth.role() is distinct from 'service_role' or p_actor_id is null then
+    raise exception 'Scrittura memoria identità consentita solo al servizio NEXTWAY autenticato.' using errcode = '42501';
+  end if;
+  perform set_config('request.jwt.claim.sub', p_actor_id::text, true);
+  v_user_id := p_actor_id;
+
   if p_workspace_id is null or v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
     array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
@@ -281,13 +287,13 @@ end;
 $$;
 
 alter function public.nextway_merge_prospect_identity(
-  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+  uuid, uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
 ) owner to postgres;
 revoke all on function public.nextway_merge_prospect_identity(
-  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
-) from public, anon;
+  uuid, uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) from public, anon, authenticated;
 grant execute on function public.nextway_merge_prospect_identity(
-  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
-) to authenticated;
+  uuid, uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) to service_role;
 
 commit;
