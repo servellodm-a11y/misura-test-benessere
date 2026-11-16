@@ -15,6 +15,8 @@ assert.match(edge, /nextway_has_workspace_access/,
   "the Edge Function must validate active workspace membership");
 assert.match(edge, /nextway_merge_prospect_identity/,
   "central identity updates must use the protected merge RPC");
+assert.match(edge, /normalized\.length <= 2048 \? normalized : ""/,
+  "canonical source URLs must be bounded before database lookup and persistence");
 assert.match(edge, /crypto\.subtle\.digest\("SHA-256"/,
   "identity keys must be hashed server-side before persistence");
 assert.match(edge, /"url:"\s*\+\s*url/,
