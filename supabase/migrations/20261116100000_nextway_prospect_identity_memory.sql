@@ -58,7 +58,7 @@ create table if not exists public.nextway_prospect_identity_archive (
       )
     ),
   constraint nextway_identity_canonical_url_check
-    check (canonical_url is null or canonical_url ~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)')
+    check (canonical_url is null or canonical_url ~* '^https?://(\[[0-9a-f:.]+\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)')
 );
 
 create index if not exists nextway_prospect_identity_workspace_seen_idx
