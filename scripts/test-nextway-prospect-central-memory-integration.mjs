@@ -18,6 +18,12 @@ assert.match(workspaceMigration, /security definer[\s\S]*set search_path = pg_ca
   "the workspace listing RPC must use a fixed search path");
 assert.match(workspaceMigration, /public\.nextway_is_platform_admin\(\)/,
   "platform administrators must be able to select active workspaces without a membership row");
+assert.match(workspaceMigration, /not public\.nextway_is_platform_admin\(\)/,
+  "ordinary membership results must not duplicate platform-admin workspace rows");
+assert.match(workspaceMigration, /m\.user_id = auth\.uid\(\)/,
+  "ordinary users must see only their own workspace memberships");
+assert.match(workspaceMigration, /order by 2, 1/,
+  "workspace listing must return a stable order across both result branches");
 assert.match(workspaceMigration, /w\.status = 'active'/,
   "only active workspaces may be listed for prospect search");
 assert.match(workspaceMigration, /m\.membership_status = 'active'/,
