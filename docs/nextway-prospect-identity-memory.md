@@ -128,6 +128,10 @@ Le RPC `nextway_store_search_query_cache` e `nextway_merge_prospect_identity` so
 
 Se la credenziale server non è disponibile, la ricerca esterna viene bloccata prima del rate limit e di qualsiasi chiamata Tavily; non vengono avviate nuove ricerche a pagamento. Prima di consumare unità Tavily, la Edge Function esegue un preflight server-only che verifica l'identità dell'attore, la membership, la presenza delle tabelle e delle RPC necessarie e i relativi permessi. Esegue anche una verifica CRM a URL vuoto e una lettura dell'archivio con il JWT dell'utente. Se uno di questi controlli fallisce, la ricerca esterna non parte.
 
+## Limite attuale della configurazione multi-brand
+
+La memoria identità, la cache e la selezione dei workspace sono isolate per workspace. Il motore di ricerca usa però ancora la configurazione aziendale già presente nell'interfaccia (selettore azienda e relativi parametri): non deriva ancora in modo completo offerte, pubblico, parole chiave e query da `nextway_workspaces.settings`. Quindi questa PR rende centrale e multi-workspace la memoria dei prospect, ma non completa ancora la configurazione commerciale multi-brand end-to-end. Il prossimo intervento dedicato dovrà collegare il profilo commerciale del workspace ai parametri di ricerca, mantenendo Zinzino come configurazione iniziale.
+
 ## Elenco dei workspace accessibili
 
 `20261116130000_nextway_list_accessible_workspaces.sql` aggiunge una RPC read-only per elencare i workspace attivi visibili al motore di ricerca. I platform_admin vedono tutti i workspace attivi; gli altri utenti vedono solo quelli con membership attiva e ruolo abilitato alla ricerca.
