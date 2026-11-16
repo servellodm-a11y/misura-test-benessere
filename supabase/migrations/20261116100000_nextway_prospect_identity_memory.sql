@@ -132,7 +132,8 @@ create trigger nextway_prospect_identity_scope_guard
 
 alter table public.nextway_prospect_identity_archive enable row level security;
 revoke all on public.nextway_prospect_identity_archive from public, anon;
-grant select, insert, update, delete on public.nextway_prospect_identity_archive to authenticated;
+revoke insert, update, delete on public.nextway_prospect_identity_archive from authenticated;
+grant select on public.nextway_prospect_identity_archive to authenticated;
 grant all on public.nextway_prospect_identity_archive to service_role;
 
 drop policy if exists nextway_prospect_identity_read on public.nextway_prospect_identity_archive;
@@ -150,73 +151,7 @@ create policy nextway_prospect_identity_read
     )
   );
 
-drop policy if exists nextway_prospect_identity_insert on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_insert
-  on public.nextway_prospect_identity_archive
-  for insert to authenticated
-  with check (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and owner_user_id = auth.uid()
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-    )
-  );
-
-drop policy if exists nextway_prospect_identity_update on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_update
-  on public.nextway_prospect_identity_archive
-  for update to authenticated
-  using (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-    )
-  )
-  with check (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-      )
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-    )
-  );
-
-drop policy if exists nextway_prospect_identity_delete on public.nextway_prospect_identity_archive;
-create policy nextway_prospect_identity_delete
-  on public.nextway_prospect_identity_archive
-  for delete to authenticated
-  using (
-    public.nextway_is_platform_admin()
-    or (
-      workspace_id is not null
-      and (
-        owner_user_id = auth.uid()
-        or public.nextway_can_manage_workspace(workspace_id)
-      )
-      and public.nextway_has_workspace_access(
-        workspace_id,
-        array['workspace_owner','workspace_admin','workspace_manager']::text[]
-      )
-    )
-  );
+-- Authenticated clients may read the archive; writes are delegated to the protected merge RPC in the integration layer.
 
 comment on table public.nextway_prospect_identity_archive is
   'NEXTWAY central prospect identity memory. Workspace-scoped; stores only public/professional prospect evidence. No automatic CRM promotion.';
@@ -410,6 +345,8 @@ declare
   v_fingerprint text;
   v_effective_archive_status text := 'seen';
   v_match_count integer;
+  v_effective_archive_status text := 'seen';
+  v_match_count integer;
 begin
   if p_workspace_id is null or v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
@@ -448,6 +385,24 @@ begin
       p_workspace_id::text || ':identity:' || v_fingerprint, 0
     ));
   end loop;
+
+  select count(*) into v_match_count
+  from public.nextway_prospect_identity_archive a
+  where a.workspace_id = p_workspace_id
+    and (a.canonical_url = p_canonical_url
+      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
+          and a.identity_fingerprints && p_identity_fingerprints));
+  if v_match_count > 1 then
+    raise exception 'Identità già presenti in più record: revisione manuale necessaria.' using errcode = '23505';
+  end if;
+
+  if exists (
+    select 1 from public.nextway_leads l
+    where l.workspace_id = p_workspace_id
+      and lower(btrim(l.source_url)) = lower(btrim(p_canonical_url))
+  ) then
+    v_effective_archive_status := 'acquired';
+  end if;
 
   select count(*) into v_match_count
   from public.nextway_prospect_identity_archive a
@@ -569,6 +524,9 @@ begin
 end;
 $$;
 
+alter function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) owner to postgres;
 alter function public.nextway_merge_prospect_identity(
   uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
 ) owner to postgres;
