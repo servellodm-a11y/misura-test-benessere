@@ -38,7 +38,6 @@ const searchHtml = fs.readFileSync('nextway-motore-ricerca.html', 'utf8');
 const archiveHtml = fs.readFileSync('nextway-ai.html', 'utf8');
 assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
 assert.ok(searchHtml.includes('let activeCompany=null;'));
-assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
 assert.ok(searchHtml.includes("clientSession.rpc('nextway_get_workspace_commercial_config'"));
 assert.ok(searchHtml.includes('loadWorkspaceCommercialConfig(s,searchWorkspaceId)'));
 assert.ok(searchHtml.includes('setWorkspaceCommercialStatus'));
