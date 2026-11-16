@@ -711,12 +711,14 @@ async function runSearch(runAll=false){
       prospect.history_first_seen=record.first_seen_at||prospect.history_first_seen;
       prospect.history_last_seen=record.last_seen_at||prospect.history_last_seen;
       prospect.central_archive_status=record.archive_status||'seen';
-      prospect.central_seen_count=Number(record.seen_count)||1;
+      prospect.central_seen_count=Number(record.seen_count)||0;
       if(record.archive_status==='acquired'&&prospect.archive_status==='new')prospect.archive_status='acquired';
       const card=[...list.querySelectorAll('article.query')].find(item=>item.dataset.canonicalUrl===canonicalProspectUrl(prospect.url));
       if(card){
        const badge=card.querySelector('.prospect-target-summary');
-       if(badge&&!badge.textContent.includes('GIÀ INDIVIDUATO'))badge.textContent+=' · GIÀ INDIVIDUATO NEL WORKSPACE · '+prospect.central_seen_count+' rilevazioni';
+       if(badge&&!badge.textContent.includes('GIÀ INDIVIDUATO')&&!badge.textContent.includes('GIÀ ACQUISITO NEL CRM')){
+        badge.textContent+=record.crm_match===true&&!record.first_seen_at?' · GIÀ ACQUISITO NEL CRM':' · GIÀ INDIVIDUATO NEL WORKSPACE · '+prospect.central_seen_count+' rilevazioni';
+       }
        const note=document.createElement('p');note.className='muted central-identity-match';note.textContent=(record.archive_status==='acquired'?'GIÀ ACQUISITO NEL CRM DEL WORKSPACE':record.archive_status==='ignored'?'GIÀ ESAMINATO · ESCLUSO IN PRECEDENZA':'GIÀ PRESENTE NELLA MEMORIA CONDIVISA')+' · prima rilevazione: '+(record.first_seen_at?new Date(record.first_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+' · ultima rilevazione: '+(record.last_seen_at?new Date(record.last_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+'.';
        card.append(note);
        const captureButton=card.querySelector('.prospect-capture-button');
