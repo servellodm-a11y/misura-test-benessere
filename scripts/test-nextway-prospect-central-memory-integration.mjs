@@ -29,6 +29,14 @@ assert.match(schemaMigration, /grant execute on function public\.nextway_store_s
   "only the trusted server role may write shared cache rows");
 assert.match(schemaMigration, /auth\.role\(\) is distinct from 'service_role'/,
   "the cache write RPC must reject calls without the trusted server role");
+assert.match(schemaMigration, /p_actor_id uuid,\s*p_workspace_id uuid/,
+  "the cache RPC must receive the actor ID verified by the Edge Function");
+assert.match(schemaMigration, /fetched_by, fetched_at, expires_at/,
+  "cache rows must retain the verified actor as their provenance");
+assert.match(rpcMigration, /p_actor_id uuid, p_workspace_id uuid/,
+  "the identity merge RPC must receive the actor ID verified by the Edge Function");
+assert.match(rpcMigration, /owner_user_id, identity_fingerprints/,
+  "new archive rows must retain the verified actor as their owner");
 assert.match(rpcMigration, /alter function public\.nextway_lookup_prospect_crm_matches\(uuid,text\[\]\) owner to postgres/,
   "CRM duplicate lookup must execute under the trusted database owner");
 assert.match(schemaMigration, /alter function public\.nextway_store_search_query_cache\([\s\S]*owner to postgres/,
