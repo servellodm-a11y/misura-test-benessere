@@ -533,7 +533,7 @@ async function runSearch(runAll=false){
       return;
     }
     total++;
-    const targetSummary=document.createElement('p');targetSummary.className='tag';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason;
+    const targetSummary=document.createElement('p');targetSummary.className='tag';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason+(historicalIdentity?' · GIÀ INDIVIDUATO IN PRECEDENZA · prima volta: '+new Date(historicalIdentity.first_seen||historicalIdentity.last_seen).toLocaleDateString('it-IT'):'');
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · '+(assessment.individual?'PERSONA IDENTIFICABILE · verifica ruolo e attualità':'IDENTITÀ PERSONALE NON CONFERMATA · da approfondire')+' · non misura l’interesse commerciale';
     const sourceQuality=assessSourceQuality(item,url,pageContent);
     const sourceQualityCard=document.createElement('p');sourceQualityCard.className='muted';sourceQualityCard.textContent='Fonte: '+sourceQuality.source_type+' · '+sourceQuality.reliability_score+'/100. Attualità: '+sourceQuality.freshness_label+' · qualità complessiva fonte: '+sourceQuality.quality_score+'/100. '+sourceQuality.verification_note;
