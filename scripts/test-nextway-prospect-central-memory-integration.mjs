@@ -50,7 +50,7 @@ assert.match(rpcMigration, /auth\.role\(\) is distinct from 'service_role'/,
   "the identity merge RPC must reject calls without the trusted server role");
 assert.match(rpcMigration, /set_config\('request\.jwt\.claim\.sub', p_actor_id::text, true\)/,
   "the server-only identity merge must restore the verified actor identity for membership checks");
-assert.match(rpcMigration, /set_config\('request\.jwt\.claims'/,
+assert.match(rpcMigration, /set_config\\(\\s*'request\\.jwt\\.claims'/,
   "the identity merge must bind the verified actor in both Supabase claim settings");
 assert.match(rpcMigration, /auth\.uid\(\) is distinct from p_actor_id/,
   "the identity merge must fail closed if the verified actor cannot be resolved");
@@ -70,7 +70,7 @@ assert.match(edge, /from\("nextway_prospect_identity_archive"\)[\s\S]*select\("i
   "the user-scoped archive read policy must be checked before paid search");
 assert.ok(edge.indexOf("Memoria centrale o permessi non pronti") < edge.indexOf('"nextway_consume_api_rate_limit"'),
   "all central memory prerequisites must be checked before consuming Tavily quota");
-assert.match(schemaMigration, /set_config\('request\.jwt\.claims'/,
+assert.match(schemaMigration, /set_config\\(\\s*'request\\.jwt\\.claims'/,
   "the cache write RPC must bind the verified actor in both Supabase claim settings");
 assert.match(schemaMigration, /auth\.uid\(\) is distinct from p_actor_id/,
   "the cache write RPC must fail closed if the verified actor cannot be resolved");
