@@ -290,6 +290,12 @@ assert.match(ui, /record\.archive_status==='acquired'\|\|record\.crm_match===tru
   "an acquired CRM match must show the acquired label even when archive history exists");
 assert.match(ui, /Già acquisito nel CRM/,
   "the UI must prevent reacquiring identities already acquired in the shared CRM");
+assert.match(ui, /prospect\.crm_match=record\.crm_match===true/,
+  "CRM duplicate matches must be retained on the prospect object, not only in presentation state");
+assert.match(ui, /dailyEntry\.crm_match===true\|\|dailyEntry\.central_identity_blocked===true\|\|dailyEntry\.central_identity_ambiguous===true/,
+  "the manual capture handler must independently reject CRM matches and ambiguous central identities");
+assert.match(ui, /record\.archive_status===\'acquired\'\|\|record\.crm_match===true/,
+  "the UI must block capture for every authoritative acquired CRM match");
 assert.match(ui, /central_identity_ambiguous/,
   "ambiguous shared identity matches must be surfaced to the operator");
 assert.match(ui, /Duplicato centrale da verificare/,
