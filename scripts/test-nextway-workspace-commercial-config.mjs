@@ -13,6 +13,8 @@ const valid=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',
   commercial_config:{
     company:{id:'zinzino',name:'Zinzino',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
+    brand_terms:['zinzino','balancetest'],
+    search_queries:{it:{customers:[['Clienti','interesse per omega 3']]},en:{customers:['omega 3 customer interest']}},
     search_modifiers:{customers:[['omega 3','BalanceTest']],wellness_pro:['nutrizione','benessere']},
     consultant_channels:{general_website:{url:'https://example.com',label:'Sito generale'}},
     official_materials:{catalogue:{status:'da_caricare',source:'Catalogo ufficiale'}}
@@ -21,6 +23,9 @@ const valid=api.normalize({
 assert.equal(valid.id,'zinzino');
 assert.equal(valid.name,'Zinzino');
 assert.equal(valid.workspaceId,'ws-1');
+assert.deepEqual([...valid.brandTerms],['zinzino','balancetest']);
+assert.equal(valid.searchQueries.it.customers[0][1],'interesse per omega 3');
+assert.equal(valid.searchQueries.en.customers[0][1],'omega 3 customer interest');
 assert.deepEqual([...valid.searchModifiers.customers[0]],['omega 3','BalanceTest']);
 assert.equal(valid.consultantChannels.general_website.url,'https://example.com');
 assert.equal(valid.officialMaterials.catalogue.status,'da_caricare');
