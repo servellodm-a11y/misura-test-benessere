@@ -39,9 +39,9 @@ assert.match(rpcMigration, /create or replace function public\.nextway_lookup_pr
   "the CRM duplicate lookup must be implemented as a protected database RPC");
 assert.match(rpcMigration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
   "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
-assert.ok(rpcMigration.includes("p_canonical_url !~* '^https?://(\\\\[[0-9a-f:.]+\\\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+assert.ok(rpcMigration.includes("p_canonical_url !~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
   "identity merge must reject source URLs without a valid domain or IP host");
-assert.ok(rpcMigration.includes("url !~* '^https?://(\\\\[[0-9a-f:.]+\\\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+assert.ok(rpcMigration.includes("url !~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
   "CRM lookup must reject malformed source URLs");
 assert.match(rpcMigration, /l\.workspace_id is null and l\.owner_profile_id = auth\.uid\(\)/,
   "legacy owner-scoped CRM Leads must also be recognized without crossing user boundaries");
