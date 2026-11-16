@@ -15,6 +15,10 @@ assert.match(edge, /nextway_has_workspace_access/,
   "the Edge Function must validate active workspace membership");
 assert.match(edge, /nextway_merge_prospect_identity/,
   "central identity updates must use the protected merge RPC");
+assert.match(edge, /p_archive_status:\s*archiveStatus/,
+  "the central merge RPC must receive only the server-enforced seen status");
+assert.match(edge, /p_results:\s*safeItems/,
+  "validated provider results must be persisted through the cache RPC");
 assert.match(edge, /normalized\.length <= 2048 \? normalized : ""/,
   "canonical source URLs must be bounded before database lookup and persistence");
 assert.match(edge, /crypto\.subtle\.digest\("SHA-256"/,
@@ -23,8 +27,8 @@ assert.match(edge, /"url:"\s*\+\s*url/,
   "canonical source URLs must contribute to identity deduplication");
 assert.match(edge, /action === "archive_prospects"/,
   "the Edge Function must expose the authenticated central archive action");
-assert.match(edge, /status === "acquired" \|\| status === "followup" \? "acquired" : "seen"/,
-  "existing CRM records and follow-ups must remain acquired, while automated identity assessment is not human review");
+assert.match(edge, /const archiveStatus = "seen"/,
+  "untrusted search results must never assert acquired or human-reviewed archive status");
 assert.match(edge, /action === "lookup_prospects"/,
   "the Edge Function must expose the authenticated central identity lookup");
 assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprintBatch\)/,
@@ -40,10 +44,10 @@ assert.match(edge, /candidates\.length > 1/,
 assert.match(edge, /\.eq\("workspace_id", workspaceId\)/,
   "central identity lookup must remain strictly workspace-scoped");
 
-assert.match(edge, /const expiresAt = new Date\(Date\.parse\(fetchedAt\) \+ 7 \* 24 \* 60 \* 60 \* 1000\)/,
-  "cache expiry must be calculated from the exact fetched_at value to satisfy the SQL seven-day cap");
-assert.match(edge, /expires_at: expiresAt/,
-  "the exact seven-day expiry must be persisted with the cached result");
+assert.match(edge, /nextway_store_search_query_cache/,
+  "cache writes must use the validated database RPC");
+assert.doesNotMatch(edge, /\.from\("nextway_search_query_cache"\)\.(insert|update)/,
+  "the Edge Function must not write cache rows directly");
 assert.match(edge, /central_cache_unavailable/,
   "if central cache is unavailable, paid external search must stop safely");
 assert.match(edge, /p_target_type:\s*targetType/,
