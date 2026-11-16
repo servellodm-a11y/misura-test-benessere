@@ -30,6 +30,12 @@ assert.match(normalized, /nextway_is_platform_admin\(\)/,
   'platform administrators must retain central oversight');
 assert.match(normalized, /owner_user_id = auth\.uid\(\)/,
   'ordinary members may create their own identity records');
+assert.match(normalized, /create or replace function public\.nextway_guard_prospect_memory_scope/,
+  'workspace and owner identifiers must be immutable for non-admins');
+assert.match(normalized, /nextway_prospect_identity_scope_guard/,
+  'identity records must have a workspace scope guard trigger');
+assert.match(normalized, /nextway_search_query_cache_scope_guard/,
+  'query cache records must have a workspace scope guard trigger');
 assert.match(normalized, /create policy nextway_prospect_identity_read/,
   'identity archive must have an explicit read policy');
 assert.match(normalized, /create policy nextway_prospect_identity_insert/,
@@ -53,4 +59,4 @@ assert.doesNotMatch(normalized, /insert into public\.(nextway_prospect_identity_
 assert.doesNotMatch(normalized, /drop table|truncate table|delete from public\./,
   'migration must not delete operational data');
 
-console.log('NEXTWAY central prospect identity memory SQL: 22 checks passed.');
+console.log('NEXTWAY central prospect identity memory SQL: 25 checks passed.');
