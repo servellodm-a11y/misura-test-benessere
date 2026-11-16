@@ -21,7 +21,7 @@ assert.match(edge, /"url:"\s*\+\s*url/,
   "canonical source URLs must contribute to identity deduplication");
 assert.match(edge, /action === "archive_prospects"/,
   "the Edge Function must expose the authenticated central archive action");
-assert.match(edge, /expires_at:\s*new Date\(Date\.now\(\)\s*\+\s*7\s*\*\s*24\s*\*\s*60\s*\*\s*60\s*\*\\s*1000\)/,
+assert.match(edge, /expires_at:\s*new Date\(Date\.now\(\)\s*\+\s*7\s*\*\s*24\s*\*\s*60\s*\*\s*60\s*\*\s*1000\)/,
   "successful provider results must be cached for no more than seven days");
 assert.match(edge, /central_cache_unavailable/,
   "if central cache is unavailable, paid external search must stop safely");
