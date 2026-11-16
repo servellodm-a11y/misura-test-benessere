@@ -224,6 +224,21 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Non hai una membership attiva con permessi di ricerca in questo workspace." }, 403, responseOrigin);
   }
 
+  if (!trustedWriter) {
+    return json({ error: "Servizio di scrittura centrale non configurato: ricerca e acquisizione sospese." }, 503, responseOrigin);
+  }
+  const { data: memoryReady, error: memoryPreflightError } = await trustedWriter.rpc(
+    "nextway_check_prospect_memory_ready",
+    { p_actor_id: userData.user.id, p_workspace_id: workspaceId },
+  );
+  if (memoryPreflightError || memoryReady !== true) {
+    console.error("NEXTWAY central memory preflight failed:", memoryPreflightError?.code ?? "not_ready");
+    return json({
+      error: "Memoria centrale o permessi non pronti: nessuna ricerca esterna è stata avviata.",
+      reason: "central_memory_not_ready",
+    }, 503, responseOrigin);
+  }
+
   if (action === "lookup_prospects") {
     if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
       return json({ error: "Richiesta di confronto non valida: massimo 25 prospect." }, 400, responseOrigin);
