@@ -313,8 +313,8 @@ Deno.serve(async (req: Request) => {
       const targetType = classification.includes("partner") ? "potential_partner" :
         classification.includes("client") ? "potential_customer" : "unknown";
       const status = cleanString(prospect.archive_status, 40);
-      const archiveStatus = status === "acquired" ? "acquired" :
-        prospect.person_confirmed === true ? "reviewed" : "seen";
+      // Automated identity assessment is not a human review.
+      const archiveStatus = status === "acquired" ? "acquired" : "seen";
       const rpcArgs = {
         p_workspace_id: workspaceId,
         p_identity_fingerprints: fingerprints,
