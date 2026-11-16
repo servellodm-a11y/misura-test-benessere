@@ -250,7 +250,16 @@ begin
      or p_provider_key is distinct from 'tavily'
      or jsonb_typeof(coalesce(p_results, '[]'::jsonb)) <> 'array'
      or jsonb_array_length(coalesce(p_results, '[]'::jsonb)) > 10
-     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304 then
+     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_results, '[]'::jsonb)) item(value)
+       where jsonb_typeof(item.value) <> 'object'
+         or coalesce(item.value ->> 'url', '') !~* '^https?://[^/[:space:]]'
+         or length(coalesce(item.value ->> 'title', '')) > 300
+         or length(coalesce(item.value ->> 'snippet', '')) > 1200
+         or length(coalesce(item.value ->> 'page_content', '')) > 2500
+         or jsonb_typeof(item.value -> 'score') <> 'number'
+     ) then
     raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
   end if;
 
@@ -361,11 +370,36 @@ begin
   if p_canonical_url is null or p_canonical_url !~* '^https?://' or length(p_canonical_url) > 2048
      or p_display_name is null or length(btrim(p_display_name)) not between 1 and 240
      or coalesce(cardinality(p_identity_fingerprints), 0) > 20
+     or array_position(coalesce(p_identity_fingerprints, '{}'::text[]), null) is not null
      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
          and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*$')
      or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
      or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
-     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array' then
+     or jsonb_typeof(coalesce(p_public_contacts -> 'emails', '[]'::jsonb)) <> 'array'
+     or jsonb_typeof(coalesce(p_public_contacts -> 'phones', '[]'::jsonb)) <> 'array'
+     or jsonb_typeof(coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)) <> 'array'
+     or jsonb_typeof(coalesce(p_public_contacts -> 'socials', '[]'::jsonb)) <> 'array'
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'emails', '[]'::jsonb)) c(value)
+       where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 500
+     )
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'phones', '[]'::jsonb)) c(value)
+       where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 100
+     )
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)) c(value)
+       where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 100
+     )
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_public_contacts -> 'socials', '[]'::jsonb)) c(value)
+       where jsonb_typeof(c.value) <> 'string' or length(c.value #>> '{}') > 500
+     )
+     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array'
+     or exists (
+       select 1 from jsonb_array_elements(coalesce(p_source_evidence, '[]'::jsonb)) e(value)
+       where jsonb_typeof(e.value) <> 'object'
+     ) then
     raise exception 'Dati della memoria prospect non validi.' using errcode = '22023';
   end if;
   if jsonb_array_length(coalesce(p_source_evidence, '[]'::jsonb)) > 12 then
