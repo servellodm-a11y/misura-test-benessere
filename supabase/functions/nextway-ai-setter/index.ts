@@ -501,8 +501,44 @@ Non inviarla: deve rimanere una bozza.
       );
 
       if (!aiResponse.ok) {
-        console.error("OpenAI request failed:", { status: aiResponse.status });
-        throw new Error("Generazione AI non riuscita");
+        const upstreamPayload = await aiResponse.json().catch(() => ({}));
+        const upstreamError = upstreamPayload && typeof upstreamPayload === "object"
+          ? (upstreamPayload as Record<string, unknown>).error
+          : null;
+        const upstreamDetails = upstreamError && typeof upstreamError === "object"
+          ? upstreamError as Record<string, unknown>
+          : {};
+        const upstreamCode = typeof upstreamDetails.code === "string"
+          ? upstreamDetails.code.slice(0, 64)
+          : undefined;
+        const upstreamType = typeof upstreamDetails.type === "string"
+          ? upstreamDetails.type.slice(0, 64)
+          : undefined;
+
+        logSafeFailure("OpenAI request failed", {
+          status: aiResponse.status,
+          code: upstreamCode,
+        });
+
+        if (aiResponse.status === 429) {
+          const quotaExceeded = [
+            "insufficient_quota",
+            "billing_hard_limit_reached",
+            "usage_limit_reached",
+          ].includes(upstreamCode || "") || upstreamType === "insufficient_quota";
+
+          return respond({
+            error: quotaExceeded
+              ? "Credito API esaurito o limite di spesa raggiunto. Verifica fatturazione e limiti API OpenAI."
+              : "Limite temporaneo OpenAI raggiunto. Attendi prima di riprovare.",
+          }, quotaExceeded ? 402 : 429, responseOrigin);
+        }
+
+        return respond({
+          error: aiResponse.status === 401 || aiResponse.status === 403
+            ? "Autorizzazione del servizio AI non valida. È necessario un controllo amministrativo."
+            : "Servizio OpenAI temporaneamente non disponibile. Nessuna bozza è stata salvata.",
+        }, 502, responseOrigin);
       }
 
       const result = await aiResponse.json();
