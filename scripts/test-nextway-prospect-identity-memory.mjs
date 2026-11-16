@@ -13,7 +13,7 @@ assert.match(page, /existing\.identity_keys=\[\.\.\.new Set/,
   'repeat sightings must merge strong identity keys instead of creating duplicate identities');
 assert.match(page, /existing\.public_contacts=/,
   'public contact details must be consolidated across sightings');
-assert.match(page, /existing\.sources=\[\.\.\.existing\.sources\]/,
+assert.match(page, /existing\.sources=\[\.\.\.\(existing\.sources\|\|\[\]\)\]/,
   'source provenance must accumulate across repeated sightings');
 assert.match(page, /SEARCH_QUERY_CACHE_TTL_MS=7\*24\*60\*60\*1000/,
   'query results must have an explicit seven-day cache lifetime');
