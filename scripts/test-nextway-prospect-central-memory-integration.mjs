@@ -167,11 +167,11 @@ assert.match(edge, /new_networker: "other_networker"/,
   "new networkers must map into the supported other-networker archive segment");
 assert.match(edge, /exnetworker: "other_networker"/,
   "former networkers must map into the supported other-networker archive segment");
-assert.match(edge, /Deno\.env\.get\("SUPABASE_SERVICE_ROLE_KEY"\)/,
+assert.match(edge, /Deno\.env\.get\("NEXTWAY_SERVICE_ROLE_KEY"\)/,
   "server-only central writes must use the protected Supabase service credential");
 assert.match(edge, /const trustedWriter = serviceRoleKey \? createClient/,
   "the trusted writer client must be initialized only inside the Edge Function");
-assert.ok(edge.indexOf("supabase.auth.getUser(token)") < edge.indexOf('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'),
+assert.ok(edge.indexOf("supabase.auth.getUser(token)") < edge.indexOf('Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY")'),
   "the caller must be authenticated before the server-only writer is initialized");
 assert.match(edge, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/,
   "identity archive writes must use the server-only trusted writer");
