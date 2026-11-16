@@ -410,7 +410,7 @@ begin
               from jsonb_array_elements_text(
                 coalesce(public_contacts -> 'emails', '[]'::jsonb) ||
                 coalesce(p_public_contacts -> 'emails', '[]'::jsonb)
-              ) limit 10
+              ) limit 5
             ) merged_emails
           ), '[]'::jsonb),
           'phones', coalesce((
@@ -419,7 +419,7 @@ begin
               from jsonb_array_elements_text(
                 coalesce(public_contacts -> 'phones', '[]'::jsonb) ||
                 coalesce(p_public_contacts -> 'phones', '[]'::jsonb)
-              ) limit 10
+              ) limit 5
             ) merged_phones
           ), '[]'::jsonb),
           'whatsapp', coalesce((
@@ -428,7 +428,7 @@ begin
               from jsonb_array_elements_text(
                 coalesce(public_contacts -> 'whatsapp', '[]'::jsonb) ||
                 coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)
-              ) limit 10
+              ) limit 5
             ) merged_whatsapp
           ), '[]'::jsonb),
           'socials', coalesce((
@@ -437,7 +437,7 @@ begin
               from jsonb_array_elements_text(
                 coalesce(public_contacts -> 'socials', '[]'::jsonb) ||
                 coalesce(p_public_contacts -> 'socials', '[]'::jsonb)
-              ) limit 10
+              ) limit 5
             ) merged_socials
           ), '[]'::jsonb)
         ),
