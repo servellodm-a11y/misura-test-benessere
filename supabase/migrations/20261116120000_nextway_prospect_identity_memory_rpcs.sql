@@ -58,7 +58,7 @@ begin
   end if;
 
   return query
-  select u.url, l.display_name, l.company_brand, l.category, l.status, l.archived_at
+  select u.url, l.display_name, l.company_brand, l.category::text, l.status::text, l.archived_at
   from unnest(coalesce(p_source_urls, '{}'::text[])) as u(url)
   join public.nextway_leads l
     on (
