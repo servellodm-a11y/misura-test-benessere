@@ -12,6 +12,14 @@ assert.equal((rpcMigration.match(/\bcommit;/gi) || []).length, 1,
   "the dependent RPC migration must be one atomic transaction");
 assert.equal((workspaceMigration.match(/\bcommit;/gi) || []).length, 1,
   "the accessible-workspaces migration must be one atomic transaction");
+for (const [label, migration] of [["schema", schemaMigration], ["RPC", rpcMigration], ["workspace", workspaceMigration]]) {
+  assert.equal((migration.match(/\$\$/g) || []).length % 2, 0,
+    label + " migration must have balanced SQL dollar-quote delimiters");
+  assert.doesNotMatch(migration, /^\s*as \$(?!\$)/m,
+    label + " migration must not contain single-dollar function openers");
+  assert.doesNotMatch(migration, /^\s*\$;\s*$/m,
+    label + " migration must not contain single-dollar function closers");
+}
 assert.match(workspaceMigration, /create or replace function public\.nextway_list_accessible_workspaces\(\)/,
   "the search UI must have a database RPC to list authorized workspaces");
 assert.match(workspaceMigration, /security definer[\s\S]*set search_path = pg_catalog, public/,
