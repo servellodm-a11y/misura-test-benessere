@@ -21,6 +21,8 @@ assert.match(edge, /"url:"\s*\+\s*url/,
   "canonical source URLs must contribute to identity deduplication");
 assert.match(edge, /action === "archive_prospects"/,
   "the Edge Function must expose the authenticated central archive action");
+assert.match(edge, /const archiveStatus = status === "acquired" \? "acquired" : "seen"/,
+  "automated identity recognition must never be mislabeled as human review");
 assert.match(edge, /action === "lookup_prospects"/,
   "the Edge Function must expose the authenticated central identity lookup");
 assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprints\)/,
