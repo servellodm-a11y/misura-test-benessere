@@ -328,6 +328,7 @@ declare
   v_fingerprints text[];
   v_sources jsonb;
   v_id uuid;
+  v_fingerprint text;
 begin
   if v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
@@ -357,10 +358,16 @@ begin
     raise exception 'Classificazione della memoria prospect non valida.' using errcode = '22023';
   end if;
 
-  perform pg_advisory_xact_lock(hashtextextended(
-    p_workspace_id::text || ':' || p_canonical_url || ':' ||
-    array_to_string(coalesce(p_identity_fingerprints, '{}'::text[]), ','), 0
-  ));
+  perform pg_advisory_xact_lock(hashtextextended(p_workspace_id::text || ':url:' || p_canonical_url, 0));
+  for v_fingerprint in
+    select distinct fingerprint
+    from unnest(coalesce(p_identity_fingerprints, '{}'::text[])) as keys(fingerprint)
+    order by fingerprint
+  loop
+    perform pg_advisory_xact_lock(hashtextextended(
+      p_workspace_id::text || ':identity:' || v_fingerprint, 0
+    ));
+  end loop;
 
   select * into v_existing
   from public.nextway_prospect_identity_archive a
