@@ -268,7 +268,7 @@ begin
      or exists (
        select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_results, '[]'::jsonb)) = 'array' then coalesce(p_results, '[]'::jsonb) else '[]'::jsonb end) item(value)
        where jsonb_typeof(item.value) <> 'object'
-         or coalesce(item.value ->> 'url', '') !~* '^https?://[^/[:space:]]'
+         or coalesce(item.value ->> 'url', '') !~* '^https?://(\[[0-9a-f:.]+\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'
          or length(coalesce(item.value ->> 'title', '')) > 300
          or length(coalesce(item.value ->> 'snippet', '')) > 1200
          or length(coalesce(item.value ->> 'page_content', '')) > 2500
