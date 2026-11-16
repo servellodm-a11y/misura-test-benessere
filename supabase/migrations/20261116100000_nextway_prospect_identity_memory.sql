@@ -396,8 +396,11 @@ begin
 
     update public.nextway_prospect_identity_archive
     set identity_fingerprints = v_fingerprints,
-        canonical_url = p_canonical_url,
-        display_name = left(btrim(p_display_name), 240),
+        canonical_url = coalesce(v_existing.canonical_url, p_canonical_url),
+        display_name = case
+          when p_display_name <> 'Prospect senza nome' then left(btrim(p_display_name), 240)
+          else display_name
+        end,
         company_name = coalesce(nullif(left(btrim(p_company_name), 240), ''), company_name),
         profile_data = profile_data || coalesce(p_profile_data, '{}'::jsonb),
         public_contacts = public_contacts || coalesce(p_public_contacts, '{}'::jsonb),
@@ -407,7 +410,7 @@ begin
         archive_status = case
           when archive_status = 'acquired' or p_archive_status = 'acquired' then 'acquired'
           when archive_status = 'ignored' then 'ignored'
-          when p_archive_status = 'reviewed' then 'reviewed'
+          when archive_status = 'reviewed' or p_archive_status = 'reviewed' then 'reviewed'
           else 'seen' end,
         last_seen_at = now(), seen_count = seen_count + 1,
         last_acquired_at = case when p_archive_status = 'acquired' then now() else last_acquired_at end,
