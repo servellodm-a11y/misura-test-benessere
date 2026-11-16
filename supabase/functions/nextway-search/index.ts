@@ -313,7 +313,7 @@ Deno.serve(async (req: Request) => {
       const fingerprints = await Promise.all(normalizedKeys.map(sha256));
       const classification = cleanString(prospect.classification, 80).toLocaleLowerCase("it");
       const targetType = classification.includes("partner") ? "potential_partner" :
-        classification.includes("client") ? "potential_customer" : "unknown";
+        (classification.includes("client") || classification.includes("cliente")) ? "potential_customer" : "unknown";
       const status = cleanString(prospect.archive_status, 40);
       // Automated identity assessment is not a human review.
       const archiveStatus = status === "acquired" ? "acquired" : "seen";
