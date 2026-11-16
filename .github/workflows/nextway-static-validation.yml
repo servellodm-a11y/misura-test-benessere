@@ -211,8 +211,6 @@ jobs:
         run: node scripts/test-nextway-prospect-identity-memory.mjs
       - name: Validate NEXTWAY central prospect identity memory SQL and RLS
         run: node scripts/test-nextway-prospect-identity-memory-sql.mjs
-      - name: Validate NEXTWAY central prospect identity memory RPC migration
-        run: node scripts/test-nextway-prospect-central-memory-integration.mjs
       - name: Validate NEXTWAY central prospect memory integration and CRM duplicate checks
         run: node scripts/test-nextway-prospect-central-memory-integration.mjs
       - name: Test NEXTWAY explainable prospect assessment dimensions
