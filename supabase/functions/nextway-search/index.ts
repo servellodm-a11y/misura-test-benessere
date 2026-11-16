@@ -250,19 +250,21 @@ Deno.serve(async (req: Request) => {
       }
       for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
     }
-    const matches = inputs.flatMap(input => {
+    const matches: Array<Record<string, unknown>> = [];
+    for (const input of inputs) {
       const candidates = [...records.values()].filter(record => {
         const storedFingerprints = record.identity_fingerprints;
         return (!!input.url && record.canonical_url === input.url) ||
           (Array.isArray(storedFingerprints) &&
             input.fingerprints.some(fingerprint => (storedFingerprints as string[]).includes(fingerprint)));
       });
-      if (!candidates.length) return [];
+      if (!candidates.length) continue;
       if (candidates.length > 1) {
-        return [{ index: input.index, ambiguous: true, matched_records: candidates.length }];
+        matches.push({ index: input.index, ambiguous: true, matched_records: candidates.length });
+        continue;
       }
       const match = candidates[0];
-      return [{
+      matches.push({
         index: input.index,
         record: {
           display_name: match.display_name,
@@ -275,8 +277,8 @@ Deno.serve(async (req: Request) => {
           seen_count: match.seen_count,
           last_acquired_at: match.last_acquired_at,
         },
-      }];
-    });
+      });
+    }
     return json({
       matches,
       matched_count: matches.length,
