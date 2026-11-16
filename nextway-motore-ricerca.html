@@ -669,6 +669,7 @@ async function runSearch(runAll=false){
     capture.dataset.initialDisabled=String(capture.disabled);capture.dataset.initialText=capture.textContent;capture.dataset.initialTitle=capture.title;
     capture.addEventListener('click',()=>{
      if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
+     if(dailyEntry.crm_match===true||dailyEntry.central_identity_blocked===true||dailyEntry.central_identity_ambiguous===true||dailyEntry.central_archive_status==='acquired'){status.textContent='Acquisizione bloccata: questa identità risulta già acquisita nel CRM o richiede una verifica dei duplicati.';return;}
      try{
       const segment=$('segment').value;
       const outcome=commercialFit.commercial_outcome;
@@ -718,6 +719,8 @@ async function runSearch(runAll=false){
       }
       if(!match.record)return;
       const record=match.record;
+      prospect.crm_match=record.crm_match===true;
+      prospect.central_identity_blocked=record.archive_status==='acquired'||record.crm_match===true;
       prospect.history_seen_before=true;
       prospect.history_first_seen=record.first_seen_at||prospect.history_first_seen;
       prospect.history_last_seen=record.last_seen_at||prospect.history_last_seen;
@@ -733,7 +736,7 @@ async function runSearch(runAll=false){
        const note=document.createElement('p');note.className='muted central-identity-match';note.textContent=(record.archive_status==='acquired'?'GIÀ ACQUISITO NEL CRM DEL WORKSPACE':record.archive_status==='ignored'?'GIÀ ESAMINATO · ESCLUSO IN PRECEDENZA':'GIÀ PRESENTE NELLA MEMORIA CONDIVISA')+' · prima rilevazione: '+(record.first_seen_at?new Date(record.first_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+' · ultima rilevazione: '+(record.last_seen_at?new Date(record.last_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+'.';
        card.append(note);
        const captureButton=card.querySelector('.prospect-capture-button');
-       if(captureButton&&record.archive_status==='acquired'){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
+       if(captureButton&&(record.archive_status==='acquired'||record.crm_match===true)){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
       }
      });
     }
