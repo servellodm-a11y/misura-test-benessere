@@ -251,7 +251,8 @@ create trigger nextway_search_query_cache_scope_guard
 
 alter table public.nextway_search_query_cache enable row level security;
 revoke all on public.nextway_search_query_cache from public, anon;
-grant select, insert, update on public.nextway_search_query_cache to authenticated;
+revoke insert, update, delete on public.nextway_search_query_cache from authenticated;
+grant select on public.nextway_search_query_cache to authenticated;
 grant all on public.nextway_search_query_cache to service_role;
 
 drop policy if exists nextway_search_query_cache_read on public.nextway_search_query_cache;
@@ -265,44 +266,73 @@ create policy nextway_search_query_cache_read
     )
   );
 
-drop policy if exists nextway_search_query_cache_insert on public.nextway_search_query_cache;
-create policy nextway_search_query_cache_insert
-  on public.nextway_search_query_cache
-  for insert to authenticated
-  with check (
-    fetched_by = auth.uid()
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  );
-
-drop policy if exists nextway_search_query_cache_update on public.nextway_search_query_cache;
-create policy nextway_search_query_cache_update
-  on public.nextway_search_query_cache
-  for update to authenticated
-  using (
-    (
-      fetched_by = auth.uid()
-      or public.nextway_can_manage_workspace(workspace_id)
-    )
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  )
-  with check (
-    (
-      fetched_by = auth.uid()
-      or public.nextway_can_manage_workspace(workspace_id)
-    )
-    and public.nextway_has_workspace_access(
-      workspace_id,
-      array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
-    )
-  );
+-- Authenticated clients may read the cache, but may not poison or rewrite it.
+-- Cache writes are serialized and validated by nextway_store_search_query_cache.
 
 comment on table public.nextway_search_query_cache is
   'NEXTWAY workspace-scoped cache of successful public search responses. Maximum TTL is seven days; only explicit query execution may populate it.';
+
+
+create or replace function public.nextway_store_search_query_cache(
+  p_workspace_id uuid,
+  p_query_fingerprint text,
+  p_query_text text,
+  p_segment_key text,
+  p_market_key text,
+  p_provider_key text,
+  p_results jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_id uuid;
+  v_now timestamptz := clock_timestamp();
+begin
+  if v_user_id is null or p_workspace_id is null or not public.nextway_has_workspace_access(
+    p_workspace_id,
+    array['workspace_owner','workspace_admin','workspace_manager','workspace_member']::text[]
+  ) then
+    raise exception 'Membership attiva richiesta per aggiornare la cache di ricerca.' using errcode = '42501';
+  end if;
+
+  if p_query_fingerprint is null or p_query_fingerprint !~ '^[a-f0-9]{64}$'
+     or p_query_text is null or length(btrim(p_query_text)) not between 1 and 400
+     or p_segment_key is null or length(btrim(p_segment_key)) not between 1 and 80
+     or p_market_key is null or length(p_market_key) > 120
+     or p_provider_key is distinct from 'tavily'
+     or jsonb_typeof(coalesce(p_results, '[]'::jsonb)) <> 'array'
+     or jsonb_array_length(coalesce(p_results, '[]'::jsonb)) > 10
+     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304 then
+    raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
+  end if;
+
+  insert into public.nextway_search_query_cache (
+    workspace_id, query_fingerprint, query_text, segment_key, market_key,
+    provider_key, results, fetched_by, fetched_at, expires_at, updated_at
+  ) values (
+    p_workspace_id, p_query_fingerprint, btrim(p_query_text), btrim(p_segment_key),
+    p_market_key, p_provider_key, coalesce(p_results, '[]'::jsonb),
+    v_user_id, v_now, v_now + interval '7 days', v_now
+  )
+  on conflict (workspace_id, query_fingerprint, segment_key, market_key, provider_key)
+  do update set
+    query_text = excluded.query_text,
+    results = excluded.results,
+    fetched_at = excluded.fetched_at,
+    expires_at = excluded.expires_at,
+    updated_at = excluded.updated_at
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
+
+alter function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) owner to postgres;
+revoke all on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) from public, anon;
+grant execute on function public.nextway_store_search_query_cache(uuid,text,text,text,text,text,jsonb) to authenticated;
 
 commit;
