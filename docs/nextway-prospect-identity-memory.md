@@ -108,3 +108,13 @@ Il confronto non si limita all'archivio identità: la Edge Function invoca `next
 La RPC di merge accetta dai client soltanto nuove osservazioni `seen`. Lo stato `acquired` viene derivato nel database esclusivamente dalla presenza effettiva di un Lead corrispondente. Il client non può attribuirsi da solo l'acquisizione o la revisione umana.
 
 La cache e i payload di identità sono convalidati prima del salvataggio: array di contatti, oggetti fonte, impronte, URL, risultati e score. Se il confronto CRM non è disponibile, la ricerca si arresta prima dell'acquisizione.
+
+
+## Migrazioni separate e ordine di applicazione
+
+Per mantenere immutabili le migrazioni già applicate, lo schema e le RPC sono distribuiti in due file distinti:
+
+1. `20261116100000_nextway_prospect_identity_memory.sql`: tabelle, indici, RLS e RPC di persistenza della cache.
+2. `20261116120000_nextway_prospect_identity_memory_rpcs.sql`: verifica Lead CRM, merge identità e stato acquisito derivato dal database.
+
+La seconda migrazione verifica preventivamente la presenza delle tabelle e delle colonne `nextway_leads.workspace_id` e `source_url`. Non modifica i dati esistenti e non deve essere applicata prima della prima migrazione.
