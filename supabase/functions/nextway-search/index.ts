@@ -412,10 +412,11 @@ Deno.serve(async (req: Request) => {
       results.push({ query: entry.query, results: safeItems, cached: false });
 
       const fetchedAt = new Date().toISOString();
+      const expiresAt = new Date(Date.parse(fetchedAt) + 7 * 24 * 60 * 60 * 1000).toISOString();
       const cacheValues = {
         results: safeItems,
         fetched_at: fetchedAt,
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        expires_at: expiresAt,
         updated_at: fetchedAt,
       };
       const cacheWrite = entry.existingId
