@@ -30,6 +30,14 @@ assert.match(migration, /v_effective_archive_status := 'acquired'/,
   "the database, not the browser, must derive acquired status from an existing CRM Lead");
 assert.match(migration, /p_archive_status is distinct from 'seen'/,
   "authenticated clients must not self-assert acquired or reviewed status");
+assert.match(migration, /array_position\(coalesce\(p_identity_fingerprints/,
+  "the merge RPC must reject null identity fingerprints");
+assert.match(migration, /jsonb_array_elements\(coalesce\(p_public_contacts -> 'emails'/,
+  "public contact arrays must be validated before merging");
+assert.match(migration, /jsonb_array_elements\(coalesce\(p_source_evidence/,
+  "source evidence must contain bounded structured objects");
+assert.match(migration, /coalesce\(jsonb_typeof\(item\.value -> 'score'\), ''\) <> 'number'/,
+  "cached search results must contain numeric relevance scores");
 assert.match(migration, /nextway_leads.*workspace_id.*source_url/s,
   "migration prerequisites must include workspace-scoped Lead source URLs");
 assert.match(edge, /p_archive_status:\s*archiveStatus/,
