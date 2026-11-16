@@ -31,7 +31,7 @@ Cache delle ricerche riuscite, separata per workspace, impronta della query, seg
 
 - Massimo 10 risultati per query.
 - Scadenza non oltre 7 giorni.
-- Lettura per membri attivi del workspace, scrittura per membri non viewer.
+- Lettura per membri attivi del workspace; scrittura esclusivamente tramite RPC server-side protetta.
 - Nessuna policy DELETE per gli utenti autenticati: la pulizia delle righe scadute sarà un'attività server-side controllata.
 
 ## Sicurezza
@@ -39,15 +39,15 @@ Cache delle ricerche riuscite, separata per workspace, impronta della query, seg
 - RLS abilitata su entrambe le tabelle.
 - Nessun accesso anonimo o pubblico.
 - Gli utenti senza workspace non possono leggere o scrivere archivi personali globali; il percorso senza workspace è riservato a `platform_admin`.
-- I membri possono creare record propri nel workspace attivo.
-- Proprietario e workspace non sono modificabili dai membri dopo la creazione; solo `platform_admin` può trasferire dati tra workspace.
+- Gli utenti autenticati hanno accesso diretto in sola lettura: inserimento, aggiornamento e merge sono riservati alle RPC server-side.
+- Le RPC verificano l'identità dell'attore e la membership; i client non possono cambiare direttamente proprietario, workspace o stato di acquisizione.
 - I viewer possono leggere ma non scrivere.
 - Il ruolo `service_role` è previsto per future operazioni server-side e bypassa RLS: deve restare esclusivamente nei segreti server, mai nel browser.
 
 ## Dipendenze prima dell'applicazione
 
 1. La catena di migrazioni multi-workspace e membership deve essere approvata e applicata nell'ordine previsto.
-2. Il client deve calcolare SHA-256 delle chiavi d'identità normalizzate prima di inviarle; non deve inviare email/telefono come impronte in chiaro.
+2. La Edge Function deve normalizzare le chiavi d'identità e calcolare SHA-256 sul server; nel database si conservano solo le impronte, mentre gli eventuali recapiti professionali pubblici sono campi distinti e soggetti a limiti.
 3. L'Edge Function di ricerca deve ricevere un workspace verificato e consultare la cache prima di consumare unità Tavily.
 4. Il salvataggio/merge dell'identità deve essere atomico per workspace e fingerprint, per evitare duplicati in richieste concorrenti.
 5. La pulizia della cache scaduta deve essere server-side e limitata al workspace.
@@ -69,14 +69,15 @@ La tabella cache evita nuove chiamate solo quando la query e il relativo contest
 
 ## Integrazione centrale proposta (PR di integrazione)
 
-La Edge Function `nextway-search` ora è predisposta per due operazioni autenticate:
+La Edge Function `nextway-search` ora è predisposta per tre operazioni autenticate:
 
 1. **Ricerca:** richiede un workspace attivo, un segmento e un mercato. Cerca prima la query nella tabella `nextway_search_query_cache`; soltanto le query mancanti vengono inviate a Tavily e conteggiate dalla RPC di rate limit.
-2. **Memoria identità:** dopo l'analisi locale, il browser invia fino a 25 prospect alla stessa Edge Function con l'azione `archive_prospects`. La funzione normalizza gli URL, calcola sul server gli SHA-256 delle chiavi identità e invoca `nextway_merge_prospect_identity`.
+2. **Confronto identità e CRM:** prima di consentire l'acquisizione, il browser invia fino a 25 prospect con l'azione `lookup_prospects`; la funzione confronta URL e impronte SHA-256 nell'archivio centrale e verifica i Lead CRM tramite RPC.
+3. **Memoria identità:** dopo l'analisi locale, il browser invia fino a 25 prospect con l'azione `archive_prospects`. La funzione normalizza gli URL, calcola sul server gli SHA-256 delle chiavi identità e invoca `nextway_merge_prospect_identity`.
 
 La RPC di merge serializza gli aggiornamenti per workspace, URL e impronte identità, consolida fonti e recapiti professionali pubblici e mantiene lo stato `acquired` se già presente. Non crea Lead e non assegna automaticamente lo stato Qualified.
 
-La UI carica i workspace accessibili tramite `nextway_list_accessible_workspaces`. Se non esiste un workspace attivo o l'utente non ne ha accesso, la ricerca esterna viene bloccata: non deve essere possibile spendere unità Tavily senza poter controllare la cache condivisa.
+La UI carica i workspace accessibili tramite `nextway_list_accessible_workspaces`. Se non esiste un workspace attivo o l'utente non ne ha accesso, la ricerca esterna viene bloccata: non deve essere possibile spendere unità Tavily senza poter controllare la cache condivisa. Il `platform_admin` vede tutti i workspace attivi e può operare senza una membership dedicata; gli altri utenti richiedono una membership attiva con ruolo di ricerca. L'area amministrativa crea un workspace inizialmente in stato `draft`; un amministratore lo attiva esplicitamente. Le migrazioni non creano workspace, membership o dati iniziali.
 
 La cache è separata per workspace, segmento, mercato, azienda e numero massimo di risultati; i record hanno TTL massimo di sette giorni. Le query già in cache non consumano unità di ricerca. Se la lettura della cache centrale fallisce, la funzione si arresta senza chiamare Tavily.
 
@@ -124,7 +125,7 @@ La seconda migrazione verifica preventivamente la presenza delle tabelle e delle
 
 Le RPC `nextway_store_search_query_cache` e `nextway_merge_prospect_identity` sono eseguibili soltanto dal ruolo server `service_role`; i ruoli `public`, `anon` e `authenticated` non possono invocarle direttamente. La Edge Function autentica prima il chiamante con il suo JWT, verifica la membership attiva usando il client con permessi dell'utente e usa il client server esclusivamente per queste due RPC. Le RPC ricevono l'ID dell'attore verificato e ripetono il controllo della membership nel database. Le letture di workspace, cache e archivio restano sul client JWT dell'utente: la chiave server non viene usata per letture generiche.
 
-Se la credenziale server non è disponibile, la ricerca può restituire i risultati già ottenuti, ma non può scrivere la cache condivisa; l'archiviazione centrale fallisce in modo chiuso e l'interfaccia mantiene bloccata l'acquisizione CRM. Prima di consumare unità Tavily, la Edge Function esegue inoltre un preflight server-only che verifica l'identità dell'attore, la membership, la presenza delle tabelle e delle RPC necessarie e i relativi permessi. Esegue anche una verifica CRM a URL vuoto e una lettura dell'archivio con il JWT dell'utente. Se uno di questi controlli fallisce, la ricerca esterna non parte.
+Se la credenziale server non è disponibile, la ricerca esterna viene bloccata prima del rate limit e di qualsiasi chiamata Tavily; non vengono avviate nuove ricerche a pagamento. Prima di consumare unità Tavily, la Edge Function esegue un preflight server-only che verifica l'identità dell'attore, la membership, la presenza delle tabelle e delle RPC necessarie e i relativi permessi. Esegue anche una verifica CRM a URL vuoto e una lettura dell'archivio con il JWT dell'utente. Se uno di questi controlli fallisce, la ricerca esterna non parte.
 
 ## Elenco dei workspace accessibili
 
