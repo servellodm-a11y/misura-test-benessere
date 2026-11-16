@@ -97,5 +97,11 @@ assert.match(search, /queries_requested/);
 assert.match(search, /queries_completed/);
 assert.match(search, /queries_failed/);
 assert.match(search, /partial/);
-assert.doesNotMatch(search, /Deno\.env\.get\(["'](?:SUPABASE_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
+assert.match(search, /Deno\.env\.get\(["']SUPABASE_SERVICE_ROLE_KEY["']\)/);
+assert.ok(search.indexOf("supabase.auth.getUser(token)") < search.indexOf('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'),
+  "the search function must authenticate the caller before initializing its server-only writer");
+assert.match(search, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/);
+assert.match(search, /trustedWriter\.rpc\("nextway_store_search_query_cache"/);
+assert.doesNotMatch(search, /trustedWriter\.from\(/,
+  "the service-role client must be restricted to protected write RPCs");
 console.log("NEXTWAY Search Edge Function: authenticated boundary, query limits, distributed quota and provider resilience contract: PASS");
