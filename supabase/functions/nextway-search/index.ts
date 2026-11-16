@@ -235,9 +235,10 @@ Deno.serve(async (req: Request) => {
     const fingerprints = [...new Set(inputs.flatMap(item => item.fingerprints))];
     const columns = "id,canonical_url,identity_fingerprints,display_name,company_name,target_type,partner_segment,archive_status,first_seen_at,last_seen_at,seen_count,last_acquired_at";
     const records = new Map<string, Record<string, unknown>>();
-    if (urls.length) {
+    for (let offset = 0; offset < urls.length; offset += 5) {
+      const urlBatch = urls.slice(offset, offset + 5);
       const { data, error } = await supabase.from("nextway_prospect_identity_archive")
-        .select(columns).eq("workspace_id", workspaceId).in("canonical_url", urls);
+        .select(columns).eq("workspace_id", workspaceId).in("canonical_url", urlBatch);
       if (error) {
         console.error("NEXTWAY central identity URL lookup failed:", error.code ?? "unknown");
         return json({ error: "Archivio centrale non leggibile: confronto identità non completato.", reason: "central_identity_lookup_failed" }, 503, responseOrigin);
