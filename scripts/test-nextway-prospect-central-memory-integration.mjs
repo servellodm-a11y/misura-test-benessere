@@ -40,6 +40,12 @@ assert.match(migration, /l\.workspace_id is null and l\.owner_profile_id = auth\
   "legacy owner-scoped CRM Leads must also be recognized without crossing user boundaries");
 assert.match(migration, /v_effective_archive_status := 'acquired'/,
   "the database, not the browser, must derive acquired status from an existing CRM Lead");
+assert.match(migration, /pg_advisory_xact_lock\(/,
+  "identity merges must serialize concurrent updates by workspace and identity");
+assert.match(migration, /if v_match_count > 1 then/,
+  "ambiguous existing identity rows must stop the merge for manual review");
+assert.match(migration, /nextway_has_workspace_access\([\s\S]*workspace_owner.*workspace_member/,
+  "identity and CRM lookup RPCs must validate active workspace membership");
 assert.match(migration, /p_archive_status is distinct from 'seen'/,
   "authenticated clients must not self-assert acquired or reviewed status");
 assert.match(migration, /array_position\(coalesce\(p_identity_fingerprints/,
