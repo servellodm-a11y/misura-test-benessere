@@ -427,10 +427,10 @@ async function runSearch(runAll=false){
   const response=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({company_id:activeCompany?.id||null,company_name:activeCompany?.name||null,queries:queriesToRun.map(entry=>entry.query),max_results:SEARCH_MAX_RESULTS})});
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||('Errore HTTP '+response.status));
   const groups=payload.results||[];let total=0;
-  const failedQueries=Array.isArray(payload.failures)?payload.failures:[];
+  const failedQueries=Array.isArray(payload.failures)?payload.failures:[];let partialFailureNotice=null;
   status.textContent='Ricerca completata: '+(payload.queries_completed??groups.length)+'/'+queriesToRun.length+' query · massimo '+SEARCH_MAX_RESULTS+' risultati per query.'+(failedQueries.length?' · '+failedQueries.length+' non completate':'');
   if(failedQueries.length){
-   const warning=document.createElement('section');warning.className='notice';warning.style.cssText='margin:10px 0;padding:12px;border:1px solid #d69b32;border-radius:10px;';
+   const warning=document.createElement('section');partialFailureNotice=warning;warning.className='notice';warning.style.cssText='margin:10px 0;padding:12px;border:1px solid #d69b32;border-radius:10px;';
    const warningTitle=document.createElement('strong');warningTitle.textContent='Ricerche non completate · nessun risultato da queste query';warning.append(warningTitle);
    const failedList=document.createElement('ul');
    const reasonLabels={timeout:'tempo di attesa superato',provider_unreachable:'servizio di ricerca non raggiungibile',provider_rate_limited:'limite temporaneo del servizio di ricerca',provider_error:'errore del servizio di ricerca',invalid_provider_json:'risposta non leggibile dal servizio',invalid_provider_payload:'risposta non valida del servizio'};
@@ -440,7 +440,7 @@ async function runSearch(runAll=false){
     item.textContent=(matching?.label||'Query non identificata')+' · '+(reasonLabels[failure.reason]||'errore non classificato')+(Number.isInteger(failure.provider_status)?' (HTTP '+failure.provider_status+')':'');
     failedList.append(item);
    });
-   warning.append(failedList);list.append(warning);
+   warning.append(failedList);
   }
   const seenProspects=new Map();
   groups.forEach((group,index)=>{
@@ -606,6 +606,7 @@ async function runSearch(runAll=false){
   const sortedCards=[...list.querySelectorAll('article.query')].sort((a,b)=>({high:0,review:1,exclude:2}[a.dataset.queue]??3)-({high:0,review:1,exclude:2}[b.dataset.queue]??3)||(Number(b.dataset.segmentPriority)||0)-(Number(a.dataset.segmentPriority)||0)||(Number(b.dataset.identityScore)||0)-(Number(a.dataset.identityScore)||0)||(Number(b.dataset.priorityScore)||0)-(Number(a.dataset.priorityScore)||0));
   const rankingHeading=document.createElement('h3');rankingHeading.textContent='Prospect organizzati per priorità operativa';
   const rankingContainer=document.createElement('div');
+  if(partialFailureNotice)rankingContainer.append(partialFailureNotice);
   queueGroups.forEach(group=>{const section=document.createElement('section');section.style.cssText='margin:14px 0;padding:12px;border:1px solid var(--border,#ddd);border-radius:10px;';const heading=document.createElement('h3');heading.textContent=group.title;section.append(heading);const members=sortedCards.filter(card=>card.dataset.queue===group.code);const count=document.createElement('p');count.className='muted';count.textContent=members.length+' risultati';section.append(count);if(!members.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='Nessun risultato in questo gruppo.';section.append(empty);}members.forEach(card=>section.append(card));rankingContainer.append(section);});
   list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
