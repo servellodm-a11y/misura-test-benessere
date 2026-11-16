@@ -108,7 +108,8 @@ assert.ok(cacheRead >= 0 && rateLimit > cacheRead && providerCall > rateLimit,
   "central cache lookup must happen before rate-limit consumption and Tavily");
 assert.match(edge, /p_units:\s*uncached\.length/,
   "only cache-miss queries may consume provider units");
-assert.ok(edge.indexOf("if (uncached.length > 0) {") < edge.indexOf("if (!trustedWriter)"),
+const trustedWriterGuard = edge.indexOf("if (!trustedWriter)");
+assert.ok(trustedWriterGuard >= 0 && trustedWriterGuard < rateLimit && trustedWriterGuard < providerCall,
   "the external search path must require a trusted writer before consuming credits");
 assert.ok(edge.indexOf("Servizio di scrittura centrale non configurato") < edge.indexOf('"nextway_consume_api_rate_limit"'),
   "paid search must be blocked before rate-limit consumption when central writes are unavailable");
