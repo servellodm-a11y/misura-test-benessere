@@ -33,4 +33,22 @@ assert.throws(()=>api.normalize({workspace_key:'vuoto',workspace_name:'Workspace
 assert.throws(()=>api.normalize({workspace_name:'Senza ID',commercial_config:{company:{name:'Azienda'},search_modifiers:{customers:['termine']}}}),/identificativo/);
 const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',commercial_config:{company:{id:'brand-x',name:'Brand X'},search_modifiers:{customers:['keyword']},consultant_channels:{bad:{url:'javascript:alert(1)'}}}});
 assert.equal(Object.keys(badUrl.consultantChannels).length,0);
-console.log('NEXTWAY workspace commercial config: 11 assertions passed.');
+
+const sql=fs.readFileSync('supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql','utf8');
+assert.match(sql,/security definer/i);
+assert.match(sql,/set search_path = pg_catalog, public/i);
+assert.match(sql,/auth\.uid\(\)/i);
+assert.match(sql,/membership_status = 'active'/i);
+assert.match(sql,/workspace_role = any/i);
+assert.match(sql,/settings -> 'commercial'/i);
+assert.match(sql,/grant execute on function public\.nextway_get_workspace_commercial_config\(uuid\) to authenticated/i);
+assert.match(sql,/revoke all on function public\.nextway_get_workspace_commercial_config\(uuid\) from public, anon/i);
+assert.doesNotMatch(sql,/\b(insert into|update public\.|delete from)\b/i);
+const searchHtml=fs.readFileSync('nextway-motore-ricerca.html','utf8');
+assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
+assert.ok(searchHtml.includes("clientSession.rpc('nextway_get_workspace_commercial_config'"));
+assert.ok(searchHtml.includes('activeCompany?.searchQueries?.it?.[seg]'));
+assert.ok(searchHtml.includes('activeCompany?.searchQueries?.en?.[seg]'));
+assert.ok(searchHtml.includes('activeCompany?.brandTerms'));
+assert.ok(!searchHtml.includes('<script src="/nextway-company-config.js"></script>'));
+console.log('NEXTWAY workspace commercial config: 25+ contract assertions passed.');
