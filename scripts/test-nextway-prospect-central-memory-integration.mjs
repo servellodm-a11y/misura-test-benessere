@@ -269,7 +269,7 @@ assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_
 assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
   "the UI must label identities already present in the shared workspace");
 assert.match(ui, /record\.archive_status==='acquired'\|\|record\.crm_match===true\)\?' · GIÀ ACQUISITO NEL CRM'/,
-  "CRM-only legacy matches must not be mislabeled as previously archived identities");
+  "an acquired CRM match must show the acquired label even when archive history exists");
 assert.match(ui, /Già acquisito nel CRM/,
   "the UI must prevent reacquiring identities already acquired in the shared CRM");
 assert.match(ui, /central_identity_ambiguous/,
