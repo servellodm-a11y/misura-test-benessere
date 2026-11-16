@@ -25,7 +25,7 @@ assert.match(edge, /status === "acquired" \|\| status === "followup" \? "acquire
   "existing CRM records and follow-ups must remain acquired, while automated identity assessment is not human review");
 assert.match(edge, /action === "lookup_prospects"/,
   "the Edge Function must expose the authenticated central identity lookup");
-assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprints\)/,
+assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprintBatch\)/,
   "central lookup must match shared identities by server-side hashed fingerprints");
 assert.match(edge, /offset < fingerprints\.length; offset \+= 80/,
   "fingerprint lookups must be split into bounded URL query batches");
