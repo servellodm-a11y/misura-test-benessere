@@ -15,6 +15,20 @@ assert.equal((rpcMigration.match(/create or replace function public\.nextway_mer
   "the identity merge RPC must be defined exactly once");
 assert.match(rpcMigration, /alter function public\.nextway_merge_prospect_identity\([\s\S]*owner to postgres/,
   "identity merge must execute under the trusted database owner");
+assert.match(rpcMigration, /revoke all on function public\.nextway_merge_prospect_identity\([\s\S]*from public, anon, authenticated/,
+  "ordinary authenticated clients must not call the identity merge RPC directly");
+assert.match(rpcMigration, /grant execute on function public\.nextway_merge_prospect_identity\([\s\S]*to service_role/,
+  "only the trusted server role may call the identity merge RPC");
+assert.match(rpcMigration, /auth\.role\(\) is distinct from 'service_role'/,
+  "the identity merge RPC must reject calls without the trusted server role");
+assert.match(rpcMigration, /set_config\('request\.jwt\.claim\.sub', p_actor_id::text, true\)/,
+  "the server-only identity merge must restore the verified actor identity for membership checks");
+assert.match(schemaMigration, /revoke all on function public\.nextway_store_search_query_cache\([\s\S]*from public, anon, authenticated/,
+  "ordinary authenticated clients must not call the cache write RPC directly");
+assert.match(schemaMigration, /grant execute on function public\.nextway_store_search_query_cache\([\s\S]*to service_role/,
+  "only the trusted server role may write shared cache rows");
+assert.match(schemaMigration, /auth\.role\(\) is distinct from 'service_role'/,
+  "the cache write RPC must reject calls without the trusted server role");
 assert.match(rpcMigration, /alter function public\.nextway_lookup_prospect_crm_matches\(uuid,text\[\]\) owner to postgres/,
   "CRM duplicate lookup must execute under the trusted database owner");
 assert.match(schemaMigration, /alter function public\.nextway_store_search_query_cache\([\s\S]*owner to postgres/,
@@ -114,8 +128,18 @@ assert.match(edge, /new_networker: "other_networker"/,
   "new networkers must map into the supported other-networker archive segment");
 assert.match(edge, /exnetworker: "other_networker"/,
   "former networkers must map into the supported other-networker archive segment");
-assert.doesNotMatch(edge, /SUPABASE_SERVICE_ROLE_KEY/,
-  "the search Edge Function must not bypass workspace RLS with a service key");
+assert.match(edge, /Deno\.env\.get\("SUPABASE_SERVICE_ROLE_KEY"\)/,
+  "server-only central writes must use the protected Supabase service credential");
+assert.match(edge, /const trustedWriter = serviceRoleKey \? createClient/,
+  "the trusted writer client must be initialized only inside the Edge Function");
+assert.ok(edge.indexOf("supabase.auth.getUser(token)") < edge.indexOf('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'),
+  "the caller must be authenticated before the server-only writer is initialized");
+assert.match(edge, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/,
+  "identity archive writes must use the server-only trusted writer");
+assert.match(edge, /trustedWriter\.rpc\("nextway_store_search_query_cache"/,
+  "query cache writes must use the server-only trusted writer");
+assert.doesNotMatch(edge, /trustedWriter\.from\(/,
+  "the service credential must not be used for general table reads or writes");
 
 assert.match(ui, /nextway_list_accessible_workspaces/,
   "the UI must load only workspaces available to the signed-in user");
