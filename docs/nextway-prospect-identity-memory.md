@@ -118,3 +118,10 @@ Per mantenere immutabili le migrazioni già applicate, lo schema e le RPC sono d
 2. `20261116120000_nextway_prospect_identity_memory_rpcs.sql`: verifica Lead CRM, merge identità e stato acquisito derivato dal database.
 
 La seconda migrazione verifica preventivamente la presenza delle tabelle e delle colonne `nextway_leads.workspace_id` e `source_url`. Non modifica i dati esistenti e non deve essere applicata prima della prima migrazione.
+
+
+## Scritture centrali: confine server-only
+
+Le RPC `nextway_store_search_query_cache` e `nextway_merge_prospect_identity` sono eseguibili soltanto dal ruolo server `service_role`; i ruoli `public`, `anon` e `authenticated` non possono invocarle direttamente. La Edge Function autentica prima il chiamante con il suo JWT, verifica la membership attiva usando il client con permessi dell'utente e usa il client server esclusivamente per queste due RPC. Le RPC ricevono l'ID dell'attore verificato e ripetono il controllo della membership nel database. Le letture di workspace, cache e archivio restano sul client JWT dell'utente: la chiave server non viene usata per letture generiche.
+
+Se la credenziale server non è disponibile, la ricerca può restituire i risultati già ottenuti, ma non può scrivere la cache condivisa; l'archiviazione centrale fallisce in modo chiuso e l'interfaccia mantiene bloccata l'acquisizione CRM.
