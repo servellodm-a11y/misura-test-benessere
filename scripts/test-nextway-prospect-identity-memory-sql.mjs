@@ -67,6 +67,8 @@ assert.doesNotMatch(normalized, /as \$(?!\$)/,
   'single-dollar function delimiters are invalid');
 assert.match(normalized, /nextway_list_accessible_workspaces/,
   'the authenticated UI must be able to list only accessible active workspaces');
+assert.match(normalized, /m\.workspace_role = any\(array\[[\s\S]*?'workspace_member'[\s\S]*?\]\)/,
+  'read-only workspace viewers must not be offered as prospect-search workspaces');
 assert.match(normalized, /nextway_merge_prospect_identity/,
   'central identity writes must use the transactional merge RPC');
 assert.match(normalized, /pg_advisory_xact_lock/,
