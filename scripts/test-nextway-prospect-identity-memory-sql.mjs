@@ -57,6 +57,12 @@ assert.match(normalized, /current_setting\('nextway\.cache_write_rpc', true\) is
   'only the protected cache RPC may update the last-fetch actor');
 assert.match(normalized, /perform set_config\('nextway\.cache_write_rpc', 'on', true\)/,
   'the trusted cache RPC must scope its permitted fetched_by update');
+assert.match(normalized, /set_config\('request\.jwt\.claim\.sub', p_actor_id::text, true\)/,
+  'the cache RPC must bind the verified actor ID to the request context');
+assert.match(normalized, /set_config\('request\.jwt\.claims'/,
+  'the cache RPC must update the claims JSON as well as the legacy sub setting');
+assert.match(normalized, /auth\.uid\(\) is distinct from p_actor_id/,
+  'the cache RPC must fail closed if Supabase does not resolve the verified actor');
 assert.match(normalized, /fetched_by = excluded\.fetched_by/,
   'cache provenance must identify the latest successful fetcher');
 assert.match(normalized, /revoke insert, update, delete on public\.nextway_search_query_cache from authenticated/,
