@@ -24,6 +24,8 @@ assert.match(migration, /create or replace function public\.nextway_lookup_prosp
   "the CRM duplicate lookup must be implemented as a protected database RPC");
 assert.match(migration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
   "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
+assert.match(migration, /l\.workspace_id is null and l\.owner_profile_id = auth\.uid\(\)/,
+  "legacy owner-scoped CRM Leads must also be recognized without crossing user boundaries");
 assert.match(migration, /v_effective_archive_status := 'acquired'/,
   "the database, not the browser, must derive acquired status from an existing CRM Lead");
 assert.match(migration, /p_archive_status is distinct from 'seen'/,
