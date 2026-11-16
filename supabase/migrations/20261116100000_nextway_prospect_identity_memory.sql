@@ -350,6 +350,142 @@ begin
      or coalesce(cardinality(p_identity_fingerprints), 0) > 20
      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
          and array_to_string(p_identity_fingerprints, ',') !~ '^[a-f0-9]{64}(,[a-f0-9]{64})*
+     or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
+     or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
+     or jsonb_typeof(coalesce(p_source_evidence, '[]'::jsonb)) <> 'array' then
+    raise exception 'Dati della memoria prospect non validi.' using errcode = '22023';
+  end if;
+  if jsonb_array_length(coalesce(p_source_evidence, '[]'::jsonb)) > 12 then
+    raise exception 'Troppe fonti nella memoria prospect.' using errcode = '22023';
+  end if;
+  if p_target_type not in ('potential_customer','potential_partner','unknown')
+     or (p_partner_segment is not null and p_partner_segment not in (
+       'wellness_professional','wellness_networker','other_networker','entrepreneur','extra_income'))
+     or p_archive_status not in ('seen','reviewed','acquired','ignored') then
+    raise exception 'Classificazione della memoria prospect non valida.' using errcode = '22023';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended(p_workspace_id::text || ':url:' || p_canonical_url, 0));
+  for v_fingerprint in
+    select distinct fingerprint
+    from unnest(coalesce(p_identity_fingerprints, '{}'::text[])) as keys(fingerprint)
+    order by fingerprint
+  loop
+    perform pg_advisory_xact_lock(hashtextextended(
+      p_workspace_id::text || ':identity:' || v_fingerprint, 0
+    ));
+  end loop;
+
+  select * into v_existing
+  from public.nextway_prospect_identity_archive a
+  where a.workspace_id = p_workspace_id
+    and (a.canonical_url = p_canonical_url
+      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
+          and a.identity_fingerprints && p_identity_fingerprints))
+  order by case when a.canonical_url = p_canonical_url then 0 else 1 end, a.last_seen_at desc
+  limit 1 for update;
+
+  if found then
+    select coalesce(array_agg(fp order by fp), '{}'::text[]) into v_fingerprints
+    from (select distinct unnest(
+      coalesce(v_existing.identity_fingerprints, '{}'::text[]) ||
+      coalesce(p_identity_fingerprints, '{}'::text[])
+    ) as fp order by fp limit 20) merged;
+
+    select coalesce(jsonb_agg(source_value order by source_order desc), '[]'::jsonb)
+      into v_sources
+    from (
+      select value as source_value, ordinality as source_order
+      from jsonb_array_elements(coalesce(v_existing.source_evidence, '[]'::jsonb) ||
+        coalesce(p_source_evidence, '[]'::jsonb)) with ordinality
+      order by ordinality desc limit 12
+    ) recent;
+
+    update public.nextway_prospect_identity_archive
+    set identity_fingerprints = v_fingerprints,
+        canonical_url = coalesce(v_existing.canonical_url, p_canonical_url),
+        display_name = case
+          when p_display_name <> 'Prospect senza nome' then left(btrim(p_display_name), 240)
+          else display_name
+        end,
+        company_name = coalesce(nullif(left(btrim(p_company_name), 240), ''), company_name),
+        profile_data = profile_data || coalesce(p_profile_data, '{}'::jsonb),
+        public_contacts = jsonb_build_object(
+          'emails', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'emails', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'emails', '[]'::jsonb)
+              ) limit 5
+            ) merged_emails
+          ), '[]'::jsonb),
+          'phones', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'phones', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'phones', '[]'::jsonb)
+              ) limit 5
+            ) merged_phones
+          ), '[]'::jsonb),
+          'whatsapp', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'whatsapp', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'whatsapp', '[]'::jsonb)
+              ) limit 5
+            ) merged_whatsapp
+          ), '[]'::jsonb),
+          'socials', coalesce((
+            select jsonb_agg(contact) from (
+              select distinct value as contact
+              from jsonb_array_elements_text(
+                coalesce(public_contacts -> 'socials', '[]'::jsonb) ||
+                coalesce(p_public_contacts -> 'socials', '[]'::jsonb)
+              ) limit 5
+            ) merged_socials
+          ), '[]'::jsonb)
+        ),
+        source_evidence = v_sources,
+        target_type = case when target_type = 'unknown' then p_target_type else target_type end,
+        partner_segment = coalesce(partner_segment, p_partner_segment),
+        archive_status = case
+          when archive_status = 'acquired' or p_archive_status = 'acquired' then 'acquired'
+          when archive_status = 'ignored' then 'ignored'
+          when archive_status = 'reviewed' or p_archive_status = 'reviewed' then 'reviewed'
+          else 'seen' end,
+        last_seen_at = now(), seen_count = seen_count + 1,
+        last_acquired_at = case when p_archive_status = 'acquired' then now() else last_acquired_at end,
+        updated_at = now()
+    where id = v_existing.id returning id into v_id;
+  else
+    insert into public.nextway_prospect_identity_archive (
+      workspace_id, owner_user_id, identity_fingerprints, canonical_url, display_name,
+      company_name, profile_data, public_contacts, source_evidence, target_type,
+      partner_segment, archive_status, last_acquired_at
+    ) values (
+      p_workspace_id, v_user_id, coalesce(p_identity_fingerprints, '{}'::text[]),
+      p_canonical_url, left(btrim(p_display_name), 240),
+      nullif(left(btrim(p_company_name), 240), ''), coalesce(p_profile_data, '{}'::jsonb),
+      coalesce(p_public_contacts, '{}'::jsonb), coalesce(p_source_evidence, '[]'::jsonb),
+      p_target_type, p_partner_segment, p_archive_status,
+      case when p_archive_status = 'acquired' then now() else null end
+    ) returning id into v_id;
+  end if;
+  return v_id;
+end;
+$$;
+
+revoke all on function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) from public, anon;
+grant execute on function public.nextway_merge_prospect_identity(
+  uuid, text[], text, text, text, jsonb, jsonb, jsonb, text, text, text
+) to authenticated;
+
+commit;
 )
      or jsonb_typeof(coalesce(p_profile_data, '{}'::jsonb)) <> 'object'
      or jsonb_typeof(coalesce(p_public_contacts, '{}'::jsonb)) <> 'object'
