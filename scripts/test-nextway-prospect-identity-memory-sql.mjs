@@ -28,8 +28,10 @@ assert.match(normalized, /nextway_has_workspace_access\(/,
   'workspace reads and writes must require active membership');
 assert.match(normalized, /nextway_is_platform_admin\(\)/,
   'platform administrators must retain central oversight');
-assert.match(normalized, /owner_user_id = auth\.uid\(\)/,
-  'ordinary members may create their own identity records');
+assert.match(normalized, /workspace_id, owner_user_id, identity_fingerprints/,
+  'the merge RPC must set the owning user on newly created identity records');
+assert.match(normalized, /p_workspace_id, v_user_id, coalesce\(p_identity_fingerprints/,
+  'new central identity rows must be owned by the authenticated caller');
 assert.match(normalized, /create or replace function public\.nextway_guard_prospect_memory_scope/,
   'workspace and owner identifiers must be immutable for non-admins');
 assert.match(normalized, /nextway_prospect_identity_scope_guard/,
