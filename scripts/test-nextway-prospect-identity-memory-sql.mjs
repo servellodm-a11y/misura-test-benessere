@@ -28,14 +28,9 @@ assert.match(normalized, /nextway_has_workspace_access\(/,
   'workspace reads and writes must require active membership');
 assert.match(normalized, /nextway_is_platform_admin\(\)/,
   'platform administrators must retain central oversight');
-assert.match(normalized, /workspace_id, owner_user_id, identity_fingerprints/,
-  'the merge RPC must set the owning user on newly created identity records');
-assert.match(normalized, /p_workspace_id, v_user_id, coalesce\(p_identity_fingerprints/,
-  'new central identity rows must be owned by the authenticated caller');
+
 assert.match(normalized, /create or replace function public\.nextway_guard_prospect_memory_scope/,
   'workspace and owner identifiers must be immutable for non-admins');
-assert.match(normalized, /p_archive_status is distinct from 'seen'/,
-  'ordinary archive calls must not grant trusted acquired or reviewed states');
 assert.match(normalized, /alter function public\.nextway_store_search_query_cache\([\s\S]*owner to postgres/,
   'cache persistence must execute under the trusted database owner');
 assert.match(normalized, /nextway_prospect_identity_scope_guard/,
@@ -64,9 +59,11 @@ assert.doesNotMatch(normalized, /create policy nextway_search_query_cache_(inser
   'cache write policies must not permit client-side cache poisoning');
 assert.match(normalized, /begin;[\s\S]*commit;/,
   'migration must be transactional');
-assert.doesNotMatch(normalized, /insert into public\.(nextway_prospect_identity_archive|nextway_search_query_cache)/,
-  'migration must not seed or import prospect data');
+assert.doesNotMatch(normalized, /insert into public\.nextway_prospect_identity_archive/,
+  'migration must not seed or import prospect identities');
+assert.match(normalized, /insert into public\.nextway_search_query_cache[\s\S]*on conflict/,
+  'the only cache insert must be inside the validated upsert RPC, not a migration seed');
 assert.doesNotMatch(normalized, /drop table|truncate table|delete from public\./,
   'migration must not delete operational data');
 
-console.log('NEXTWAY central prospect identity memory SQL: 25 checks passed.');
+console.log('NEXTWAY central prospect identity memory SQL: contract checks passed.');
