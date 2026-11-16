@@ -238,6 +238,23 @@ Deno.serve(async (req: Request) => {
       reason: "central_memory_not_ready",
     }, 503, responseOrigin);
   }
+  const { data: crmPreflight, error: crmPreflightError } = await supabase.rpc(
+    "nextway_lookup_prospect_crm_matches",
+    { p_workspace_id: workspaceId, p_source_urls: [] },
+  );
+  if (crmPreflightError || !Array.isArray(crmPreflight)) {
+    console.error("NEXTWAY CRM lookup preflight failed:", crmPreflightError?.code ?? "not_ready");
+    return json({ error: "Verifica CRM non pronta: nessuna ricerca esterna è stata avviata." }, 503, responseOrigin);
+  }
+  const { error: archiveReadPreflightError } = await supabase
+    .from("nextway_prospect_identity_archive")
+    .select("id")
+    .eq("workspace_id", workspaceId)
+    .limit(1);
+  if (archiveReadPreflightError) {
+    console.error("NEXTWAY identity archive read preflight failed:", archiveReadPreflightError.code ?? "not_ready");
+    return json({ error: "Lettura archivio centrale non pronta: nessuna ricerca esterna è stata avviata." }, 503, responseOrigin);
+  }
 
   if (action === "lookup_prospects") {
     if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
