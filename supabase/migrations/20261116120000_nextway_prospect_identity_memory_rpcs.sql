@@ -355,7 +355,7 @@ begin
 
   if not has_function_privilege('service_role',
        'public.nextway_store_search_query_cache(uuid,uuid,text,text,text,text,text,jsonb)', 'EXECUTE')
-     or not has_function_privilege('service_role',
+     or not has_function_privilege('authenticated',
        'public.nextway_lookup_prospect_crm_matches(uuid,text[])', 'EXECUTE')
      or not has_function_privilege('service_role',
        'public.nextway_merge_prospect_identity(uuid,uuid,text[],text,text,text,jsonb,jsonb,jsonb,text,text,text)', 'EXECUTE') then
