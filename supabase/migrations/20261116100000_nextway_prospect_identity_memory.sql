@@ -258,7 +258,7 @@ begin
          or length(coalesce(item.value ->> 'title', '')) > 300
          or length(coalesce(item.value ->> 'snippet', '')) > 1200
          or length(coalesce(item.value ->> 'page_content', '')) > 2500
-         or jsonb_typeof(item.value -> 'score') <> 'number'
+         or coalesce(jsonb_typeof(item.value -> 'score'), '') <> 'number'
      ) then
     raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
   end if;
