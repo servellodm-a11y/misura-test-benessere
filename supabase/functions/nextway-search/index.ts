@@ -196,6 +196,13 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Sessione scaduta o non autorizzata." }, 401, responseOrigin);
   }
 
+  // The service-role client is kept server-side and used only for two validated write RPCs.
+  // All workspace reads and membership checks continue through the caller's JWT-scoped client.
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const trustedWriter = serviceRoleKey ? createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }) : null;
+
   const parsedBody = await parseBody(req);
   if (parsedBody instanceof Response) {
     const message = parsedBody.status === 413 ? "Richiesta troppo grande." :
@@ -327,6 +334,9 @@ Deno.serve(async (req: Request) => {
   }
 
   if (action === "archive_prospects") {
+    if (!trustedWriter) {
+      return json({ error: "Servizio di scrittura memoria non configurato: nessun dato è stato archiviato." }, 503, responseOrigin);
+    }
     if (!Array.isArray(body.prospects) || body.prospects.length > 25) {
       return json({ error: "Archivio non valido: inviare al massimo 25 prospect per volta." }, 400, responseOrigin);
     }
@@ -358,6 +368,7 @@ Deno.serve(async (req: Request) => {
       // existing trusted states (acquired/reviewed/ignored) are preserved by the database merge.
       const archiveStatus = "seen";
       const rpcArgs = {
+        p_actor_id: userData.user.id,
         p_workspace_id: workspaceId,
         p_identity_fingerprints: fingerprints,
         p_canonical_url: url,
@@ -370,7 +381,7 @@ Deno.serve(async (req: Request) => {
         p_partner_segment: partnerSegment(prospect.segment),
         p_archive_status: archiveStatus,
       };
-      const { data, error } = await supabase.rpc("nextway_merge_prospect_identity", rpcArgs);
+      const { data, error } = await trustedWriter.rpc("nextway_merge_prospect_identity", rpcArgs);
       if (error || typeof data !== "string") {
         failures.push({ index, reason: "central_archive_write_failed" });
         continue;
@@ -523,7 +534,9 @@ Deno.serve(async (req: Request) => {
       });
       results.push({ query: entry.query, results: safeItems, cached: false });
 
-      const cacheWrite = await supabase.rpc("nextway_store_search_query_cache", {
+      const cacheWrite = trustedWriter
+        ? await trustedWriter.rpc("nextway_store_search_query_cache", {
+        p_actor_id: userData.user.id,
         p_workspace_id: workspaceId,
         p_query_fingerprint: entry.fingerprint,
         p_query_text: entry.query,
@@ -531,7 +544,8 @@ Deno.serve(async (req: Request) => {
         p_market_key: marketKey,
         p_provider_key: "tavily",
         p_results: safeItems,
-      });
+      })
+        : { data: null, error: { code: "trusted_writer_unavailable" } };
       if (cacheWrite.error || typeof cacheWrite.data !== "string") {
         cacheWriteFailures++;
         console.error("NEXTWAY central query cache write failed:", cacheWrite.error.code ?? "unknown");
