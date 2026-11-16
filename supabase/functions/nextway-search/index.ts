@@ -255,6 +255,14 @@ Deno.serve(async (req: Request) => {
       }
       for (const row of data ?? []) records.set(String(row.id), row as Record<string, unknown>);
     }
+    const { data: crmRows, error: crmLookupError } = await supabase.rpc("nextway_lookup_prospect_crm_matches", {
+      p_workspace_id: workspaceId,
+      p_source_urls: urls,
+    });
+    if (crmLookupError || !Array.isArray(crmRows)) {
+      console.error("NEXTWAY CRM duplicate lookup failed:", crmLookupError?.code ?? "unknown");
+      return json({ error: "Verifica dei Lead CRM non disponibile: acquisizione sospesa.", reason: "crm_duplicate_lookup_failed" }, 503, responseOrigin);
+    }
     const matches: Array<Record<string, unknown>> = [];
     for (const input of inputs) {
       const candidates = [...records.values()].filter(record => {
@@ -263,11 +271,37 @@ Deno.serve(async (req: Request) => {
           (Array.isArray(storedFingerprints) &&
             input.fingerprints.some(fingerprint => (storedFingerprints as string[]).includes(fingerprint)));
       });
-      if (!candidates.length) continue;
-      if (candidates.length > 1) {
-        matches.push({ index: input.index, ambiguous: true, matched_records: candidates.length });
+      const crmMatches = (crmRows as Array<Record<string, unknown>>).filter(row =>
+        typeof row.canonical_url === "string" &&
+        !!input.url &&
+        String(row.canonical_url).trim().toLocaleLowerCase("it") === input.url.trim().toLocaleLowerCase("it")
+      );
+      if (candidates.length > 1 || crmMatches.length > 1) {
+        matches.push({ index: input.index, ambiguous: true, matched_records: Math.max(candidates.length, crmMatches.length) });
         continue;
       }
+      if (crmMatches.length === 1) {
+        const crm = crmMatches[0];
+        const archived = candidates[0];
+        matches.push({
+          index: input.index,
+          record: {
+            display_name: archived?.display_name ?? crm.display_name,
+            company_name: archived?.company_name ?? crm.company_name,
+            target_type: archived?.target_type ?? (String(crm.category).includes("customer") ? "potential_customer" : "potential_partner"),
+            partner_segment: archived?.partner_segment ?? null,
+            archive_status: "acquired",
+            first_seen_at: archived?.first_seen_at ?? null,
+            last_seen_at: archived?.last_seen_at ?? null,
+            seen_count: archived?.seen_count ?? 0,
+            last_acquired_at: archived?.last_acquired_at ?? null,
+            crm_match: true,
+            crm_archived: crm.archived_at !== null,
+          },
+        });
+        continue;
+      }
+      if (!candidates.length) continue;
       const match = candidates[0];
       matches.push({
         index: input.index,
@@ -281,6 +315,7 @@ Deno.serve(async (req: Request) => {
           last_seen_at: match.last_seen_at,
           seen_count: match.seen_count,
           last_acquired_at: match.last_acquired_at,
+          crm_match: false,
         },
       });
     }
