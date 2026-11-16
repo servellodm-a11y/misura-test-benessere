@@ -104,8 +104,11 @@ begin
 
   if tg_table_name = 'nextway_search_query_cache'
      and (
-       to_jsonb(new) -> 'fetched_by' is distinct from to_jsonb(old) -> 'fetched_by'
-       or to_jsonb(new) -> 'query_fingerprint' is distinct from to_jsonb(old) -> 'query_fingerprint'
+       to_jsonb(new) -> 'query_fingerprint' is distinct from to_jsonb(old) -> 'query_fingerprint'
+       or (
+         to_jsonb(new) -> 'fetched_by' is distinct from to_jsonb(old) -> 'fetched_by'
+         and current_setting('nextway.cache_write_rpc', true) is distinct from 'on'
+       )
      ) then
     raise exception 'Identità e autore della query cache non possono essere modificati.'
       using errcode = '42501';
@@ -263,6 +266,8 @@ begin
     raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
   end if;
 
+  perform set_config('nextway.cache_write_rpc', 'on', true);
+
   insert into public.nextway_search_query_cache (
     workspace_id, query_fingerprint, query_text, segment_key, market_key,
     provider_key, results, fetched_by, fetched_at, expires_at, updated_at
@@ -275,6 +280,7 @@ begin
   do update set
     query_text = excluded.query_text,
     results = excluded.results,
+    fetched_by = excluded.fetched_by,
     fetched_at = excluded.fetched_at,
     expires_at = excluded.expires_at,
     updated_at = excluded.updated_at
