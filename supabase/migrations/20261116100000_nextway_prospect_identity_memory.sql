@@ -356,8 +356,6 @@ declare
   v_fingerprint text;
   v_effective_archive_status text := 'seen';
   v_match_count integer;
-  v_effective_archive_status text := 'seen';
-  v_match_count integer;
 begin
   if p_workspace_id is null or v_user_id is null or not public.nextway_has_workspace_access(
     p_workspace_id,
@@ -438,24 +436,6 @@ begin
         l.workspace_id = p_workspace_id
         or (l.workspace_id is null and l.owner_profile_id = v_user_id)
       )
-      and lower(btrim(l.source_url)) = lower(btrim(p_canonical_url))
-  ) then
-    v_effective_archive_status := 'acquired';
-  end if;
-
-  select count(*) into v_match_count
-  from public.nextway_prospect_identity_archive a
-  where a.workspace_id = p_workspace_id
-    and (a.canonical_url = p_canonical_url
-      or (coalesce(cardinality(p_identity_fingerprints), 0) > 0
-          and a.identity_fingerprints && p_identity_fingerprints));
-  if v_match_count > 1 then
-    raise exception 'Identità già presenti in più record: revisione manuale necessaria.' using errcode = '23505';
-  end if;
-
-  if exists (
-    select 1 from public.nextway_leads l
-    where l.workspace_id = p_workspace_id
       and lower(btrim(l.source_url)) = lower(btrim(p_canonical_url))
   ) then
     v_effective_archive_status := 'acquired';
