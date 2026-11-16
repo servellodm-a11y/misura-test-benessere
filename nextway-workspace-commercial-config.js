@@ -54,7 +54,10 @@
       materials[key]={status:clean(value.status,40)||'da_caricare',source:clean(value.source,300),version:clean(value.version,80),market:clean(value.market,80)};
     }
     if(!id||!name)throw new Error('Configurazione commerciale workspace incompleta: identificativo e nome azienda sono obbligatori.');
-    if(!SEGMENTS.some(segment=>normalizedModifiers[segment].length))throw new Error('Configurazione commerciale workspace senza criteri di ricerca: ricerca sospesa.');
+    const missingModifiers=SEGMENTS.filter(segment=>!normalizedModifiers[segment].length);
+    if(missingModifiers.length)throw new Error('Criteri commerciali mancanti per: '+missingModifiers.join(', ')+'. Ricerca sospesa.');
+    const missingQueries=SEGMENTS.filter(segment=>!searchQueries.it[segment].length||!searchQueries.en[segment].length);
+    if(missingQueries.length)throw new Error('Query commerciali IT/EN mancanti per: '+missingQueries.join(', ')+'. Ricerca sospesa.');
     return {
       id,name,active:true,country:clean(company.country||raw.market_country,80),
       language:clean(company.language||raw.language_code,12)||'it',
