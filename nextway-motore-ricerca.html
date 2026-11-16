@@ -524,7 +524,7 @@ async function runSearch(runAll=false){
     const pageContent=String(item.page_content||'').slice(0,5000);
     const publicContacts=extractPublicContacts(pageContent);
     const assessment=item._assessment||assessSearchEvidence(item.title,item.snippet,pageContent,url,publicContacts,$('segment').value);
-    const card=document.createElement('article');card.className='query';card.dataset.priorityScore=String(assessment.score||0);card.dataset.identityScore=String(assessment.identityScore||0);card.dataset.personPriority=assessment.individual?'1':'0';
+    const card=document.createElement('article');card.className='query';card.dataset.canonicalUrl=canonicalProspectUrl(url);card.dataset.priorityScore=String(assessment.score||0);card.dataset.identityScore=String(assessment.identityScore||0);card.dataset.personPriority=assessment.individual?'1':'0';
     const title=document.createElement('strong');title.textContent=item.title||'Risultato senza titolo';
     const snippet=document.createElement('p');snippet.className='muted';snippet.textContent=item.snippet||'';
     const contactSummary=document.createElement('p');contactSummary.className='muted';
@@ -560,7 +560,7 @@ async function runSearch(runAll=false){
       return;
     }
     total++;
-    const targetSummary=document.createElement('p');targetSummary.className='tag';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason+(historicalIdentity?(historicalIdentity.archive_status==='acquired'?' · GIÀ ACQUISITO NEL CRM':' · GIÀ INDIVIDUATO IN PRECEDENZA')+' · prima volta: '+new Date(historicalIdentity.first_seen||historicalIdentity.last_seen).toLocaleDateString('it-IT'):'');
+    const targetSummary=document.createElement('p');targetSummary.className='tag prospect-target-summary';targetSummary.style.display='inline-block';targetSummary.textContent=targetAssessment.primary+' · affidabilità '+targetAssessment.confidence+' · '+targetAssessment.reason+(historicalIdentity?(historicalIdentity.archive_status==='acquired'?' · GIÀ ACQUISITO NEL CRM':' · GIÀ INDIVIDUATO IN PRECEDENZA')+' · prima volta: '+new Date(historicalIdentity.first_seen||historicalIdentity.last_seen).toLocaleDateString('it-IT'):'');
     const quality=document.createElement('p');quality.className='tag';quality.style.display='inline-block';quality.textContent='Pertinenza documentale: '+assessment.score+'/100 · '+assessment.entityType+' · '+(assessment.individual?'PERSONA IDENTIFICABILE · verifica ruolo e attualità':'IDENTITÀ PERSONALE NON CONFERMATA · da approfondire')+' · non misura l’interesse commerciale';
     const sourceQuality=assessSourceQuality(item,url,pageContent);
     const sourceQualityCard=document.createElement('p');sourceQualityCard.className='muted';sourceQualityCard.textContent='Fonte: '+sourceQuality.source_type+' · '+sourceQuality.reliability_score+'/100. Attualità: '+sourceQuality.freshness_label+' · qualità complessiva fonte: '+sourceQuality.quality_score+'/100. '+sourceQuality.verification_note;
@@ -653,7 +653,7 @@ async function runSearch(runAll=false){
 
     const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Apri fonte originale';
     const copy=document.createElement('button');copy.className='btn alt';copy.textContent='Copia scheda';copy.addEventListener('click',()=>navigator.clipboard?.writeText('Nome: '+profile.name+'\\nIdentità: '+profile.identity_status+'\\nOrigine nominativo: '+profile.name_source+'\\nProfessione: '+profile.profession+'\\nAzienda: '+profile.organization+'\\nLocalità: '+profile.location+'\\nCategoria: '+targetAssessment.primary+'\\nSegmento: '+targetAssessment.segment+'\\nPriorità verifica: '+profile.priority+'\\nMotivazione: '+targetAssessment.reason+'\\nFonte: '+url+'\\nDOCUMENTATO NELLA FONTE: '+evidenceReview.documented.map(e=>e.kind+' ['+e.field+']: '+e.excerpt).join(' | ')+'\\nINTERPRETAZIONE NEXTWAY (non accertata): '+evidenceReview.inference.map(e=>e.kind+': '+e.value+' — '+e.reason).join(' | ')+'\\nDA VERIFICARE: '+evidenceReview.verify.join('; ')));
-    const capture=document.createElement('button');capture.className='btn alt';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisisci prospect qualificato':'Acquisisci come ricerca da qualificare';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisizione manuale di un prospect con dichiarazione esplicita; verificare comunque la fonte.':'Acquisizione manuale come risultato di ricerca, non come cliente o partner qualificato.';
+    const capture=document.createElement('button');capture.className='btn alt prospect-capture-button';const notSuitable=qualification.status==='Non adatto · da scartare';capture.textContent=alreadyAcquired?'Già presente nel CRM':notSuitable?'Non adatto · non acquisibile':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisisci prospect qualificato':'Acquisisci come ricerca da qualificare';capture.disabled=alreadyAcquired||notSuitable;capture.title=alreadyAcquired?'URL o identità già presenti nell’archivio personale.':notSuitable?'Risultato classificato come non adatto: non può essere acquisito nel CRM.':(commercialFit.commercial_outcome==='partner_potential'||commercialFit.commercial_outcome==='customer_potential')?'Acquisizione manuale di un prospect con dichiarazione esplicita; verificare comunque la fonte.':'Acquisizione manuale come risultato di ricerca, non come cliente o partner qualificato.';
     capture.addEventListener('click',()=>{
      if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
      try{
@@ -684,6 +684,34 @@ async function runSearch(runAll=false){
   list.replaceChildren(rankingHeading,rankingContainer);
   dailyProspects.sort((a,b)=>(Number(b.commercial_fit?.priority_score)||0)-(Number(a.commercial_fit?.priority_score)||0)||Number(b.person_confirmed)-Number(a.person_confirmed)||b.identity_score-a.identity_score||b.evidence_score-a.evidence_score||b.relevance_score-a.relevance_score);
   if(!saveSearchHistory(dailyProspects))status.textContent='Ricerca completata, ma lo storico locale delle identità non è stato salvato.';
+   try{
+    const lookupRows=dailyProspects.slice(0,25).map(p=>({url:p.url,identity_keys:p.identity_keys||[]}));
+    if(lookupRows.length){
+     const lookupResponse=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({action:'lookup_prospects',workspace_id:searchWorkspaceId,prospects:lookupRows})});
+     const lookupPayload=await lookupResponse.json();
+     if(!lookupResponse.ok)throw new Error(lookupPayload.error||('Errore HTTP '+lookupResponse.status));
+     (lookupPayload.matches||[]).forEach(match=>{
+      const prospect=dailyProspects[match.index];if(!prospect||!match.record)return;
+      const record=match.record;
+      prospect.history_seen_before=true;
+      prospect.history_first_seen=record.first_seen_at||prospect.history_first_seen;
+      prospect.history_last_seen=record.last_seen_at||prospect.history_last_seen;
+      prospect.central_archive_status=record.archive_status||'seen';
+      prospect.central_seen_count=Number(record.seen_count)||1;
+      if(record.archive_status==='acquired'&&prospect.archive_status==='new')prospect.archive_status='acquired';
+      const card=[...list.querySelectorAll('article.query')].find(item=>item.dataset.canonicalUrl===canonicalProspectUrl(prospect.url));
+      if(card){
+       const badge=card.querySelector('.prospect-target-summary');
+       if(badge&&!badge.textContent.includes('GIÀ INDIVIDUATO'))badge.textContent+=' · GIÀ INDIVIDUATO NEL WORKSPACE · '+prospect.central_seen_count+' rilevazioni';
+       const note=document.createElement('p');note.className='muted central-identity-match';note.textContent=(record.archive_status==='acquired'?'GIÀ ACQUISITO NEL CRM DEL WORKSPACE':record.archive_status==='ignored'?'GIÀ ESAMINATO · ESCLUSO IN PRECEDENZA':'GIÀ PRESENTE NELLA MEMORIA CONDIVISA')+' · prima rilevazione: '+(record.first_seen_at?new Date(record.first_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+' · ultima rilevazione: '+(record.last_seen_at?new Date(record.last_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+'.';
+       card.append(note);
+       const captureButton=card.querySelector('.prospect-capture-button');
+       if(captureButton&&record.archive_status==='acquired'){captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
+      }
+     });
+     if(lookupPayload.matched_count)status.textContent+=' · '+lookupPayload.matched_count+' già presenti nella memoria condivisa.';
+    }
+   }catch(lookupError){status.textContent='Confronto con memoria centrale non completato: '+lookupError.message+'. La ricerca non viene considerata nuova; verifica prima di acquisire nominativi.';}
    try{
     const archiveRows=dailyProspects.slice(0,25).map(p=>({url:p.url,title:p.title,identity_keys:p.identity_keys||[],profile:p.profile||{},emails:p.emails||[],phones:p.phones||[],whatsapp:p.whatsapp||[],socials:p.socials||[],source_evidence:(p.source_evidence||[]).slice(0,1).map(source=>({url:source.url,title:String(source.title||'').slice(0,180),snippet:String(source.snippet||'').slice(0,700),evidence:String(source.evidence||'').slice(0,1200),collected_at:source.collected_at||''})),evidence_summary:p.profile?.evidence_summary||p.reason||'',reason:p.reason||'',classification:p.classification||'',segment:p.segment||'',person_confirmed:!!p.person_confirmed,archive_status:p.archive_status||''}));
     if(archiveRows.length){
