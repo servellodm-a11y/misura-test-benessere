@@ -19,6 +19,13 @@
     const name=clean(company.name||raw.partner_name||raw.workspace_name,160);
     const sector=Array.isArray(company.sector)?company.sector.map(x=>clean(x,80)).filter(Boolean).slice(0,20):clean(company.sector||raw.sector,160);
     const positioning=clean(company.positioning,1200);
+    const brandTerms=Array.isArray(config.brand_terms)?config.brand_terms.map(x=>clean(x,100).toLocaleLowerCase('it')).filter(Boolean).slice(0,40):[name.toLocaleLowerCase('it')];
+    const rawSearchQueries=config.search_queries&&typeof config.search_queries==='object'?config.search_queries:{};
+    const searchQueries={it:{},en:{}};
+    for(const language of ['it','en'])for(const segment of SEGMENTS){
+      const entries=rawSearchQueries[language]?.[segment];
+      searchQueries[language][segment]=Array.isArray(entries)?entries.slice(0,8).map((entry,index)=>Array.isArray(entry)?[clean(entry[0],120)||('Ricerca '+(index+1)),clean(entry[1],500)]:[('Ricerca '+(index+1)),clean(entry,500)]).filter(entry=>entry[1]):[];
+    }
     const searchModifiers=config.search_modifiers&&typeof config.search_modifiers==='object'?config.search_modifiers:{};
     const consultantChannels=config.consultant_channels&&typeof config.consultant_channels==='object'?config.consultant_channels:{};
     const officialMaterials=config.official_materials&&typeof config.official_materials==='object'?config.official_materials:{};
@@ -51,7 +58,7 @@
     return {
       id,name,active:true,country:clean(company.country||raw.market_country,80),
       language:clean(company.language||raw.language_code,12)||'it',
-      sector,positioning,
+      sector,positioning,brandTerms,searchQueries,
       searchModifiers:normalizedModifiers,
       consultantChannels:channels,
       officialMaterials:materials,
