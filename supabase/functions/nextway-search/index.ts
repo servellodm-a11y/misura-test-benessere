@@ -198,7 +198,7 @@ Deno.serve(async (req: Request) => {
 
   // The service-role client is kept server-side and used only for two validated write RPCs.
   // All workspace reads and membership checks continue through the caller's JWT-scoped client.
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY");
   const trustedWriter = serviceRoleKey ? createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   }) : null;
