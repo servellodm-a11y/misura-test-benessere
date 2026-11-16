@@ -32,8 +32,8 @@ assert.match(migration, /p_archive_status is distinct from 'seen'/,
   "authenticated clients must not self-assert acquired or reviewed status");
 assert.match(migration, /array_position\(coalesce\(p_identity_fingerprints/,
   "the merge RPC must reject null identity fingerprints");
-assert.match(migration, /jsonb_array_elements\(coalesce\(p_public_contacts -> 'emails'/,
-  "public contact arrays must be validated before merging");
+assert.match(migration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_public_contacts -> 'emails'/,
+  "public contact arrays must be validated safely before merging");
 assert.match(migration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_source_evidence/,
   "source evidence validation must not throw on malformed scalar JSON");
 assert.match(migration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
