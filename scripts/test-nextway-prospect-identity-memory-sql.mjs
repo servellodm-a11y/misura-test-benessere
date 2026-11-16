@@ -38,12 +38,12 @@ assert.match(normalized, /nextway_search_query_cache_scope_guard/,
   'query cache records must have a workspace scope guard trigger');
 assert.match(normalized, /create policy nextway_prospect_identity_read/,
   'identity archive must have an explicit read policy');
-assert.match(normalized, /create policy nextway_prospect_identity_insert/,
-  'identity archive must have an explicit insert policy');
-assert.match(normalized, /create policy nextway_prospect_identity_update/,
-  'identity archive must have an explicit update policy');
-assert.match(normalized, /create policy nextway_prospect_identity_delete/,
-  'identity archive must have an explicit delete policy');
+assert.match(normalized, /revoke insert, update, delete on public\.nextway_prospect_identity_archive from authenticated/,
+  'authenticated clients must not write identity rows directly');
+assert.match(normalized, /grant select on public\.nextway_prospect_identity_archive to authenticated/,
+  'authenticated members may read the shared identity archive');
+assert.doesNotMatch(normalized, /create policy nextway_prospect_identity_(insert|update|delete)/,
+  'all identity writes must go through the validated merge RPC');
 assert.match(normalized, /expires_at <= fetched_at \+ interval '7 days'/,
   'query cache lifetime must be capped at seven days');
 assert.match(normalized, /create policy nextway_search_query_cache_read/,
