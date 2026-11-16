@@ -107,6 +107,8 @@ function partnerSegment(value: unknown): string | null {
   const map: Record<string, string> = {
     wellness_pro: "wellness_professional",
     wellness_networker: "wellness_networker",
+    new_networker: "other_networker",
+    exnetworker: "other_networker",
     other_networker: "other_networker",
     entrepreneur: "entrepreneur",
     side_income: "extra_income",
