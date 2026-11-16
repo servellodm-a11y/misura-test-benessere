@@ -98,6 +98,8 @@ assert.match(edge, /crm_match:\s*true/,
   "a matching existing CRM Lead must be returned as an acquired identity");
 assert.match(rpcMigration, /create or replace function public\.nextway_lookup_prospect_crm_matches/,
   "the CRM duplicate lookup must be implemented as a protected database RPC");
+assert.match(rpcMigration, /l\.category::text, l\.status::text/,
+  "CRM lookup must explicitly cast category and status to its declared text return types");
 assert.match(rpcMigration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
   "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
 assert.ok(rpcMigration.includes("p_canonical_url !~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
