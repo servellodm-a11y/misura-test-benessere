@@ -242,8 +242,17 @@ begin
      or p_market_key is null or length(p_market_key) > 120
      or p_provider_key is distinct from 'tavily'
      or jsonb_typeof(coalesce(p_results, '[]'::jsonb)) <> 'array'
-     or jsonb_array_length(coalesce(p_results, '[]'::jsonb)) > 10
-     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304 then
+     or jsonb_array_length(case when jsonb_typeof(coalesce(p_results, '[]'::jsonb)) = 'array' then coalesce(p_results, '[]'::jsonb) else '[]'::jsonb end) > 10
+     or pg_column_size(coalesce(p_results, '[]'::jsonb)) > 98304
+     or exists (
+       select 1 from jsonb_array_elements(case when jsonb_typeof(coalesce(p_results, '[]'::jsonb)) = 'array' then coalesce(p_results, '[]'::jsonb) else '[]'::jsonb end) item(value)
+       where jsonb_typeof(item.value) <> 'object'
+         or coalesce(item.value ->> 'url', '') !~* '^https?://[^/[:space:]]'
+         or length(coalesce(item.value ->> 'title', '')) > 300
+         or length(coalesce(item.value ->> 'snippet', '')) > 1200
+         or length(coalesce(item.value ->> 'page_content', '')) > 2500
+         or coalesce(jsonb_typeof(item.value -> 'score'), '') <> 'number'
+     ) then
     raise exception 'Dati della cache di ricerca non validi.' using errcode = '22023';
   end if;
 
