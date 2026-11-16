@@ -8,30 +8,41 @@ vm.runInNewContext(source,sandbox);
 const api=sandbox.window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
 assert.equal(api.version,1);
 assert.equal(api.segments.length,9);
+const allModifiers=Object.fromEntries(api.segments.map(segment=>[segment,segment==='customers'?[['omega 3','BalanceTest']]:['termine '+segment]]));
+const allQueries={
+  it:Object.fromEntries(api.segments.map(segment=>[segment,[[segment,'query italiana '+segment]]])),
+  en:Object.fromEntries(api.segments.map(segment=>[segment,[[segment,'english query '+segment]]]))
+};
+const baseCommercial={
+  company:{id:'zinzino',name:'Zinzino',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
+  brand_terms:['zinzino','balancetest'],
+  search_queries:allQueries,
+  search_modifiers:allModifiers,
+  consultant_channels:{general_website:{url:'https://example.com',label:'Sito generale'}},
+  official_materials:{catalogue:{status:'da_caricare',source:'Catalogo ufficiale'}}
+};
 const valid=api.normalize({
   workspace_id:'ws-1',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',
-  commercial_config:{
-    company:{id:'zinzino',name:'Zinzino',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
-    brand_terms:['zinzino','balancetest'],
-    search_queries:{it:{customers:[['Clienti','interesse per omega 3']]},en:{customers:['omega 3 customer interest']}},
-    search_modifiers:{customers:[['omega 3','BalanceTest']],wellness_pro:['nutrizione','benessere']},
-    consultant_channels:{general_website:{url:'https://example.com',label:'Sito generale'}},
-    official_materials:{catalogue:{status:'da_caricare',source:'Catalogo ufficiale'}}
-  }
+  commercial_config:baseCommercial
 });
 assert.equal(valid.id,'zinzino');
 assert.equal(valid.name,'Zinzino');
 assert.equal(valid.workspaceId,'ws-1');
 assert.deepEqual([...valid.brandTerms],['zinzino','balancetest']);
-assert.equal(valid.searchQueries.it.customers[0][1],'interesse per omega 3');
-assert.equal(valid.searchQueries.en.customers[0][1],'omega 3 customer interest');
+assert.equal(valid.searchQueries.it.customers[0][1],'query italiana customers');
+assert.equal(valid.searchQueries.en.customers[0][1],'english query customers');
 assert.deepEqual([...valid.searchModifiers.customers[0]],['omega 3','BalanceTest']);
 assert.equal(valid.consultantChannels.general_website.url,'https://example.com');
 assert.equal(valid.officialMaterials.catalogue.status,'da_caricare');
-assert.throws(()=>api.normalize({workspace_key:'vuoto',workspace_name:'Workspace vuoto',commercial_config:{}}),/criteri di ricerca/);
-assert.throws(()=>api.normalize({workspace_name:'Senza ID',commercial_config:{company:{name:'Azienda'},search_modifiers:{customers:['termine']}}}),/identificativo/);
-const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',commercial_config:{company:{id:'brand-x',name:'Brand X'},search_modifiers:{customers:['keyword']},consultant_channels:{bad:{url:'javascript:alert(1)'}}}});
+assert.throws(()=>api.normalize({workspace_key:'vuoto',workspace_name:'Workspace vuoto',commercial_config:{}}),/Criteri commerciali mancanti/);
+assert.throws(()=>api.normalize({workspace_name:'Senza ID',commercial_config:{company:{name:'Azienda'},search_modifiers:allModifiers,search_queries:allQueries}}),/identificativo/);
+const incomplete={...baseCommercial,search_modifiers:{...allModifiers,wellness_pro:[]}};
+assert.throws(()=>api.normalize({workspace_key:'incompleto',workspace_name:'Incompleto',commercial_config:incomplete}),/Criteri commerciali mancanti per: wellness_pro/);
+const incompleteQueries={...baseCommercial,search_queries:{...allQueries,it:{...allQueries.it,side_income:[]}}};
+assert.throws(()=>api.normalize({workspace_key:'query-incomplete',workspace_name:'Query incomplete',commercial_config:incompleteQueries}),/Query commerciali IT\/EN mancanti per: side_income/);
+const unsafeChannel={...baseCommercial,consultant_channels:{bad:{url:'javascript:alert(1)'}}};
+const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',commercial_config:unsafeChannel});
 assert.equal(Object.keys(badUrl.consultantChannels).length,0);
 
 const seed=JSON.parse(fs.readFileSync('docs/companies/zinzino/workspace-commercial-settings.json','utf8'));
