@@ -3600,3 +3600,30 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico
 - 17-11-2026 — PR #52 allinea le allow-list CORS Knowledge nel repository; PR #53 introduce il bootstrap controllato del workspace Zinzino in Admin UI. Entrambe integrate e CI riuscita. Aggiornamento documentale: nessuna modifica live a Supabase/Netlify.
+
+
+---
+
+## AGGIORNAMENTO CONTINUITÀ — 17 NOVEMBRE 2026, PR #55 (importazione Knowledge Markdown)
+
+### PR #55 — importazione multipla autenticata
+- PR #55 `Add authenticated bulk import for Zinzino Markdown Knowledge` integrata in main, squash commit `8d2035ee0f1990e8efe1c3d6c06c90d020c1db13`.
+- Aggiunto manifesto macchina `docs/companies/zinzino/knowledge/import-manifest.v1.json` con 8 documenti, chiavi modulo, titoli, versioni e URL fonte.
+- I documenti sono correttamente classificati `training_material`: sono sintesi/riferimenti NEXTWAY derivati da fonti ufficiali, non originali policy Zinzino. Manifesto Markdown aggiornato coerentemente.
+- Admin UI aggiunge il comando di importazione del pacchetto; limita l'azione al workspace `zinzino-italia` selezionato e non archiviato.
+- Il client scarica e valida tutti gli 8 file prima di iniziare; invia sequenzialmente contenuti Markdown alla funzione `nextway-knowledge-ingest` usando esclusivamente JWT utente e public API key. Su HTTP 401 tenta un solo refresh session.
+- Nuovi documenti restano `approval_status=pending`; l'UI non approva documenti. La funzione ingest riconosce duplicati via SHA-256, così un retry dopo importazione parziale non crea duplicati. Se un documento fallisce, l'UI mostra il conteggio parziale e consente il retry.
+- Test dedicato `scripts/test-nextway-zinzino-knowledge-import.mjs` e step CI aggiunti. GitHub Actions NEXTWAY static validation run #1069: SUCCESS. Il primo tentativo #1065 ha individuato un'asserzione errata nel test sul nome dell'header Authorization; il test è stato corretto e la run #1069 è passata integralmente.
+- Nessun documento è stato importato nel database; nessuna chiamata live a Supabase è stata eseguita. La funzione live non è stata deployata/aggiornata.
+
+### Stato operativo aggiornato
+- PR #52, #53, #54 e #55: integrate.
+- PR #55: COMPLETATO E VERIFICATO nel repository e nella CI.
+- Manifesto e 8 file Markdown: presenti e verificati nel repository.
+- Workspace Zinzino Italia: non creato; richiede Admin UI distribuita e sessione `platform_admin`.
+- Importazione Knowledge: codice pronto nel repository; DA COMPLETARE dopo creazione workspace e allineamento/deploy autorizzato della funzione `nextway-knowledge-ingest`.
+- I documenti dovranno restare pending; la revisione/approvazione sarà una fase separata, documento per documento.
+- Nessun deploy Netlify/produzione prima del 4 dicembre 2026; nessun test con utenti reali o conversioni reali prima della stessa data.
+
+### Registro cronologico
+- 17-11-2026 — PR #55 aggiunge il percorso bulk autenticato per gli 8 documenti Markdown, manifesto JSON e test CI. Importazione live non eseguita.
