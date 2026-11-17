@@ -107,7 +107,7 @@
     if(!selected||!catalog)return null;
     const offers=selected==='customer'?catalog.premier_kits?.offers:catalog.partner_kits?.offers;
     if(!Array.isArray(offers))return null;
-    return offers.find(item=>item.id===clean(offerId,120))||null;
+    return offers.find(item=>item.id===clean(offerId,120)&&item.availability_status!=='discontinued'&&item.status!=='official_page_discontinued_not_offerable')||null;
   }
   function canCalculateCompensation(normalizedConfig){
     const plan=normalizedConfig?.commercialData?.partner?.compensation_plan;
