@@ -7,7 +7,7 @@ const partner = config.partner.compensation_plan;
 assert.equal(root.calculations_enabled, false);
 assert.equal(partner.calculations_enabled, false);
 assert.equal(root.rules_status, 'phase_2_structured_reference');
-assert.equal(partner.rules_status, 'phase_1_structured_reference');
+assert.equal(partner.rules_status, 'phase_2_structured_reference');
 assert.ok(Array.isArray(root.rules) && root.rules.length >= 20);
 assert.deepEqual(root.rules, partner.rules);
 const byId = new Map(root.rules.map(rule => [rule.id, rule]));
