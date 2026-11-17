@@ -744,7 +744,7 @@
       "catalog_scope_note": "Catalogo strutturato parziale delle offerte visibili nella pagina ufficiale Italia. I prezzi sono snapshot; verificare scheda e condizioni della campagna prima di ogni proposta. Le etichette Full Refund Possible non autorizzano promesse di rimborso."
     },
     "compensation_plan": {
-      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_phase_1_structured",
       "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
       "source_title": "Zinzino Compensation Plan — Europe",
       "source_version": "12-02-2025",
@@ -1761,7 +1761,7 @@
       "source_language": "it",
       "source_market": "Italy",
       "translation_status": "official_italian_pdf_linked_from_italy_partner_page_but_older_than_eu_2025_master",
-      "reconciliation_status": "known_document_differences_recorded_fast_start_operational_rule_confirmed_by_user_for_nextway",
+      "reconciliation_status": "master_eu_2025_user_confirmed_current_phase_1_rules_structured",
       "master_precedence_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
       "notes": "Il PDF italiano 14/11/2024 è collegato dalla pagina ufficiale Partner Italia e resta riferimento localizzato precedente al master EU 12/02/2025. Per NEXTWAY la sequenza Fast Start attualmente applicata è stata confermata dal titolare del progetto il 17/11/2026; vedere compensation-plan-italian-2024-comparison.md. Il master EU resta la fonte primaria. Le condizioni dei bonus 60/90 giorni restano dipendenti dal regolamento della campagna specifica."
     },
@@ -1786,7 +1786,7 @@
       "source_version": "12-02-2025",
       "source_language": "en",
       "source_market": "EU",
-      "status": "current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_phase_1_structured",
       "validity_note": "L'utente conferma il 17/11/2026 che il master EU 12/02/2025 è vigente in Italia senza modifiche; la conferma è dell'utente, non una dichiarazione indipendente Zinzino.",
       "refresh": "before_calculation"
     }
@@ -1822,6 +1822,15 @@
     ]
   },
   "compensation": {
+    "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_phase_1_structured",
+    "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+    "source_title": "Zinzino Compensation Plan — Europe",
+    "source_version": "12-02-2025",
+    "source_language": "en",
+    "source_market": "EU",
+    "source_type": "official_company_document",
+    "italian_translation_status": "original_italian_operational_summary_not_official_translation",
+    "calculations_enabled": false,
     "rules": [
       {
         "id": "customer_activity_and_points",
@@ -2337,63 +2346,72 @@
             "left_credits": 200,
             "right_credits": 200,
             "total_pay_points": 50,
-            "cumulative_increment_pay_points": 0
+            "cumulative_increment_pay_points": 0,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "Small",
             "left_credits": 500,
             "right_credits": 500,
             "total_pay_points": 200,
-            "cumulative_increment_pay_points": 150
+            "cumulative_increment_pay_points": 150,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "Medium",
             "left_credits": 1500,
             "right_credits": 1500,
             "total_pay_points": 400,
-            "cumulative_increment_pay_points": 200
+            "cumulative_increment_pay_points": 200,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "Large",
             "left_credits": 3500,
             "right_credits": 3500,
             "total_pay_points": 600,
-            "cumulative_increment_pay_points": 200
+            "cumulative_increment_pay_points": 200,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "XL",
             "left_credits": 7500,
             "right_credits": 7500,
             "total_pay_points": 1000,
-            "cumulative_increment_pay_points": 400
+            "cumulative_increment_pay_points": 400,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "XXL",
             "left_credits": 15000,
             "right_credits": 15000,
             "total_pay_points": 1500,
-            "cumulative_increment_pay_points": 500
+            "cumulative_increment_pay_points": 500,
+            "max_title_range": "Bronze–Director"
           },
           {
             "tier": "3XL",
             "left_credits": 35000,
             "right_credits": 35000,
             "total_pay_points": 3000,
-            "cumulative_increment_pay_points": 1500
+            "cumulative_increment_pay_points": 1500,
+            "max_title_range": "Crown–Black Crown"
           },
           {
             "tier": "4XL",
             "left_credits": 75000,
             "right_credits": 75000,
             "total_pay_points": 4500,
-            "cumulative_increment_pay_points": 1500
+            "cumulative_increment_pay_points": 1500,
+            "max_title_range": "Ambassador–Black Ambassador"
           },
           {
             "tier": "5XL",
             "left_credits": 150000,
             "right_credits": 150000,
             "total_pay_points": 6000,
-            "cumulative_increment_pay_points": 1500
+            "cumulative_increment_pay_points": 1500,
+            "max_title_range": "President and above"
           }
         ]
       },
@@ -2730,18 +2748,11 @@
         ]
       }
     ],
-    "rules_status": "phase_1_structured_reference",
-    "rule_coverage": {
-      "structured_rules": 18,
-      "phase": "phase_1_structured_reference",
-      "remaining": [
-        "T-Balance e criteri completi OTB per tutti i titoli",
-        "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
-        "campagne Fast Start 60/90 giorni",
-        "regole dettagliate dei viaggi incentivo",
-        "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
-      ],
-      "calculations_enabled": false
+    "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
+    "validity_confirmation": {
+      "status": "confirmed_by_user",
+      "confirmed_at": "2026-11-17",
+      "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore a novembre 2026 senza modifiche."
     },
     "fast_start_operational_rule": {
       "status": "confirmed_by_project_owner_for_nextway",
@@ -2775,6 +2786,18 @@
       ],
       "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
     },
-    "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi."
+    "rules_status": "phase_1_structured_reference",
+    "rule_coverage": {
+      "structured_rules": 18,
+      "phase": "phase_1_structured_reference",
+      "remaining": [
+        "T-Balance e criteri completi OTB per tutti i titoli",
+        "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
+        "campagne Fast Start 60/90 giorni",
+        "regole dettagliate dei viaggi incentivo",
+        "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
+      ],
+      "calculations_enabled": false
+    }
   }
 }
