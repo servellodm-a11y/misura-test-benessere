@@ -67,6 +67,8 @@
     for(const [key,value] of Object.entries(consultantChannels).slice(0,12)){
       if(!value||typeof value!=='object')continue;
       const url=clean(value.url,500);
+      const lowerUrl=url.toLowerCase();
+      if(!(lowerUrl.startsWith('https://')||lowerUrl.startsWith('http://')))continue;
       let parsedUrl;
       try{parsedUrl=new URL(url);}catch{continue;}
       if(!['http:','https:'].includes(parsedUrl.protocol)||!parsedUrl.hostname||parsedUrl.username||parsedUrl.password)continue;
