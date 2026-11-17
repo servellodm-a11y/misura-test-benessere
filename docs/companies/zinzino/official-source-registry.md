@@ -210,3 +210,8 @@ Sono state strutturate 18 voci di riferimento: Cliente attivo e Customer Points;
 I valori restano nelle unità originali e non vengono trasformati in stime di reddito. T-Balance, OTB completi, titoli oltre Black Crown, campagne Fast Start 60/90 giorni e viaggi incentivo restano da formalizzare. Nessun calcolo è abilitato.
 
 Documento: docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured-rules.md.
+
+
+### Aggiornamento 17 novembre 2026 — completamento tabelle Partner
+- Master EU 2025: aggiunte soglie/strutture per Ambassador, Royal Ambassador, Black Ambassador, President, Elite President, Global President, 1 Star Global President e progressione 2 Star+; incluse condizioni dei bonus azionari.
+- OTB: estratte tutte le 14 righe da Bronze a President, inclusi limiti temporali e pagamenti mensili. Il significato operativo/formula di T-Balance resta da formalizzare; nessun calcolo OTB abilitato.
