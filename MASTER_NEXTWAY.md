@@ -3288,3 +3288,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - PR #26 merge squash commit: `18c6421436e14ec225d9ee4cb87a25202a7a68fa`.
 - CI post-merge main run `44096143255` era queued al momento dell'aggiornamento: non dichiarare ancora post-merge CI completata.
 - Nessuna modifica Supabase, nessuna creazione/attivazione workspace e nessun deploy Netlify.
+
+
+## 17 novembre 2026 — Catalogo Partner Zinzino ampliato (PR #27)
+
+- PR #27 integrata: 10 ulteriori voci Partner Kit rilevate nel catalogo ufficiale Italia: Ultimate Beauty, Ultimate Collagen, Basic/Advanced/Ultimate Vegan, Ultimate Immune, Ultimate Practitioners, Health Protocol, Basic Xelliss e Ultimate Xelliss.
+- La base commerciale contiene ora 14 voci Partner Kit (incluse Basic, Advanced, Ultimate e Training Partner Kit già presenti). I prezzi sono snapshot del 17/11/2026 e richiedono refresh prima della proposta.
+- Per le offerte con etichetta `Full Refund Possible`, `refund_rule_status=not_acquired_do_not_promise`: nessuna promessa di rimborso finché non viene acquisito il regolamento ufficiale della campagna.
+- Test commerciale aggiornato da 4 a 14 voci, con assert su Ultimate Beauty, Health Protocol e stato del rimborso Ultimate Practitioners. CI PR #27 run `44096276366`: SUCCESS.
+- PR #27 merge squash commit: `9b20590590c62560bffcfccc8bf9b526739e4712`.
+- Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
