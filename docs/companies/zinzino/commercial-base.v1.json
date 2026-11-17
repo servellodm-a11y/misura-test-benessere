@@ -1096,7 +1096,174 @@
               "personal_customer_points": 25
             }
           ],
-          "higher_titles_status": "not_structured_in_phase_1"
+          "higher_titles_status": "not_structured_in_phase_1",
+          "higher_titles": [
+            {
+              "title": "Ambassador",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 150000,
+              "additional_enrollment_lines": 3,
+              "line_mcv": 10000,
+              "multiple_income_centers": {
+                "ic1": 150000,
+                "ic2": 30000
+              },
+              "single_ic_lines": {
+                "line_count": 3,
+                "each_mcv": 10000
+              }
+            },
+            {
+              "title": "Royal Ambassador",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 200000,
+              "additional_enrollment_lines": 3,
+              "line_mcv": 20000,
+              "multiple_income_centers": {
+                "ic1": 200000,
+                "ic2": 60000
+              },
+              "single_ic_lines": {
+                "line_count": 3,
+                "each_mcv": 20000
+              }
+            },
+            {
+              "title": "Black Ambassador",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 250000,
+              "additional_enrollment_lines": 3,
+              "line_mcv": 30000,
+              "multiple_income_centers": {
+                "ic1": 250000,
+                "ic2": 90000
+              },
+              "single_ic_lines": {
+                "line_count": 3,
+                "each_mcv": 30000
+              }
+            },
+            {
+              "title": "President",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 300000,
+              "additional_enrollment_lines": [
+                3,
+                4
+              ],
+              "line_mcv": 40000,
+              "multiple_income_centers": {
+                "ic1": 300000,
+                "ic2": 120000,
+                "ic3": 120000
+              },
+              "single_ic_lines": {
+                "line_count": 4,
+                "each_mcv": 40000
+              }
+            },
+            {
+              "title": "Elite President",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 500000,
+              "additional_enrollment_lines": [
+                3,
+                4
+              ],
+              "line_mcv": 80000,
+              "multiple_income_centers": {
+                "ic1": 500000,
+                "ic2": 240000,
+                "ic3": 240000
+              },
+              "single_ic_lines": {
+                "line_count": 4,
+                "each_mcv": 80000
+              }
+            },
+            {
+              "title": "Global President",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 1000000,
+              "additional_enrollment_lines": [
+                3,
+                4
+              ],
+              "line_mcv": 130000,
+              "multiple_income_centers": {
+                "ic1": 1000000,
+                "ic2": 390000,
+                "ic3": 390000
+              },
+              "single_ic_lines": {
+                "line_count": 4,
+                "each_mcv": 130000
+              }
+            },
+            {
+              "title": "1 Star Global President",
+              "pcv": 125,
+              "personal_customer_points": 25,
+              "mcv": 2000000,
+              "additional_enrollment_lines": [
+                3,
+                4,
+                5
+              ],
+              "line_mcv": 130000,
+              "multiple_income_centers": {
+                "ic1": 2000000,
+                "ic2": 390000,
+                "ic3": 390000
+              },
+              "single_ic_lines": {
+                "line_count": 5,
+                "each_mcv": 130000
+              }
+            },
+            {
+              "title": "2 Star Global President and above",
+              "increment": {
+                "balanced_mcv_in_ic1": 1000000,
+                "additional_ic_mcv": 390000,
+                "alternative_enrollment_line_mcv": 130000
+              },
+              "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV."
+            }
+          ],
+          "share_bonus": {
+            "rules": [
+              {
+                "title": "President",
+                "pay_points": 200000
+              },
+              {
+                "title": "Elite President",
+                "pay_points": 300000
+              },
+              {
+                "title": "Global President",
+                "pay_points": 500000
+              },
+              {
+                "title": "1 Star Global President and above",
+                "pay_points": 1000000
+              }
+            ],
+            "conditions": [
+              "raggiungere il titolo rilevante tra 1 gennaio e 31 dicembre dell'anno di qualifica",
+              "mantenere il titolo un livello sotto dal 1 gennaio al 30 marzo dell'anno successivo",
+              "numero azioni calcolato sulla media del prezzo di negoziazione di febbraio dell'anno successivo",
+              "approvazione dell'Assemblea generale a maggio; consegna azioni a settembre",
+              "lock-up di 6 mesi o periodo previsto dalle autorità fiscali del paese di residenza"
+            ]
+          }
         },
         {
           "id": "team_commission",
@@ -1268,63 +1435,72 @@
               "left_credits": 200,
               "right_credits": 200,
               "total_pay_points": 50,
-              "cumulative_increment_pay_points": 0
+              "cumulative_increment_pay_points": 0,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "Small",
               "left_credits": 500,
               "right_credits": 500,
               "total_pay_points": 200,
-              "cumulative_increment_pay_points": 150
+              "cumulative_increment_pay_points": 150,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "Medium",
               "left_credits": 1500,
               "right_credits": 1500,
               "total_pay_points": 400,
-              "cumulative_increment_pay_points": 200
+              "cumulative_increment_pay_points": 200,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "Large",
               "left_credits": 3500,
               "right_credits": 3500,
               "total_pay_points": 600,
-              "cumulative_increment_pay_points": 200
+              "cumulative_increment_pay_points": 200,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "XL",
               "left_credits": 7500,
               "right_credits": 7500,
               "total_pay_points": 1000,
-              "cumulative_increment_pay_points": 400
+              "cumulative_increment_pay_points": 400,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "XXL",
               "left_credits": 15000,
               "right_credits": 15000,
               "total_pay_points": 1500,
-              "cumulative_increment_pay_points": 500
+              "cumulative_increment_pay_points": 500,
+              "max_title_range": "Bronze–Director"
             },
             {
               "tier": "3XL",
               "left_credits": 35000,
               "right_credits": 35000,
               "total_pay_points": 3000,
-              "cumulative_increment_pay_points": 1500
+              "cumulative_increment_pay_points": 1500,
+              "max_title_range": "Crown–Black Crown"
             },
             {
               "tier": "4XL",
               "left_credits": 75000,
               "right_credits": 75000,
               "total_pay_points": 4500,
-              "cumulative_increment_pay_points": 1500
+              "cumulative_increment_pay_points": 1500,
+              "max_title_range": "Ambassador–Black Ambassador"
             },
             {
               "tier": "5XL",
               "left_credits": 150000,
               "right_credits": 150000,
               "total_pay_points": 6000,
-              "cumulative_increment_pay_points": 1500
+              "cumulative_increment_pay_points": 1500,
+              "max_title_range": "President and above"
             }
           ]
         },
@@ -1444,7 +1620,7 @@
         {
           "id": "partner_one_time_title_bonuses",
           "area": "partner",
-          "status": "partially_structured_not_executable",
+          "status": "structured_reference_not_executable",
           "source_section": "One-Time Title Bonuses",
           "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
           "maximum_bonuses_per_title": 3,
@@ -1459,113 +1635,343 @@
           "rows": [
             {
               "title": "Bronze",
+              "time_limit": "first_12_full_months",
               "first": {
                 "credits_2_to_1": 375,
                 "pcp": 4,
-                "pp": 50
+                "pay_points": 50
               },
               "second": {
                 "t_balance": 50,
                 "pcp": 25,
-                "pp": 50
+                "pay_points": 50
               },
               "third": {
-                "enrollment_rank": "Bronze",
+                "enrollment_lines_rank": "Bronze",
                 "pcp": 4,
-                "pp": 50
+                "pay_points": 50
               },
-              "months": 4,
-              "pp_per_month": 12.5,
-              "total_if_all_three": 150
+              "payment": {
+                "months": 4,
+                "pp_per_month": 12.5,
+                "total_if_all_three": 150
+              }
             },
             {
               "title": "Silver",
+              "time_limit": "first_12_full_months",
               "first": {
                 "credits_2_to_1": 750,
                 "pcp": 4,
-                "pp": 100
+                "pay_points": 100
               },
               "second": {
                 "t_balance": 100,
                 "pcp": 25,
-                "pp": 100
+                "pay_points": 100
               },
               "third": {
-                "enrollment_rank": "Silver",
+                "enrollment_lines_rank": "Silver",
                 "pcp": 4,
-                "pp": 100
+                "pay_points": 100
               },
-              "months": 4,
-              "pp_per_month": 25,
-              "total_if_all_three": 300
+              "payment": {
+                "months": 4,
+                "pp_per_month": 25,
+                "total_if_all_three": 300
+              }
             },
             {
               "title": "Gold",
+              "time_limit": "first_12_full_months",
               "first": {
                 "credits_2_to_1": 1500,
                 "pcp": 4,
-                "pp": 200
+                "pay_points": 200
               },
               "second": {
                 "t_balance": 200,
                 "pcp": 25,
-                "pp": 200
+                "pay_points": 200
               },
               "third": {
-                "enrollment_rank": "Gold",
+                "enrollment_lines_rank": "Gold",
                 "pcp": 4,
-                "pp": 200
+                "pay_points": 200
               },
-              "months": 4,
-              "pp_per_month": 50,
-              "total_if_all_three": 600
+              "payment": {
+                "months": 4,
+                "pp_per_month": 50,
+                "total_if_all_three": 600
+              }
             },
             {
               "title": "Executive",
+              "time_limit": "first_12_full_months",
               "first": {
                 "credits_2_to_1": 3000,
                 "pcp": 10,
-                "pp": 400
+                "pay_points": 400
               },
               "second": {
                 "t_balance": 400,
                 "pcp": 25,
-                "pp": 400
+                "pay_points": 400
               },
               "third": {
-                "enrollment_rank": "Executive",
+                "enrollment_lines_rank": "Executive",
                 "pcp": 10,
-                "pp": 400
+                "pay_points": 400
               },
-              "months": 4,
-              "pp_per_month": 100,
-              "total_if_all_three": 1200
+              "payment": {
+                "months": 4,
+                "pp_per_month": 100,
+                "total_if_all_three": 1200
+              }
             },
             {
               "title": "Platinum",
+              "time_limit": "first_12_full_months",
               "first": {
                 "credits_2_to_1": 6000,
                 "pcp": 10,
-                "pp": 800
+                "pay_points": 800
               },
               "second": {
                 "t_balance": 800,
                 "pcp": 25,
-                "pp": 800
+                "pay_points": 800
               },
               "third": {
-                "enrollment_rank": "Platinum",
+                "enrollment_lines_rank": "Platinum",
                 "pcp": 10,
-                "pp": 800
+                "pay_points": 800
               },
-              "months": null,
-              "pp_per_month": null,
-              "total_if_all_three": null
+              "payment": {
+                "months": 4,
+                "pp_per_month": 200,
+                "total_if_all_three": 2400
+              }
+            },
+            {
+              "title": "Diamond",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 12000,
+                "pcp": 10,
+                "pay_points": 1500
+              },
+              "second": {
+                "t_balance": 1500,
+                "pcp": 25,
+                "pay_points": 1500
+              },
+              "third": {
+                "enrollment_lines_rank": "Diamond",
+                "pcp": 10,
+                "pay_points": 1500
+              },
+              "payment": {
+                "months": 5,
+                "pp_per_month": 300,
+                "total_if_all_three": 4500
+              }
+            },
+            {
+              "title": "Director",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 24000,
+                "pcp": 25,
+                "pay_points": 2500
+              },
+              "second": {
+                "t_balance": 3000,
+                "pcp": 25,
+                "pay_points": 2500
+              },
+              "third": {
+                "enrollment_lines_rank": "Director",
+                "pcp": 25,
+                "pay_points": 2500
+              },
+              "payment": {
+                "months": 5,
+                "pp_per_month": 500,
+                "total_if_all_three": 7500
+              }
+            },
+            {
+              "title": "Crown",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 48000,
+                "pcp": 25,
+                "pay_points": 4000
+              },
+              "second": {
+                "t_balance": 6000,
+                "pcp": 25,
+                "pay_points": 4000
+              },
+              "third": {
+                "enrollment_lines_rank": "Crown",
+                "pcp": 25,
+                "pay_points": 4000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 400,
+                "total_if_all_three": 12000
+              }
+            },
+            {
+              "title": "Royal Crown",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 80000,
+                "pcp": 25,
+                "pay_points": 6000
+              },
+              "second": {
+                "t_balance": 10000,
+                "pcp": 25,
+                "pay_points": 6000
+              },
+              "third": {
+                "enrollment_lines_rank": "Royal Crown",
+                "pcp": 25,
+                "pay_points": 6000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 600,
+                "total_if_all_three": 18000
+              }
+            },
+            {
+              "title": "Black Crown",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 130000,
+                "pcp": 25,
+                "pay_points": 8000
+              },
+              "second": {
+                "t_balance": 15000,
+                "pcp": 25,
+                "pay_points": 8000
+              },
+              "third": {
+                "enrollment_lines_rank": "Black Crown",
+                "pcp": 25,
+                "pay_points": 8000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 800,
+                "total_if_all_three": 24000
+              }
+            },
+            {
+              "title": "Ambassador",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 150000,
+                "pcp": 25,
+                "pay_points": 10000
+              },
+              "second": {
+                "t_balance": 20000,
+                "pcp": 25,
+                "pay_points": 10000
+              },
+              "third": {
+                "enrollment_lines_rank": "Ambassador",
+                "pcp": 25,
+                "pay_points": 10000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 1000,
+                "total_if_all_three": 30000
+              }
+            },
+            {
+              "title": "Royal Ambassador",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 200000,
+                "pcp": 25,
+                "pay_points": 12500
+              },
+              "second": {
+                "t_balance": 25000,
+                "pcp": 25,
+                "pay_points": 12500
+              },
+              "third": {
+                "enrollment_lines_rank": "Royal Ambassador",
+                "pcp": 25,
+                "pay_points": 12500
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 1250,
+                "total_if_all_three": 37500
+              }
+            },
+            {
+              "title": "Black Ambassador",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 250000,
+                "pcp": 25,
+                "pay_points": 15000
+              },
+              "second": {
+                "t_balance": 30000,
+                "pcp": 25,
+                "pay_points": 15000
+              },
+              "third": {
+                "enrollment_lines_rank": "Black Ambassador",
+                "pcp": 25,
+                "pay_points": 15000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 1500,
+                "total_if_all_three": 45000
+              }
+            },
+            {
+              "title": "President",
+              "time_limit": "no_time_limit",
+              "first": {
+                "credits_2_to_1": 300000,
+                "pcp": 25,
+                "pay_points": 40000
+              },
+              "second": {
+                "t_balance": 35000,
+                "pcp": 25,
+                "pay_points": 40000
+              },
+              "third": {
+                "enrollment_lines_rank": "President",
+                "pcp": 25,
+                "pay_points": 40000
+              },
+              "payment": {
+                "months": 10,
+                "pp_per_month": 4000,
+                "total_if_all_three": 120000
+              }
             }
           ],
           "unresolved": [
-            "T-Balance definition and formula",
-            "full OTB rows for all titles"
+            "T-Balance: il piano fornisce soglie numeriche ma la formula/definizione completa va formalizzata prima di qualsiasi calcolo."
           ]
         },
         {
@@ -1704,11 +2110,10 @@
         "structured_rules": 18,
         "phase": "phase_1_structured_reference",
         "remaining": [
-          "T-Balance e criteri completi OTB per tutti i titoli",
-          "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
-          "campagne Fast Start 60/90 giorni",
+          "formula/definizione operativa di T-Balance e logica OTB testabile",
+          "condizioni complete e aggiornate delle campagne Fast Start 60/90 giorni",
           "regole dettagliate dei viaggi incentivo",
-          "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
+          "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus"
         ],
         "calculations_enabled": false
       }
@@ -2174,7 +2579,174 @@
             "personal_customer_points": 25
           }
         ],
-        "higher_titles_status": "not_structured_in_phase_1"
+        "higher_titles_status": "not_structured_in_phase_1",
+        "higher_titles": [
+          {
+            "title": "Ambassador",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 150000,
+            "additional_enrollment_lines": 3,
+            "line_mcv": 10000,
+            "multiple_income_centers": {
+              "ic1": 150000,
+              "ic2": 30000
+            },
+            "single_ic_lines": {
+              "line_count": 3,
+              "each_mcv": 10000
+            }
+          },
+          {
+            "title": "Royal Ambassador",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 200000,
+            "additional_enrollment_lines": 3,
+            "line_mcv": 20000,
+            "multiple_income_centers": {
+              "ic1": 200000,
+              "ic2": 60000
+            },
+            "single_ic_lines": {
+              "line_count": 3,
+              "each_mcv": 20000
+            }
+          },
+          {
+            "title": "Black Ambassador",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 250000,
+            "additional_enrollment_lines": 3,
+            "line_mcv": 30000,
+            "multiple_income_centers": {
+              "ic1": 250000,
+              "ic2": 90000
+            },
+            "single_ic_lines": {
+              "line_count": 3,
+              "each_mcv": 30000
+            }
+          },
+          {
+            "title": "President",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 300000,
+            "additional_enrollment_lines": [
+              3,
+              4
+            ],
+            "line_mcv": 40000,
+            "multiple_income_centers": {
+              "ic1": 300000,
+              "ic2": 120000,
+              "ic3": 120000
+            },
+            "single_ic_lines": {
+              "line_count": 4,
+              "each_mcv": 40000
+            }
+          },
+          {
+            "title": "Elite President",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 500000,
+            "additional_enrollment_lines": [
+              3,
+              4
+            ],
+            "line_mcv": 80000,
+            "multiple_income_centers": {
+              "ic1": 500000,
+              "ic2": 240000,
+              "ic3": 240000
+            },
+            "single_ic_lines": {
+              "line_count": 4,
+              "each_mcv": 80000
+            }
+          },
+          {
+            "title": "Global President",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 1000000,
+            "additional_enrollment_lines": [
+              3,
+              4
+            ],
+            "line_mcv": 130000,
+            "multiple_income_centers": {
+              "ic1": 1000000,
+              "ic2": 390000,
+              "ic3": 390000
+            },
+            "single_ic_lines": {
+              "line_count": 4,
+              "each_mcv": 130000
+            }
+          },
+          {
+            "title": "1 Star Global President",
+            "pcv": 125,
+            "personal_customer_points": 25,
+            "mcv": 2000000,
+            "additional_enrollment_lines": [
+              3,
+              4,
+              5
+            ],
+            "line_mcv": 130000,
+            "multiple_income_centers": {
+              "ic1": 2000000,
+              "ic2": 390000,
+              "ic3": 390000
+            },
+            "single_ic_lines": {
+              "line_count": 5,
+              "each_mcv": 130000
+            }
+          },
+          {
+            "title": "2 Star Global President and above",
+            "increment": {
+              "balanced_mcv_in_ic1": 1000000,
+              "additional_ic_mcv": 390000,
+              "alternative_enrollment_line_mcv": 130000
+            },
+            "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV."
+          }
+        ],
+        "share_bonus": {
+          "rules": [
+            {
+              "title": "President",
+              "pay_points": 200000
+            },
+            {
+              "title": "Elite President",
+              "pay_points": 300000
+            },
+            {
+              "title": "Global President",
+              "pay_points": 500000
+            },
+            {
+              "title": "1 Star Global President and above",
+              "pay_points": 1000000
+            }
+          ],
+          "conditions": [
+            "raggiungere il titolo rilevante tra 1 gennaio e 31 dicembre dell'anno di qualifica",
+            "mantenere il titolo un livello sotto dal 1 gennaio al 30 marzo dell'anno successivo",
+            "numero azioni calcolato sulla media del prezzo di negoziazione di febbraio dell'anno successivo",
+            "approvazione dell'Assemblea generale a maggio; consegna azioni a settembre",
+            "lock-up di 6 mesi o periodo previsto dalle autorità fiscali del paese di residenza"
+          ]
+        }
       },
       {
         "id": "team_commission",
@@ -2531,7 +3103,7 @@
       {
         "id": "partner_one_time_title_bonuses",
         "area": "partner",
-        "status": "partially_structured_not_executable",
+        "status": "structured_reference_not_executable",
         "source_section": "One-Time Title Bonuses",
         "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
         "maximum_bonuses_per_title": 3,
@@ -2546,113 +3118,343 @@
         "rows": [
           {
             "title": "Bronze",
+            "time_limit": "first_12_full_months",
             "first": {
               "credits_2_to_1": 375,
               "pcp": 4,
-              "pp": 50
+              "pay_points": 50
             },
             "second": {
               "t_balance": 50,
               "pcp": 25,
-              "pp": 50
+              "pay_points": 50
             },
             "third": {
-              "enrollment_rank": "Bronze",
+              "enrollment_lines_rank": "Bronze",
               "pcp": 4,
-              "pp": 50
+              "pay_points": 50
             },
-            "months": 4,
-            "pp_per_month": 12.5,
-            "total_if_all_three": 150
+            "payment": {
+              "months": 4,
+              "pp_per_month": 12.5,
+              "total_if_all_three": 150
+            }
           },
           {
             "title": "Silver",
+            "time_limit": "first_12_full_months",
             "first": {
               "credits_2_to_1": 750,
               "pcp": 4,
-              "pp": 100
+              "pay_points": 100
             },
             "second": {
               "t_balance": 100,
               "pcp": 25,
-              "pp": 100
+              "pay_points": 100
             },
             "third": {
-              "enrollment_rank": "Silver",
+              "enrollment_lines_rank": "Silver",
               "pcp": 4,
-              "pp": 100
+              "pay_points": 100
             },
-            "months": 4,
-            "pp_per_month": 25,
-            "total_if_all_three": 300
+            "payment": {
+              "months": 4,
+              "pp_per_month": 25,
+              "total_if_all_three": 300
+            }
           },
           {
             "title": "Gold",
+            "time_limit": "first_12_full_months",
             "first": {
               "credits_2_to_1": 1500,
               "pcp": 4,
-              "pp": 200
+              "pay_points": 200
             },
             "second": {
               "t_balance": 200,
               "pcp": 25,
-              "pp": 200
+              "pay_points": 200
             },
             "third": {
-              "enrollment_rank": "Gold",
+              "enrollment_lines_rank": "Gold",
               "pcp": 4,
-              "pp": 200
+              "pay_points": 200
             },
-            "months": 4,
-            "pp_per_month": 50,
-            "total_if_all_three": 600
+            "payment": {
+              "months": 4,
+              "pp_per_month": 50,
+              "total_if_all_three": 600
+            }
           },
           {
             "title": "Executive",
+            "time_limit": "first_12_full_months",
             "first": {
               "credits_2_to_1": 3000,
               "pcp": 10,
-              "pp": 400
+              "pay_points": 400
             },
             "second": {
               "t_balance": 400,
               "pcp": 25,
-              "pp": 400
+              "pay_points": 400
             },
             "third": {
-              "enrollment_rank": "Executive",
+              "enrollment_lines_rank": "Executive",
               "pcp": 10,
-              "pp": 400
+              "pay_points": 400
             },
-            "months": 4,
-            "pp_per_month": 100,
-            "total_if_all_three": 1200
+            "payment": {
+              "months": 4,
+              "pp_per_month": 100,
+              "total_if_all_three": 1200
+            }
           },
           {
             "title": "Platinum",
+            "time_limit": "first_12_full_months",
             "first": {
               "credits_2_to_1": 6000,
               "pcp": 10,
-              "pp": 800
+              "pay_points": 800
             },
             "second": {
               "t_balance": 800,
               "pcp": 25,
-              "pp": 800
+              "pay_points": 800
             },
             "third": {
-              "enrollment_rank": "Platinum",
+              "enrollment_lines_rank": "Platinum",
               "pcp": 10,
-              "pp": 800
+              "pay_points": 800
             },
-            "months": null,
-            "pp_per_month": null,
-            "total_if_all_three": null
+            "payment": {
+              "months": 4,
+              "pp_per_month": 200,
+              "total_if_all_three": 2400
+            }
+          },
+          {
+            "title": "Diamond",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 12000,
+              "pcp": 10,
+              "pay_points": 1500
+            },
+            "second": {
+              "t_balance": 1500,
+              "pcp": 25,
+              "pay_points": 1500
+            },
+            "third": {
+              "enrollment_lines_rank": "Diamond",
+              "pcp": 10,
+              "pay_points": 1500
+            },
+            "payment": {
+              "months": 5,
+              "pp_per_month": 300,
+              "total_if_all_three": 4500
+            }
+          },
+          {
+            "title": "Director",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 24000,
+              "pcp": 25,
+              "pay_points": 2500
+            },
+            "second": {
+              "t_balance": 3000,
+              "pcp": 25,
+              "pay_points": 2500
+            },
+            "third": {
+              "enrollment_lines_rank": "Director",
+              "pcp": 25,
+              "pay_points": 2500
+            },
+            "payment": {
+              "months": 5,
+              "pp_per_month": 500,
+              "total_if_all_three": 7500
+            }
+          },
+          {
+            "title": "Crown",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 48000,
+              "pcp": 25,
+              "pay_points": 4000
+            },
+            "second": {
+              "t_balance": 6000,
+              "pcp": 25,
+              "pay_points": 4000
+            },
+            "third": {
+              "enrollment_lines_rank": "Crown",
+              "pcp": 25,
+              "pay_points": 4000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 400,
+              "total_if_all_three": 12000
+            }
+          },
+          {
+            "title": "Royal Crown",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 80000,
+              "pcp": 25,
+              "pay_points": 6000
+            },
+            "second": {
+              "t_balance": 10000,
+              "pcp": 25,
+              "pay_points": 6000
+            },
+            "third": {
+              "enrollment_lines_rank": "Royal Crown",
+              "pcp": 25,
+              "pay_points": 6000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 600,
+              "total_if_all_three": 18000
+            }
+          },
+          {
+            "title": "Black Crown",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 130000,
+              "pcp": 25,
+              "pay_points": 8000
+            },
+            "second": {
+              "t_balance": 15000,
+              "pcp": 25,
+              "pay_points": 8000
+            },
+            "third": {
+              "enrollment_lines_rank": "Black Crown",
+              "pcp": 25,
+              "pay_points": 8000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 800,
+              "total_if_all_three": 24000
+            }
+          },
+          {
+            "title": "Ambassador",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 150000,
+              "pcp": 25,
+              "pay_points": 10000
+            },
+            "second": {
+              "t_balance": 20000,
+              "pcp": 25,
+              "pay_points": 10000
+            },
+            "third": {
+              "enrollment_lines_rank": "Ambassador",
+              "pcp": 25,
+              "pay_points": 10000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 1000,
+              "total_if_all_three": 30000
+            }
+          },
+          {
+            "title": "Royal Ambassador",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 200000,
+              "pcp": 25,
+              "pay_points": 12500
+            },
+            "second": {
+              "t_balance": 25000,
+              "pcp": 25,
+              "pay_points": 12500
+            },
+            "third": {
+              "enrollment_lines_rank": "Royal Ambassador",
+              "pcp": 25,
+              "pay_points": 12500
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 1250,
+              "total_if_all_three": 37500
+            }
+          },
+          {
+            "title": "Black Ambassador",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 250000,
+              "pcp": 25,
+              "pay_points": 15000
+            },
+            "second": {
+              "t_balance": 30000,
+              "pcp": 25,
+              "pay_points": 15000
+            },
+            "third": {
+              "enrollment_lines_rank": "Black Ambassador",
+              "pcp": 25,
+              "pay_points": 15000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 1500,
+              "total_if_all_three": 45000
+            }
+          },
+          {
+            "title": "President",
+            "time_limit": "no_time_limit",
+            "first": {
+              "credits_2_to_1": 300000,
+              "pcp": 25,
+              "pay_points": 40000
+            },
+            "second": {
+              "t_balance": 35000,
+              "pcp": 25,
+              "pay_points": 40000
+            },
+            "third": {
+              "enrollment_lines_rank": "President",
+              "pcp": 25,
+              "pay_points": 40000
+            },
+            "payment": {
+              "months": 10,
+              "pp_per_month": 4000,
+              "total_if_all_three": 120000
+            }
           }
         ],
         "unresolved": [
-          "T-Balance definition and formula",
-          "full OTB rows for all titles"
+          "T-Balance: il piano fornisce soglie numeriche ma la formula/definizione completa va formalizzata prima di qualsiasi calcolo."
         ]
       },
       {
@@ -2791,11 +3593,10 @@
       "structured_rules": 18,
       "phase": "phase_1_structured_reference",
       "remaining": [
-        "T-Balance e criteri completi OTB per tutti i titoli",
-        "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
-        "campagne Fast Start 60/90 giorni",
+        "formula/definizione operativa di T-Balance e logica OTB testabile",
+        "condizioni complete e aggiornate delle campagne Fast Start 60/90 giorni",
         "regole dettagliate dei viaggi incentivo",
-        "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
+        "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus"
       ],
       "calculations_enabled": false
     }
