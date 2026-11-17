@@ -50,7 +50,7 @@ Esempi verificati su schede ufficiali:
 - Viva+ Kit: €88 iniziali, €31/mese, consegna ogni due mesi, preavviso di 30 giorni; 5 Credits iniziali + 3 Credits/mese. URL: https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910277
 - ZinoBiotic+ Kit: €91 iniziali, €33/mese, consegna ogni due mesi, preavviso di 30 giorni; 5 Credits iniziali + 3 Credits/mese. URL: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910256
 - Protect+ Kit: €112 iniziali, €45/mese, consegna ogni due mesi, preavviso di 30 giorni; 8 Credits iniziali + 4 Credits/mese. URL: https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910337
-- Nails, Hair & Skin Care Kit: la scheda indica durata minima di 6 mesi e non la regola standard di annullamento con preavviso di 30 giorni. URL: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910810
+- Nails, Hair & Skin Care Kit: la pagina ufficiale ora restituisce una scheda con prezzo iniziale €40, abbonamento €20/mese, consegna ogni due mesi, 2,5 Credits iniziali + 1,75 Credits/mese e pulsante **Discontinued**; non va proposto come offerta acquistabile. La precedente nota sui 6 mesi non è più da usare come condizione corrente. URL: https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910810/
 
 Questi esempi dimostrano che non si può applicare una regola di abbonamento universale: NEXTWAY deve consultare la scheda specifica del kit e non dedurre le condizioni da un altro prodotto.
 
@@ -100,3 +100,8 @@ Regole contenute nel PDF:
 - [x] Regole sintetiche Zinzino4Free verificate sulla pagina ufficiale italiana (4 clienti con Premier Kit; Credits aggregati almeno 4 volte l'abbonamento del Cliente; abbonamento mensile gratuito, spedizione a carico del Cliente). Regolamento dettagliato e condizioni di eccezione: da acquisire.
 - [ ] Termini e condizioni generali italiani correnti verificati: il PDF trovato precedentemente è datato 2022-02 e non è sufficiente come fonte attuale.
 - [ ] Importazione nel bucket knowledge: richiede workspace e upload autenticato, non ancora completati.
+
+
+### Aggiornamento catalogo — stato offerta Nails, Hair & Skin Care Kit (17 novembre 2026)
+
+La scheda ufficiale italiana consultata mostra il kit come **Discontinued**. I valori visualizzati (€40 iniziali, €20/mese, consegna ogni due mesi, 2,5 Credits + 1,75 Credits/mese) sono conservati solo come traccia della pagina e non devono essere presentati come offerta disponibile. La precedente indicazione di durata minima di sei mesi non va riutilizzata come condizione corrente. Prima di qualsiasi proposta commerciale, verificare il catalogo e il checkout live.
