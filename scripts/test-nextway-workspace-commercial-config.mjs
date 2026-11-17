@@ -69,7 +69,12 @@ const integrated=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
 });
 assert.equal(integrated.commercialData.schema_version,1);
-assert.equal(integrated.commercialData.customer.premier_kits.offers.length,11);
+assert.equal(integrated.commercialData.customer.premier_kits.offers.length,16);
+assert.equal(api.getOffer(integrated,'customer','zinogene-kit-910533').credits_recurring_per_month,5);
+assert.equal(api.getOffer(integrated,'customer','menoplex-kit-910808').recurring_amount_eur,20);
+assert.equal(api.getOffer(integrated,'customer','berry-blast-kit-910754').prepaid_amount_eur,400);
+assert.equal(api.getOffer(integrated,'customer','tropical-blast-kit-910758').credits_initial,6.5);
+assert.equal(api.getOffer(integrated,'customer','skny-u-kit-910761').prepaid_credits,20);
 assert.equal(api.getOffer(integrated,'customer','leanshake-kit-910237').recurring_amount_eur,116);
 assert.equal(api.getOffer(integrated,'customer','leanshake-kit-x2-910637').credits_recurring_per_month,4);
 assert.equal(api.getOffer(integrated,'customer','leanshake-challenge-kit-910324').prepaid_amount_eur,1253);
