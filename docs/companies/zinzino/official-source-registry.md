@@ -147,3 +147,18 @@ Il PDF italiano dei Termini (https://zinzinowebstorage.blob.core.windows.net/fil
 
 ### Campagna Black Week 2026 (temporanea)
 Fonte ufficiale: https://www.zinzino.com/shop/7705770203/it/it-it/products/black-week-main . Periodo pubblicato: 13 novembre 2026 ore 10:00 CET – 2 dicembre 2026 ore 12:00 CET. La pagina elenca Premier Kit selezionati con prodotti aggiuntivi gratuiti e varianti senza abbonamento. Trattare come campagna temporanea separata dal catalogo permanente: ricontrollare disponibilità e prezzo finale al checkout; non riutilizzare dopo la scadenza.
+
+
+## Aggiornamento catalogo Premier Kit — nuove schede italiane (17 novembre 2026)
+
+Aggiunte alla base commerciale cinque offerte con schede ufficiali italiane:
+
+- **ZinoGene+ Kit** (910533): €116 iniziali + €58/mese, consegna ogni due mesi, 10 Credits iniziali + 5/mese; alternativa prepagata €464 e 25 Credits.
+- **Menoplex Kit** (910808): €40 iniziali + €20/mese, consegna ogni due mesi, 2,5 Credits iniziali + 1,75/mese.
+- **Berry Blast Kit** (910754): €100 iniziali + €50/mese, consegna ogni due mesi, 6,5 Credits iniziali + 4,5/mese; prepagato €400, 20 Credits.
+- **Tropical Blast Kit** (910758): €100 iniziali + €50/mese, consegna ogni due mesi, 6,5 Credits iniziali + 4,5/mese.
+- **SKNY-U Kit** (910761): €100 iniziali + €50/mese, consegna ogni due mesi, 6,5 Credits iniziali + 4,5/mese; prepagato €400, 20 Credits.
+
+Fonti ufficiali: https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910533 ; https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910808/ ; https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910754/ ; https://www.zinzino.com/shop/site/it/it-it/products/brand-shop/valentus-premier-kits/910758 ; https://www.zinzino.com/shop/site/it/it-it/products/valentus-all/910761 .
+
+Tutti i dati sono snapshot del 17/11/2026. Non assumere durata minima non indicata; verificare sempre prezzo, contenuto e condizioni live prima di un preventivo. Il catalogo strutturato resta parziale.
