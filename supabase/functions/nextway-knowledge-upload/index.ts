@@ -18,6 +18,7 @@ const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
 const allowedOrigins = [...new Set([
   ...configuredOrigins,
   "http://localhost:8000",
+  "https://misura-test-benessere.pages.dev",
 ])];
 const BUCKET = "nextway-knowledge";
 const MAX_FILE_BYTES = 12 * 1024 * 1024;
