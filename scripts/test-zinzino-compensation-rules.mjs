@@ -29,8 +29,8 @@ assert.equal(byId.get('customer_one_time_and_fast_start_bonuses').one_time_bonus
 // Numeric consistency checks for published tables only; these do not enable runtime calculations.
 const credits = byId.get('credits_balance_and_banking');
 assert.equal(credits.maximum_balance_ratio, '2:1');
-assert.equal(credits.maximum_larger_team_share, 2 / 3);
-assert.equal(credits.minimum_smaller_team_share, 1 / 3);
+assert.ok(Math.abs(credits.maximum_larger_team_share - 2 / 3) < 1e-9);
+assert.ok(Math.abs(credits.minimum_smaller_team_share - 1 / 3) < 1e-9);
 assert.equal(credits.maximum_banked_credits_weekly, 1000000);
 assert.equal(credits.maximum_banked_credits_monthly, 1000000);
 
