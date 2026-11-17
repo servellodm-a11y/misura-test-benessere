@@ -599,7 +599,7 @@
       "market": "Italia"
     },
     "compensation_plan": {
-      "status": "20_regole_strutturate_calcoli_disabilitati",
+      "status": "20_regole_calcoli_disabilitati",
       "source": "Master EU 2025 12/02/2025; knowledge/compensation-plan-eu-2025-structured-rules.md; T-Balance e campagne ancora bloccanti",
       "market": "Europa/Italia"
     },
@@ -609,7 +609,7 @@
       "market": "Italia"
     },
     "compliance_guidelines": {
-      "status": "guardrail_interni_parziali_policy_ufficiali_da_acquisire",
+      "status": "policy_da_acquisire_guardrail_parziali",
       "source": "Guardrail NEXTWAY su claim, privacy e promesse; policy ufficiali Zinzino complete da acquisire",
       "market": "Italia/UE"
     },
