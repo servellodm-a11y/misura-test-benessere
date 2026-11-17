@@ -215,3 +215,7 @@ Documento: docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured
 ### Aggiornamento 17 novembre 2026 — completamento tabelle Partner
 - Master EU 2025: aggiunte soglie/strutture per Ambassador, Royal Ambassador, Black Ambassador, President, Elite President, Global President, 1 Star Global President e progressione 2 Star+; incluse condizioni dei bonus azionari.
 - OTB: estratte tutte le 14 righe da Bronze a President, inclusi limiti temporali e pagamenti mensili. Il significato operativo/formula di T-Balance resta da formalizzare; nessun calcolo OTB abilitato.
+
+
+### Aggiornamento Fast Start — 17 novembre 2026
+Il master EU 2025 è stato strutturato in quattro step (30/60/90/120 giorni), con requisiti, PP standard, Credits senza ECB, Enrollment Points e requisito separato di 12 punti per l'Enrollment Bonus successivo. La sequenza operativa NEXTWAY resta quella confermata dall'utente (4 CP; 2 UPK, uno per lato; duplicazione; altri 10 CP ripartiti 4+6). I valori promozionali 60/90 giorni restano dipendenti dal regolamento di campagna.

@@ -117,13 +117,25 @@ Tabella OTB estratta integralmente dal master EU 2025. Il piano consente fino a 
 - 1 Pay Point ha come obiettivo €1, ma il valore può essere modificato dalla società e convertito nella valuta locale con cambio mensile o fisso: non trattarlo come cambio garantito.
 - Z4F Partner: Auto Order Z4F attivo, almeno 4 Clienti abbonati di prima generazione e almeno 40 Credits combinati. Nei primi quattro ordini della Grace Period è indicata una soglia agevolata di 20 Credits con 4 punti; dal quinto Auto Order 40 Credits e 4+ punti. Spedizione esclusa.
 
-## 13. Regola Fast Start operativa confermata dall'utente
+## 13. Fast Start — sequenza operativa e requisiti del master EU 2025
+
+La sequenza operativa adottata da NEXTWAY, confermata dall'utente il 17/11/2026, è:
 1. 4 punti cliente.
 2. 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra.
 3. Duplicazione dei due Partner.
 4. Altri 10 punti cliente, ripartiti in 4 + 6.
 
-Questa sequenza è la regola operativa adottata da NEXTWAY sulla base della conferma dell'utente del 17/11/2026; non è un'attestazione aziendale indipendente.
+Il master descrive un percorso di 120 giorni con quattro bonus:
+- **Q-Team entro 30 giorni:** 4 abbonamenti Cliente con Premier Kit; 100 PP Fast Start; soglia agevolata Z4F di 20 Credits nei primi quattro mesi. Il piano indica 40 Credits combinati dai Clienti di prima generazione come requisito ordinario per Z4F.
+- **Enroll 2 entro 60 giorni:** 2 Partner con UPK, uno a sinistra e uno a destra; 400 PP Fast Start. Il piano attribuisce 3 Enrollment Points a un UPK, 2 a un Advanced e 1 a un Basic; la combinazione di due UPK vale 6 punti.
+- **Help your 2 Enroll 2 entro 90 giorni:** ciascuno dei due Partner duplica con UPK; il master indica che valgono quattro iscrizioni complessive provenienti da te, A o B; 1.200 PP Fast Start. Step 3 è conseguibile dopo Step 2 o dopo la scadenza del periodo richiesto.
+- **X-Team entro 120 giorni:** dai 4 Clienti iniziali si aggiungono 6 Clienti per arrivare a 10; 50 zRewards, Z4F mensile e mantenimento ECB; 150 PP Fast Start.
+
+Il master indica 1.850 PP complessivi di Fast Start standard (100 + 400 + 1.200 + 150), oltre al Cash Bonus del 10% mostrato per gli step. Il totale non include importi promozionali aggiuntivi. Il documento avverte che i bonus a 60 e 90 giorni sono aumentati secondo le regole della campagna: gli importi correnti di campagna restano quindi da acquisire, senza dedurli dal piano generale.
+
+Dopo il percorso, il master riporta separatamente un requisito di 12 Enrollment Points per un successivo bonus enrollment: 4 UPK oppure 6 Advanced oppure 12 Basic o combinazioni equivalenti; almeno 2 punti del totale devono essere collocati a sinistra o a destra secondo la nota del master. Questa condizione successiva non va confusa con i quattro step Fast Start.
+
+La sequenza NEXTWAY e il posizionamento un Partner per lato sono registrati sulla base della conferma esplicita dell'utente; non sono presentati come attestazione aziendale indipendente.
 
 ### Bonus azionari per i titoli superiori
 Il master riporta bonus in azioni: President 200.000 PP; Elite President 300.000 PP; Global President 500.000 PP; 1 Star Global President e ogni livello superiore 1.000.000 PP. Condizioni: raggiungere il titolo nell'anno solare; mantenere il titolo un livello sotto dal 1 gennaio al 30 marzo dell'anno seguente; valorizzazione in base al prezzo medio di febbraio; approvazione dell'Assemblea generale a maggio e consegna a settembre; lock-up di 6 mesi o quello imposto dalle autorità fiscali del paese di residenza.

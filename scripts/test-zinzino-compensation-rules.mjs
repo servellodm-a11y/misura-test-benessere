@@ -16,6 +16,13 @@ for (const id of ['customer_activity_and_points','credits_balance_and_banking','
   assert.equal(byId.get(id).source_url, root.source_url);
 }
 assert.equal(byId.get('fast_start_operational_rule_user_confirmed').status, 'confirmed_by_project_owner_for_nextway');
+const fastStart = byId.get('fast_start_operational_rule_user_confirmed');
+assert.equal(fastStart.source_plan_sequence.steps.length, 4);
+assert.equal(fastStart.source_plan_sequence.base_fast_start_pay_points_total, 1850);
+assert.deepEqual(fastStart.source_plan_sequence.steps.map(x => x.fast_start_bonus_pay_points), [100,400,1200,150]);
+assert.equal(fastStart.source_plan_sequence.steps[1].requirements.placement.left, 1);
+assert.equal(fastStart.source_plan_sequence.steps[1].requirements.placement.right, 1);
+assert.equal(fastStart.source_plan_sequence.post_fast_start_enrollment_bonus.required_enrollment_points, 12);
 assert.equal(byId.get('credit_accelerators').ECBx.multiplier, null);
 assert.equal(byId.get('customer_one_time_and_fast_start_bonuses').one_time_bonuses[0].campaign_rules_required, true);
 assert.ok(root.rule_coverage.remaining.length > 0);

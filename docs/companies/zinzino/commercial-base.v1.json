@@ -2064,7 +2064,92 @@
                 "second": 6
               }
             }
-          ]
+          ],
+          "source_plan_sequence": {
+            "eligibility": {
+              "active_partner_required": true,
+              "active_z4f_auto_order_required": true,
+              "period_days": 120,
+              "bonuses_independent": true,
+              "step3_dependency": "Step 3 is earned only after Step 2 has been earned or the required time period has expired."
+            },
+            "steps": [
+              {
+                "step": 1,
+                "title": "Q-Team in 30 days",
+                "requirements": {
+                  "customer_subscriptions": 4,
+                  "customer_subscription_type": "Premier Kit",
+                  "first_generation_customer_credits_minimum": 40,
+                  "first_four_months_Z4F_auto_order_credits": 20
+                },
+                "fast_start_bonus_pay_points": 100,
+                "additional_credits_without_ECB": 20,
+                "additional_premier_kits_without_ECB": 4
+              },
+              {
+                "step": 2,
+                "title": "Enroll 2 in 60 days",
+                "requirements": {
+                  "new_partners": 2,
+                  "kit": "Ultimate Partner Kit",
+                  "placement": {
+                    "left": 1,
+                    "right": 1
+                  },
+                  "enrollment_points_total": 6
+                },
+                "fast_start_bonus_pay_points": 400
+              },
+              {
+                "step": 3,
+                "title": "Help your 2 Enroll 2 in 90 days",
+                "requirements": {
+                  "each_of_two_partners_duplicates_with_UPK": true,
+                  "eligible_enrollments": "Any 4 from the sponsor, Partner A or Partner B",
+                  "kit": "Ultimate Partner Kit"
+                },
+                "fast_start_bonus_pay_points": 1200
+              },
+              {
+                "step": 4,
+                "title": "X-Team in 120 days",
+                "requirements": {
+                  "customer_points_total": 10,
+                  "existing_customer_points": 4,
+                  "additional_customer_points": 6
+                },
+                "zrewards": 50,
+                "z4f_monthly": true,
+                "retain_ECB": true,
+                "fast_start_bonus_pay_points": 150,
+                "additional_credits_without_ECB": 50,
+                "additional_premier_kits_without_ECB": 10
+              }
+            ],
+            "enrollment_point_values": {
+              "ultimate_partner_kit": 3,
+              "advanced_partner_kit": 2,
+              "basic_partner_kit": 1,
+              "step2_total_points": 6,
+              "step2_composition": "2 UPK or 3 Advanced or 6 Basic or equivalent mix",
+              "placement_in_plan_footnote": "at least one of six points on left or right; NEXTWAY uses the user's operational confirmation of one Partner on each side"
+            },
+            "post_fast_start_enrollment_bonus": {
+              "required_enrollment_points": 12,
+              "minimum_points_on_one_side": 2,
+              "kit_point_values": {
+                "ultimate_partner_kit": 3,
+                "advanced_partner_kit": 2,
+                "basic_partner_kit": 1
+              },
+              "note": "Separate subsequent enrollment bonus qualification, not to be conflated with the four Fast Start steps."
+            },
+            "base_fast_start_pay_points_total": 1850,
+            "cash_bonus": "10% Cash Bonus is shown at each step; not included in the 1,850 PP subtotal.",
+            "campaign_note": "The EU master says 60-day and 90-day Fast Start bonuses are increased according to campaign rules. The current campaign-specific increased values are not included here and must not be inferred."
+          },
+          "note": "La sequenza operativa NEXTWAY è confermata dal titolare del progetto: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due; altri 10 punti cliente (4+6). Il dettaglio dei requisiti/bonus standard del master è registrato separatamente sopra. La conferma utente non è un'attestazione aziendale indipendente."
         }
       ],
       "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
@@ -3547,7 +3632,92 @@
               "second": 6
             }
           }
-        ]
+        ],
+        "source_plan_sequence": {
+          "eligibility": {
+            "active_partner_required": true,
+            "active_z4f_auto_order_required": true,
+            "period_days": 120,
+            "bonuses_independent": true,
+            "step3_dependency": "Step 3 is earned only after Step 2 has been earned or the required time period has expired."
+          },
+          "steps": [
+            {
+              "step": 1,
+              "title": "Q-Team in 30 days",
+              "requirements": {
+                "customer_subscriptions": 4,
+                "customer_subscription_type": "Premier Kit",
+                "first_generation_customer_credits_minimum": 40,
+                "first_four_months_Z4F_auto_order_credits": 20
+              },
+              "fast_start_bonus_pay_points": 100,
+              "additional_credits_without_ECB": 20,
+              "additional_premier_kits_without_ECB": 4
+            },
+            {
+              "step": 2,
+              "title": "Enroll 2 in 60 days",
+              "requirements": {
+                "new_partners": 2,
+                "kit": "Ultimate Partner Kit",
+                "placement": {
+                  "left": 1,
+                  "right": 1
+                },
+                "enrollment_points_total": 6
+              },
+              "fast_start_bonus_pay_points": 400
+            },
+            {
+              "step": 3,
+              "title": "Help your 2 Enroll 2 in 90 days",
+              "requirements": {
+                "each_of_two_partners_duplicates_with_UPK": true,
+                "eligible_enrollments": "Any 4 from the sponsor, Partner A or Partner B",
+                "kit": "Ultimate Partner Kit"
+              },
+              "fast_start_bonus_pay_points": 1200
+            },
+            {
+              "step": 4,
+              "title": "X-Team in 120 days",
+              "requirements": {
+                "customer_points_total": 10,
+                "existing_customer_points": 4,
+                "additional_customer_points": 6
+              },
+              "zrewards": 50,
+              "z4f_monthly": true,
+              "retain_ECB": true,
+              "fast_start_bonus_pay_points": 150,
+              "additional_credits_without_ECB": 50,
+              "additional_premier_kits_without_ECB": 10
+            }
+          ],
+          "enrollment_point_values": {
+            "ultimate_partner_kit": 3,
+            "advanced_partner_kit": 2,
+            "basic_partner_kit": 1,
+            "step2_total_points": 6,
+            "step2_composition": "2 UPK or 3 Advanced or 6 Basic or equivalent mix",
+            "placement_in_plan_footnote": "at least one of six points on left or right; NEXTWAY uses the user's operational confirmation of one Partner on each side"
+          },
+          "post_fast_start_enrollment_bonus": {
+            "required_enrollment_points": 12,
+            "minimum_points_on_one_side": 2,
+            "kit_point_values": {
+              "ultimate_partner_kit": 3,
+              "advanced_partner_kit": 2,
+              "basic_partner_kit": 1
+            },
+            "note": "Separate subsequent enrollment bonus qualification, not to be conflated with the four Fast Start steps."
+          },
+          "base_fast_start_pay_points_total": 1850,
+          "cash_bonus": "10% Cash Bonus is shown at each step; not included in the 1,850 PP subtotal.",
+          "campaign_note": "The EU master says 60-day and 90-day Fast Start bonuses are increased according to campaign rules. The current campaign-specific increased values are not included here and must not be inferred."
+        },
+        "note": "La sequenza operativa NEXTWAY è confermata dal titolare del progetto: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due; altri 10 punti cliente (4+6). Il dettaglio dei requisiti/bonus standard del master è registrato separatamente sopra. La conferma utente non è un'attestazione aziendale indipendente."
       }
     ],
     "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
