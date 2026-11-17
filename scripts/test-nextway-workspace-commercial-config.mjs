@@ -48,6 +48,7 @@ assert.equal(Object.keys(badUrl.consultantChannels).length,0);
 const seed=JSON.parse(fs.readFileSync('docs/companies/zinzino/workspace-commercial-settings.json','utf8'));
 const commercialData=JSON.parse(fs.readFileSync('docs/companies/zinzino/commercial-base.v1.json','utf8'));
 const integratedSeed={...seed,commercial_data:commercialData};
+assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:seed}),/Base commerciale Zinzino Cliente\/Partner obbligatoria/);
 const seedWorkspace=api.normalize({
   workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
