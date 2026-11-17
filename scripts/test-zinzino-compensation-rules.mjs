@@ -19,5 +19,8 @@ assert.equal(byId.get('fast_start_operational_rule_user_confirmed').status, 'con
 assert.equal(byId.get('credit_accelerators').accelerators.ECBx.multiplier, null);
 assert.equal(byId.get('customer_one_time_and_fast_start_bonuses').one_time_bonuses[0].campaign_rules_required, true);
 assert.ok(root.rule_coverage.remaining.length > 0);
+assert.equal(byId.get('partner_team_titles').higher_titles.length, 8, 'Senior Partner titles and star progression must be structured');
+assert.equal(byId.get('partner_one_time_title_bonuses').rows.length, 14, 'Complete OTB title table must be structured');
+assert.equal(byId.get('partner_one_time_title_bonuses').rows[5].time_limit, 'no_time_limit');
 assert.ok(fs.readFileSync('docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured-rules.md','utf8').includes('calculations_enabled=false'));
 console.log('Zinzino EU 2025 compensation rule registry: PASS');
