@@ -3354,3 +3354,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il manifesto definisce module_key, source_type, data/validità e controlli; i documenti mantengono la soglia 7° ordine come storica non riconfermata e mantengono il Piano Compensi in stato non validato.
 - CI PR #31 run `44098866088`: SUCCESS. Merge squash commit `06c2699488c668c25afc0d57178908ee29a66a00`.
 - Nessuna modifica DB, creazione/attivazione workspace o deploy Netlify.
+
+
+## 17 novembre 2026 — Piano Compensi Zinzino: fonte europea inglese individuata
+
+- Individuato il PDF ufficiale Zinzino `CompensationPlan_EU_eng.pdf`, versione impressa 12-02-2025, mercato EU. La fonte è indicizzata integralmente dal lettore PDF web (1.828 righe) e il sommario riporta avvio attività, Fast Start, carriera Cliente, carriera Partner, viaggi incentivo e glossario.
+- Il documento dichiara che, in caso di differenze di traduzione, prevale il master inglese. È stata aggiunta una scheda italiana di orientamento non ufficiale; non viene riprodotta una traduzione integrale del documento protetto.
+- La pagina Partner italiana continua a collegare un PDF italiano distinto. La versione EU 2025 non prova che le condizioni siano quelle vigenti in Italia nel 2026.
+- `commercial-base.v1.json` registra il riferimento EU 2025 ma mantiene `calculations_enabled=false` e `rules=[]`. Nessuna commissione, qualifica o proiezione può essere calcolata fino alla verifica della versione italiana corrente.
+- Fonte: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf
