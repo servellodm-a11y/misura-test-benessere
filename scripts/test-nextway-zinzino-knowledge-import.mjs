@@ -20,7 +20,7 @@ assert.match(admin, /workspace\.workspace_key !== "zinzino-italia"/);
 assert.match(admin, /approval_status/);
 assert.match(admin, /result\.duplicate/);
 assert.match(admin, /c\.auth\.refreshSession\(\)/);
-assert.match(admin, /"Authorization": "Bearer " \\+ accessToken/);
+assert.match(admin, /"Authorization": "Bearer " \+ accessToken/);
 assert.doesNotMatch(admin.slice(admin.indexOf('$("import-zinzino-knowledge")'), admin.indexOf('$("knowledge-upload").addEventListener')), /service_role|NEXTWAY_SERVICE_ROLE_KEY|approve_document/);
 assert.match(ingest, /"training_material"/);
 assert.match(ingest, /approval_status: "pending"/);
