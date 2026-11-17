@@ -24,6 +24,7 @@ on:
       - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
       - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
       - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "scripts/test-nextway-zinzino-workspace-bootstrap.mjs"
       - "scripts/test-nextway-commercial-audience-setter.mjs"
       - "scripts/test-nextway-commercial-audience-crm.mjs"
       - "docs/companies/zinzino/workspace-commercial-settings.json"
@@ -224,6 +225,8 @@ jobs:
         run: node scripts/test-zinzino-compensation-rules.mjs
       - name: Validate workspace commercial configuration
         run: node scripts/test-nextway-workspace-commercial-config.mjs
+      - name: Validate Zinzino draft workspace bootstrap
+        run: node scripts/test-nextway-zinzino-workspace-bootstrap.mjs
       - name: Validate NEXTWAY commercial audience and AI Setter integration
         run: node scripts/test-nextway-commercial-audience-setter.mjs
       - name: Validate NEXTWAY CRM commercial audience form and sync
