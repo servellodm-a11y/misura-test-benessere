@@ -3239,3 +3239,15 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Per Zinzino, generazione bloccata se manca la base commerciale o se il Lead è ancora non classificato. Regole esplicite: prezzi snapshot da verificare; nessun calcolo commissioni/qualifiche finché il piano italiano ufficiale non è validato.
 - Test contrattuale aggiunto: `scripts/test-nextway-commercial-audience-setter.mjs` (12 asserzioni). Nessun test end-to-end reale ancora eseguito.
 - Migrazione NON applicata e Edge Function NON deployata; PR e CI da completare prima dell'applicazione. Nessun workspace creato/attivato e nessun deploy Netlify.
+
+
+### Aggiornamento rollout — 17 novembre 2026
+
+- PR #23 integrata in `main`: merge commit `d726510381c4f98c41d2ffacf84d356bb8435d76`.
+- CI PR #23: run `44092214980` completata con esito SUCCESS; 64 step completati, nessun errore.
+- Migrazione `20261117170000_nextway_lead_commercial_audience` applicata a Supabase con esito positivo.
+- Verifica database: colonna `nextway_leads.commercial_audience` presente, text nullable per compatibilità con Lead storici; constraint limita i valori a `customer` e `partner`.
+- Verifica RPC: `nextway_create_lead_with_conversation_commercial_v3` presente, SECURITY DEFINER, `search_path=pg_catalog, public`; EXECUTE authenticated=true, anon=false.
+- Edge Function `nextway-ai-setter` deployata su Supabase, versione 3, ACTIVE; `verify_jwt=false` mantenuto come nella configurazione precedente, con verifica manuale del token all'interno della funzione. Confronto sorgente GitHub/deploy: exactMatch=true.
+- Nessun Lead storico classificato automaticamente: `commercial_audience=NULL` resta da completare manualmente. Per workspace Zinzino, l'AI Setter rifiuta la generazione finché il Lead non è classificato.
+- Nessun test end-to-end con workspace Zinzino reale: il workspace non è ancora creato/attivato. Nessun messaggio inviato, nessuna conversione reale e nessun deploy Netlify.
