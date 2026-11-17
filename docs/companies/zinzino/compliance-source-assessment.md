@@ -131,3 +131,22 @@ Fonti aggiuntive:
 - https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Marketing-rules-and-ethics-en-WW.pdf
 - https://zinzinowebstorage.blob.core.windows.net/contracts/PartnerContract_EU_en-GB.pdf
 - https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Social-Selling-Guide-en-EN.pdf
+
+## 10. Canale ufficiale per acquisire la documentazione Partner Italia — 17 novembre 2026
+
+La pagina ufficiale italiana per diventare Partner collega il Piano Compensi, ma nella versione pubblica consultata non espone un collegamento pubblico al Partner Agreement vigente, al Code of Conduct, alle Business Ethics Guidelines o alla policy Marketing Rules & Ethics specifica per l'Italia. La pagina rinvia all'Assistenza per Partner.
+
+La pagina ufficiale Assistenza Partner indica tre modalità: chat integrata, telefono o e-mail. La chat è raggiungibile dal logo in fondo alla pagina. Non sono stati inventati indirizzi e-mail o numeri telefonici non esposti nel contenuto consultato.
+
+**Canale da usare per chiudere il blocco:** accedere al Back Office Partner italiano e aprire la chat Assistenza Partner, oppure usare i contatti mostrati nella pagina ufficiale. Chiedere conferma scritta e copia scaricabile dei seguenti documenti, con data, numero versione e mercato di applicazione:
+1. Partner Agreement / Independent Partner Contract vigente per Italia (IT), inclusi allegati e successive modifiche;
+2. Code of Conduct e Business Ethics Guidelines correnti, adottati dal Board;
+3. Marketing Rules & Ethics vigente per Italia, oppure conferma esplicita che la versione en-WW è quella contrattualmente applicabile al mercato italiano;
+4. Online Sales Application e regole correnti per vendita online, siti personali, marketplace, pubblicità e social;
+5. condizioni italiane aggiornate su abbonamenti Premier, cancellazione, recesso, resi e rimborsi.
+
+Non assumere che la pagina pubblica o i documenti globali sostituiscano il contenuto riservato al Partner nel Back Office. Fino all'acquisizione, compliance resta PARZIALE / NON APPROVATA e NEXTWAY mantiene i guardrail prudenziali già definiti.
+
+Fonti:
+- Pagina ufficiale Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb
+- Assistenza Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb/perche-noi/assistenza-partner
