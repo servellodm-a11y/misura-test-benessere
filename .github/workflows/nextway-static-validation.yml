@@ -29,6 +29,7 @@ on:
       - "docs/companies/zinzino/workspace-commercial-settings.json"
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-company-config.mjs"
+      - "scripts/test-zinzino-compensation-rules.mjs"
       - "scripts/test-nextway-manual-lead-review-sql.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
