@@ -6,6 +6,7 @@ const cloud = read("../nextway-cloud.js");
 const setter = read("../nextway-setter.js");
 const setterFunction = read("../supabase/functions/nextway-ai-setter/index.ts");
 const html = read("../nextway-ai.html");
+const searchHtml = read("../nextway-motore-ricerca.html");
 const leadSchema = read("../supabase/nextway_leads.sql");
 const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_trail.sql");
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
@@ -39,12 +40,26 @@ assert.match(leadUiScript, /let activeOwnerId=null,data=\[\]/);
 assert.match(leadUiScript, /localStorage\.getItem\(KEY\+':'\+userId\)/);
 assert.match(leadUiScript, /localStorage\.setItem\(KEY\+':'\+activeOwnerId/);
 assert.match(leadUiScript, /if\(!activeOwnerId\)\{alert\('Accedi con il tuo account NEXTWAY prima di creare un Lead\.'/);
-assert.match(leadUiScript, /window\.NEXTWAY_LOCAL_ARCHIVE=\{activate:activateLocalAccount,clear:clearLocalAccount/);
+assert.match(leadUiScript, /window\.NEXTWAY_LOCAL_ARCHIVE=\{\s*activate:activateLocalAccount,\s*clear:clearLocalAccount/);
 assert.doesNotMatch(leadUiScript, /localStorage\.(?:getItem|setItem)\(KEY(?:\)|,)/, "Lead UI must not read or write the unscoped legacy archive key");
 assert.match(cloud, /function localArchiveKey\(userId\)/);
 assert.match(cloud, /localStorage\.getItem\(localArchiveKey\(s\.user\.id\)\)/);
 assert.match(cloud, /localStorage\.setItem\(localArchiveKey\(s\.user\.id\)/);
 assert.match(cloud, /client\.auth\.onAuthStateChange/);
+assert.match(cloud, /function activateLocalArchive\(userId\)\{const archive=window\.NEXTWAY_LOCAL_ARCHIVE;if\(!archive\)return false;/,
+  "Cloud authentication must not require the page-local archive component");
+const archiveActivation = cloud.match(/function activateLocalArchive\(userId\)\{[\s\S]*?\}/)?.[0];
+assert.ok(archiveActivation, "Optional local archive activation helper must exist");
+const activateWithoutArchive = new Function("window", archiveActivation + "; return activateLocalArchive;")({});
+assert.equal(activateWithoutArchive("123e4567-e89b-12d3-a456-426614174000"), false,
+  "Search-only pages must retain Supabase authentication when no local archive UI is loaded");
+let archiveActivated = "";
+const activateWithArchive = new Function("window", archiveActivation + "; return activateLocalArchive;")({
+  NEXTWAY_LOCAL_ARCHIVE: { activate: (userId) => { archiveActivated = userId; } }
+});
+assert.equal(activateWithArchive("123e4567-e89b-12d3-a456-426614174000"), true);
+assert.equal(archiveActivated, "123e4567-e89b-12d3-a456-426614174000");
+
 assert.match(cloud, /if\(previousId!==nextId\)\{clearLocalArchive\(\);\$\('nw-results'\)\.replaceChildren\(\);\$\('nw-act-results'\)\.replaceChildren\(\);\$\('nw-org-activity'\)\.hidden=true/);
 assert.match(cloud, /clearLocalArchive\(\)/);
 assert.match(leadUiScript, /safeHttpUrl\(x\.url\)/);
@@ -247,10 +262,10 @@ assert.match(leadUiScript, /editingLeadId=lead\.id/);
 assert.match(leadUiScript, /Object\.entries\(fields\)\.forEach/);
 assert.match(leadUiScript, /const existing=editingLeadId\?data\.find\(y=>y\.id===editingLeadId\):null/);
 assert.match(leadUiScript, /data\.some\(y=>y!==existing&&!y\.is_test&&y\.url&&values\.url/);
-assert.match(leadUiScript, /if\(existing\)\{Object\.assign\(existing,values\)/);
+assert.match(leadUiScript, /if\(existing\)\{const metadata=readProspectMetadata\(existing\);Object\.assign\(existing,values\);if\(Object\.keys\(metadata\)\.length\)writeProspectMetadata\(existing,metadata\)/, "Editing a Lead must preserve its prospect metadata");
 assert.match(leadUiScript, /existing\.local_dirty=true/);
 assert.match(leadUiScript, /values\.id=Date\.now\(\)\.toString\(36\)/);
-assert.match(leadUiScript, /edit\.textContent='Modifica Lead'/);
+assert.match(leadUiScript, /edit\.textContent=x\.category==='research_result'\?'Completa classificazione':'Modifica Lead'/);
 assert.match(leadUiScript, /edit\.disabled=!!x\.archived_at\|\|!!x\._sync_conflict/);
 assert.match(leadUiScript, /bar\.append\(edit,archive,sel,del\)/);
 console.log("NEXTWAY CRM Lead editing: edit form, duplicate protection, existing-record update and sync dirty flag: PASS");
@@ -261,7 +276,7 @@ assert.match(html, /id="sort" aria-label="Ordina Lead"/);
 assert.match(leadUiScript, /sort==='recent'\?new Date\(b\.created\|\|0\)-new Date\(a\.created\|\|0\)/);
 assert.match(leadUiScript, /sort==='oldest'\?new Date\(a\.created\|\|0\)-new Date\(b\.created\|\|0\)/);
 assert.match(leadUiScript, /sort==='name'\?String\(a\.name\|\|''\)\.localeCompare/);
-assert.match(leadUiScript, /\['query','cat','state','archiveFilter','qualificationFilter','partnerFilter','sort'\]\.forEach/);
+assert.match(leadUiScript, /\['query','cat','state','archiveFilter','qualificationFilter','partnerFilter','commercialQualificationFilter','prospectQualityFilter','entityTypeFilter','sort'\]\.forEach/, "All CRM filters, including prospect-quality filters, must trigger list refresh");
 console.log("NEXTWAY CRM sorting: score, newest, oldest and alphabetical order: PASS");
 
 
@@ -272,7 +287,7 @@ assert.match(leadUiScript, /qualification=el\('qualificationFilter'\)\.value,par
 assert.match(leadUiScript, /x\.company_brand,x\.location,x\.source,x\.url,x\.evidence,x\.notes/);
 assert.match(leadUiScript, /!qualification\|\|x\.qualification===qualification/);
 assert.match(leadUiScript, /!partner\|\|x\.partner_type===partner/);
-assert.match(leadUiScript, /'qualificationFilter','partnerFilter','sort'/);
+assert.match(leadUiScript, /'qualificationFilter','partnerFilter','commercialQualificationFilter','prospectQualityFilter','entityTypeFilter','sort'/, "Filter state must include all expanded prospect filters");
 console.log("NEXTWAY CRM search: company/source/evidence/notes plus qualification and partner filters: PASS");
 
 
@@ -292,7 +307,7 @@ assert.match(cloud, /async function addLeadActivity\(cloudId,activity\)/);
 assert.match(cloud, /async function setLeadActivityStatus\(activityId,status\)/);
 assert.match(cloud, /nextway_lead_activities/);
 assert.match(cloud, /owner_profile_id:lead\.owner_profile_id,created_by:s\.user\.id/);
-assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity,setLeadActivityStatus/);
+assert.match(cloud, /getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity,setLeadActivityStatus/, "Cloud API must expose lead activities, follow-up summary and status updates");
 assert.match(cloud, /owner_profile_id:r\.owner_profile_id/);
 assert.match(leadUiScript, /Attività e follow-up/);
 assert.match(leadUiScript, /Registra attività/);
@@ -318,7 +333,7 @@ console.log("NEXTWAY CRM archived Lead: activity history remains readable while 
 
 assert.match(cloud, /async function getOpenLeadActivities\(limit=100\)/);
 assert.match(cloud, /\.eq\('next_action_status','open'\)\.not\('next_action_at','is',null\)/);
-assert.match(cloud, /getLeadActivities,getOpenLeadActivities,addLeadActivity/);
+assert.match(cloud, /getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity/, "Cloud API must expose the open-activity summary");
 assert.match(html, /id="loadFollowups"/);
 assert.match(leadUiScript, /getOpenLeadActivities\(100\)/);
 assert.match(leadUiScript, /Completa/);
@@ -428,3 +443,160 @@ for (const signature of [
 assert.doesNotMatch(triggerPrivileges, /drop trigger|disable trigger|drop function/i);
 assert.doesNotMatch(triggerPrivileges, /nextway_save_ai_analysis|nextway_prune_lead_creation_requests|nextway_is_platform_admin/i);
 console.log("NEXTWAY trigger-only function EXECUTE: PUBLIC, anon and authenticated revoked; installed triggers retained: PASS");
+
+
+// Prospect identity extraction: guard against treating organization names as people.
+const prospectProfileStart = searchHtml.indexOf("function buildProspectProfile(");
+const prospectProfileEnd = searchHtml.indexOf("function canonicalProspectUrl", prospectProfileStart);
+assert.ok(prospectProfileStart >= 0 && prospectProfileEnd > prospectProfileStart, "Prospect profile extraction function must exist");
+const prospectProfileSource = searchHtml.slice(prospectProfileStart, prospectProfileEnd);
+const buildProspectProfile = new Function("safeUrl", prospectProfileSource + "; return buildProspectProfile;")(value => value);
+const prospectCases = [
+  { title: "Dott. Marco Verdi – Nutrizionista", expected: "Marco Verdi", individual: true, profession: "Nutrizionista" },
+  { title: "Mario Rossi - Personal Trainer", expected: "Mario Rossi", individual: true, profession: "Personal trainer" },
+  { title: "Laura Bianchi | LinkedIn", expected: "Laura Bianchi", individual: true },
+  { title: "Profilo professionale", snippet: "Mi chiamo Giulia Neri, sono biologa nutrizionista.", expected: "Giulia Neri", individual: true, profession: "Biologo/a nutrizionista" },
+  { title: "Centro Benessere Aurora", expected: "Non rilevato con certezza", individual: false, entityType: "Azienda o organizzazione" },
+  { title: "Studio Medico Rossi", expected: "Non rilevato con certezza", individual: false, entityType: "Azienda o organizzazione" },
+  { title: "Articolo senza nominativo", expected: "Non rilevato con certezza", individual: false, entityType: "Directory / articolo / annuncio" },
+  { title: "Centro Benessere Aurora", snippet: "Mi chiamo Mario Rossi e sono il responsabile del centro.", expected: "Non rilevato con certezza", candidate: "Mario Rossi", individual: false, entityType: "Azienda o organizzazione" }
+];
+for (const item of prospectCases) {
+  const profile = buildProspectProfile(item.title, item.snippet || "", "", "https://example.test/profilo", {}, { individual: item.individual, score: 80, entityType: item.entityType || "Possibile profilo individuale" }, {});
+  assert.equal(profile.name, item.expected, "Unexpected confirmed name for: " + item.title);
+  assert.equal(profile.name_candidate, item.candidate || "", "Unexpected unconfirmed name candidate for: " + item.title);
+  if (item.profession) assert.equal(profile.profession, item.profession);
+}
+const identityStart = searchHtml.indexOf("function assessProfessionalActivity(");
+const identityEnd = searchHtml.indexOf("function qualifyCommercialProspect", identityStart);
+assert.ok(identityStart >= 0 && identityEnd > identityStart, "Identity assessment function must exist");
+const identitySource = searchHtml.slice(identityStart, identityEnd);
+const assessSearchEvidence = new Function(identitySource + "; return assessSearchEvidence;")();
+const companyPage = assessSearchEvidence("Centro Benessere Aurora", "Mi chiamo Mario Rossi e sono il responsabile del centro.", "", "https://example.test/centro", {}, "wellness_pro");
+assert.equal(companyPage.individual, false, "Organization page must not be promoted to an individual based on a quoted name");
+assert.equal(companyPage.entityType, "Azienda o organizzazione");
+const namedCompanyPage = assessSearchEvidence("Aurora Wellness", "Mi chiamo Mario Rossi e sono il responsabile del centro.", "", "https://example.test/azienda", {}, "wellness_pro");
+assert.equal(namedCompanyPage.individual, false, "Organization context in the body must override an incidental self-introduction");
+const brandedSocialPage = assessSearchEvidence("Aurora Wellness", "Mi chiamo Mario Rossi e presento i servizi del nostro centro.", "", "https://www.instagram.com/aurorawellness/", {}, "wellness_pro");
+assert.equal(brandedSocialPage.individual, false, "A branded social account must not be treated as a personal profile based on company copy");
+const companyLinkedIn = assessSearchEvidence("Aurora Wellness", "Team e servizi", "", "https://www.linkedin.com/company/aurora-wellness/", {}, "wellness_pro");
+assert.equal(companyLinkedIn.individual, false, "LinkedIn company pages must not be treated as personal profiles");
+const personPage = assessSearchEvidence("Dott. Marco Verdi – Nutrizionista", "", "", "https://example.test/marco-verdi", {}, "wellness_pro");
+assert.equal(personPage.individual, true, "Named professional page should remain an individual candidate");
+assert.ok(Array.isArray(personPage.evidence), "Identity assessment must expose structured source evidence");
+assert.ok(personPage.evidence.some(item => item.kind === "Nominativo nel titolo" && item.source === "Titolo della pagina"), "Person name evidence must identify the title as its source");
+assert.ok(personPage.evidence.some(item => item.kind === "Ruolo o professione" && /Nutrizionista/i.test(item.excerpt)), "Professional-role evidence must include the matching source phrase");
+const selfIntroEvidence = assessSearchEvidence("Profilo professionale", "Mi chiamo Giulia Neri, sono biologa nutrizionista.", "", "https://example.test/giulia", {}, "wellness_pro");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Autopresentazione" && item.source === "Descrizione del risultato" && /Mi chiamo Giulia Neri/i.test(item.excerpt)), "Self-introduction evidence must preserve its exact source and excerpt");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Ruolo o professione" && item.source === "Descrizione del risultato"), "Professional role evidence must identify the exact source field");
+assert.ok(selfIntroEvidence.evidence.some(item => item.kind === "Corrispondenza al segmento"), "Segment evidence must identify its matching phrase");
+assert.ok(companyPage.evidence.some(item => item.kind === "Contesto organizzativo"), "Organization evidence must be visible in the evidence list");
+assert.match(searchHtml, /Documentato nella fonte · citazione testuale/);
+assert.match(searchHtml, /assessment\.evidence/);
+assert.match(searchHtml, /const personConfirmed=assessment\?\.individual===true/);
+assert.match(searchHtml, /Pagina aziendale\/organizzazione · persona non confermata/);
+assert.match(searchHtml, /Nome citato nella pagina, ma non confermato come prospect individuale/);
+console.log("Prospect identity extraction: 8 controlled cases PASS; organization-page false-positive guards PASS");
+
+// Prospect acquisition: unsuitable directory/article/organization results cannot be saved as Leads.
+assert.match(searchHtml, /const notSuitable=qualification\.status==='Non adatto · da scartare'/);
+assert.match(searchHtml, /capture\.disabled=alreadyAcquired\|\|notSuitable/);
+assert.match(searchHtml, /if\(notSuitable\)\{status\.textContent=/);
+assert.match(searchHtml, /Non adatto · non acquisibile/);
+console.log("Prospect acquisition guard: unsuitable results disabled and protected by a click-time check: PASS");
+
+// Prospect result rendering: initialize source-quality data before the UI reads it.
+const prospectRenderStart = searchHtml.indexOf("const targetSummary=");
+const sourceQualityInit = searchHtml.indexOf("const sourceQuality=assessSourceQuality(item,url,pageContent);", prospectRenderStart);
+const sourceQualityCard = searchHtml.indexOf("const sourceQualityCard=", prospectRenderStart);
+assert.ok(prospectRenderStart >= 0 && sourceQualityInit > prospectRenderStart && sourceQualityCard > sourceQualityInit,
+  "Source quality must be initialized before rendering the prospect source-quality card");
+console.log("Prospect source-quality rendering: initialization precedes UI access: PASS");
+
+
+// NEXTWAY multi-query: each selected segment must require its own documented evidence.
+const targetStart=searchHtml.indexOf("function classifyProspectTarget(");
+const targetEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",targetStart);
+assert.ok(targetStart>=0&&targetEnd>targetStart,"Segment-specific prospect classifier must exist");
+const networkerHelperStart=searchHtml.indexOf("function assessNetworkerActivity(");
+assert.ok(networkerHelperStart>=0&&networkerHelperStart<targetStart,"Networker activity helper must precede the segment classifier");
+const targetClassifier=new Function(searchHtml.slice(networkerHelperStart,targetEnd)+"; return classifyProspectTarget;")();
+const classifyCases=[
+ {segment:"wellness_networker",title:"Network marketing wellness",body:"Sono networker nel settore wellness",expected:"wellness_networker"},
+ {segment:"wellness_networker",title:"Network marketing",body:"Sono networker nel settore immobiliare",expected:"unclassified"},
+ {segment:"other_networker",title:"Network marketing",body:"Sono networker nel settore immobiliare",expected:"other_networker"},
+ {segment:"other_networker",title:"Network marketing wellness",body:"Sono networker nel settore wellness",expected:"unclassified"},
+ {segment:"new_networker",title:"Il mio percorso",body:"Ho iniziato da poco nel network marketing",expected:"new_networker"},
+ {segment:"exnetworker",title:"La mia esperienza",body:"Ho lasciato il network marketing dopo anni",expected:"exnetworker"},
+ {segment:"side_income",title:"Cerco un secondo lavoro",body:"Cerco un secondo lavoro part-time",expected:"side_income"},
+ {segment:"side_income",title:"Benessere e lavoro",body:"Mi piace il benessere e lavoro part-time",expected:"unclassified"},
+ {segment:"business_seeking",title:"Cerco un progetto",body:"Vorrei avviare un'attività e mettermi in proprio",expected:"business_seeking"},
+ {segment:"customers",title:"Richiesta informazioni",body:"Cerco informazioni su un percorso benessere",expected:"customers"},
+ {segment:"customers",title:"Articolo benessere",body:"Il benessere è importante per tutti",expected:"unclassified"}
+];
+for(const item of classifyCases){
+ const result=targetClassifier(item.title,"",item.body,item.segment);
+ assert.equal(result.segment,item.expected,"Wrong segment classification for "+item.segment+": "+item.body);
+ if(item.expected==="unclassified")assert.equal(result.kind,"unknown","A generic or mismatched signal must not become a prospect");
+}
+assert.match(searchHtml,/const segmentEvidenceMatches=/,"Documentary signals must be constrained by selected segment");
+assert.match(searchHtml,/Ricerca esplicita di lavoro extra/);
+assert.match(searchHtml,/Ricerca esplicita di attività imprenditoriale/);
+console.log("NEXTWAY multi-query: 11 segment-specific evidence/classification cases PASS");
+
+
+// Segment relevance must distinguish explicit personal declarations from generic industry mentions.
+const evidenceStart=searchHtml.indexOf("function assessProfessionalActivity(");
+const evidenceEnd=searchHtml.indexOf("\nfunction classifyNetworkerStage",evidenceStart);
+assert.ok(evidenceStart>=0&&evidenceEnd>evidenceStart,"Segment evidence assessor must exist");
+const evidenceAssessor=new Function(searchHtml.slice(evidenceStart,evidenceEnd)+"; return assessSearchEvidence;")();
+const evidenceCases=[
+ ["wellness_networker","Network marketing wellness","Sono networker nel settore wellness",true],
+ ["wellness_networker","Network marketing","Sono networker nel settore immobiliare",false],
+ ["other_networker","Network marketing","Sono networker nel settore immobiliare",true],
+ ["other_networker","Network marketing wellness","Sono networker nel settore wellness",false],
+ ["side_income","Cerco un secondo lavoro","Cerco un secondo lavoro part-time",true],
+ ["side_income","Benessere e lavoro","Mi piace il benessere e lavoro part-time",false],
+ ["business_seeking","Cerco un progetto","Vorrei avviare un'attività e mettermi in proprio",true],
+ ["business_seeking","Imprenditoria","Articolo sull'imprenditoria in Italia",false],
+ ["customers","Richiesta informazioni","Cerco informazioni su un percorso benessere",true],
+ ["customers","Articolo benessere","Il benessere è importante per tutti",false]
+];
+for(const [segment,title,body,expected] of evidenceCases){
+ const result=evidenceAssessor(title,body,"","https://example.test/profilo",{},segment);
+ assert.equal(result.relevanceScore>10,expected,"Generic sector mention must not satisfy segment-specific evidence: "+segment+" / "+body);
+}
+console.log("NEXTWAY segment evidence scoring: 10 explicit-vs-generic cases PASS");
+
+
+// Source evidence review: only exact excerpts from the declared source field are documented.
+const reviewStart=searchHtml.indexOf("function assessProspectFieldEvidence(");
+const reviewEnd=searchHtml.indexOf("\nfunction buildProspectProfile",reviewStart);
+assert.ok(reviewStart>=0&&reviewEnd>reviewStart,"Profile and evidence review helper chain must exist before prospect profile extraction");
+const reviewHelper=searchHtml.slice(reviewStart,reviewEnd);
+const reviewFn=new Function(reviewHelper+"; return buildEvidenceReview;")();
+const reviewed=reviewFn(
+ {score:78,evidence:[
+  {kind:"Ruolo",source:"Descrizione del risultato",excerpt:"Sono nutrizionista",reason:"Ruolo rilevato"},
+  {kind:"Segmento",source:"Contenuto estratto della pagina",excerpt:"network marketing wellness",reason:"Contesto rilevato"},
+  {kind:"Recapiti",source:"Testo della fonte",excerpt:"1 recapito rilevato",reason:"Conteggio automatico"}
+ ]},
+ "Mario Rossi - Profilo","Sono nutrizionista","Esperienza in network marketing wellness",
+ {identity_status:"Possibile profilo individuale",profession:"Nutrizionista",organization:"Non rilevata"},
+ {segment:"wellness_pro",reason:"Ruolo coerente"},
+ {published_at:null,host:"example.test"}
+);
+assert.equal(reviewed.documented.length,2,"Only exact excerpts found in their declared fields may be documented");
+assert.equal(reviewed.documented[0].field,"Descrizione del risultato");
+assert.equal(reviewed.interpreted.length,1,"Derived contact counts must not be represented as direct source quotations");
+assert.ok(reviewed.inference.some(item=>item.kind==="Segmento suggerito"));
+assert.ok(reviewed.verify.some(item=>item.includes("Interesse e disponibilità")));
+const mismatched=reviewFn({evidence:[{kind:"Ruolo",source:"Titolo della pagina",excerpt:"Sono nutrizionista",reason:"test"}]},"Titolo senza ruolo","","",{},{},{});
+assert.equal(mismatched.documented.length,0,"An excerpt absent from its claimed source field must not be documented");
+assert.equal(mismatched.interpreted.length,1);
+assert.match(searchHtml,/Documentato nella fonte · citazione testuale/);
+assert.match(searchHtml,/Interpretazione NEXTWAY · non è un fatto accertato/);
+assert.match(searchHtml,/Da verificare manualmente/);
+assert.match(searchHtml,/evidence_review:evidenceReview/);
+assert.match(searchHtml,/DOCUMENTATO NELLA FONTE \(dichiarazioni, non fatti verificati\)/);
+console.log("NEXTWAY evidence review: exact-source, inference separation and manual verification cases PASS");

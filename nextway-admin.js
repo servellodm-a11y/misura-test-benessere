@@ -7,7 +7,7 @@
     if (!cloud) return;
 
     const $ = (id) => document.getElementById(id);
-    const state = { workspaces: [], profiles: [], memberships: [], documents: [] };
+    const state = { workspaces: [], profiles: [], memberships: [], documents: [], prompts: [], criteria: [] };
     const status = (message) => { $("admin-status").textContent = message; };
 
     function node(tag, text, className) {
@@ -64,10 +64,7 @@
       state.workspaces = result.workspaces || [];
       renderWorkspaceSelect();
       renderWorkspaces();
-      if (selectedWorkspace()) {
-        await loadMemberships();
-        await loadDocuments();
-      }
+      if (selectedWorkspace()) await loadSelectedWorkspace();
       status("Workspace caricati: " + state.workspaces.length + ".");
     }
 
@@ -85,6 +82,13 @@
         item.append(heading);
         item.append(node("p", "Chiave: " + workspace.workspace_key + " · ID: " + workspace.id, "muted"));
         if (workspace.sector) item.append(node("p", "Settore: " + workspace.sector, "muted"));
+        const settings = workspace.settings && typeof workspace.settings === "object" ? workspace.settings : {};
+        const offeringCount = Array.isArray(settings.offering) ? settings.offering.length : 0;
+        const audienceCount = Array.isArray(settings.audiences) ? settings.audiences.length : 0;
+        const keywordCount = settings.discovery && Array.isArray(settings.discovery.keywords) ? settings.discovery.keywords.length : 0;
+        if (offeringCount || audienceCount || keywordCount) {
+          item.append(node("p", "Profilo commerciale: " + offeringCount + " offerte · " + audienceCount + " pubblici · " + keywordCount + " parole chiave", "muted"));
+        }
         const selectButton = node("button", "Seleziona", "btn alt");
         selectButton.type = "button";
         selectButton.addEventListener("click", async () => {
@@ -255,13 +259,145 @@
     }
 
     async function loadSelectedWorkspace() {
-      await Promise.all([loadMemberships(), loadDocuments()]);
+      const workspace = selectedWorkspace();
+      const moduleInput = $("knowledge-upload").elements.namedItem("module_key");
+      const commercialEditor = $("commercial-config-json");
+      const commercialCurrent = $("commercial-config-current");
+      if (workspace && moduleInput && !moduleInput.value.trim()) moduleInput.value = workspace.workspace_key.slice(0, 64);
+      if (commercialEditor) commercialEditor.value = workspace?.settings?.commercial ? JSON.stringify(workspace.settings.commercial, null, 2) : "";
+      if (commercialCurrent) commercialCurrent.textContent = workspace?.settings?.commercial ? "Configurazione commerciale presente · " + workspace.name : (workspace ? "Configurazione commerciale non ancora impostata · " + workspace.name : "Seleziona un workspace.");
+      if (!workspace) {
+        state.memberships = [];
+        state.documents = [];
+        state.prompts = [];
+        state.criteria = [];
+        renderWorkspaceReadiness();
+        return;
+      }
+      await Promise.all([loadMemberships(), loadDocuments(), loadGovernance()]);
+      renderWorkspaceReadiness();
     }
+
+    function renderWorkspaceReadiness() {
+      const target = $("workspace-readiness");
+      if (!target) return;
+      target.replaceChildren();
+      const workspace = selectedWorkspace();
+      if (!workspace) {
+        target.textContent = "Seleziona un workspace.";
+        return;
+      }
+      const checks = [];
+      checks.push({ label: "Workspace attivo", ok: workspace.status === "active", detail: "Stato: " + workspace.status });
+      let commercialOk = false;
+      let commercialDetail = "Configurazione commerciale assente.";
+      try {
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG?.normalize;
+        if (!normalizer) throw new Error("Validatore non caricato.");
+        normalizer({
+          commercial_config: workspace.settings?.commercial,
+          workspace_key: workspace.workspace_key,
+          partner_name: workspace.partner_name,
+          workspace_name: workspace.name,
+          market_country: workspace.market_country,
+          language_code: workspace.language_code
+        });
+        commercialOk = true;
+        commercialDetail = "Configurazione valida: 9 segmenti, criteri e query IT/EN.";
+      } catch (error) {
+        commercialDetail = error.message;
+      }
+      checks.push({ label: "Configurazione commerciale", ok: commercialOk, detail: commercialDetail });
+      const activeMemberships = state.memberships.filter(item => item.membership_status === "active").length;
+      checks.push({ label: "Membri attivi", ok: activeMemberships > 0, detail: activeMemberships + " membership attive." });
+      const approvedDocuments = state.documents.filter(item => item.approval_status === "approved").length;
+      checks.push({ label: "Knowledge Base", ok: approvedDocuments > 0, optional: true, detail: approvedDocuments + " documenti approvati; requisito consigliato, non blocca la ricerca prospect." });
+      const activePrompts = state.prompts.filter(item => item.status === "active").length;
+      const activeCriteria = state.criteria.filter(item => item.status === "active").length;
+      checks.push({ label: "Istruzioni AI attive", ok: activePrompts > 0, optional: true, detail: activePrompts + " versioni attive." });
+      checks.push({ label: "Criteri di qualificazione attivi", ok: activeCriteria > 0, optional: true, detail: activeCriteria + " versioni attive." });
+      checks.forEach(check => {
+        const line = node("p", undefined, "item");
+        line.append(node("strong", (check.ok ? "OK · " : check.optional ? "DA PREPARARE · " : "BLOCCANTE · ") + check.label));
+        line.append(node("span", check.detail, "muted"));
+        target.append(line);
+      });
+      const blockers = checks.filter(check => !check.ok && !check.optional);
+      const optional = checks.filter(check => !check.ok && check.optional);
+      const summary = node("p", blockers.length ? "Ricerca non pronta: " + blockers.length + " prerequisiti bloccanti." : "Prerequisiti essenziali della ricerca soddisfatti. Nessuna attivazione è stata eseguita.");
+      summary.style.fontWeight = "700";
+      target.prepend(summary);
+      if (optional.length) target.append(node("p", "Da completare per una configurazione più completa: " + optional.map(item => item.label).join(", ") + ".", "muted"));
+    }
+
+    $("load-zinzino-commercial-seed").addEventListener("click", async () => {
+      const target = $("commercial-config-status");
+      const button = $("load-zinzino-commercial-seed");
+      button.disabled = true;
+      try {
+        const response = await fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("File seed Zinzino non disponibile (HTTP " + response.status + ").");
+        const seed = await response.json();
+        $("commercial-config-json").value = JSON.stringify(seed, null, 2);
+        target.textContent = "Modello Zinzino caricato nell'editor. Non è stato ancora salvato.";
+      } catch (error) {
+        target.textContent = "Caricamento non riuscito: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("save-commercial-config").addEventListener("click", async () => {
+      const button = $("save-commercial-config");
+      const target = $("commercial-config-status");
+      const workspace = selectedWorkspace();
+      if (!workspace) { target.textContent = "Seleziona prima un workspace."; return; }
+      button.disabled = true;
+      try {
+        const commercial = JSON.parse($("commercial-config-json").value || "{}");
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) throw new Error("Validatore della configurazione commerciale non caricato.");
+        const normalized = normalizer.normalize({
+          workspace_id: workspace.id,
+          workspace_key: workspace.workspace_key,
+          workspace_name: workspace.name,
+          partner_name: workspace.partner_name,
+          market_country: workspace.market_country,
+          language_code: workspace.language_code,
+          commercial_config: commercial
+        });
+        const missingSegments = normalizer.segments.filter(segment => !normalized.searchModifiers[segment]?.length);
+        if (missingSegments.length) throw new Error("Criteri mancanti per: " + missingSegments.join(", "));
+        if (!confirm("Salvare la configurazione commerciale " + normalized.name + " nel workspace " + workspace.name + "?")) return;
+        const settings = { ...(workspace.settings || {}), commercial };
+        await adminAction({ action: "update_workspace", workspace_id: workspace.id, settings });
+        await loadWorkspaces();
+        target.textContent = "Configurazione commerciale salvata nel workspace " + workspace.name + ". La ricerca la leggerà al prossimo caricamento.";
+        status("Configurazione commerciale aggiornata.");
+      } catch (error) {
+        target.textContent = "Configurazione non salvata: " + error.message;
+        status("Salvataggio configurazione commerciale non completato: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     $("workspace-create").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
       const values = Object.fromEntries(new FormData(form).entries());
+      const lines = (value) => String(value || "").split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+      values.settings = {
+        profile_version: 1,
+        offering: lines(values.profile_offering),
+        audiences: lines(values.profile_audiences),
+        discovery: { keywords: lines(values.profile_discovery_terms) },
+        messaging: { approved_positioning: String(values.profile_positioning || "").trim() }
+      };
+      delete values.profile_offering;
+      delete values.profile_audiences;
+      delete values.profile_discovery_terms;
+      delete values.profile_positioning;
       const button = form.querySelector('button[type="submit"]');
       button.disabled = true;
       try {
@@ -314,6 +450,129 @@
       }
     });
 
+
+    async function loadGovernance() {
+      const workspace = selectedWorkspace();
+      const promptsTarget = $("prompt-list");
+      const criteriaTarget = $("criteria-list");
+      promptsTarget.replaceChildren();
+      criteriaTarget.replaceChildren();
+      if (!workspace) {
+        promptsTarget.append(node("p", "Seleziona un workspace."));
+        criteriaTarget.append(node("p", "Seleziona un workspace."));
+        return;
+      }
+      const [prompts, criteria] = await Promise.all([
+        adminAction({ action: "list_prompts", workspace_id: workspace.id }),
+        adminAction({ action: "list_criteria", workspace_id: workspace.id })
+      ]);
+      state.prompts = prompts.items || [];
+      state.criteria = criteria.items || [];
+      renderGovernanceItems(promptsTarget, state.prompts, "prompt");
+      renderGovernanceItems(criteriaTarget, state.criteria, "criteria");
+      renderWorkspaceReadiness();
+      status("Istruzioni AI: " + state.prompts.length + " · Criteri: " + state.criteria.length + ".");
+    }
+
+    function renderGovernanceItems(target, items, kind) {
+      target.replaceChildren();
+      if (!items.length) {
+        target.append(node("p", kind === "prompt" ? "Nessuna istruzione AI configurata." : "Nessun criterio di qualificazione configurato."));
+        return;
+      }
+      items.forEach((item) => {
+        const isPrompt = kind === "prompt";
+        const itemKey = isPrompt ? item.prompt_key : item.criteria_key;
+        const heading = node("strong", (isPrompt ? item.purpose : item.name) + " · v" + item.version);
+        heading.append(node("span", item.status, "pill"));
+        const row = node("div", undefined, "item");
+        row.append(heading);
+        row.append(node("p", "Chiave: " + itemKey + " · ID: " + item.id, "muted"));
+        if (item.description) row.append(node("p", item.description));
+        if (isPrompt && item.prompt_body) row.append(node("p", item.prompt_body.slice(0, 700) + (item.prompt_body.length > 700 ? "…" : ""), "muted"));
+        if (item.status === "draft") {
+          const activate = node("button", "Attiva versione", "btn");
+          activate.type = "button";
+          activate.addEventListener("click", async () => {
+            if (!confirm("Attivare " + itemKey + " versione " + item.version + "? La versione attiva precedente sarà sostituita.")) return;
+            activate.disabled = true;
+            try {
+              await adminAction({ action: isPrompt ? "activate_prompt" : "activate_criteria", item_id: item.id });
+              await loadGovernance();
+              status("Versione attivata.");
+            } catch (error) {
+              status("Attivazione non completata: " + error.message);
+              activate.disabled = false;
+            }
+          });
+          const archive = node("button", "Archivia bozza", "btn warn");
+          archive.type = "button";
+          archive.addEventListener("click", async () => {
+            if (!confirm("Archiviare questa bozza?")) return;
+            archive.disabled = true;
+            try {
+              await adminAction({ action: isPrompt ? "archive_prompt" : "archive_criteria", item_id: item.id });
+              await loadGovernance();
+            } catch (error) {
+              status("Archiviazione non completata: " + error.message);
+              archive.disabled = false;
+            }
+          });
+          row.append(activate, archive);
+        }
+        target.append(row);
+      });
+    }
+
+    $("prompt-create").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const workspace = selectedWorkspace();
+      if (!workspace) { status("Seleziona prima un workspace."); return; }
+      const form = event.currentTarget;
+      const values = Object.fromEntries(new FormData(form).entries());
+      values.version = Number(values.version);
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await adminAction({ action: "save_prompt_draft", workspace_id: workspace.id, ...values });
+        form.reset();
+        form.elements.namedItem("version").value = "1";
+        await loadGovernance();
+        status("Bozza istruzione AI salvata. Non è attiva finché non la attivi.");
+      } catch (error) {
+        status("Bozza istruzione non salvata: " + error.message);
+      } finally { button.disabled = false; }
+    });
+
+    $("criteria-create").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const workspace = selectedWorkspace();
+      if (!workspace) { status("Seleziona prima un workspace."); return; }
+      const form = event.currentTarget;
+      const values = Object.fromEntries(new FormData(form).entries());
+      values.version = Number(values.version);
+      try {
+        values.config = JSON.parse(values.config || "{}");
+        if (!values.config || Array.isArray(values.config) || typeof values.config !== "object") throw new Error("La configurazione deve essere un oggetto JSON.");
+      } catch (error) { status("Configurazione criteri non valida: " + error.message); return; }
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await adminAction({ action: "save_criteria_draft", workspace_id: workspace.id, ...values });
+        form.reset();
+        form.elements.namedItem("version").value = "1";
+        form.elements.namedItem("config").value = "{}";
+        await loadGovernance();
+        status("Bozza criteri salvata. Non è attiva finché non la attivi.");
+      } catch (error) {
+        status("Bozza criteri non salvata: " + error.message);
+      } finally { button.disabled = false; }
+    });
+
+    $("governance-refresh").addEventListener("click", async () => {
+      try { await loadGovernance(); } catch (error) { status("Istruzioni e criteri non disponibili: " + error.message); }
+    });
+
     $("documents-refresh").addEventListener("click", async () => {
       try { await loadDocuments(); } catch (error) { status("Elenco documenti non disponibile: " + error.message); }
     });
@@ -343,6 +602,8 @@
           ? "Documento già presente: non è stato creato un duplicato."
           : "Documento caricato e indicizzato. Stato pending: richiede approvazione.");
         form.reset();
+        const activeWorkspace = selectedWorkspace();
+        if (activeWorkspace) form.elements.namedItem("module_key").value = activeWorkspace.workspace_key.slice(0, 64);
       } catch (error) {
         status("Caricamento non completato: " + error.message);
       } finally {
@@ -361,7 +622,7 @@
         const { data, error } = await c.rpc("nextway_search_knowledge", {
           p_workspace_id: workspace.id,
           p_query: query,
-          p_module_key: $("knowledge-upload").elements.namedItem("module_key").value || "zinzino",
+          p_module_key: $("knowledge-upload").elements.namedItem("module_key").value.trim() || workspace.workspace_key.slice(0, 64),
           p_language_code: "it",
           p_limit: 5
         });

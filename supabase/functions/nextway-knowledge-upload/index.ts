@@ -8,8 +8,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Permette il test locale; autenticazione e autorizzazioni restano obbligatorie.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const BUCKET = "nextway-knowledge";
 const MAX_FILE_BYTES = 12 * 1024 * 1024;
 const MAX_EXTRACTED_CHARS = 500_000;
@@ -165,7 +174,7 @@ Deno.serve(async (req) => {
     if (!uuidPattern.test(workspaceId)) {
       return respond({ error: "workspace_id obbligatorio e non valido" }, 400, origin);
     }
-    const moduleKey = String(form.get("module_key") ?? "zinzino").trim();
+    const moduleKey = String(form.get("module_key") ?? "general").trim();
     const title = String(form.get("title") ?? originalName).trim();
     const sourceType = String(form.get("source_type") ?? "official_document").trim();
     const languageCode = String(form.get("language_code") ?? "it").trim();
