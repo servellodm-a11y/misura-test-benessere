@@ -3418,3 +3418,9 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Restano da estrarre/formalizzare: T-Balance, OTB completi per tutti i titoli, gradi oltre Black Crown, campagne Fast Start 60/90 giorni, viaggi incentivo ed esempi numerici ufficiali per test indipendenti.
 - `calculations_enabled=false` resta obbligatorio; nessuna formula di commissione o proiezione reddito attivata.
 - Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
+
+
+### Aggiornamento estrazione — titoli superiori e OTB completi
+- Fonte ufficiale EU 2025 interrogata direttamente: aggiunte le soglie e le strutture di avanzamento da Ambassador a 2 Star Global President e il programma bonus azionari.
+- La tabella One-Time Title Bonuses è ora strutturata per tutti i 14 titoli, con finestra temporale, tre criteri, rate e importi. Resta non automatizzabile la formula di T-Balance.
+- Il test contrattuale è stato corretto per verificare che le copie del registro Partner e del registro radice siano identiche e che le tabelle complete restino presenti.
