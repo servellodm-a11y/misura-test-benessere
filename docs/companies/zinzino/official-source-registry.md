@@ -249,3 +249,16 @@ La pagina Shop Italia e le categorie ufficiali sono state consultate per creare 
 Le pagine di categoria e le schede individuali possono mostrare importi differenti. Per questa ragione non sono stati inseriti prezzi statici nell'indice. Ogni proposta deve essere basata sulla scheda prodotto e sul checkout italiani aggiornati, distinguendo acquisto singolo, Prezzo Premier, abbonamento, Credits e consegna.
 
 Documento preparato: knowledge/shop-catalog-index.md. Non sostituisce schede tecniche, ingredienti, allergeni o claim autorizzati dei singoli prodotti.
+
+
+## Etica, marketing e privacy Partner — verifica preliminare (17 novembre 2026)
+
+Fonti ufficiali individuate:
+- Annual Report Zinzino AB 2025: https://cdn.cms.zinzino.com/globalassets/media/reports/financial-reports/2026/zinzino-annual-report-2025.pdf
+- Informativa privacy Partner, versione 1.0 EU: https://zinzinowebstorage.blob.core.windows.net/filelibrary/Integritypolicypartner_IT.pdf
+- Marketing Rules & Ethics identificata come MYS (Malaysia), non applicabile automaticamente all'Italia: https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Marketing-rules-and-ethics-en-MYS.pdf
+- Termini e condizioni vendita Italia identificati come 2022-02, non assumere che siano la versione corrente: https://zinzinowebstorage.blob.core.windows.net/contracts/TermsAndConditions_IT_it-IT.pdf
+
+L'Annual Report 2025 dichiara che il Code of Conduct e le Business Ethics Guidelines sono adottati annualmente dal Consiglio di amministrazione e inclusi negli accordi dei distributori; il testo integrale e la versione effettivamente applicabile al Partner italiano non sono allegati al rapporto. NEXTWAY deve acquisire dal Back Office Partner il Partner Agreement italiano vigente e i relativi allegati etici aggiornati.
+
+Stato: compliance Zinzino Italia PARZIALE / NON APPROVATA. Non importare la policy MYS come policy italiana e non usare i termini 2022-02 come fonte esclusiva per condizioni correnti. Valutazione interna: docs/companies/zinzino/compliance-source-assessment.md. Documento non inserito nel manifest Knowledge Base perché è un assessment interno e non una policy aziendale approvata.
