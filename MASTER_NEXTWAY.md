@@ -3373,3 +3373,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il manifesto KB include il riferimento come documento storico/secondario. Non è una traduzione integrale: non si riproduce in italiano l'intero documento protetto.
 - La pagina Partner Italia continua a collegare un PDF italiano separato, che resta da acquisire e riconciliare per confermare il piano vigente in Italia nel 2026.
 - Il contenuto è nel repository GitHub main, ma non è stato caricato nella KB Supabase: il workspace Zinzino non è ancora creato. Nessuna modifica DB o deploy.
+
+
+## 17 novembre 2026 — Conferma di vigenza del Piano Compensi Zinzino EU 2025
+
+- L'utente conferma che il PDF ufficiale Zinzino Compensation Plan — Europe, versione 12/02/2025, è tuttora in vigore a novembre 2026 senza modifiche e si applica anche al mercato italiano.
+- NEXTWAY assume il PDF master europeo come fonte ufficiale vigente per il workspace Zinzino Italia. La conferma della vigenza è registrata come dichiarazione dell'utente, non come verifica indipendente del portale Zinzino.
+- Aggiornata la base commerciale: lo stato non è più storico/non verificato; è ora `official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending`.
+- Aggiornata la guida italiana: sintesi originale operativa, non traduzione ufficiale integrale.
+- I calcoli restano prudentemente disabilitati (`calculations_enabled=false`, `rules=[]`) finché non saranno estratte e validate con test tutte le formule, soglie, condizioni, eccezioni, periodicità e requisiti di qualifica.
+- Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
