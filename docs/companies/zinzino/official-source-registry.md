@@ -118,3 +118,21 @@ Sono state acquisite tre ulteriori schede ufficiali italiane e aggiunte alla bas
 Fonti ufficiali: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910237 ; https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910637 ; https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910324 .
 
 I valori sono snapshot rilevati il 17 novembre 2026 e vanno ricontrollati prima di ogni preventivo. L'elenco resta parziale, non un catalogo esaustivo.
+
+
+## Aggiornamento catalogo Partner Kit — 17 novembre 2026
+
+La pagina ufficiale italiana Partner Kit espone anche le seguenti varianti, registrate nella base commerciale come snapshot di catalogo (non come prezzo garantito):
+
+- **Ultimate Beauty Kit** — prezzo standard visualizzato €3105; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+- **Ultimate Collagen Kit** — prezzo standard visualizzato €2075; Prezzo Premier €1280; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+- **Basic Vegan Kit** — prezzo standard visualizzato €542; Prezzo Premier €329.
+- **Advanced Vegan Kit** — prezzo standard visualizzato €1387; Prezzo Premier €860.
+- **Ultimate Vegan Kit** — prezzo standard visualizzato €2711; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+- **Ultimate Immune Kit** — prezzo standard visualizzato €3328; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+- **Ultimate Practitioners Kit** — prezzo standard visualizzato €3282; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+- **Health Protocol Kit** — prezzo standard visualizzato €1259; Prezzo Premier €583.
+- **Basic Xelliss Kit** — prezzo standard visualizzato €499; Prezzo Premier €329.
+- **Ultimate Xelliss Kit** — prezzo standard visualizzato €3385; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
+
+Fonte: https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers. La base commerciale contiene ora 14 voci Partner Kit; il catalogo resta parziale. Per le offerte con etichetta di rimborso, acquisire e verificare il regolamento specifico della campagna prima di descrivere requisiti, scadenze o importi rimborsabili.
