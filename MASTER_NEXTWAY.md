@@ -3556,3 +3556,47 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Solo dopo l'accesso amministrativo riuscito: creare il workspace Zinzino Italia tramite l'azione amministrativa ufficiale, quindi importare e approvare la documentazione secondo gli stati previsti.
 - Non creare workspace via SQL o service-role bypass; non importare documenti nel database prima della creazione workspace autenticata.
 - PR #49 e #50 non hanno modificato il database né eseguito deploy.
+
+
+---
+
+## AGGIORNAMENTO CONTINUITÀ — 17 NOVEMBRE 2026, PR #52–#53
+
+### PR #52 — CORS Knowledge Base
+- PR #52 `Allow Cloudflare Pages preview for NEXTWAY Knowledge import` integrata in main, squash commit `d96a7657d93912ff081db3f1c3c458ff211c72f1`.
+- Origine esatta `https://misura-test-benessere.pages.dev` aggiunta alle allow-list CORS di `nextway-knowledge-ingest` e `nextway-knowledge-upload`; origini configurate e localhost conservati; nessun wildcard.
+- Test statico CORS esteso alle due funzioni Knowledge.
+- GitHub Actions NEXTWAY static validation run #1061: SUCCESS; test CORS, Knowledge Ingest/Upload security contracts e type-check delle Edge Functions superati.
+- Cloudflare Pages ha pubblicato la preview del branch PR #52. È una preview Cloudflare e non equivale a un deploy Netlify di produzione.
+- La modifica è nel repository: le due Edge Functions Supabase live non sono state aggiornate. Il deploy resta bloccato fino al 4 dicembre 2026.
+
+### PR #53 — bootstrap controllato workspace Zinzino
+- PR #53 `Prepare validated Zinzino workspace draft from admin UI` integrata in main, squash commit `daf69185a3c5c25b0f5ae6baf3afc01bb8d341d5`.
+- Admin UI aggiunge il pulsante esplicito `Prepara bozza Zinzino Italia`: carica e valida `workspace-commercial-settings.json` e `commercial-base.v1.json`, precompila i campi del workspace e mantiene la configurazione commerciale completa in memoria fino all'invio.
+- Alla conferma esplicita, il flusso crea soltanto un workspace in stato `draft`, con la configurazione commerciale associata in `settings.commercial`. La UI blocca l'invio se l'identità del workspace non corrisponde più a Zinzino Italia.
+- I calcoli compensi e l'attivazione commerciale restano disabilitati. Nessuna membership, invito, approvazione documentale o attivazione automatica viene eseguita.
+- Aggiunto `scripts/test-nextway-zinzino-workspace-bootstrap.mjs` e relativo step CI.
+- GitHub Actions NEXTWAY static validation run #1063: SUCCESS; test bootstrap, test configurazione commerciale, sintassi Admin UI e type-check Edge Functions superati.
+- Nessuna chiamata live a Supabase e nessuna creazione workspace eseguita. Il workspace `zinzino-italia` resta da creare tramite Admin UI autenticata come `platform_admin`.
+- La UI modificata è nel repository; non è stata distribuita a Netlify né a Supabase.
+
+### Stato Knowledge Base Zinzino
+- Il manifesto `docs/companies/zinzino/knowledge/IMPORT-MANIFEST.md` elenca 8 documenti italiani preparati.
+- Tutti gli 8 file elencati sono stati recuperati da GitHub main e risultano presenti; la verifica ha confermato intestazioni, riferimenti fonte e dimensioni non nulle.
+- I documenti non sono importati nel bucket privato `nextway-knowledge`; l'importazione richiede workspace esistente e Admin UI autenticata.
+- Dopo l'importazione, i documenti devono rimanere `approval_status=pending` fino alla revisione amministrativa. Non approvare in blocco.
+- Il manifesto mantiene le cautele: prezzi/cataloghi dinamici da aggiornare, documento storico 2024 non fonte autonoma per calcoli, piano EU 2025 basato anche sulla conferma del titolare, calcoli compensi disabilitati.
+
+### Stato aggiornato e prossimi passaggi
+- Repository main: HEAD osservato `daf69185a3c5c25b0f5ae6baf3afc01bb8d341d5`.
+- PR #52 e #53: COMPLETATO E VERIFICATO come merge.
+- CI run #1061 e #1063: COMPLETATO E VERIFICATO.
+- Workspace Zinzino Italia: DA COMPLETARE tramite sessione Admin UI autenticata; non eseguire SQL/service-role bypass.
+- Configurazione commerciale nel DB: DA COMPLETARE dopo creazione workspace; il nuovo bootstrap consente di associarla contestualmente alla creazione.
+- Knowledge Base: 8 documenti predisposti, importazione DA COMPLETARE; nessuna approvazione automatica.
+- Edge Functions CORS live e UI amministrativa Netlify: DA COMPLETARE dopo il 4 dicembre 2026; nessun deploy prima di tale data.
+- Test runtime workspace/Knowledge/CRM/AI Setter: DA COMPLETARE dopo allineamento delle funzioni e configurazione DB, con test interni controllati.
+- Vincoli invariati: nessun test utenti reali o conversioni reali prima del 4 dicembre 2026; nessun deploy Netlify/produzione prima della stessa data.
+
+### Registro cronologico
+- 17-11-2026 — PR #52 allinea le allow-list CORS Knowledge nel repository; PR #53 introduce il bootstrap controllato del workspace Zinzino in Admin UI. Entrambe integrate e CI riuscita. Aggiornamento documentale: nessuna modifica live a Supabase/Netlify.
