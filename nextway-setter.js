@@ -443,9 +443,7 @@
         const createRequest = await prepareLeadCreateRequest(values, s.user.id);
         say('Creazione prospect e conversazione…');
         const workspaceId = values.workspace_id || null;
-        const rpcName = workspaceId
-          ? 'nextway_create_lead_with_conversation_commercial_v3'
-          : 'nextway_create_lead_with_conversation_commercial_v3';
+        const rpcName = 'nextway_create_lead_with_conversation_commercial_v3';
         const rpcArgs = {
           p_request_id: createRequest.request_id,
           p_request_hash: createRequest.request_hash,
