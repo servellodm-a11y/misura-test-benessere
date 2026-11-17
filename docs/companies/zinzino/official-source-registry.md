@@ -174,7 +174,7 @@ Fonte indice: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits .
 
 ## Knowledge Base — documenti pronti per importazione (17 novembre 2026)
 
-Preparati nel repository quattro documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: knowledge/customer-rewards-program.md, knowledge/partner-kits-and-compensation-boundaries.md, knowledge/premier-kit-catalog-validation.md e knowledge/IMPORT-MANIFEST.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
+Preparati nel repository sette documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: customer-rewards-program.md, partner-kits-and-compensation-boundaries.md, premier-kit-catalog-validation.md, compensation-plan-eu-2025-italian-reference.md, compensation-plan-italian-2024-comparison.md, compensation-plan-eu-2025-structured-rules.md e balancetest-product-and-use-reference.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
 
 
 ## Piano Compensi — riferimento europeo inglese acquisito (17 novembre 2026)
@@ -182,7 +182,7 @@ Preparati nel repository quattro documenti italiani da importare nella Knowledge
 - Fonte ufficiale Zinzino: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf
 - Titolo: Zinzino Compensation Plan — Europe; versione impressa 12-02-2025; 60 pagine circa, testo indicizzato in 1.828 righe.
 - È stata preparata una scheda italiana di orientamento non ufficiale, non una traduzione integrale. Il documento stesso dichiara che la versione inglese prevale in caso di differenze di traduzione.
-- La pagina Partner Italia collega un PDF distinto in italiano; finché quel documento non è acquisito e riconciliato con la versione europea, la scheda inglese resta riferimento secondario/storico e i calcoli restano disabilitati.
+- La pagina Partner Italia collega un PDF distinto in italiano; il master EU inglese resta il riferimento adottato per la configurazione commerciale, in base alla conferma dell'utente del 17/11/2026. Il confronto con il PDF italiano 2024 è documentato separatamente; i calcoli restano disabilitati.
 
 
 ## Aggiornamento 17 novembre 2026 — conferma di vigenza Piano Compensi EU
@@ -205,7 +205,7 @@ La conferma dell'utente del 17/11/2026 che il master EU 12/02/2025 è tuttora vi
 
 Fonte primaria: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf (Zinzino Compensation Plan — Europe, versione 12/02/2025). La vigenza fino a novembre 2026 è registrata sulla base della conferma esplicita dell'utente.
 
-Sono state strutturate 18 voci di riferimento: Cliente attivo e Customer Points; Credits e bilanciamento 2:1; banking; ECB/ECBx/RCB; Grace Period e Active Partner; Customer Career Plan; Cash Bonus; MCB e zRewards; bonus una tantum e Fast Start Cliente; titoli Partner fino a Black Crown; Team Commission; Volume Commission; CAB; Mentor Matching Bonus; OTB Partner parziali; zPhone/zCar; Income Center; Pay Points; Z4F Partner e Fast Start operativo confermato dall'utente.
+Sono state strutturate 20 regole di riferimento: Cliente attivo e Customer Points; Credits e bilanciamento 2:1; banking; ECB/ECBx/RCB; Grace Period e Active Partner; Customer Career Plan; Cash Bonus; MCB e zRewards; bonus una tantum e Fast Start Cliente; titoli Partner fino a Black Crown; Team Commission; Volume Commission; CAB; Mentor Matching Bonus; OTB Partner parziali; zPhone/zCar; Income Center; Pay Points; Z4F Partner e Fast Start operativo confermato dall'utente.
 
 I valori restano nelle unità originali e non vengono trasformati in stime di reddito. T-Balance, OTB completi, titoli oltre Black Crown, campagne Fast Start 60/90 giorni e viaggi incentivo restano da formalizzare. Nessun calcolo è abilitato.
 
@@ -226,3 +226,17 @@ Il master EU 2025 è stato strutturato in quattro step (30/60/90/120 giorni), co
 - Lifetime Awards: 5, 10, 15, 30, 50, 100 e 500 Partner personali; qualifica 30 giorni prima dell'Annual Event.
 - Incentive trips: Director Trip annuale e Ambassador Trip annuale per Ambassador attivi; regolamenti specifici non inclusi nel piano generale.
 - Requisiti dettagliati titoli senior da Ambassador a 2 Star Global President e Infinity Bonus 0,5% per 1/2 Star GP inseriti nel JSON.
+
+
+## BalanceTest — scheda prodotto e Product Sheet italiano (verifica 17 novembre 2026)
+
+Fonti ufficiali consultate:
+- Scheda prodotto Italia: https://www.zinzino.com/shop/site/IT/it-IT/products/shop/309000
+- Product Sheet italiano, quattro pagine, data impressa 06/10/2026: https://zinzinowebstorage.blob.core.windows.net/product-sheets/BalanceTest-it-IT.pdf
+- Guida rapida ufficiale: https://www.zinzino.com/site/it/it-it/blog/health/balancetest-guida-rapida-al-test-degli-omega-3/
+
+È stata preparata la sintesi originale `knowledge/balancetest-product-and-use-reference.md`: descrizione DBS, 11 acidi grassi, indicatori e formule pubblicate, procedura di raccolta, accesso ai risultati e limiti di comunicazione. Il produttore indica un orizzonte di circa 120 giorni per i valori del profilo e risultati disponibili in circa 10–20 giorni.
+
+La documentazione dichiara che il Valore di Protezione non indica lo stato di salute. La formula completa di normalizzazione degli indicatori non è pubblicata nella scheda; NEXTWAY non deve ricostruirla né simulare il punteggio. Sono stati aggiunti limiti per claim sanitari e protezione dei dati: non archiviare risultati/ID/referti nel CRM prospecting.
+
+La scheda e il Product Sheet citano la direttiva 98/79/CE e il marchio CE. La citazione è registrata come contenuto della fonte, non come verifica autonoma della conformità normativa attuale.
