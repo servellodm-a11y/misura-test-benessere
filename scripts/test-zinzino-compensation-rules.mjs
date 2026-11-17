@@ -16,7 +16,7 @@ for (const id of ['customer_activity_and_points','credits_balance_and_banking','
   assert.equal(byId.get(id).source_url, root.source_url);
 }
 assert.equal(byId.get('fast_start_operational_rule_user_confirmed').status, 'confirmed_by_project_owner_for_nextway');
-assert.equal(byId.get('credit_accelerators').accelerators.ECBx.multiplier, null);
+assert.equal(byId.get('credit_accelerators').ECBx.multiplier, null);
 assert.equal(byId.get('customer_one_time_and_fast_start_bonuses').one_time_bonuses[0].campaign_rules_required, true);
 assert.ok(root.rule_coverage.remaining.length > 0);
 assert.equal(byId.get('partner_team_titles').higher_titles.length, 8, 'Senior Partner titles and star progression must be structured');
