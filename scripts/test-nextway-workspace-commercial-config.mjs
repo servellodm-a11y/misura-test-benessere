@@ -14,7 +14,7 @@ const allQueries={
   en:Object.fromEntries(api.segments.map(segment=>[segment,[[segment,'english query '+segment]]]))
 };
 const baseCommercial={
-  company:{id:'zinzino',name:'Zinzino',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
+  company:{id:'test-brand',name:'Test Brand',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
   brand_terms:['zinzino','balancetest'],
   search_queries:allQueries,
   search_modifiers:allModifiers,
@@ -26,8 +26,8 @@ const valid=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',
   commercial_config:baseCommercial
 });
-assert.equal(valid.id,'zinzino');
-assert.equal(valid.name,'Zinzino');
+assert.equal(valid.id,'test-brand');
+assert.equal(valid.name,'Test Brand');
 assert.equal(valid.workspaceId,'ws-1');
 assert.deepEqual([...valid.brandTerms],['zinzino','balancetest']);
 assert.equal(valid.searchQueries.it.customers[0][1],'query italiana customers');
