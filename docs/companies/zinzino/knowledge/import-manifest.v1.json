@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "workspace_key": "zinzino-italia",
+  "language_code": "it",
+  "import_policy": {
+    "approval_status": "pending",
+    "deduplicate_by_content_sha256": true,
+    "maximum_documents_per_batch": 20,
+    "notes": "Documenti NEXTWAY di sintesi e riferimento interno basati su fonti ufficiali indicate in ogni file. Non sono policy Zinzino originali né pareri legali o medici."
+  },
+  "documents": [
+    {
+      "file": "customer-rewards-program.md",
+      "module_key": "customer_rewards",
+      "source_type": "training_material",
+      "title": "Programma a premi Cliente",
+      "version_label": "2026-11-17",
+      "source_reference": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program"
+    },
+    {
+      "file": "partner-kits-and-compensation-boundaries.md",
+      "module_key": "partner_program",
+      "source_type": "training_material",
+      "title": "Kit Partner e limiti del Piano Compensi",
+      "version_label": "2026-11-17",
+      "source_reference": "https://www.zinzino.com/site/it/it-it/partnerweb"
+    },
+    {
+      "file": "premier-kit-catalog-validation.md",
+      "module_key": "customer_catalog",
+      "source_type": "training_material",
+      "title": "Catalogo Premier Kit e stato validazione",
+      "version_label": "2026-11-17",
+      "source_reference": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits"
+    },
+    {
+      "file": "compensation-plan-eu-2025-italian-reference.md",
+      "module_key": "partner_compensation_reference",
+      "source_type": "training_material",
+      "title": "Piano Compensi Zinzino — guida italiana al master europeo vigente",
+      "version_label": "EU-2025-IT-reference-2026-11",
+      "source_reference": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf"
+    },
+    {
+      "file": "compensation-plan-italian-2024-comparison.md",
+      "module_key": "partner_compensation_reference",
+      "source_type": "training_material",
+      "title": "Confronto PDF italiano 2024 e master EU 2025",
+      "version_label": "IT-2024-vs-EU-2025",
+      "source_reference": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf"
+    },
+    {
+      "file": "compensation-plan-eu-2025-structured-rules.md",
+      "module_key": "partner_compensation_rules",
+      "source_type": "training_material",
+      "title": "Regole Piano Compensi EU 2025 — estrazione strutturata fase 2",
+      "version_label": "EU-2025-phase-2-2026-11",
+      "source_reference": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf"
+    },
+    {
+      "file": "balancetest-product-and-use-reference.md",
+      "module_key": "customer_product_education",
+      "source_type": "training_material",
+      "title": "BalanceTest — scheda prodotto e istruzioni ufficiali",
+      "version_label": "Product-Sheet-2026-10-06",
+      "source_reference": "https://zinzinowebstorage.blob.core.windows.net/product-sheets/BalanceTest-it-IT.pdf"
+    },
+    {
+      "file": "shop-catalog-index.md",
+      "module_key": "customer_catalog",
+      "source_type": "training_material",
+      "title": "Shop Zinzino Italia — indice categorie e prodotti",
+      "version_label": "2026-11-17",
+      "source_reference": "https://www.zinzino.com/shop/site/IT/it-IT/products/shop/shop"
+    }
+  ]
+}

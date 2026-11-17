@@ -97,6 +97,10 @@
   <section class="panel">
     <h2>4. Knowledge Base</h2>
     <p class="muted">Carica PDF, DOCX o TXT. I documenti vengono indicizzati come pending e non sono utilizzabili dall'assistente finché non vengono approvati.</p>
+    <div class="row">
+      <button class="btn alt" id="import-zinzino-knowledge" type="button">Importa pacchetto Zinzino (8 documenti)</button>
+      <span class="muted" id="zinzino-knowledge-import-status" aria-live="polite">Importazione multipla dei riferimenti Markdown; tutti i nuovi documenti resteranno pending.</span>
+    </div>
     <form id="knowledge-upload">
       <div class="grid">
         <label>Modulo / area documentale<input name="module_key" required maxlength="64" placeholder="Si propone la chiave del workspace selezionato"></label>
