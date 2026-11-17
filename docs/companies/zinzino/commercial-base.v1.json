@@ -841,9 +841,9 @@
       "source_language": "it",
       "source_market": "Italy",
       "translation_status": "official_italian_pdf_linked_from_italy_partner_page_but_older_than_eu_2025_master",
-      "reconciliation_status": "known_differences_and_internal_fast_start_ambiguity_identified_full_rule_validation_pending",
+      "reconciliation_status": "known_document_differences_recorded_fast_start_operational_rule_confirmed_by_user_for_nextway",
       "master_precedence_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
-      "notes": "Il PDF italiano caricato è la versione 14/11/2024, collegata dalla pagina ufficiale Partner Italia. Il documento dichiara che, in caso di traduzione errata o differenze, prevale il master inglese. Non usarlo da solo per calcoli o regole correnti. Differenze da riconciliare: nota Fast Start Enrollment Points e nota campagne 60/90 giorni; vedere compensation-plan-italian-2024-comparison.md."
+      "notes": "Il PDF italiano 14/11/2024 è collegato dalla pagina ufficiale Partner Italia e resta riferimento localizzato precedente al master EU 12/02/2025. Per NEXTWAY la sequenza Fast Start attualmente applicata è stata confermata dal titolare del progetto il 17/11/2026; vedere compensation-plan-italian-2024-comparison.md. Il master EU resta la fonte primaria. Le condizioni dei bonus 60/90 giorni restano dipendenti dal regolamento della campagna specifica."
     },
     {
       "id": "black_week_2026_it",
