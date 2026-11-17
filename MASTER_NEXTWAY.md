@@ -3533,3 +3533,26 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - L'assessment interno è `docs/companies/zinzino/compliance-source-assessment.md`; è escluso dal manifest Knowledge Base perché non è una policy aziendale approvata.
 - Il registro fonti aggiornato è `docs/companies/zinzino/official-source-registry.md`.
 - Non sono state apportate modifiche a Supabase, workspace, produzione Netlify o test reali.
+
+
+---
+
+## 17 novembre 2026 — PR #49 e #50: sessione Admin e CORS Cloudflare Pages
+
+### Integrazione GitHub
+- PR #49 — refresh una tantum della sessione Supabase quando la funzione amministrativa risponde 401; merge squash nel commit `27a2a6a4a55aa3728c9bbd44e081128b69a8ffa9`.
+- PR #50 — aggiunta l'origine esatta `https://misura-test-benessere.pages.dev` alla allow-list CORS di `nextway-workspace-admin`; mantenute `http://localhost:8000` e le origini configurate da `NEXTWAY_ALLOWED_ORIGINS`; nessun wildcard. Merge squash nel commit `61718bf38b33dbe168cfd2e25d03d3da01fc5d71`.
+- CI PR #50: NEXTWAY static validation success; test CORS allow-list, workspace-admin security contract e type-check della Edge Function superati.
+
+### Stato Supabase live e diagnosi
+- La Edge Function `nextway-workspace-admin` è ancora alla versione 3 distribuita prima della PR #50, con `verify_jwt=true`.
+- Il codice live autorizza per default soltanto `https://misura-test-benessere.netlify.app`; non contiene localhost né l'origine Cloudflare Pages.
+- I log browser hanno mostrato l'origine `https://misura-test-benessere.pages.dev`; il preflight può quindi essere respinto dal browser per assenza di `Access-Control-Allow-Origin`.
+- PR #50 corregge il codice nel repository, ma non modifica la funzione live.
+
+### Vincoli e prossime azioni
+- Non distribuire la Edge Function prima del 4 dicembre 2026, salvo nuova autorizzazione esplicita. Nessun deploy Netlify/produzione e nessun test con utenti reali/conversioni prima della stessa data.
+- Dopo la finestra autorizzata: distribuire esclusivamente `nextway-workspace-admin` dalla versione `main` con `verify_jwt=true`; verificare preflight dall'origine Cloudflare Pages, chiamata autenticata con JWT utente e ruolo server-side `platform_admin`.
+- Solo dopo l'accesso amministrativo riuscito: creare il workspace Zinzino Italia tramite l'azione amministrativa ufficiale, quindi importare e approvare la documentazione secondo gli stati previsti.
+- Non creare workspace via SQL o service-role bypass; non importare documenti nel database prima della creazione workspace autenticata.
+- PR #49 e #50 non hanno modificato il database né eseguito deploy.
