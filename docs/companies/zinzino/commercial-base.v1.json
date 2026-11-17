@@ -754,11 +754,43 @@
       "italian_translation_status": "original_italian_operational_summary_not_official_translation",
       "calculations_enabled": false,
       "rules": [],
-      "blocking_reason": "Fonte ufficiale europea vigente secondo conferma dell'utente del 17-11-2026. La strutturazione puntuale delle regole, le formule, le soglie, le eccezioni e i test automatici sono ancora da completare. Non abilitare calcoli commissioni/qualifiche finché le regole non sono state estratte e verificate una per una contro il documento master.",
+      "blocking_reason": "Fonte ufficiale europea vigente secondo conferma dell'utente del 17-11-2026. La sequenza Fast Start operativa è stata confermata dall'utente e registrata. La strutturazione puntuale delle restanti regole, formule, soglie, eccezioni e test automatici è ancora da completare. Non abilitare calcoli commissioni/qualifiche finché le regole non sono state estratte e verificate una per una contro il documento master.",
       "validity_confirmation": {
         "status": "confirmed_by_user",
         "confirmed_at": "2026-11-17",
         "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore a novembre 2026 senza modifiche."
+      },
+      "fast_start_operational_rule": {
+        "status": "confirmed_by_project_owner_for_nextway",
+        "confirmed_at": "2026-11-17",
+        "confirmation_basis": "explicit_user_operational_confirmation",
+        "sequence": [
+          {
+            "step": 1,
+            "requirement": "4 punti cliente"
+          },
+          {
+            "step": 2,
+            "requirement": "2 Partner con Ultimate Partner Kit",
+            "placement": {
+              "left": 1,
+              "right": 1
+            }
+          },
+          {
+            "step": 3,
+            "requirement": "duplicazione dei due Partner"
+          },
+          {
+            "step": 4,
+            "requirement": "10 ulteriori punti cliente",
+            "breakdown": {
+              "first": 4,
+              "second": 6
+            }
+          }
+        ],
+        "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
       }
     }
   },
