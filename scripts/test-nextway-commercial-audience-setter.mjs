@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const migration=fs.readFileSync("supabase/migrations/20261117170000_nextway_lead_commercial_audience.sql","utf8");
+const setter=fs.readFileSync("nextway-setter.js","utf8");
+const edge=fs.readFileSync("supabase/functions/nextway-ai-setter/index.ts","utf8");
+assert.match(migration,/commercial_audience text/,"Lead stores explicit commercial audience");
+assert.match(migration,/commercial_audience in \('customer','partner'\)/,"audience is restricted to customer or partner");
+assert.match(migration,/nextway_create_lead_with_conversation_idempotent_v2/,"creation retains existing idempotent workspace safeguards");
+assert.match(migration,/owner_profile_id=auth\.uid\(\)[\s\S]*workspace_id is not distinct from p_workspace_id/,"audience assignment is bound to the authenticated Lead owner and workspace");
+assert.match(setter,/name="commercial_audience" required/,"AI Setter requires explicit audience selection");
+assert.match(setter,/p_commercial_audience: values\.commercial_audience/,"AI Setter sends audience to the database RPC");
+assert.match(setter,/nextway_create_lead_with_conversation_commercial_v3/,"AI Setter uses the audience-aware idempotent RPC");
+assert.match(edge,/commercial_audience,/,"AI Setter reads the stored audience");
+assert.match(edge,/nextway_get_workspace_commercial_config/,"AI Setter reads the authorized workspace commercial configuration");
+assert.match(edge,/selected_catalog: selected/,"AI Setter injects only the audience-specific catalog");
+assert.match(edge,/Classificare il prospect come Cliente o Partner/,"Zinzino generation fails closed for unclassified Leads");
+assert.match(edge,/Non calcolare commissioni, qualifiche o guadagni/,"AI Setter does not calculate unverified compensation");
+console.log("NEXTWAY commercial audience and AI Setter integration: 12 contract assertions passed");
