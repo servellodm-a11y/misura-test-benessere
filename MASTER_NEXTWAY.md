@@ -3437,3 +3437,38 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Aggiunti i riferimenti Director Trip e Ambassador Trip, mantenendo le condizioni di campagna non presenti nel piano generale come non verificate.
 - Completate le descrizioni dei requisiti di qualifica dei titoli Ambassador–2 Star Global President, incluse alternative Income Centers/Enrollment Lines, e registrato Infinity Bonus 0,5% per 1/2 Star GP.
 - Il registro contiene ora 20 regole; `calculations_enabled=false` resta obbligatorio per T-Balance, campagne e assenza di test numerici completi.
+
+
+---
+
+## 17 novembre 2026 — Chiusura verifica commerciale Zinzino e controlli numerici strutturali
+
+### Integrazione GitHub
+- PR #37 — chiarimento CAB: merge completato nel commit `f52560aa3e2a36687540f7f86ee6eea0e05583cc`.
+- PR #38 — controlli di coerenza delle tabelle compensi e aggiornamento documentazione: merge completato nel commit `4da30dba66ba40bc4b59ef1ba270051c79ad3047`.
+- CI PR #37: NEXTWAY static validation conclusa con successo.
+- CI PR #38: NEXTWAY static validation conclusa con successo dopo due correzioni del test (tolleranza floating point 2:1 e testo CAB Mini).
+- La suite Zinzino verifica ora la coerenza strutturale/numerica di Team Commission, CAB, OTB, Volume Commission, Cash Bonus ed Enrollment Incentive Program.
+
+### CAB
+- La configurazione distingue Mini da Small–5XL sul requisito Active Partner: il glossario esplicita il requisito per Small–5XL, ma non lo estende esplicitamente a Mini.
+- Soglie Left/Right simmetriche, stessa Income Center, limite di una Income Center per ciclo settimanale.
+- Incrementi cumulativi e totali PP verificati rispetto alla tabella strutturata.
+- Nessun calcolo commissionale runtime abilitato.
+
+### Stato compensi
+- 20 regole strutturate e doppia copia sincronizzata.
+- I test automatici controllano coerenza interna delle tabelle, non certificano un motore di calcolo commissionale né sostituiscono casi di prova indipendenti ufficiali.
+- `calculations_enabled=false` resta obbligatorio.
+- Restano non risolti: formula T-Balance/OTB, importi maggiorati Fast Start 60/90 legati a campagne, regolamenti annuali Director/Ambassador Trip applicabili al ciclo corrente, test indipendenti su banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus.
+- Il catalogo Premier Kit conta 35 voci: 15 snapshot di schede, 1 prodotto discontinuato e 19 voci listing-only non selezionabili finché non si acquisiscono dettagli verificati.
+- Il catalogo Partner Kit conta 14 voci; prezzi e condizioni vanno aggiornati prima di ogni proposta.
+
+### Documentazione
+- Corretto `docs/companies/zinzino/README.md`: stato delle fonti non più genericamente “da acquisire”.
+- Corretto `docs/companies/zinzino/commercial-base.md`: non descrive più il piano compensi come privo di regole strutturate.
+- Nessun intervento Supabase, nessuna creazione workspace, nessun deploy produzione o test con utenti reali.
+
+### Istruzione operativa permanente
+- Quando l'utente dice “completa tutto” o “procedi”, continuare in sequenza le attività sicure e necessarie senza chiedere il comando a ogni passaggio.
+- Non dichiarare attività in background tra conversazioni. Riprendere dal presente MASTER quando si riapre il lavoro.
