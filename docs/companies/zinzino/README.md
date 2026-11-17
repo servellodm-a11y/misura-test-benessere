@@ -31,17 +31,17 @@ Il sito Misura Test Benessere non deve essere descritto come sito ufficiale Zinz
 
 Questa cartella è il punto di raccolta della documentazione ufficiale da cui ricavare i contenuti aziendali. Non inserire dati commerciali per supposizione.
 
-| Area | Fonte richiesta | Stato |
+| Area | Fonte / base disponibile | Stato |
 |---|---|---|
-| Presentazione aziendale | Presentazione ufficiale aggiornata | Da acquisire |
-| Catalogo prodotti | Catalogo ufficiale valido per l'Italia | Da acquisire |
-| Schede prodotto | Schede tecniche e ingredienti ufficiali | Da acquisire |
-| Test e strumenti | Documentazione ufficiale di BalanceTest e strumenti collegati | Da acquisire |
-| Piano compensi | Piano commerciale/compensi vigente in Italia, con condizioni e definizioni | Da acquisire |
-| Regole commerciali | Policy, termini, condizioni, codici etici e regole di comunicazione | Da acquisire |
-| Formazione | Materiali ufficiali per clienti, nuovi partner e leader | Da acquisire |
-| Claim consentiti | Claim autorizzati, avvertenze e materiali conformi UE/Italia | Da acquisire |
-| Prezzi e abbonamenti | Listini e condizioni ufficiali aggiornati per il mercato italiano | Da acquisire |
+| Presentazione aziendale | Presentazione ufficiale e pagine pubbliche Zinzino | Parziale; integrare materiali italiani e aggiornati |
+| Catalogo prodotti | Cataloghi Partner Kit, Premier Kit e Shop Italia censiti nel registro fonti | Strutturato; prezzi e disponibilità da aggiornare prima di ogni proposta |
+| Schede prodotto | Schede Premier Kit e prodotti già censite; schede tecniche complete da acquisire | Parziale; non inventare ingredienti, dosi o claim mancanti |
+| Test e strumenti | Pagine pubbliche e riferimenti BalanceTest | Parziale; acquisire manuali e documentazione tecnica completa |
+| Piano compensi | Master EU 2025, versione 12/02/2025, strutturato in 20 regole; applicabilità Italia confermata dall'utente il 17/11/2026 | Strutturato; calcoli disabilitati e regole residue aperte |
+| Regole commerciali | Condizioni catalogo, Customer Rewards e riferimenti policy censiti | Parziale; acquisire regolamenti completi e aggiornati |
+| Formazione | Pagine pubbliche di onboarding e Fast Start | Parziale; completare materiali ufficiali italiani |
+| Claim consentiti | Fonti pubbliche e regole di conformità registrate | Da completare con dossier claim approvati per Italia/UE |
+| Prezzi e abbonamenti | Snapshot delle schede ufficiali italiane nel registro | Da aggiornare dal catalogo/checkout prima di ogni preventivo |
 
 ## Come NEXTWAY deve usare questi dati
 
