@@ -90,7 +90,7 @@
       id,name,active:true,country:clean(company.country||raw.market_country,80),
       language:clean(company.language||raw.language_code,12)||'it',
       sector,positioning,brandTerms,searchQueries,
-      searchModifiers:normalizedModifiers,consultantChannels,officialMaterials,guardrails,
+      searchModifiers:normalizedModifiers,consultantChannels:channels,officialMaterials:materials,guardrails,
       commercialData,
       workspaceId:clean(raw.workspace_id,80),
       workspaceKey:clean(raw.workspace_key,80)
