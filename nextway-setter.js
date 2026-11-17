@@ -59,6 +59,7 @@
             </label>
             <label>Percorso commerciale *
               <select name="commercial_audience" required>
+                <option value="">Seleziona Cliente o Partner</option>
                 <option value="customer">Cliente — prodotti, Shop e abbonamenti</option>
                 <option value="partner">Partner — kit, attività e piano compensi</option>
               </select>
@@ -448,6 +449,8 @@
         const rpcArgs = {
           p_request_id: createRequest.request_id,
           p_request_hash: createRequest.request_hash,
+          p_workspace_id: workspaceId,
+          p_commercial_audience: values.commercial_audience,
           p_display_name: values.display_name,
           p_category: values.category,
           p_source_name: values.source_name,
@@ -456,7 +459,6 @@
           p_objective: values.objective,
           p_channel: values.channel
         };
-        if (workspaceId) rpcArgs.p_workspace_id = workspaceId;
         const { data, error } = await c.rpc(rpcName, rpcArgs);
         if (error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
