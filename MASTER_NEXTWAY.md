@@ -1,110 +1,3 @@
-## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
-
-### Verifica finale della schermata di creazione workspace
-- La modifica in `nextway-admin.html` rimuove i valori precompilati da Nome workspace, Chiave univoca e Paese mercato; restano esempi nei placeholder e un avviso che identifica la creazione come scrittura sul database.
-- `scripts/test-nextway-admin-ui.mjs` verifica che i campi siano vuoti e che l'avviso sia presente.
-- GitHub Actions run #269, ID `43231967925`, sul commit `774bdf5`: **SUCCESS**. Tutti i controlli statici e tutti i type-check Deno sono completati con successo, inclusi i nuovi test CORS e UI.
-- La run #266, ID `43231793366`, aveva già verificato con SUCCESS le sei allow-list CORS locali e i relativi controlli.
-- La copia locale del Mac è stata aggiornata dall'utente soltanto fino al commit `fd1b578`; dovrà ricevere gli ulteriori commit del branch prima di provare la nuova interfaccia locale. Non è stato richiesto alcun comando locale in questo passaggio.
-
-### Stato di sicurezza e perimetro
-- Branch di sviluppo: `fix/nextway-password-recovery`; nessuna modifica a `main`, nessun merge.
-- Tutte e sei le Edge Functions chiamate dall'interfaccia locale includono `http://localhost:8000` nell'allow-list senza wildcard e senza rimuovere le origini configurate.
-- Nessun deploy Supabase/Netlify, migrazione SQL o modifica a dati/configurazione live.
-- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
-- Il blocco produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e CI possono continuare sul branch.
-
-### Prossimo passo operativo
-- Aggiornare la copia locale del branch con un solo `git pull --ff-only`, poi provare in locale i flussi di sola lettura. La correzione CORS non avrà effetto sulle funzioni remote finché non saranno distribuite con deploy autorizzato.
-
-### Registro cronologico
-- 12-11-2026, 14:47 Europe/Rome — verificata con SUCCESS la CI #269 dopo la rimozione dei valori precompilati dal form workspace. Nessuna azione live.
-
----
-
-## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
-
-### Sicurezza operativa dell'area amministrativa — campi workspace non precompilati
-- In `nextway-admin.html` i campi Nome workspace, Chiave univoca e Paese mercato non hanno più valori precompilati. Gli esempi sono soltanto placeholder.
-- È stato aggiunto un avviso esplicito: la creazione registra un workspace nel database e i campi devono essere compilati/inviati solo dopo verifica e decisione consapevole.
-- Test statico aggiunto a `scripts/test-nextway-admin-ui.mjs`: verifica l'avviso, i placeholder e l'assenza di attributi `value` nei campi che identificano il nuovo workspace.
-- Commit del test: `774bdf55a49e0eee69b625bc2571aa84189f8215`. La CI per questa modifica è in attesa di esito al momento di questo aggiornamento.
-- La modifica non crea né modifica alcun workspace e non cambia la logica di invio del form; rende soltanto esplicita la natura di scrittura dell'operazione e rimuove i valori precompilati.
-
-### Stato complessivo CORS locale
-- Le sei Edge Functions richiamate dalle interfacce locali consentono `http://localhost:8000`, conservano `NEXTWAY_ALLOWED_ORIGINS` e mantengono autenticazione/autorizzazioni server-side.
-- Test dedicato `scripts/test-nextway-local-cors.mjs` inserito nel workflow statico.
-- GitHub Actions run #266 (ID `43231793366`) sul commit `f43a897`: SUCCESS, inclusi test CORS, test sicurezza, controlli UI, sintassi Node e cinque type-check Deno.
-- I risultati CI riguardano il repository, non la funzione remota già pubblicata.
-
-### Perimetro live
-- Nessun deploy Supabase o Netlify, merge, migrazione SQL o modifica al database.
-- Nessun workspace, membership, account, documento, prompt o criterio creato; nessuna email o invito inviato.
-- Il blocco di produzione fino al 4 dicembre 2026 resta invariato. Sviluppo e test sul branch continuano.
-
-### Registro cronologico
-- 12-11-2026, 14:47 Europe/Rome — rimossi i valori precompilati dal form di creazione workspace e aggiunto il test statico corrispondente. CI della modifica in attesa; nessuna azione live.
-
----
-
-## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
-
-### Sviluppo locale — correzione CORS estesa e verificata in CI
-- Branch di lavoro: `fix/nextway-password-recovery`. Nessuna modifica a `main`.
-- È stata estesa l'origine di sviluppo `http://localhost:8000` alle sei Edge Functions richiamate dalle interfacce NEXTWAY locali:
-  - `nextway-workspace-admin`
-  - `nextway-ai-setter`
-  - `nextway-search`
-  - `nextway-knowledge-ingest`
-  - `nextway-knowledge-upload`
-  - `nextway-conversion-provisioning`
-- Le origini già configurate con `NEXTWAY_ALLOWED_ORIGINS` vengono mantenute e unite all'origine locale senza duplicati. Nessuna funzione usa wildcard CORS; i controlli di autenticazione, JWT, ruolo e autorizzazione server-side restano invariati.
-- Test di regressione aggiunto: `scripts/test-nextway-local-cors.mjs`. Verifica su tutte e sei le funzioni la presenza dell'origine localhost, il mantenimento delle origini configurate, il controllo esplicito dell'origine, la risposta CORS e la gestione OPTIONS, oltre all'assenza di wildcard.
-- Il test specifico dell'area amministrativa è stato esteso in `scripts/test-nextway-workspace-admin-security.mjs` per impedire la regressione del preflight CORS.
-- Workflow `.github/workflows/nextway-static-validation.yml` aggiornato: il nuovo test viene eseguito in CI su push a main e pull request.
-- Ultimo commit di codice/workflow osservato: `f43a8972bf56de5474a694ca5de22164fa1ac84b`.
-- GitHub Actions run #266, ID `43231793366`, sul commit `f43a897`: **SUCCESS**. Tutti i controlli statici, i test di contratto, i controlli sintattici Node e i cinque type-check Deno sono terminati con successo.
-- La CI dimostra la correttezza statica e il type-check dei sorgenti; non dimostra il comportamento runtime delle funzioni già pubblicate su Supabase.
-
-### Limiti operativi invariati
-- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito.
-- Nessun workspace, membership, account, documento, prompt o criterio è stato creato; nessuna email o invito è stato inviato.
-- Il codice aggiornato su GitHub non modifica automaticamente le Edge Functions pubblicate: il problema CORS nel browser resterà fino al deploy autorizzato delle funzioni aggiornate.
-- Resta valido il blocco di produzione fino al 4 dicembre 2026. Lo sviluppo e la validazione sul branch possono continuare.
-- Le migrazioni CRM/workspace restano sospese fino a backup verificato, preflight read-only aggiornato e applicazione controllata per singola migrazione.
-
-### Prossimi passi
-1. Aggiornare la copia locale del branch quando l'utente è pronto a riprendere i test sul Mac.
-2. Proseguire la revisione statica dei flussi UI e dei contratti delle funzioni; non effettuare chiamate di scrittura ai dati live.
-3. Preparare una sequenza di verifica post-deploy limitata alle funzioni e alle migrazioni effettivamente necessarie, da eseguire solo quando autorizzata.
-
-### Registro cronologico
-- 12-11-2026, 14:47 Europe/Rome — esteso CORS locale alle sei Edge Functions, aggiunto test dedicato, integrato nel workflow e verificata la CI #266 con esito SUCCESS. Nessun intervento live.
-
----
-
-## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 14:47 (Europe/Rome)
-
-### Stato operativo aggiornato — sviluppo prosegue senza interventi live
-- Branch di lavoro: `fix/nextway-password-recovery`. Il commit ricevuto dall'utente sul Mac prima di questo aggiornamento era `fd1b578f485b848c0f48fd78acf57899cda26bf5`.
-- Correzione CORS della Edge Function `supabase/functions/nextway-workspace-admin/index.ts`: il sorgente sul branch consente esplicitamente `http://localhost:8000`, mantenendo le origini configurate tramite `NEXTWAY_ALLOWED_ORIGINS`. La risposta preflight OPTIONS e la risposta POST includono `Access-Control-Allow-Origin` solo per origini ammesse.
-- È stato aggiunto un controllo di regressione in `scripts/test-nextway-workspace-admin-security.mjs` che verifica: allow-list localhost, conservazione delle origini configurate, risposta OPTIONS 200 e presenza del controllo sull'origine nella risposta.
-- Commit del test: `720bd3f06a15024a555113b845fe4d8f67c6c3bb` — "Add regression test for NEXTWAY admin CORS preflight". Modificato esclusivamente il branch di lavoro.
-- CI: la run #259 (ID 43230634320) risulta SUCCESS sul commit precedente `fd1b578`. Al momento della registrazione non è ancora disponibile una run associata al commit `720bd3f`; il nuovo controllo va considerato in attesa di CI, non ancora superato.
-- Nessun deploy Supabase, deploy Netlify, merge, migrazione SQL o modifica al database è stato eseguito. Nessun workspace, membership, utente, documento, prompt o criterio è stato creato.
-- Il vincolo operativo di non toccare la produzione prima del 4 dicembre 2026 resta invariato. Lo sviluppo, la revisione statica, i test CI e la preparazione dei materiali possono proseguire sul branch.
-
-### Prossimi passi di sviluppo
-1. Verificare l'esito CI sul commit `720bd3f`; se fallisce, leggere i log e correggere solo il test o il sorgente interessato.
-2. Proseguire con revisione statica e test non distruttivi dell'area amministrativa e dei contratti Edge Function, senza chiamate di scrittura al progetto Supabase.
-3. Mantenere la distinzione tra test statici/CI e test runtime: la correzione CORS nel repository non modifica la funzione già pubblicata, quindi il browser continuerà a vedere il comportamento remoto precedente fino a un deploy autorizzato.
-4. Tenere bloccate migrazioni CRM/workspace finché non siano disponibili backup verificato e diagnostiche live read-only aggiornate; non eseguire bundle SQL in blocco.
-
-### Registro cronologico
-- 12-11-2026, 14:47 Europe/Rome — registrati la correzione CORS già presente nel branch, il test di regressione aggiunto e lo stato CI/deploy. Solo codice di test e documentazione nel branch; nessuna modifica live.
-
----
-
 ## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:28 (Europe/Rome)
 
 ### Repository, branch e fonti verificate
@@ -2486,958 +2379,700 @@ La console `nextway-admin.html` è stata precompilata con nome e chiave conferma
 
 **La conferma riguarda il nome e i valori iniziali, non costituisce ancora ordine di creazione del record.** Al momento di questo aggiornamento non è stato creato alcun workspace o membership su Supabase e non è stato eseguito alcun deploy. Prima della creazione occorre verificare che la console e la Edge Function aggiornata siano effettivamente pubblicate e autorizzate.
 
-
 ---
 
-## Intervento locale — 12 novembre 2026 — recupero password NEXTWAY
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 19:10 (Europe/Rome)
 
-### Problema rilevato
-- La configurazione Supabase nel browser è stata salvata correttamente.
-- L'utente Auth esistente è l'unico utente registrato e l'indirizzo email inserito in NEXTWAY coincide con quello presente in Authentication → Users.
-- Il login ha restituito `Invalid login credentials`.
-- Il recupero avviato dalla Dashboard Supabase ha reindirizzato alla homepage Netlify, non a una pagina dedicata al cambio password.
-- È stato aggiunto `http://localhost:8000/**` a Authentication → URL Configuration → Redirect URLs, mantenendo invariati Site URL e redirect Netlify.
-- Ulteriori richieste hanno raggiunto il limite email Supabase (`email rate limit exceeded`). Non ripetere richieste fino al ripristino del limite.
+### Fonti e perimetro del controllo
 
-### Modifiche preparate su branch separato
-Branch: `fix/nextway-password-recovery` (non `main`).
+- Recuperato `MASTER_NEXTWAY.md` da `main` prima della modifica; blob SHA di partenza: `b408776be45c43d7bb96e6be6ac4e0494b30074c`.
+- HEAD di `main` verificato tramite Git ref: `a3fbec076221f0f043d60373e2864d7d07db30d7`, commit documentale `docs(nextway): record confirmed first workspace identity` (12-11-2026 07:30:18 UTC).
+- Esaminati i 12 commit più recenti. Tra quelli rilevanti: `a3fbec0` (decisione primo workspace), `b2ce72e` (precompilazione dei dati Zinzino Italia nella console), `cd813d8` (piano pre-release), `c46a789` (console amministrativa e Knowledge Base), `9dcf333` (test UI amministrativa), `18b38e1` (caricamento directory profili prima delle etichette membership).
+- Albero Git ricorsivo di `main` recuperato senza troncamento (`truncated=false`). Confermata la presenza dei file applicativi, script di test, diagnostiche SQL, migrazioni e sei directory Edge Function: `nextway-ai-setter`, `nextway-conversion-provisioning`, `nextway-knowledge-ingest`, `nextway-knowledge-upload`, `nextway-search`, `nextway-workspace-admin`.
+- File sorgente effettivamente recuperati da GitHub:
+  - `nextway-admin.html` — blob `34b27774837c57b899487c7327b3c29a210f5c6e`;
+  - `nextway-admin.js` — blob `3a1bc7a9ff58a9319ff0179d842c363e4d0d4b6b`;
+  - `nextway-ai.html` — blob `1074f2f146ddc6794e98f3109abb6e7d6470d61d`;
+  - `nextway-cloud.js` — blob `7a93cf3ead6ecdd423cdbc074c86f6dbb1c2df64`;
+  - `supabase/functions/nextway-workspace-admin/index.ts` — blob `11bcc7d9c8439dc6061e801384450853a19fc015`;
+  - `supabase/migrations/20261112020000_nextway_setter_generation_table_isolation.sql` — blob `55d902da44f318572c98b6a7f408c5cefe319fac`;
+  - `.github/workflows/nextway-static-validation.yml` — blob `07380290955939d265a739fe6ebb2f9cfb766eae`.
+- La console HTML contiene i valori iniziali `Zinzino Italia`, `zinzino-italia`, paese `Italia`, lingua `it`; il pulsante crea esplicitamente il workspace in stato bozza. Il testo della pagina precisa che l'area è riservata a `platform_admin` e che non crea account, non invia inviti e non spedisce messaggi.
+- Il codice browser usa la Edge Function `nextway-workspace-admin`; le azioni presenti nel client e nel sorgente server comprendono creazione/elenco/aggiornamento workspace, elenco profili, elenco/aggiornamento membership, elenco documenti e approvazione/rifiuto dei documenti. Il controllo statico del file browser non ha rilevato uso di `innerHTML`; i contenuti dinamici sono inseriti con API DOM testuali. Questo è un controllo del sorgente, non un test runtime.
+- `nextway-ai.html` contiene il collegamento all'area amministrativa; `nextway-cloud.js` contiene l'integrazione Supabase JS. La presenza dei file non prova che la versione corrente sia pubblicata su Netlify.
 
-- `nextway-cloud.js`: aggiunto pulsante **Password dimenticata?**. La richiesta usa `auth.resetPasswordForEmail(email, { redirectTo })` e indirizza a `window.location.origin + '/nextway-reset-password.html'`.
-- `nextway-reset-password.html`: nuova pagina locale che riutilizza URL e Publishable key già salvati nel browser, riconosce il flusso di recupero Supabase e consente di aggiornare la password con `auth.updateUser({ password })`. Dopo il cambio chiude la sessione locale e rimanda all'accesso.
-- La password non viene salvata in localStorage né trasmessa all'applicazione in chiaro da codice personalizzato.
+### GitHub Actions — ultimo risultato disponibile
 
-Commit:
-- `4679488fc5a3d2d065df72870e7d7c5d268107e5` — pulsante e richiesta di recupero con redirect esplicito.
-- `1e3c44ddab68df5248acc13bc879cf702df6b73a` — pagina locale di reimpostazione.
+- Run più recente: **#251**, ID `43175706330`, workflow `NEXTWAY static validation`, evento `push`, conclusione **SUCCESS**, commit `b2ce72e4212f41334bbbcb542722c380bad29b08` (precompilazione dei valori del primo workspace).
+- Job `validate`: completato con successo. Sono passati i controlli statici per audit, conversion provisioning, sicurezza Edge Functions, rate limit/idempotenza SQL, Knowledge Base, Knowledge Ingest/Upload, multi-workspace, workspace admin, associazione dati, membership, RLS workspace-scoped, Setter generation, isolamento tabelle legacy/workspace, Lead creation e UI; sono passati anche `node --check` per gli script browser e i cinque `deno check` per AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin.
+- Run #250 (`43174338611`) sul commit `9dcf333` è anch'essa SUCCESS. Le run #246–#249 della sequenza precedente erano FAILURE; la run #251 è il risultato verde più recente osservato.
+- HEAD `a3fbec0` è successivo alla run #251 ed è un commit esclusivamente documentale su `MASTER_NEXTWAY.md`. Il workflow filtra i percorsi applicativi e non include il MASTER nei trigger `paths`; quindi non si dichiara una nuova CI sul commit documentale. La CI #251 valida il commit di codice `b2ce72e`, non il comportamento runtime di Supabase.
+- La CI non applica migrazioni, non verifica i secrets live e non certifica il deploy delle Edge Functions o di Netlify.
 
-### Verifiche eseguite
-- Parsing JavaScript di `nextway-cloud.js`: superato.
-- Parsing JavaScript inline di `nextway-reset-password.html`: superato.
-- Presenza del pulsante, redirectTo, chiamata resetPasswordForEmail e updateUser: verificata.
-- Nessun reset email runtime inviato; nessun cambio password eseguito.
-- Nessuna modifica al branch `main`; nessun deploy Netlify o Supabase eseguito.
+### Supabase, schema, RLS e RPC — separazione delle evidenze
 
-### Passi ancora necessari
-1. Portare il branch sul Mac locale e avviare il server locale.
-2. Verificare che la pagina di recupero si apra correttamente.
-3. Attendere il ripristino del limite email.
-4. Dalla pagina `nextway-ai.html`, inserire l'email e premere **Password dimenticata?**; non usare il reset dalla Dashboard per questo test.
-5. Aprire il nuovo link nello stesso browser e verificare il cambio password.
-6. Accedere a NEXTWAY con la nuova password.
-7. Solo dopo test locale e revisione, valutare separatamente un eventuale merge/deploy, che richiede autorizzazione distinta.
+**Evidenze live precedentemente fornite dall'utente (non interrogate nuovamente in questo controllo):**
+- Le tabelle workspace `nextway_workspaces`, `nextway_workspace_prompts`, `nextway_workspace_prospect_criteria` e `nextway_workspace_memberships` risultavano create con RLS attiva. Le policy amministrative e le RPC di attivazione erano state verificate nelle sessioni precedenti.
+- `nextway_has_workspace_access(uuid,text[])` risultava con `search_path=pg_catalog, public`, esecuzione consentita ad `authenticated` e `service_role`, negata ad `anon`. La funzione `nextway_is_platform_admin()` risultava con search path fissato.
+- La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` era stata eseguita dall'utente con esito `Success. No rows returned`. Il postflight riportato indicava la nuova tabella `nextway_setter_workspace_generation_requests` presente, RLS attiva, accesso diretto revocato e le quattro RPC correnti collegate alla nuova tabella. La tabella legacy `nextway_setter_generation_requests` è stata preservata e non va confusa con la nuova tabella workspace.
+- Per le quattro RPC di generazione e la funzione di retention (`nextway_begin_setter_generation`, `nextway_store_setter_generation_output`, `nextway_get_staged_setter_output`, `nextway_complete_setter_generation`, `nextway_prune_workspace_setter_generation_requests`) il controllo ACL riportato dall'utente era 5/5: `security_definer=true`, search path fissato, `authenticated_execute=true`, `anon_execute=false`, `service_role_execute=false`. È una verifica dei metadati/privilegi, non un collaudo runtime.
+- La tabella core `nextway_leads` risultava presente con RLS attiva e policy owner/platform_admin nell'ultima diagnostica CRM disponibile. Le tabelle `nextway_lead_activities` e `nextway_lead_conversion_requests` risultavano assenti in quella diagnostica precedente; non è stata eseguita una nuova lettura live oggi.
+- Le migrazioni CRM 008–014 e il bundle `supabase/deploy/nextway_crm_apply.sql` non risultano applicati nella procedura corrente: l'utente ha chiesto prima un backup e la sequenza è stata fermata prima di qualsiasi esecuzione SQL.
 
+**Limiti di questo controllo:**
+- Non è disponibile qui una connessione diretta al progetto Supabase; non sono state interrogate tabelle, policy, RPC, bucket o secrets live il 12 novembre alle 19:10.
+- Le evidenze sopra sono riportate come risultati precedenti forniti dall'utente e non come nuove verifiche di questa esecuzione.
+- Nessun dato, schema, account, membership, workspace o documento Knowledge Base è stato creato o modificato durante questo aggiornamento documentale.
 
+### Edge Functions, integrazioni e pubblicazione
 
----
+- I sei sorgenti Edge Function sono presenti nel repository. Il workflow #251 esegue type-check Deno su cinque funzioni: AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning e workspace admin. `nextway-search` è presente nell'albero, ma non compare tra i cinque type-check del workflow corrente.
+- Il sorgente corrente di `nextway-workspace-admin` include le azioni workspace, membership e revisione documenti e controlli amministrativi; la console client invia le richieste a tale endpoint. Le nuove azioni aggiunte al repository non sono state collaudate live in questa esecuzione.
+- Un deploy precedente di `nextway-workspace-admin` e di `nextway-conversion-provisioning` era stato riportato dall'utente; non è stata verificata qui la versione attualmente pubblicata. Lo stato del deploy della versione corrente con le azioni membership/Knowledge Base resta quindi **ESEGUITO MA NON VERIFICATO** per le funzioni già dichiarate deployate; per le altre funzioni il deploy resta **DA COMPLETARE/VERIFICARE**.
+- La console amministrativa e il collegamento da `nextway-ai.html` sono verificati nel repository, non su Netlify. Il test runtime di creazione workspace, membership, upload, approvazione e ricerca documentale non è stato eseguito in questa sessione.
+- Restano valide le integrazioni architetturali documentate con Supabase Auth/Database/Storage/Edge Functions, Supabase JS nel browser e OpenAI lato server. Nessuna chiave, credenziale o token è stato inserito nel MASTER.
+- Il blocco operativo Netlify fino al 4 dicembre 2026 è una decisione precedente dell'utente, mantenuta invariata; nessun deploy Netlify è stato effettuato.
 
-## Console amministrativa — istruzioni AI e criteri di qualificazione — 12 novembre 2026
+### Decisione amministrativa e attività della giornata
 
-- Estesa la console nextway-admin.html con la sezione per consultare e creare versioni di istruzioni AI e criteri di qualificazione per workspace.
-- Le nuove versioni vengono salvate esclusivamente come bozze; il frontend richiede conferma esplicita prima dell'attivazione o archiviazione.
-- L'attivazione richiama le RPC amministrative già esistenti e sostituisce la versione attiva precedente secondo la logica atomica del database.
-- La configurazione dei criteri viene validata come oggetto JSON prima dell'invio; i dati restituiti sono renderizzati con textContent, senza HTML dinamico.
-- Aggiunti controlli statici per form, azioni e validazione JSON.
-- Nessun workspace, prompt, criterio, lead o conversazione creato. Nessun deploy o invio di messaggi.
-- Modifiche isolate nel branch fix/nextway-password-recovery; nessun intervento su main o Netlify.
+- L'utente ha confermato il primo workspace operativo: nome `Zinzino Italia`, chiave `zinzino-italia`, mercato Italia, lingua `it`, stato iniziale `draft`.
+- La conferma riguarda i valori e la precompilazione della console; non equivale a un ordine di creazione del record. Non è documentata una creazione live del workspace o di membership.
+- Attività terminale riferita dall'utente il 12 novembre: `supabase --version` → `command not found`; `brew --version` → `zsh: command not found: brew`; lo script Homebrew standard ha risposto `Homebrew on macOS is only supported on Apple Silicon processors!`; `uname -m` → `x86_64` (Mac Intel).
+- Il controllo richiesto di `node -v` e `npm -v` non ha ancora un risultato fornito in questa conversazione. Non si presume che Node.js o npm siano installati.
+- Non è stato creato né verificato un dump/backup. L'installazione della CLI e l'esportazione restano ferme; il bundle CRM non è stato eseguito. L'avviso di Supabase sulle operazioni potenzialmente distruttive è stato valutato sul testo SQL caricato dall'utente, ma la revisione statica non sostituisce backup e preflight live.
 
+### Matrice di stato
 
----
+- Repository `main`, inventario file e MASTER letto prima dell'aggiornamento: **COMPLETATO E VERIFICATO**.
+- Console amministrativa e integrazione client/API nel sorgente GitHub: **COMPLETATO E VERIFICATO** limitatamente ai file e ai controlli statici.
+- Decisione e precompilazione del workspace Zinzino Italia: **COMPLETATO E VERIFICATO** nel repository; creazione del record live: **DA COMPLETARE**.
+- CI GitHub Actions #251: **COMPLETATO E VERIFICATO** per il job statico/type-check sul commit `b2ce72e`; runtime Supabase/Netlify: non coperto.
+- Schema workspace, RLS, policy e RPC: **ESEGUITO MA NON VERIFICATO** in questo controllo; sono disponibili precedenti risultati live forniti dall'utente, non riletti oggi.
+- Isolamento tabella AI Setter e ACL delle cinque funzioni: **ESEGUITO MA NON VERIFICATO** in questo controllo; esito positivo riportato dall'utente nelle sessioni precedenti.
+- CRM Lead core e policy: **ESEGUITO MA NON VERIFICATO** in questo controllo; ultima diagnostica live precedente positiva per tabella/RLS/policy.
+- Migrazioni CRM 008–014: **BLOCCATO** fino a backup verificato, diagnostica prerequisiti aggiornata e sequenza controllata.
+- Supabase CLI e backup database: **BLOCCATO** sul Mac Intel; `node -v`/`npm -v` ancora da acquisire e nessun dump prodotto.
+- Edge Functions: sorgenti e type-check CI delle cinque funzioni elencate **COMPLETATO E VERIFICATO**; deploy della versione corrente **ESEGUITO MA NON VERIFICATO** per le due funzioni precedentemente dichiarate deployate, restante stato deploy **DA COMPLETARE/VERIFICARE**.
+- Console live, membership, documenti KB e test end-to-end: **DA COMPLETARE**.
+- Netlify produzione: **BLOCCATO** fino al 4 dicembre 2026 secondo la decisione precedente dell'utente.
 
-## Aggiornamento — 12 novembre 2026 — AI Setter collegato alle istruzioni e ai criteri approvati
+### Prossimi passi operativi
 
-### Funzionalità preparata nel repository
-- Aggiunta la migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`, con RPC read-only `nextway_get_active_setter_governance(uuid)`.
-- La RPC restituisce solo prompt e criteri attivi del workspace, dopo aver verificato l'utente autenticato e la membership attiva tramite `nextway_has_workspace_access`; il ruolo `workspace_viewer` resta escluso perché in sola lettura.
-- Le bozze e gli elementi archiviati non vengono restituiti; non viene concessa lettura diretta delle tabelle amministrative.
-- La Edge Function AI Setter legge `workspace_id` dalla conversazione, recupera la governance approvata e integra nel prompt al massimo 5 istruzioni (6.000 caratteri ciascuna) e nel contesto al massimo 5 criteri, con configurazioni JSON limitate a 5.000 caratteri.
-- In caso di errore nel recupero della governance di un workspace, la generazione si interrompe con HTTP 503 (fail-closed). Le conversazioni legacy senza workspace mantengono il comportamento standard.
-- Le istruzioni approvate non possono prevalere sulle regole di sicurezza e sul divieto di pressioni o promesse di risultati.
+1. Acquisire l'output di `node -v` e `npm -v`; scegliere un metodo CLI/strumento PostgreSQL realmente compatibile con macOS Intel, senza insistere sull'installer Homebrew Apple Silicon.
+2. Produrre un'esportazione locale del database e verificarne presenza, dimensione e leggibilità prima di qualsiasi migrazione.
+3. Eseguire la diagnostica CRM read-only dei prerequisiti sul progetto corretto; non ripetere i controlli workspace già documentati se non vi sono cambiamenti.
+4. Solo dopo backup e preflight, definire e applicare le migrazioni CRM autorizzate in modo controllato, senza eseguire il bundle 008–014 in blocco sulla sola base della revisione statica.
+5. Verificare quale versione delle Edge Functions sia effettivamente deployata; pubblicare la versione aggiornata solo con autorizzazione operativa separata e poi collaudare membership e Knowledge Base.
+6. Creare il workspace Zinzino Italia in bozza soltanto dopo aver verificato la console e la Edge Function live; non creare account o inviare inviti automaticamente.
+7. Mantenere sospesi i deploy Netlify di produzione fino alla data già concordata e completare il piano di test runtime con account distinti prima del rilascio ai partner.
 
-### Verifiche predisposte
-- Aggiunto `scripts/test-nextway-setter-governance.mjs` per i contratti statici SQL/Edge Function.
-- Aggiornato `docs/NEXTWAY-AI-SETTER-TEST-PLAN.md` con i casi runtime per membership, isolamento tra workspace, ruolo viewer, prompt/criteri draft e fail-closed.
-- Workflow static validation aggiornato per eseguire il nuovo test su push e pull request e includere i nuovi file nei trigger.
+### Registro cronologico del MASTER
 
-### Stato e limiti
-- Modifiche isolate nel branch `fix/nextway-password-recovery`; nessun intervento su `main`.
-- Migrazione SQL preparata ma NON applicata a Supabase.
-- Edge Function aggiornata nel repository ma NON distribuita.
-- Nessun prompt, criterio, lead, conversazione o messaggio creato o modificato.
-- Nessun messaggio inviato e nessuna chiamata OpenAI eseguita durante questa modifica.
-- Non è stato eseguito un collaudo runtime; il nuovo test statico e la CI devono ancora essere eseguiti.
-- Netlify resta congelato fino al 4 dicembre 2026.
-
-
----
-
-## Collaudo autenticazione Edge Function workspace-admin — 12 novembre 2026
-
-### Evidenze operative già acquisite
-- La Edge Function `nextway-workspace-admin` è stata distribuita nel progetto Supabase `nextway-platform` (`obqwbtlltxjfeirstsya`); i secrets richiesti risultavano presenti al momento del deploy.
-- Una richiesta POST anonima all'endpoint ha restituito `HTTP 401 UNAUTHORIZED_NO_AUTH_HEADER`. Questo conferma che l'endpoint è raggiungibile e che una chiamata priva di Bearer token viene respinta; non dimostra ancora l'autorizzazione di un amministratore autenticato.
-- Non sono stati creati workspace, membership o utenti e non sono state inviate email.
-- Il progetto Supabase disponibile è uno solo; non esiste un ambiente Supabase separato di test.
-
-### Verifica del percorso autenticato — ancora da eseguire
-La console `nextway-admin.html` nel branch `fix/nextway-password-recovery` esegue all'avvio:
-1. verifica la sessione Supabase;
-2. chiama `list_profiles` (sola lettura, restituisce ID, ruolo e nome);
-3. chiama `list_workspaces` (sola lettura).
-
-Il test minimo deve essere eseguito nel browser dell'amministratore, con la sessione NEXTWAY già autenticata, aprendo la console locale. Non copiare né condividere access token, refresh token, chiavi o cookie.
-
-Esito da registrare:
-- **Autenticazione/ruolo:** `list_profiles` restituisce HTTP 200 e la console popola l'elenco profili. Questo verifica il percorso Bearer autenticato e il gate `platform_admin`.
-- **Schema workspace:** `list_workspaces` può essere valutata separatamente; un errore relativo a tabella/relazione mancante indica prerequisito schema non applicato, non un errore di autenticazione.
-- Se `list_profiles` restituisce 401/403, fermarsi: non tentare operazioni di scrittura e riportare soltanto il messaggio applicativo, senza credenziali.
-
-### Limiti e protezioni
-- Il test è esclusivamente di lettura: non usare `create_workspace`, `set_membership`, `update_workspace`, approvazioni o salvataggi.
-- Non creare il workspace **Zinzino Italia**: la conferma del nome e dei valori iniziali non è un ordine di creazione.
-- Non applicare migrazioni e non distribuire altre Edge Functions.
-- Netlify produzione resta congelato fino al 4 dicembre 2026.
-- Nessun test autenticato è dichiarato superato finché non viene osservato il risultato nel browser con sessione valida.
-
-### Prossima azione minima
-Aprire `http://localhost:8000/nextway-admin.html` nel browser in cui NEXTWAY ha già una sessione valida e verificare se l'elenco profili viene popolato. Se la pagina non è disponibile localmente, prima avviare il server nella cartella repository già indicata nelle istruzioni operative; non eseguire altri reset email.
+- 12-11-2026, 19:10 Europe/Rome — verificati HEAD e commit recenti di `main`, inventario ricorsivo dei file, sorgenti console/API, workflow e CI #251; registrati i valori confermati del primo workspace e l'esito dei tentativi CLI/Homebrew su Mac Intel. Distinte le evidenze GitHub correnti dai risultati Supabase precedentemente forniti dall'utente. Modificato esclusivamente `MASTER_NEXTWAY.md`.
 
 
 
 ---
 
-## Aggiornamento — 12 novembre 2026 — test statici locali compatibili con Python 3.9
+## CONTROLLO DI CONTINUITÀ — 12 NOVEMBRE 2026, ORE 19:34 (Europe/Rome)
 
-### Motivo
-Sul Mac dell'utente non risultano disponibili `node`, `npm` o `deno`; è invece presente Python 3.9.6. I test JavaScript esistenti restano invariati e continuano a essere eseguiti da GitHub Actions.
+### Fonti, repository e limiti di accesso
 
-### Adattamento locale
-- Aggiunto `scripts/test-nextway-local-static.py`, compatibile con Python 3.9.
-- Il nuovo script riproduce i tre gruppi di controlli locali già presenti nei test Node:
-  1. allow-list CORS delle sei Edge Functions;
-  2. contratto di sicurezza dell'API workspace-admin e delle due RPC SQL di attivazione;
-  3. struttura della console admin, azioni UI/API, campi workspace non precompilati e rendering sicuro.
-- Lo script legge esclusivamente i file del repository: non contatta Supabase, non modifica dati o file, non invia email e non esegue deploy.
-- Comando locale: `python3 scripts/test-nextway-local-static.py`.
-- Commit del nuovo script: `af90151f879612d979b33ff5672822bd251ca4cc`.
+- Recuperato questo MASTER da GitHub `main` immediatamente prima dell'aggiornamento; blob SHA di partenza: `0cf2f753bec42cc87449e9cde22d3e6929fd83fe`. Il documento conteneva 2.473 righe.
+- HEAD di `main` verificato: `dbeb9944441576734621c9cecba0ea60bac44c62`, commit `docs(nextway): update MASTER continuity for 12 Nov evening`, 12-11-2026 18:14:36 UTC (19:14:36 Europe/Rome). Il commit ha come parent `a3fbec076221f0f043d60373e2864d7d07db30d7`; il diff del commit HEAD modifica soltanto `MASTER_NEXTWAY.md`.
+- Albero Git ricorsivo di `main` recuperato: 140 voci, `truncated=false`. Sono presenti le diagnostiche CRM `nextway_crm_live_status_readonly.sql` e `nextway_crm_prerequisites_readonly.sql`. Il documento `docs/NEXTWAY-STAGING-SETUP-PLAN.md` non è presente in `main`: è presente soltanto nel branch della PR #1.
+- Strumenti disponibili in questa sessione: connettore GitHub per lettura repository, commit, PR, workflow, job e log. Non è disponibile un connettore Supabase o Netlify; non è stata effettuata una lettura diretta dei rispettivi ambienti live. Le conversazioni considerate sono quelle effettivamente presenti nel contesto corrente e i risultati riportati dall'utente; non si presume accesso indiscriminato a tutte le chat storiche.
 
-### Stato e limiti
-- Modifica confinata al branch `fix/nextway-password-recovery`; nessun intervento su `main`.
-- Nessun deploy Supabase/Netlify, merge, migrazione o modifica live.
-- I test Node e i type-check Deno restano coperti da GitHub Actions; il nuovo script Python è un ausilio per la verifica statica locale sul Mac, non sostituisce i type-check Deno né un collaudo runtime.
-- Prossimo passo: aggiornare la copia locale con `git pull --ff-only origin fix/nextway-password-recovery`, poi eseguire il comando Python indicato sopra e riportare l'output.
+### Pull request #1 e branch di lavoro
 
+- PR #1: `NEXTWAY: verifica integrazione AI Setter governance`, URL https://github.com/servellodm-a11y/misura-test-benessere/pull/1.
+- Stato verificato al controllo: **OPEN, DRAFT, NOT MERGED**. Base `main` a `a3fbec076221f0f043d60373e2864d7d07db30d7`; head `fix/nextway-password-recovery` a `a7e345fb8d8715901486d0ac316512c9494988ba`. Il confronto GitHub indica 71 commit ahead e 0 behind; 26 file modificati/aggiunti. Queste modifiche non sono ancora in `main`.
+- Contenuti rilevanti della PR, verificati tramite confronto file e sorgenti del branch:
+  - pagina `nextway-reset-password.html` per completare il recupero password Supabase nel browser;
+  - integrazione AI Setter con la nuova RPC `nextway_get_active_setter_governance(uuid)`, SECURITY DEFINER, search_path fissato, accesso limitato a workspace attivo e ruoli operativi; restituisce soltanto prompt e criteri attivi, non bozze o metadati amministrativi;
+  - la Edge Function AI Setter carica la governance approvata prima di richiedere il claim di generazione;
+  - nuova migrazione `20261112030000_nextway_setter_governance_read_rpc.sql`;
+  - nuova migrazione `20261112170000_nextway_conversion_activation_integrity.sql`: finalizzazione transazionale, lock `FOR UPDATE` sul Lead, ricontrollo proprietario/stato `In valutazione`/non archiviato, aggiornamento dello stato Lead prima della creazione del record di destinazione e RPC finale riservata a `service_role`;
+  - aggiornamenti della funzione di provisioning e dei contratti di sicurezza, inclusa la riduzione degli errori a codici diagnostici sicuri;
+  - nuovi piani documentali per test di concorrenza A–F, rilascio controllato e ambiente di staging; modifiche alla console amministrativa per la governance AI.
+- La presenza di questi file nel branch PR e i test statici non dimostrano che le nuove migrazioni o funzioni siano state applicate/deployate. Non è stato creato uno staging e non è stato eseguito alcun test PostgreSQL runtime.
 
----
+### GitHub Actions — run e log verificati
 
-## Verifica runtime console amministrativa locale — 12 novembre 2026
+- Ultima run push disponibile su `main`: **#251**, ID `43175706330`, SUCCESS, commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Il job `validate` è concluso con SUCCESS. HEAD `main` è successivo ma il commit `dbeb994` è documentale; il workflow usa filtri `paths` per file applicativi/test/migrazioni e non avvia una nuova run per il solo aggiornamento del MASTER.
+- Ultima run PR esaminata: **#292**, ID `43247460858`, SUCCESS sul head `a7e345fb8d8715901486d0ac316512c9494988ba`. Job `validate` e tutti gli step elencati risultano completati con successo; inclusi test governance AI Setter, integrità conversione, controlli statici locali, `node --check` dei due script browser e cinque `deno check` delle Edge Functions.
+- Nei log della run #292 è presente il messaggio `NEXTWAY conversion integrity ... PASS`. Sono presenti anche warning non bloccanti relativi alla deprecazione del modulo Node `punycode` e al passaggio delle action GitHub che usano Node 20 a Node 24. Non risultano errori nel job completato.
+- Le run PR #285 e precedenti nella sequenza immediata includevano failure; le run #286–#292 risultano SUCCESS. Il risultato verde più recente è #292. La CI resta una validazione statica/type-check: non applica migrazioni, non verifica secrets live, non prova la concorrenza PostgreSQL e non certifica deploy Supabase/Netlify.
+- Workflow `.github/workflows/nextway-static-validation.yml` verificato sia su `main` sia sul branch PR. Il branch PR aggiunge i controlli AI Setter governance, CORS locale e static checks Python; tali modifiche al workflow non sono ancora in `main`.
 
-### Esito osservato nel browser
-- La pagina `http://localhost:8000/nextway-admin.html` si apre e mostra correttamente le sezioni Workspace, Membership, Knowledge Base, registro attività, richieste conversione e governance AI.
-- La sessione personale risulta autenticata come `servello.dm@gmail.com`.
-- La console amministrativa mostra però `Accesso o servizio amministrativo non disponibile: Failed to fetch`.
-- La configurazione è quindi distinta: interfaccia locale caricata e sessione personale riconosciuta, ma chiamata alla Edge Function amministrativa non completata dal browser.
+### Supabase CRM — risultato live fornito dall'utente
 
-### Diagnosi e causa residua
-- La correzione del bridge archivio locale ha superato il precedente errore `Archivio locale non pronto`.
-- Il problema residuo è coerente con il preflight CORS già osservato: la Edge Function remota risponde a OPTIONS ma non restituisce `Access-Control-Allow-Origin` per `http://localhost:8000`.
-- Il branch contiene già la correzione CORS per localhost e il test statico locale ha superato tutti e tre i gruppi di controlli.
-- La versione remota della Edge Function non è stata aggiornata; finché non verrà distribuita la versione corretta, il browser continuerà a bloccare la richiesta cross-origin.
+La diagnostica `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è stata aggiornata per non interrogare la relazione non disponibile `supabase_migrations.schema_migrations`, che aveva causato l'errore PostgreSQL `42P01`. Il risultato successivo fornito dall'utente riporta:
 
-### Stato, vincoli e prossime attività
-- Nessun workspace, membership, documento, prompt o criterio creato o modificato.
-- Nessuna migrazione applicata, nessun deploy Supabase o Netlify, nessun merge.
-- Restano validi i vincoli: nessun deploy/merge senza autorizzazione esplicita e Netlify produzione congelato fino al 4 dicembre 2026.
-- Proseguire sul branch con revisione statica e preparazione del pacchetto di rilascio; il collaudo runtime amministrativo autenticato resta sospeso fino a quando il deploy della Edge Function sarà autorizzato.
+- `public.nextway_leads`: presente; RLS attiva; FORCE RLS non attivo.
+- Policy per `authenticated`: SELECT, INSERT, UPDATE e DELETE. Le condizioni `USING`/ `WITH CHECK` consentono il proprietario tramite `owner_profile_id = auth.uid()` oppure un utente con ruolo `platform_admin`.
+- `public.nextway_lead_activities`: assente al momento della query.
+- `public.nextway_lead_conversion_requests`: assente al momento della query.
+- `supabase_migrations.schema_migrations`: `to_regclass` restituisce assenza/non disponibilità nel contesto SQL interrogato. Questo non dimostra che non esista alcun altro sistema di tracciamento delle migrazioni.
+- Il risultato è una lettura fornita dall'utente, non una connessione diretta dell'assistente a Supabase. La diagnostica è read-only; nessuna migrazione è stata applicata in conseguenza dell'errore o del controllo.
 
+### Diagnostica prerequisiti e migrazione 011
 
----
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente in `main`, blob SHA `832d328fd84b0694f7e324866a2db4927ab83dd2`. Verifica colonne archive, vincoli di stato, tabelle correlate (attività, conversioni, idempotenza) e firme delle RPC. Nel contesto corrente non è disponibile un risultato della sua esecuzione: resta **DA COMPLETARE**.
+- Nuova lettura del file `supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql` da `main`: blob SHA `db17834699909be71c084aad56f64885c5656867`. I due corpi PL/pgSQL presenti nel file usano delimitatori bilanciati `as $$ ... $$;`. **Correzione documentale:** la nota precedente che descriveva la versione corrente su `main` con delimitatori `as $` / `$;` non è confermata da questo blob e va considerata superata. È stata verificata la struttura testuale dei delimitatori, non una compilazione PostgreSQL runtime.
+- La diagnostica prerequisiti deve precedere qualsiasi decisione sulle migrazioni CRM 008–014. L'assenza live delle tabelle attività e conversioni non basta, da sola, a stabilire lo stato di tutte le migrazioni prerequisito.
 
-## Revisione statica sicurezza multi-workspace e Knowledge Base — 12 novembre 2026
+### Ambiente locale e piano staging — evidenze disponibili
 
-### Componenti revisionati nel branch
-- Membership: una sola membership per coppia workspace/utente; indice univoco per un solo owner attivo o invitato; lettura autonoma limitata alla propria membership; gestione riservata a platform_admin.
-- Helper `nextway_has_workspace_access`: richiede sessione autenticata e, per i membri, membership attiva, workspace attivo e ruolo incluso nell'allow-list; platform_admin mantiene l'accesso centrale.
-- Workspace: registry e versioni di istruzioni/criteri con RLS; bozze distinte dagli elementi attivi; indici univoci impediscono più versioni attive per la stessa chiave.
-- AI Setter: conversazione vincolata al proprietario e al workspace del Lead; il controllo di accesso al workspace avviene prima del claim di generazione; viewer escluso dalle RPC di generazione.
-- Messaggi Setter: i client autenticati hanno sola lettura diretta; scrittura tramite RPC protette che verificano utente, conversazione, membership e stato.
-- Knowledge Base: upload e ingestione richiedono autenticazione e ruolo platform_admin; i documenti nascono pending; la ricerca usa workspace esplicito, membership attiva, stato approved e finestra di validità.
-- API amministrativa: verifica token e ruolo platform_admin prima delle operazioni; directory profili senza indirizzi email; membership e documenti validati lato server.
-- Rendering console: dati non attendibili inseriti come testo; nessun uso di innerHTML nel renderer amministrativo; nessuna chiave service-role nel codice browser.
+- Il piano `docs/NEXTWAY-STAGING-SETUP-PLAN.md` è presente nel branch PR, non in `main`; blob SHA sul branch: `43650bade42fe6d52bd3e66deebf38aa359fa611`. È un piano preparatorio, non un ambiente creato.
+- Il piano indica che il repository non contiene ancora `supabase/config.toml` né un seed locale completo e che le migrazioni NEXTWAY dipendono da uno schema applicativo preesistente. Prima di un ambiente locale serve una baseline schema-only completa e revisionata, senza dati personali, più fixture sintetiche.
+- Dati terminale riferiti dall'utente: Mac `x86_64` (Intel), memoria `8589934592` byte (8 GiB); in controlli precedenti `supabase --version` e `brew --version` hanno restituito command not found, i comandi `command -v node/nodejs/npm/deno` non hanno individuato percorsi e Python era 3.9.6. Non è stata confermata in questa sessione la disponibilità completa di Docker o la fattibilità di un runtime Supabase locale; l'output disco/Docker più recente non è disponibile integralmente nel testo accessibile.
+- Nessun dump/backup verificato, nessun progetto staging cloud creato, nessuna baseline schema-only completata, nessun test A–F eseguito, nessuna migrazione o deploy eseguito. Il piano preferisce Supabase locale se tecnicamente praticabile; un secondo progetto cloud richiederebbe prima verifica di limiti/costi e autorizzazione esplicita.
 
-### Esito delle verifiche automatiche GitHub
-- Commit verificato: `5589ec034e1f1f45100cc3921ba7364088fb25d4`.
-- Workflow `NEXTWAY static validation`: job `validate` completato con esito SUCCESS.
-- Tutti i 31 passaggi operativi del job risultano completati con esito SUCCESS, inclusi contratti SQL/RLS, membership, isolamento Setter, governance AI, UI admin, test Python locale, sintassi JavaScript e type-check Deno delle cinque Edge Functions.
-- PR #1 resta aperta in stato draft, head sul branch `fix/nextway-password-recovery`, base `main`; non è stata effettuata alcuna fusione.
+### Matrice di stato aggiornata
 
-### Limiti e decisioni
-- Questa è una revisione statica del codice e dei contratti: non sostituisce test runtime RLS, test multiutente, test di concorrenza o verifica con dati di prova su Supabase.
-- Le migrazioni workspace, membership, RLS, Knowledge Base e governance AI presenti nel branch restano candidate e NON applicate.
-- Le Edge Functions aggiornate nel branch, inclusa la correzione CORS per localhost, non sono state ridistribuite.
-- Nessun workspace, membership, documento, prompt, criterio, Lead o messaggio creato o modificato durante la revisione.
-- Nessun deploy Supabase/Netlify, merge o modifica a `main`.
-- Resta bloccato il collaudo runtime amministrativo locale finché la Edge Function remota non riceverà la correzione CORS e il relativo deploy non sarà autorizzato.
+- Repository `main`, MASTER, albero e commit HEAD: **COMPLETATO E VERIFICATO** per i contenuti GitHub letti.
+- Diagnostica CRM live: **COMPLETATO E VERIFICATO** limitatamente al JSON fornito dall'utente; lettura diretta Supabase non disponibile.
+- Tabella Lead e quattro policy owner/admin: **COMPLETATO E VERIFICATO** per la query ricevuta.
+- Tabelle attività e richieste conversione: **DA COMPLETARE** (assenti nell'ultima query).
+- Diagnostica prerequisiti CRM: **COMPLETATO E VERIFICATO** quanto a presenza/contenuto nel repository; esecuzione e risultato live **DA COMPLETARE**.
+- Migrazione 011: delimitatori PL/pgSQL bilanciati nel blob corrente di `main`, **COMPLETATO E VERIFICATO** a livello di lettura statica; validazione PostgreSQL runtime **DA COMPLETARE**.
+- PR #1, branch `fix/nextway-password-recovery`: controlli statici CI #292 **COMPLETATO E VERIFICATO**; merge e rilascio **DA COMPLETARE** (PR ancora draft/open).
+- Nuove migrazioni governance AI Setter e integrità conversione: presenti e testate staticamente nel branch PR; applicazione su Supabase **DA COMPLETARE** dopo staging, backup e preflight.
+- Ambiente staging locale/cloud, baseline schema-only e test concorrenza A–F: **DA COMPLETARE**; nessun ambiente creato.
+- Backup database: **BLOCCATO** fino a disponibilità di un metodo CLI/esportazione compatibile e verifica del file risultante.
+- Deploy Edge Functions/Supabase e Netlify: **DA COMPLETARE/VERIFICARE**; nessun nuovo deploy accertato in questo controllo. Resta invariata la decisione precedente di non effettuare deploy Netlify di produzione prima del 4 dicembre 2026.
+- Applicazione migrazioni CRM e workspace: **BLOCCATO** fino a backup verificato, risultato della diagnostica prerequisiti e ambiente di collaudo isolato.
 
-### Prossima fase
-1. Completare la revisione dei flussi di caricamento/indicizzazione e delle autorizzazioni Knowledge Base.
-2. Preparare una checklist di migrazioni in ordine, con precondizioni e rollback documentati.
-3. Pianificare test runtime controllati per due workspace e almeno tre ruoli (platform_admin, workspace_member, workspace_viewer), senza usare dati reali.
+### Prossimo passo operativo preciso
 
+1. Eseguire in Supabase SQL Editor `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo.
+2. Confrontare quel risultato con le migrazioni e con la baseline schema-only; non eseguire ancora il bundle CRM 008–014 in produzione.
+3. Completare la fattibilità del test locale su Mac Intel (Docker/runtime, spazio e CLI compatibile); se non praticabile, valutare un progetto cloud isolato solo dopo verifica dei costi e autorizzazione.
+4. Mantenere PR #1 draft finché i gate di staging, backup, test A–F e revisione delle migrazioni non sono soddisfatti.
 
----
+### Registro cronologico del MASTER
 
-## Checklist di rilascio controllato aggiunta — 12 novembre 2026
-
-- Creato `docs/NEXTWAY-RELEASE-CHECKLIST.md` nel branch di lavoro.
-- La checklist separa la catena AI Setter/Lead, la Knowledge Base e la sequenza multi-workspace, elenca le migrazioni candidate e segnala la migrazione legacy `nw_*` come separata, da non applicare automaticamente.
-- Inseriti gate pre-migrazione, requisiti di backup, controlli RLS/grant, matrice runtime a due workspace e ruoli, criteri di approvazione documenti e ordine di rilascio.
-- Il documento è preparatorio e non autorizza alcuna migrazione, deploy o merge.
-- Commit checklist: `bee045a8320bca2f240ba9b74d1204fec911e188`.
-- PR #1 resta aperta draft; `main` non modificato.
+- 12-11-2026, 19:34 Europe/Rome — aggiornati HEAD/commit di `main`, inventario repository, PR #1 (71 commit ahead, draft), workflow e log GitHub Actions #251/#292; registrati i risultati CRM forniti dall'utente, la diagnostica prerequisiti non ancora eseguita, la correzione della precedente nota sulla migrazione 011 e il piano staging presente solo nel branch PR. Modificato esclusivamente `MASTER_NEXTWAY.md`.
 
 
 ---
 
-## Revisione statica — ricerca pubblica, AI Setter e provisioning conversioni — 12 novembre 2026
+## NOTA DI CONTINUITÀ — 12 NOVEMBRE 2026, CONTROLLO SUCCESSIVO ALLA CORREZIONE DELLE 19:34
 
-### 1. Ricerca pubblica Tavily — `nextway-search`
-
-- Autenticazione verificata tramite `auth.getUser(token)`; il token viene usato con client Supabase associato alla sessione.
-- Il body viene letto in streaming con limite effettivo di 16 KB; sono ammesse da 1 a 5 query, ciascuna da 1 a 400 caratteri.
-- Il limite di consumo è applicato lato database tramite RPC atomica: 10 unità/minuto per utente, una unità per query inoltrata.
-- Il numero di risultati è limitato tra 1 e 10; le chiamate Tavily hanno timeout di 20 secondi e non richiedono risposta sintetica né contenuto raw.
-- I risultati sono normalizzati e limitati in lunghezza; vengono mantenuti soltanto URL HTTP/HTTPS validi. Gli errori parziali sono distinti dai risultati riusciti.
-- Nessuna creazione automatica di Lead: la risposta avverte che identità, fonte ed evidenza devono essere verificate manualmente.
-- Esito: i controlli statici osservati sono coerenti con autenticazione, minimizzazione della risposta, rate limit e gestione dei risultati non attendibili.
-- Limite: non sono state effettuate chiamate runtime a Tavily né prove di abuso/concorrenza del rate limit.
-
-### 2. AI Setter — `nextway-ai-setter`
-
-- Autenticazione Bearer verificata con Supabase Auth; metodo limitato a POST/OPTIONS e origine controllata da allow-list.
-- Body letto in streaming con limite effettivo di 16 KB; UUID e obiettivo sono validati prima della generazione.
-- Rate limit atomico database: 5 generazioni/minuto per utente.
-- Conversazione e Lead sono recuperati tramite client autenticato e RLS; conversazioni chiuse/archiviate vengono rifiutate.
-- Per conversazioni workspace, istruzioni e criteri vengono recuperati esclusivamente tramite RPC dedicata alla governance attiva; in caso di errore il flusso si interrompe con 503.
-- Il contesto inviato al provider usa un'allow-list di campi, esclude note libere e recapiti/URL, limita lo storico alle ultime 20 comunicazioni e applica limiti di lunghezza e sanitizzazione.
-- Il flusso usa claim idempotente, staging dell'output e completamento tramite RPC; una bozza non conforme non viene salvata.
-- La risposta viene preparata come bozza; nel codice esaminato non è presente un invio automatico a prospect o clienti.
-- Esito: i controlli statici osservati sono coerenti con minimizzazione, autorizzazione, idempotenza e separazione tra generazione e invio.
-- Limite: nessun test runtime OpenAI, RLS, concorrenza, revoca membership o recupero output è stato eseguito in questa revisione.
-
-### 3. Provisioning conversioni — `nextway-conversion-provisioning` e migrazioni 014/015/cleanup
-
-- La Edge Function richiede un Bearer token valido e ruolo `platform_admin`; le operazioni privilegiate usano la chiave service-role esclusivamente lato server.
-- Le RPC di claim, finalizzazione e rilascio sono riservate a `service_role`; il claim è protetto da token e finestra temporale, con recupero degli inviti creati da tentativi precedenti.
-- La migrazione crea vincoli univoci per collegare una richiesta a un solo record `clients` o `partner_details`; la finalizzazione SQL è transazionale e aggiorna lo stato della richiesta.
-- **Rilievo di integrità da correggere prima del rilascio:** la finalizzazione crea/aggiorna il record cliente o partner e poi aggiorna il Lead soltanto se è ancora non archiviato e in stato `In valutazione`. Il codice non verifica che l'UPDATE del Lead abbia modificato una riga. Se il Lead viene archiviato o cambia stato dopo l'approvazione ma prima dell'attivazione, la conversione può comunque risultare `activated` e creare il record cliente/partner, lasciando il Lead in uno stato incoerente. Correzione raccomandata: verificare e bloccare la transizione se il Lead non è ancora convertibile, nella stessa transazione e prima di creare il record di destinazione; predisporre un test concorrente sul cambio stato/archiviazione.
-- **Rilievo di minimizzazione errori:** `safeMessage(error)` restituisce il messaggio originale dell'eccezione, troncato a 300 caratteri; lo stesso testo viene registrato nei log e restituito al client amministrativo. Correzione raccomandata: risposta esterna generica con codice di correlazione e log limitato a codice/status tecnico, senza messaggi SQL o dettagli interni.
-- La funzione restituisce anche identificativi tecnici di attivazione nella risposta amministrativa; verificare che la UI li utilizzi davvero e mantenere soltanto i campi necessari.
-- Limite: nessuna attivazione reale, invito email, prova di retry o test concorrente è stato eseguito durante questa revisione.
-
-### 4. Stato e decisioni
-
-- Revisione esclusivamente statica dei file del branch `fix/nextway-password-recovery`.
-- I due rilievi sul provisioning sono **correzioni raccomandate ancora da implementare**; questa registrazione non modifica il codice.
-- Nessuna migrazione applicata, nessun deploy Supabase/Netlify, nessun merge e nessuna modifica a `main`.
-- Nessuna richiesta di conversione attivata, nessun account creato e nessuna email/invito inviato.
-- Prossimo passo: preparare correzione transazionale e test statici/runtime per il controllo dello stato Lead prima della conversione; rendere privacy-safe la gestione degli errori. Le modifiche restano sul branch e non autorizzano deploy o migrazioni.
+- Recuperato il MASTER corrente da main: blob SHA 0d93ff050d8abf70bf9baed12469d04375afd8dc; 2.557 righe.
+- HEAD main osservato: e7446613e550376ec1d5c3152c95d852b0751811, commit documentale "docs(nextway): correct MASTER line count and wording". Il diff è limitato a due correzioni testuali nel MASTER: conteggio corretto di 2.473 righe nella sezione precedente e correzione della punteggiatura del percorso del piano staging. Nessun file applicativo o SQL modificato.
+- La continuità GitHub Actions e PR resta quella registrata nella sezione precedente: push main #251 SUCCESS; ultima run PR osservata #292 SUCCESS; PR #1 OPEN/DRAFT/NOT MERGED, base a3fbec076221f0f043d60373e2864d7d07db30d7, head a7e345fb8d8715901486d0ac316512c9494988ba.
+- Non risultano nuove evidenze tecniche Supabase in questo controllo. Il JSON live Lead già riportato resta l'ultimo risultato ricevuto; la diagnostica prerequisiti CRM non risulta ancora eseguita dall'utente. Nessuna query Supabase, migrazione, modifica applicativa o deploy è stato eseguito.
+- Stato: MASTER e correzione documentale **COMPLETATO E VERIFICATO**; PR e test statici **ESEGUITO MA NON VERIFICATO** rispetto al runtime; diagnostica prerequisiti CRM **DA COMPLETARE**; applicazione migrazioni **BLOCCATO** fino a preflight, backup e staging.
+- Prossimo passo invariato: eseguire supabase/diagnostics/nextway_crm_prerequisites_readonly.sql in Supabase SQL Editor e acquisire il JSON completo; non applicare ancora le migrazioni CRM.
+- Registro MASTER: nota aggiunta dopo il commit e744661 per documentare la correzione testuale e confermare che non sono intervenute modifiche applicative o live.
 
 
 ---
 
-## Correzione integrità provisioning conversioni — 12 novembre 2026
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:21 (Europe/Rome)
 
-### Correzioni implementate sul branch
+### Fonti e revisioni GitHub
 
-- Nuova migrazione candidata `supabase/migrations/20261112170000_nextway_conversion_activation_integrity.sql`.
-- La RPC `nextway_finalize_conversion_activation` blocca la riga Lead con `SELECT ... FOR UPDATE` e verifica che ID, proprietario, stato `In valutazione` e `archived_at IS NULL` siano ancora validi.
-- La transizione Lead a `Convertito cliente` / `Convertito partner` viene eseguita e verificata prima della creazione del record di destinazione. Se non aggiorna esattamente una riga, la funzione solleva un errore e PostgreSQL annulla l'intera transazione.
-- Creazione/aggiornamento di `clients` o `profiles/partner_details` e passaggio della richiesta a `activated` restano nella stessa transazione SQL. Un errore in qualsiasi passaggio annulla anche il cambio stato del Lead.
-- La RPC conserva `SECURITY DEFINER`, `search_path` esplicito e privilegi EXECUTE riservati a `service_role`.
-- La Edge Function non restituisce più il messaggio originale delle eccezioni. Risponde con testo generico, HTTP 500 e `request_id`; i log registrano soltanto request ID e codice errore sanitizzato. Anche il log della pulizia compensativa Auth non registra il messaggio grezzo.
-- Test di regressione aggiornati in `scripts/test-nextway-provisioning-security.mjs` e `scripts/test-nextway-local-static.py`: lock Lead, verifica stato/owner/archivio, ordine transizione-creazione, atomicità, grant service_role e assenza di messaggi di errore grezzi.
+- MASTER recuperato da `main` prima della scrittura: blob SHA `3ddd44ca69b79b9c875f35bc60732fef2d6bffcd`. HEAD `main`: `4344bd2a181667ec6e80a704d298625e1321bb85` (12 novembre, commit documentale).
+- Commit recenti esaminati: `4344bd2`, `e744661`, `9133d4d`, `dbeb994`, `a3fbec0`, `b2ce72e`, `cd813d8`, `c46a789`, `9dcf333`, `18b38e1`. L'ultimo push CI su main è #251, sul precedente commit di codice `b2ce72e`.
+- Albero ricorsivo main: 140 elementi, senza troncamento; presenti sei Edge Functions e migrazioni fino a `20261112020000_nextway_setter_generation_table_isolation.sql`. Non risultano in main `nextway-company-config.js` né le migrazioni `20261113110000`–`20261113150000`.
+- PR #1 / branch `fix/nextway-password-recovery`: HEAD remoto `e0b5098f88417597010e5845a61d0c16d65c2689`, albero 208 elementi; PR OPEN, DRAFT, NOT MERGED, 84 file modificati, 534 commit dichiarati dai metadati, `mergeable=false`. Base SHA restituito dalla PR: `a3fbec076221f0f043d60373e2864d7d07db30d7`. Nessun merge.
+- Ultimo pull locale confermato dall'utente il 13 novembre alle 13:42: `955cf9d..f2b00a0`, fast-forward, solo `nextway-motore-ricerca.html` (+83/-7). Il branch remoto è poi avanzato a `e0b5098`; sincronizzazione locale successiva non confermata.
+- In questo aggiornamento sono stati letti file, migrazioni, documenti, albero Git e CI. Nessun accesso diretto a Supabase/Netlify.
 
-### Commit della correzione
+### Requisito funzionale e ricerca prospect
 
-- Edge Function error handling: `44dc8e3ab2c1cbba8b9f937edafea72be482aa9c`.
-- Migrazione candidata: `60e261aec8c2693ff3f219fbb5308a34d5fe532f`.
-- Test provisioning: `1b595e17a26f376118c78a03cf71414a89d99a15`.
-- Test statici Python locale: `bc594bf33fb2e2d58da1b6444e050147d7f91891`.
+- Requisito esplicito dell'utente del 13 novembre: NEXTWAY deve ricercare potenziali clienti e partner. Segmenti partner richiesti: professionisti salute/benessere, professionisti network marketing wellness, networker di altri settori, imprenditori, persone interessate a un'attività o reddito aggiuntivo.
+- Decisione: NEXTWAY CORE indipendente dal marchio; Zinzino è la prima azienda da predisporre. Cambiare azienda deve avvenire tramite configurazione, documenti, prompt e criteri, senza riscrivere il motore.
+- Sul branch PR `nextway-company-config.js` definisce Zinzino come unica azienda attiva e nove segmenti: `customers`, `wellness_pro`, `wellness_networker`, `new_networker`, `other_networker`, `exnetworker`, `entrepreneur`, `side_income`, `business_seeking`.
+- Sul branch PR `nextway-motore-ricerca.html` genera cinque query per ricerca, con area, fonte e lingua; usa il backend di ricerca, estrae profili/prove pubbliche, deduplica e prepara l'acquisizione manuale nel CRM. La versione branch è circa 114 KB; la versione main è circa 13 KB.
+- Punteggio documentale 0–100: identità 0–40, coerenza segmento 0–40, prove pubbliche 0–20. Non misura interesse, disponibilità o idoneità commerciale. Il modulo richiede verifica umana; non fa scraping automatico, non invia messaggi automaticamente e vieta profilazione di dati sanitari.
+- `nextway-search` usa Tavily, autenticazione Supabase e RPC `nextway_consume_api_rate_limit`; il sorgente impone da 1 a 5 query, body massimo 16 KB, massimo 10 risultati per query e rate limit per utente. Richiede il secret `TAVILY_API_KEY` (valore non documentato). Il branch consente CORS locale `http://localhost:8000` senza wildcard.
+- I due canali del consulente restano distinti: Misura Test Benessere come sito generale a branding neutro, non sito ufficiale Zinzino; sito replica personale Zinzino solo quando c'è interesse specifico. Nessun link commerciale automatico nel primo contatto.
+- Documentazione ufficiale Zinzino ancora da caricare: presentazione, catalogo, schede prodotto, BalanceTest, piano compensi Italia, policy/compliance, formazione, claim e listini. I relativi stati in configurazione sono `da_caricare`; la Knowledge Base aziendale non è completa.
+- Correzioni branch recenti: esito Zoom esplicito e stop post-incontro; ripristino e cronologia del modulo attività; stato CRM allineato all'esito Zoom; riduzione punteggi senza persona/segmento verificabili; correzione falsi positivi imprenditore/regex. HEAD `e0b5098` considera prima `published_date` Tavily per la freschezza delle fonti. Modifiche di sorgente, non prove runtime.
 
-### Stato di verifica e limiti
+### CI
 
-- Correzioni e test sono presenti nel branch `fix/nextway-password-recovery`; esito CI sul nuovo HEAD da attendere/verificare.
-- I test aggiunti sono controlli statici del contratto sorgente. Non sostituiscono una prova runtime concorrente su PostgreSQL con due sessioni (finalizzazione contro archiviazione/cambio stato).
-- Migrazione soltanto preparata nel repository: **non applicata** a Supabase.
-- Nessun invito Auth, account, cliente, partner o Lead reale creato/modificato.
-- Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`.
-- PR #1 resta draft; non renderla pronta e non effettuare merge.
-- Il vincolo di non intervenire su Netlify produzione prima del 4 dicembre 2026 resta invariato.
+- Main: run #251, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Validazione statica/type-check del codice di quel commit; non è un test runtime Supabase. I commit main successivi osservati sono documentali.
+- Branch PR: run #520, ID `43460040655`, FAILURE sul HEAD `e0b5098` (13 novembre, 16:10:35 UTC). Fallisce lo step `Validate NEXTWAY audit`: `scripts/validate-nextway-audit.mjs` cerca la forma compatta `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount`, mentre il sorgente presenta l'oggetto su più righe. L'asserzione non corrisponde alla formattazione e il processo termina con exit code 1.
+- Il log prova il fallimento del test di contratto, non un difetto runtime dell'archivio. Gli step successivi sono SKIPPED, inclusi test Zinzino, controlli locali, `node --check` e `deno check`. Le run PR #510–#519 nell'elenco recente risultano FAILURE; #520 è la più recente esaminata.
+- Il test `scripts/test-nextway-company-config.mjs` è presente e copre i nove segmenti e il flusso ricerca/CRM, ma non è stato raggiunto nella run #520. Correggere il test audit senza indebolire l'isolamento e rieseguire la CI completa.
 
+### Supabase — evidenze utente del 12–13 novembre
 
-### Verifica CI della correzione — 12 novembre 2026
+- Progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`. Gli esiti seguenti sono output riferiti dall'utente, non una nuova lettura live dell'assistente.
+- **P0 Rate Limit e Governance — COMPLETATO E VERIFICATO:** il 13 novembre alle 07:37 l'utente ha eseguito il draft SQL nel Supabase SQL Editor (`Success. No rows returned`). Verifica: Tabella Rate Limit OK; RPC Rate Limit OK; RPC Governance OK; RLS Rate Limit ATTIVA; Accesso RPC Rate Limit OK; Accesso RPC Governance OK. Dal sorgente del draft: `nextway_api_rate_limits`, `nextway_consume_api_rate_limit(text,integer)`, `nextway_get_active_setter_governance(uuid)`.
+- **Workspace — COMPLETATO E VERIFICATO per gli output disponibili:** il 13 novembre alle 07:25 l'utente ha confermato workspaces, prompts e prospect criteria presenti con RLS/accesso; il 12 novembre aveva verificato `nextway_workspace_memberships` con RLS attiva, 0 righe, FK a `auth.users` e `nextway_workspaces`, UNIQUE `(workspace_id,user_id)` e vincoli ruolo/stato. Il 13 novembre alle 09:29 ha confermato le policy `nextway_workspace_memberships_admin_all` e `nextway_workspace_memberships_self_read`.
+- Le RPC `nextway_activate_workspace_prompt/criteria(uuid,uuid)` erano state verificate il 12 novembre come SECURITY DEFINER, `search_path=pg_catalog, public`, EXECUTE solo `service_role`. `workspace_id` presente su leads, knowledge documents e setter conversations con FK RESTRICT; FK anche su prompts e prospect criteria.
+- **Privilegi RPC conversione — COMPLETATO E VERIFICATO per la diagnostica utente del 13 novembre alle 09:36:** claim/finalize/release/guard/set_updated_at EXECUTE solo a `postgres, service_role`; `nextway_has_workspace_access` e `nextway_is_platform_admin` anche ad `authenticated`; nessun EXECUTE a anon/PUBLIC. Anomalia live: `nextway_is_platform_admin()` aveva `search_path=public`. La migrazione branch `20261113110000` fissa `pg_catalog, public`, ma non risulta applicata.
+- **Storage — COMPLETATO E VERIFICATO all'ultima lettura utente dell'11 novembre:** `nextway-knowledge` privato, 12 MiB, MIME PDF/DOCX/TXT, 0 oggetti e quattro policy admin authenticated SELECT/INSERT/UPDATE/DELETE. Non ricontrollato il 13 novembre.
+- **CRM core:** l'ultima diagnostica registrata (11 novembre) mostrava `nextway_leads` presente con RLS e policy owner/platform_admin; attività e conversion requests assenti in quel momento. Il dump schema-only del 13 novembre fotografa uno stato successivo con 21 tabelle, ma la riconciliazione oggetto-per-oggetto non è finita: non dedurre lo stato corrente di ogni tabella CRM.
+- **AI Setter generation:** il preflight utente del 13 novembre alle 07:25 ha trovato la tabella legacy `nextway_setter_generation_requests`, ma senza le colonne legacy attese `user_id` e `lease_expires_at`. La catena successiva usa uno store workspace separato: non applicare cleanup/retention legacy senza riconciliare tabella e firme effettive.
 
-- GitHub Actions run #286, commit `5fc1760fc044ec24f0812d398e2851914d0ccaa9`: **SUCCESS**.
-- Superati il contratto di sicurezza provisioning aggiornato, il controllo statico Python locale, il type-check Deno della Edge Function `nextway-conversion-provisioning` e tutti gli altri controlli del workflow.
-- Deploy Preview Netlify associata alla PR: stato check `success`; è un ambiente preview, non un deploy di produzione e non applica la migrazione Supabase.
-- Il commit documentale successivo sul MASTER non modifica codice o test. Nessun test runtime con transazioni concorrenti è stato eseguito.
+### Conversione Lead → cliente/partner
 
+- La diagnostica live del 13 novembre ha evidenziato che la finalizzazione precedente non bloccava il Lead con `FOR UPDATE` e non verificava l'UPDATE: rischio di conversione non atomica. Nessuna riga di test è stata modificata sul progetto reale.
+- Solo sul branch PR, non applicate: `20261113110000` hardening search_path admin; `20261113120000` snapshot immutabile workspace sulla richiesta; `20261113130000` finalizzazione transazionale con partner + membership `invited` oppure cliente + attribuzione workspace; `20261113140000` cancellazione amministrativa controllata; `20261113150000` riallineamento trigger stale-output alla tabella Setter workspace.
+- Il piano di concorrenza conversione A–F è preparato ma non eseguito. Richiede staging separato, due sessioni PostgreSQL, fixture sintetiche e nessuna email/account reale. Staging, test runtime, inviti e membership di prova non sono confermati.
 
----
+### Dump schema-only, baseline e staging
 
-## Piano collaudo concorrente conversioni — 12 novembre 2026
+- Il 13 novembre l'utente ha riferito `/tmp/nextway-public-schema.sql`, prodotto con Supabase CLI 3.1.0 dal solo schema `public`: circa 154 KB, 3.615 righe, 0 INSERT/COPY, SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`. Conteggi riportati: 21 tabelle, 22 SECURITY DEFINER, 53 policy RLS, 11 trigger, 48 indici. È schema-only, non backup completo dei dati; nessun restore è stato provato.
+- Inventario statico: 31 migrazioni. La DDL originaria delle tabelle core non è nella cronologia Git iniziale; lo snapshot corrente include già modifiche delle migrazioni. Riconciliazione oggetto-per-oggetto, tipi, sequenze, ownership, grant e dipendenze Auth/Storage DA COMPLETARE.
+- Il 13 novembre alle 12:08 l'utente ha eseguito `python3 scripts/extract-nextway-core-ddl.py`: "Formato non riconosciuto"; nessun file modificato. Nessun estratto DDL core riuscito confermato.
+- Sul branch è presente `scripts/check-nextway-schema-dump.py`, scanner che ignora commenti, stringhe e corpi dollar-quoted e rileva INSERT/COPY a livello statement; il self-test è nel workflow, ma non è stato raggiunto nella run #520.
+- Sul branch è presente `supabase/config.toml` con label locale `nextway-staging-prepared`, redirect localhost, signup/anon disabilitati, SMTP locale `local_smtp`, nessun remote e nessun segreto. Non crea uno staging. Il documento readiness sconsiglia `supabase start` sul Mac Intel da 8 GB.
+- Staging non creato, nessuna baseline importabile certificata, nessun seed sintetico e nessun test PostgreSQL runtime. Backup completo e restore DA COMPLETARE.
 
-- Creato `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md`.
-- Il piano definisce sei scenari: Lead già archiviato, Lead con stato cambiato, concorrenza con aggiornamento Lead vincente, concorrenza con finalizzazione vincente, rollback per errore a valle e idempotenza.
-- Specifica l'uso esclusivo di staging Supabase separato, fixture sintetiche, due sessioni PostgreSQL indipendenti e criteri verificabili di superamento.
-- Il test partner, che richiede un invito Auth, è limitato a un account sintetico di staging e prevede verifica della cancellazione a fine test.
-- **Stato: piano preparato, test runtime non eseguito.** Non è disponibile in questo passaggio una connessione autorizzata a un database di staging; non è stata usata né interrogata la produzione.
-- Nessuna migrazione applicata, nessun dato reale modificato, nessun account o invito creato, nessun deploy o merge.
-- Prossimo requisito: predisporre un progetto Supabase staging separato e autorizzare esplicitamente il collaudo runtime su quel progetto. Il piano non autorizza modifiche o deploy in produzione.
+### Mac Intel, Edge Functions e vincoli
 
+- Output utente del 13 novembre alle 07:53: Supabase CLI 3.1.0, Docker 29.9.3, circa 8 GB RAM, architettura Intel; dump schema-only prodotto.
+- Output utente serale successivo: `supabase --version` e `brew --version` → `command not found`; installer Homebrew standard rifiutato perché richiede Apple Silicon; `uname -m` → `x86_64`. Discrepanza di PATH/sessione non risolta. `node -v` e `npm -v` non ancora riportati.
+- Sei sorgenti nel repository: `nextway-ai-setter`, `nextway-search`, `nextway-workspace-admin`, `nextway-knowledge-upload`, `nextway-knowledge-ingest`, `nextway-conversion-provisioning`. La matrice branch documenta dipendenze e nomi secrets (senza valori): OpenAI per AI Setter, Tavily per search, service-role per funzioni amministrative/Knowledge/conversion.
+- Il branch include CORS locale `http://localhost:8000` senza wildcard; il sorgente aggiornato non modifica automaticamente le funzioni remote. Versioni remote, secrets live e CORS remoto non verificati in questo controllo. Nessun deploy effettuato.
+- Vincolo utente invariato: nessuna azione Netlify produzione e nessun test con utenti o conversioni reali prima del 4 dicembre 2026. Staging futuro solo con dati sintetici e email sandbox.
 
----
+### Matrice di stato aggiornata
 
-## Ricognizione ambiente staging Supabase — 12 novembre 2026, ore 16:22 CET
+- MASTER/main, HEAD/blob e inventario GitHub: **COMPLETATO E VERIFICATO**.
+- CI main #251: **COMPLETATO E VERIFICATO** per quella run statica/type-check.
+- CI PR #520: **BLOCCATO** dall'asserzione audit; gli step successivi sono stati saltati.
+- Motore prospect e configurazione Zinzino nel branch: **ESEGUITO MA NON VERIFICATO**; browser e CI sul commit corrente non superati.
+- Materiali ufficiali Zinzino/Knowledge Base: **DA COMPLETARE**.
+- P0 Rate Limit/Governance: **COMPLETATO E VERIFICATO** sugli output Supabase utente del 13 novembre.
+- Workspace/membership/RLS/RPC: **COMPLETATO E VERIFICATO** per gli output utente del 12–13 novembre.
+- Bucket Knowledge: **COMPLETATO E VERIFICATO** all'ultima lettura utente dell'11 novembre; 0 oggetti, non ricontrollato oggi.
+- Fix live search_path platform admin: **DA COMPLETARE**; migrazione solo branch.
+- Migrazioni conversione/cancellazione/Setter del 13 novembre: **ESEGUITO MA NON VERIFICATO** sul branch; nessun runtime.
+- Schema CRM live e riconciliazione delle 31 migrazioni: **DA COMPLETARE**.
+- Dump schema-only: **COMPLETATO E VERIFICATO** come file locale riferito dall'utente; backup completo/restore: **DA COMPLETARE**.
+- Estrazione DDL core: **BLOCCATO** dall'errore di formato.
+- Configurazione staging: **ESEGUITO MA NON VERIFICATO** come file branch; progetto e baseline: **DA COMPLETARE**.
+- CLI nel Terminale serale: **BLOCCATO** fino a chiarimento della discrepanza con l'output mattutino.
+- Deploy Edge Functions: **DA COMPLETARE**.
+- Merge PR #1: **BLOCCATO** fino a CI verde, staging e test.
+- Netlify produzione/test reali prima del 4 dicembre: **BLOCCATO** per decisione utente.
 
-### Verifiche repository/GitHub
-- Ricontrollati il branch `fix/nextway-password-recovery`, il MASTER, la checklist di rilascio, il piano collaudo concorrenza, la directory `supabase/`, la directory `supabase/migrations/` e il README Supabase.
-- Il piano `docs/NEXTWAY-CONVERSION-CONCURRENCY-TEST-PLAN.md` richiede esplicitamente un progetto Supabase di staging distinto dalla produzione e dichiara il test runtime non eseguito.
-- La checklist `docs/NEXTWAY-RELEASE-CHECKLIST.md` prescrive backup, verifica dello schema e cronologia migrazioni prima di qualunque applicazione.
-- Nel branch non risulta presente `supabase/config.toml`; la directory Supabase contiene README, funzioni, migrazioni e materiali di supporto, ma nessuna configurazione locale che identifichi un progetto staging.
-- Il README Supabase descrive una procedura riferita al progetto da selezionare manualmente e non identifica un ambiente staging.
-- Su GitHub risultano i soli branch `main` e `fix/nextway-password-recovery`; non è presente un branch denominato staging. Questo dato non dimostra quanti progetti cloud Supabase esistano.
-- Nessuna integrazione Supabase amministrativa è disponibile in questa sessione per interrogare l'elenco dei progetti cloud dell'account.
+### Prossimi passi prioritari
 
-### Conclusione verificabile
-- **Staging non documentato e non verificato come esistente.** Non è corretto dichiarare che non esista in assoluto: il repository e gli strumenti attualmente disponibili non consentono di accertarlo nell'account Supabase.
-- Non è stata aperta né interrogata la produzione durante questa ricognizione; nessun progetto cloud è stato creato o modificato.
+1. Correggere il test audit #520 mantenendo i controlli di isolamento e rieseguire la CI completa, inclusi test Zinzino e Deno.
+2. Aggiornare la copia locale solo dopo aver verificato lo stato Git; il pull delle 13:42 non prova che sia presente il HEAD remoto delle 16:10 UTC.
+3. Acquisire i materiali ufficiali Zinzino e collegare configurazione, criteri e prompt al motore/AI Setter senza inventare dati commerciali.
+4. Risolvere l'estrazione DDL core e completare la riconciliazione; non usare lo snapshot corrente come baseline storica senza revisione.
+5. Preparare staging isolato con dati sintetici, email sandbox e baseline coerente; eseguire lì i test conversione A–F e multi-workspace.
+6. Prima di interventi sul progetto reale, acquisire backup completo e prova restore, preflight aggiornato e autorizzazione specifica. Mantenere il blocco Netlify e test reali fino al 4 dicembre.
 
-### Prossimo percorso, senza costi o modifiche implicite
-1. Valutare prima un ambiente locale isolato, se Docker e Supabase CLI sono disponibili; non sono ancora stati verificati su questo Mac.
-2. Se il locale non è praticabile, verificare nel pannello Supabase se il piano attuale consente un secondo progetto gratuito e quali limiti/costi comporta, prima di crearne uno.
-3. Solo dopo identificazione certa dello staging, predisporre schema e migrazioni selezionate e svolgere i test con fixture sintetiche.
-4. Non collegare mai il test harness al progetto di produzione; nessun deploy, migrazione o spesa senza autorizzazione specifica.
+### Registro cronologico del MASTER
 
-### Stato
-- Ricognizione GitHub/repository completata.
-- Esistenza di un progetto cloud staging: non verificabile dagli strumenti attualmente disponibili.
-- Ambiente locale Supabase: da valutare; nessuna verifica Docker/CLI eseguita.
-- Test runtime concorrenti: non eseguiti.
-- PR #1 resta aperta draft; `main` invariato.
-
-
-## Piano tecnico ambiente di collaudo isolato — 12 novembre 2026
-
-- Creato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` sul branch di lavoro.
-- La priorità è verificare la fattibilità di Supabase locale prima di valutare un secondo progetto cloud.
-- La ricognizione repository ha rilevato l'assenza di `supabase/config.toml` e di un seed locale completo.
-- Le migrazioni NEXTWAY dipendono da uno schema applicativo preesistente (fra cui `profiles`, `clients`, `partner_details`, `nextway_leads), funzioni RPC, trigger e oggetti Storage. Il solo avvio di Supabase locale non basta: serve una baseline schema-only completa, revisionata e priva di dati personali.
-- La verifica Docker/Supabase CLI sul Mac non è ancora stata eseguita; Node/npm non risultavano disponibili e Python era 3.9.6 nella verifica precedente.
-- Piano: verifica locale non distruttiva; baseline schema-only; seed sintetici; test concorrenza A–F; alternativa cloud soltanto previa verifica di costi/limiti e autorizzazione.
-- Nessun progetto staging creato, nessun comando remoto eseguito, nessuna migrazione applicata, nessun deploy e nessuna spesa.
-
-
----
-
-## Ambiente locale NEXTWAY — verifica Mac e strategia a risorse ridotte — 13 novembre 2026
-
-- Verificati sul Mac, con comandi informativi e senza connessioni remote: Docker Desktop 29.9.3 installato e daemon attivo; Supabase CLI 3.1.0 installata.
-- Rilevati: architettura Intel x86_64; RAM fisica 8 GiB; memoria VM Docker 3.82 GiB; 382 GiB liberi sul volume dati; 2 immagini Docker (1.56 GB); nessun container attivo.
-- La documentazione CLI Supabase raccomanda almeno 7 GB assegnati a Docker per lo stack completo. Non aumentare la memoria Docker sul Mac attuale e non tentare il full stack.
-- Aggiornato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` con strategia a profili: prima profilo SQL locale isolato; profilo d'integrazione ridotto solo in seguito e se le risorse lo consentono. La lista servizi da escludere dovrà essere validata sulla CLI 3.1.0.
-- Restano prerequisiti bloccanti: `supabase/config.toml` assente, seed locale assente e baseline schema-only completa da preparare. Le dipendenze Auth/Storage devono essere incluse nella baseline quando richieste dalle migrazioni; PostgreSQL-only non certifica i test Auth/Storage/Edge Functions.
-- Non eseguire `supabase init` nella directory esistente prima di aver definito una procedura che preservi `supabase/` e `supabase/.temp/`.
-- Nessun container avviato, nessuna immagine rimossa, nessun file locale modificato, nessuna connessione remota, nessuna migrazione o test runtime eseguito.
-- Nessun deploy Supabase/Netlify, nessun merge, nessuna modifica a `main`, nessun progetto cloud creato e nessuna spesa.
-
-
-## Matrice servizi Supabase locale — 13 novembre 2026
-
-- Inventariate staticamente le 31 migrazioni del branch `fix/nextway-password-recovery` e le dipendenze principali verso schema applicativo (`profiles`, `clients`, `partner_details`, `nextway_leads`, conversazioni Setter), schemi gestiti Supabase (`auth`, `storage`) e RPC/trigger preesistenti.
-- Creato `docs/NEXTWAY-LOCAL-SERVICE-MATRIX.md`: separa il Profilo A SQL/concorrenza dal Profilo B d'integrazione Auth/API/Storage/Edge Runtime; identifica i servizi non necessari ai test esaminati e i limiti di ciascun profilo.
-- La lista `supabase start -x` resta da verificare sulla CLI 3.1.0. Nessun container avviato e nessun comando CLI di inizializzazione/esecuzione lanciato.
-- La baseline deve includere tutte le dipendenze reali, incluse Auth/Storage ove richieste. Il profilo PostgreSQL-only non può certificare test Auth, API, Storage o Edge Functions.
-- La migrazione draft `20261105000100_nextway_ai_assistant_foundation.sql` resta separata. La migrazione Setter workspace isolation già applicata live non va riapplicata in produzione.
-- Nessun dato sintetico ancora creato; nessuna migrazione locale/live applicata; nessuna connessione remota, deploy, merge, spesa o modifica a `main`/Netlify produzione.
-
-
-## Recupero baseline schema-only — 13 novembre 2026
-
-- Confermato che nel repository non è presente una baseline completa dello schema applicativo originario; i file diagnostici sono read-only e descrivono soltanto porzioni di metadati, non costituiscono un dump ricostruibile.
-- Creato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con procedura per un dump schema-only del solo `public`, da salvare in `/tmp`, usando la Supabase CLI v3 e senza dati/ruoli custom. La sintassi va prima verificata con `supabase db dump --help`; target `obqwbtlltxjfeirstsya` da controllare prima di procedere.
-- Nessun dump remoto eseguito, nessuna password richiesta o acquisita, nessun dato applicativo esportato. Nessuna connessione remota aperta in questo passaggio.
-- Il dump `public` non contiene le strutture gestite `auth`/`storage`: devono essere fornite dallo stack locale; i ruoli standard devono essere confrontati separatamente.
-- Il dump non va versionato prima della revisione per assenza di righe dati, segreti hard-coded e oggetti specifici della produzione. Occorre riconciliarlo con le 31 migrazioni del branch prima di importarlo.
+- 13-11-2026, 19:21 Europe/Rome — aggiornati HEAD/blob main, commit recenti, inventario main/PR, PR #1, CI main #251 e CI PR #520 con causa del fallimento; registrati requisito prospect, nove segmenti Zinzino, P0 Rate Limit/Governance, workspace/membership, audit conversione, dump schema-only, staging e discrepanza CLI Intel. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni o deploy.
 
 
 ---
 
-## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026 — RECUPERO BASELINE SCHEMA-ONLY
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:35 (Europe/Rome)
 
-### Dump remoto in sola lettura
-- Verificata la sintassi con Supabase CLI 3.1.0 ed eseguito: `supabase db dump --remote=obqwbtlltxjfeirstsya --schema public --file /tmp/nextway-public-schema.sql`.
-- La CLI ha identificato il target come progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`, production. Il dump è stato scritto in `/tmp`, senza applicare SQL al database remoto.
-- File risultante: circa 154 KB / 3.615 righe. SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
-- Controlli: zero occorrenze `COPY` / `INSERT INTO`; 21 tabelle, 22 funzioni `SECURITY DEFINER`, 53 policy RLS, 11 trigger e 48 indici. Le definizioni esaminate includono configurazioni `search_path`; il dump usa `CREATE OR REPLACE TRIGGER`.
-- Il dump originale non è stato committato e resta in `/tmp`. Nessuna migrazione, scrittura SQL o modifica ai dati/configurazione remoti.
+### Repository, branch e fonti effettivamente controllate
 
-### Inventario migrazioni e riconciliazione
-- Recuperato l'albero Git ricorsivo del branch `fix/nextway-password-recovery` al commit `d11e3e812f11b5949ebd388b976d35cdfd2e83dd`; inventariati e letti staticamente i 31 file SQL in `supabase/migrations/`.
-- Creato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`: elenco delle 31 migrazioni, aree funzionali, dipendenze preesistenti e managed Auth/Storage, limiti probatori e ordine di costruzione.
-- Aggiornato `docs/NEXTWAY-SCHEMA-BASELINE-RECOVERY.md` con il risultato effettivo del dump e lo stato.
-- Aggiornato `docs/NEXTWAY-STAGING-SETUP-PLAN.md` con il nuovo stato della baseline e i vincoli per il setup locale.
-- La migrazione `20261105000100_nextway_ai_assistant_foundation.sql` resta draft separato. La migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` risulta già applicata live secondo il registro: non riapplicarla in produzione.
+- Recuperato questo MASTER da GitHub `main` prima dell'aggiornamento; blob SHA di partenza: `b1d9af49e44dd471af05b3fca2b6363d4ec658a8`. Il documento esistente è stato preservato integralmente e questa sezione è stata aggiunta in coda.
+- HEAD di `main` verificato: `4344bd2a181667ec6e80a704d298625e1321bb85`, commit del 12-11-2026 18:39:25 UTC, messaggio `docs(nextway): record follow-up continuity check`. Il diff del commit modifica soltanto `MASTER_NEXTWAY.md`.
+- Ultima GitHub Actions push osservata su `main`: run #251, ID `43175706330`, SUCCESS, sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Non è una validazione delle modifiche più recenti sul branch PR.
+- PR #1, `NEXTWAY: verifica integrazione AI Setter governance`: ancora OPEN, DRAFT e NOT MERGED. HEAD del branch `fix/nextway-password-recovery`: `e0b5098f88417597010e5845a61d0c16d65c2689` (13-11-2026 16:10:33 UTC). GitHub riporta 84 file modificati, 10.986 aggiunte e 88 cancellazioni. Il confronto con `main` risulta DIVERGED: 534 commit ahead e 4 behind; il metadato PR riporta `mergeable=false`. Non è stato eseguito rebase, merge o aggiornamento del branch.
+- Il repository risulta aggiornato sul branch PR fino al commit sopra indicato; la copia locale dell'utente non è stata letta direttamente. L'utente aveva riferito un `git pull --ff-only` riuscito sul branch `fix/nextway-password-recovery`, da `e8a0a6e` a `69b7426`, con 45 file aggiornati. Questo prova quel pull al momento riferito, non che la copia locale sia successivamente arrivata a `e0b5098`.
+- Il connettore GitHub consente di leggere repository, PR, commit, workflow e log. Non è disponibile un connettore Supabase o Netlify; le informazioni live Supabase sotto indicate provengono dai risultati restituiti dall'utente o da precedenti risultati già registrati, non da una nuova connessione diretta.
 
-### Stato e decisione tecnica
-- **COMPLETATO:** verifica CLI/Docker e risorse Mac; recupero schema-only read-only; controlli iniziali assenza righe; inventario statico migrazioni; aggiornamento documentazione sul branch.
-- **DA COMPLETARE:** confronto puntuale di nomi e definizioni del dump con tutte le migrazioni; verifica tipi, sequenze, ownership, grant, FK e dipendenze; preparazione baseline locale revisionata.
-- **NON ESEGUITO:** `supabase init`, `supabase start`, import locale, seed sintetici, test runtime, migrazioni.
-- Non tentare il full stack sul Mac Intel da 8 GB RAM; non aumentare la memoria Docker. Prima profilo SQL ridotto, poi eventuale profilo integrazione soltanto se sostenibile.
-- Nessun `supabase link`, `db push`, deploy, merge, modifica a `main`, progetto cloud o spesa. Il blocco Netlify produzione fino al 4 dicembre 2026 resta invariato.
+### Lavoro prodotto sul branch PR il 13 novembre — non ancora in main
 
+Le seguenti attività sono state riscontrate nei commit, nei file e nei documenti del branch `fix/nextway-password-recovery`. Non vanno considerate pubblicate su `main` né attive nel progetto remoto.
 
-### Strumento preparatorio aggiunto — confronto baseline
-- Creato `scripts/analyze-nextway-schema-baseline.py`, script Python 3 che confronta lessicalmente i nomi degli oggetti dichiarati nelle migrazioni con quelli trovati nel dump schema-only.
-- Lo script stampa conteggi, nomi, riferimenti agli schemi managed e SHA-256; non stampa corpi funzione/valori, non apre connessioni e non esegue SQL.
-- Esecuzione prevista dal repository locale: `python3 scripts/analyze-nextway-schema-baseline.py`. Il dump predefinito atteso è `/tmp/nextway-public-schema.sql`.
-- Script non ancora eseguito sul Mac. Il suo output sarà un ausilio per la riconciliazione, non una certificazione PostgreSQL.
+**Motore di ricerca prospect e perimetro MVP**
+- Creato/aggiornato `docs/NEXTWAY-MVP-SCOPE.md`: il primo MVP è uno strumento commerciale personale, con un solo titolare operativo (platform admin). I prospect acquisiti confluiscono nel suo archivio Lead; selezione, verifica, priorità, contatto, qualificazione e passaggio a Zoom sono gestiti centralmente. Distribuzione automatica dei Lead ai collaboratori, rotazione, dashboard e metriche individuali sono fuori perimetro MVP.
+- Il perimetro funzionale comprende ricerca per segmento e area, URL/fonte/evidenza verificabile, classificazione cliente/partner e sottocategorie, recapiti professionali pubblicamente esposti solo se utilizzabili lecitamente, deduplicazione, acquisizione controllata, scoring motivato, messaggi individuali basati su evidenze e gestione degli stati/follow-up.
+- La conversazione del 13 novembre ha precisato i target: potenziali clienti e partner; professionisti salute/benessere; networker del wellness; networker di altri settori; imprenditori; persone interessate a un'attività extra. Questa è una specifica di prodotto fornita dall'utente, non una prova che la ricerca reale sia già stata eseguita.
+- Su `nextway-motore-ricerca.html` sono stati sviluppati controlli di classificazione degli imprenditori, riduzione dei falsi positivi e regole che impediscono punteggi elevati quando persona e segmento non sono verificabili. L'ultimo commit `e0b5098` aggiunge `published_date`/ `publishedDate` alla lettura dei metadati Tavily per il calcolo della freschezza delle fonti.
+- Nella conversazione precedente è stato riportato un esito locale/statico di 5/5 test sul lavoro di classificazione e controllo sintattico PASS. Questo non coincide con l'esito dell'ultima GitHub Actions, che è fallita per un'altra asserzione del validatore audit (vedi sezione CI). Non risulta una ricerca prospect live, un'acquisizione reale o un invio di messaggi eseguito in questo controllo.
 
+**CRM, agenda commerciale e Zoom**
+- I commit del branch aggiungono cronologia attività e resa degli esiti, bozze di proposta Zoom contestuali alla conversazione CRM più recente, agenda commerciale complessiva, next-best-action basata sull'esito, priorità ai follow-up in scadenza, inclusione dei Lead sincronizzati non ancora lavorati e collegamento di prenotazione Calendly.
+- Sono state corrette l'inizializzazione e la persistenza dell'esito Zoom e l'allineamento dello stato CRM all'esito finale. La regola esplicita dell'utente è: dopo Zoom l'esito è esclusivamente **Interessato** oppure **Non interessato**; non devono partire sequenze o follow-up automatici post-incontro.
+- Queste sono modifiche di codice presenti nel branch e controlli statici/unitari riferiti nella cronologia; non dimostrano un ciclo CRM/Zoom verificato su utenti reali o un'integrazione Calendly live.
 
----
+**Workspace, conversione Partner e staging**
+- Corretto sul branch `supabase/functions/nextway-workspace-admin/index.ts` per conservare `invited_by` originario durante l'attivazione della membership, evitando di sostituirlo con l'amministratore attivatore. Il test di sicurezza è stato aggiornato. CI run `43410329154`, commit `6b24979df271df59b19b6c6e624e85f9dc769800`, è stata riportata SUCCESS.
+- Preparati una fixture SQL transazionale rollback-only per la cancellazione Partner e il relativo protocollo staging, inclusi retry idempotente, invalidazione claim e gare finalize-vs-cancel/claim-vs-cancel. Le prove SQL e di concorrenza non sono state eseguite perché manca un ambiente staging isolato.
+- Aggiunto `supabase/config.toml` con configurazione locale preparata, senza remote/project ref, URL produzione o segreti, e SMTP locale sandbox Mailpit. Test di configurazione statico CI run `43413398397` riportato SUCCESS. Il file non crea né collega un progetto Supabase.
+- Preparati manifest baseline, mappa delta migrazioni, inventario oggetti e diagnostiche read-only. La DDL core originaria completa non è disponibile nella cronologia Git esaminata. Il dump locale `/tmp/nextway-public-schema.sql` è uno snapshot dello schema corrente e non è sufficiente, da solo, per ricostruire in sicurezza la baseline pre-migrazioni.
+- L'utente ha eseguito lo script di estrazione DDL sul file locale; lo script ha rifiutato il formato perché richiede un dump `pg_dump` testuale/SQL. L'utente ha riferito che nessun file è stato modificato. Baseline SQL non prodotta e confronto DDL non completato.
+- Sul branch PR sono presenti le migrazioni `20261113110000_nextway_platform_admin_search_path_hardening.sql`, `20261113120000_nextway_conversion_request_workspace_snapshot.sql`, `20261113130000_nextway_conversion_workspace_finalization.sql`, `20261113140000_nextway_partner_conversion_cancellation.sql` e `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql`, oltre alle migrazioni governance e integrità conversione già documentate. Presenza nel repository e test statici non significano applicazione: nessuna di queste nuove migrazioni è stata verificata come applicata al progetto remoto.
+- `docs/NEXTWAY-STAGING-READINESS.md` registra che la configurazione CLI è preparata, ma la baseline core resta bloccante. Il Mac Intel da 8 GB è stato giudicato inadatto all'avvio dello stack Supabase full locale. Nessun progetto staging cloud è stato creato.
 
-## Confronto baseline / migrazioni eseguito sul Mac — 13 novembre 2026
+### GitHub Actions — stato aggiornato della PR
 
-- L'utente ha eseguito `python3 scripts/analyze-nextway-schema-baseline.py` sul branch aggiornato a `ed8187d`; il dump mantiene SHA-256 `5622e4e5864c6860241f04ad6ecff6c08a1d7a61c37a062b50772fa704a9f32d`.
-- Esito statico: 12 tabelle NEXTWAY già presenti nel dump; 12 tabelle `nw_*` non presenti sono quelle della fondazione AI Assistant draft e restano intenzionalmente escluse. Le 4 policy Storage mancanti sono su `storage.objects`, schema gestito non incluso nel dump `public`.
-- Lo script ha falsi positivi lessicali (`already` come trigger e `if` come indice) e discrepanze nei conteggi delle policy: non usare i suoi totali come certificazione.
-- **Discrepanza sostanziale:** il dump non rileva `public.nextway_setter_generation_requests`, ma la migrazione `20261112020000_nextway_setter_generation_table_isolation.sql` richiede esplicitamente che la tabella legacy esista e dichiara di preservarla. Non ricrearla per supposizione; chiarire prima la differenza.
-- Altre differenze da chiarire: assenza di `nextway_api_rate_limits` / `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output` e relativo trigger, `nextway_prune_setter_generation_requests`, `nextway_get_active_setter_governance`.
-- Aggiornato `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con classificazione e decisione. Baseline ancora non certificata/importabile.
-- Prossimo passo: controlli mirati read-only sul dump locale per confermare la tabella legacy, i nomi esatti e i riferimenti; migliorare il parser. Nessuna migrazione, import, seed, test runtime, modifica remota, deploy, merge o modifica a `main`.
+- Ultima run push del branch PR osservata: **#520**, ID `43460040655`, sul commit `e0b5098f88417597010e5845a61d0c16d65c2689`, conclusione **FAILURE**. Il job `validate` si interrompe allo step `Validate NEXTWAY audit`; gli step successivi risultano SKIPPED.
+- Il log mostra un'asserzione che cerca il testo `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount...` e non lo trova nel contenuto esaminato di `nextway-ai.html`. È un disallineamento tra aspettativa del test e sorgente corrente da investigare; il solo log non dimostra se sia il test a essere obsoleto o se manchi un'esportazione richiesta.
+- Anche la run #519 (ID `43459970766`) risulta FAILURE. La run #520 è l'ultima disponibile al controllo. Non dichiarare la CI del branch verde sulla base dei precedenti successi: i successi delle run precedenti certificano soltanto i rispettivi commit e test.
+- La run #251 su `main` resta SUCCESS, ma è precedente alle modifiche del branch PR e non valida il codice del 13 novembre.
+- Prossimo intervento di codice, da svolgere separatamente da questo aggiornamento documentale: confrontare l'implementazione corrente dell'archivio locale con `scripts/validate-nextway-audit.mjs`, correggere il contratto test o l'esportazione effettiva senza indebolire i controlli di sicurezza e rilanciare GitHub Actions sul branch.
 
+### Supabase — risultati disponibili e limiti
 
-### Correzione mirata baseline Setter — 13 novembre 2026
+- **Rate Limit e Governance P0:** secondo il risultato Supabase fornito dall'utente il 13 novembre, tabella Rate Limit OK, RPC Rate Limit OK, RPC Governance OK, RLS Rate Limit ATTIVA, accesso RPC Rate Limit OK e accesso RPC Governance OK. Classificare questi controlli P0 come **COMPLETATO E VERIFICATO** sulla base dell'output ricevuto; non ripeterli senza un cambiamento o un rischio concreto.
+- **CRM Lead:** l'ultima diagnostica live eseguita dall'utente restituisce `public.nextway_leads` presente, RLS attiva, FORCE RLS non attivo e quattro policy per `authenticated` (SELECT, INSERT, UPDATE, DELETE) con accesso al proprietario o a `platform_admin`. `public.nextway_lead_activities` e `public.nextway_lead_conversion_requests` risultano assenti al momento della query.
+- La query ha anche rilevato che `supabase_migrations.schema_migrations` non è disponibile nel contesto interrogato; non è possibile dedurre da quel risultato lo storico delle migrazioni. La diagnostica è stata corretta per non interrogare quella relazione.
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente nel repository, ma non è stato ricevuto il relativo JSON di esecuzione. Colonne `archived_*`, vincoli status, tabella idempotenza e firme RPC restano **DA COMPLETARE**.
+- Nessuna connessione diretta Supabase è stata effettuata in questo controllo. Non sono state applicate migrazioni, eseguiti DDL/DML, creati utenti Auth, inviate email o modificati record/schema del progetto `nextway-platform`.
 
-- L'utente ha eseguito un `grep` mirato sul dump locale `/tmp/nextway-public-schema.sql`.
-- Confermata la presenza di `public.nextway_setter_generation_requests` (definizione intorno alla riga 2071), con PK, indice conversazione, FK verso `nextway_setter_conversations` e `profiles`, RLS abilitata e grant a `service_role`.
-- Confermata anche la distinta tabella `nextway_setter_workspace_generation_requests`; il commento SQL dichiara esplicitamente che è separata dallo store legacy.
-- La precedente segnalazione di assenza della tabella legacy era un falso negativo dello script lessicale; ritirata e corretta in `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md`. Non ricreare la tabella.
-- Il medesimo controllo non ha trovato nel dump riferimenti a `nextway_api_rate_limits`, `nextway_consume_api_rate_limit`, `nextway_clear_stale_setter_output`, `nextway_prune_setter_generation_requests` e `nextway_get_active_setter_governance`. Queste restano differenze da incrociare con le migrazioni e la cronologia, senza dedurre dal solo dump che siano state rimosse o mai applicate.
-- Nessuna modifica al database, nessuna migrazione, import locale, seed, test runtime o deploy.
+### Matrice di stato al 13 novembre
 
+- MASTER su `main`, recupero pre-modifica e verifica GitHub: **COMPLETATO E VERIFICATO** al termine di questo aggiornamento.
+- Branch PR #1 e confronto con `main`: **COMPLETATO E VERIFICATO** quanto a stato OPEN/DRAFT, head, file modificati e divergenza; merge **BLOCCATO/DA COMPLETARE**.
+- Motore ricerca prospect: **ESEGUITO MA NON VERIFICATO** end-to-end; modifiche e test locali/statici riferiti, nessuna ricerca reale o acquisizione verificata.
+- Agenda CRM, attività e regola esito Zoom: **ESEGUITO MA NON VERIFICATO** su runtime remoto.
+- Correzione audit `invited_by` e test CI relativo: **COMPLETATO E VERIFICATO** staticamente sul commit/run citati; comportamento Auth/membership live **DA COMPLETARE** in staging.
+- Rate Limit e Governance P0: **COMPLETATO E VERIFICATO** sulla base del risultato Supabase fornito dall'utente.
+- Lead core RLS e policy: **COMPLETATO E VERIFICATO** per la query ricevuta.
+- Tabelle attività e richieste conversione CRM: **DA COMPLETARE** (assenti nell'ultima query live).
+- Diagnostica prerequisiti CRM: file **COMPLETATO E VERIFICATO** nel repository; esecuzione e JSON **DA COMPLETARE**.
+- Configurazione CLI staging: **COMPLETATO E VERIFICATO** come file locale preparato e test statico CI; progetto staging **NON CREATO**.
+- Baseline schema-only core: **BLOCCATO** dalla mancanza della DDL originaria completa e dal formato non accettato del dump locale.
+- Migrazioni 13 novembre su branch PR: **ESEGUITE NEL REPOSITORY, NON APPLICATE AL DATABASE**; test PostgreSQL/Auth/concorrenza **DA COMPLETARE**.
+- CI branch PR al commit `e0b5098`: **BLOCCATA** dalla failure #520 nel validatore NEXTWAY audit.
+- Deploy Edge Functions, deploy Netlify e modifiche di produzione: **NON ESEGUITI/DA VERIFICARE**; resta valida la decisione di non effettuare deploy Netlify di produzione prima del 4 dicembre 2026.
 
-### Riconciliazione codice runtime / RPC Setter — 13 novembre 2026
+### Prossimo passo operativo preciso
 
-- Corretto il precedente falso negativo: `public.nextway_setter_generation_requests` è presente nel dump, con PK, indice conversazione, FK, RLS e grant a `service_role`. Lo store `nextway_setter_workspace_generation_requests` è separato. La vecchia riga del rapporto che ne dichiarava l'assenza è superata dalla correzione nella sezione precedente e nel documento di riconciliazione.
-- Lettura statica di `supabase/functions/nextway-ai-setter/index.ts`: prima di procedere la Edge Function chiama `nextway_consume_api_rate_limit` con `p_scope` e `p_units`. Se la RPC non è disponibile, restituisce HTTP 503 e interrompe la generazione.
-- La stessa Edge Function chiama `nextway_get_active_setter_governance` quando la conversazione ha `workspace_id`; se la RPC non è disponibile, restituisce HTTP 503 e non procede con governance workspace.
-- Il dump schema `public` non contiene la tabella `nextway_api_rate_limits`, la RPC rate limit a due argomenti né la RPC governance. Sono quindi **priorità P0 da chiarire** rispetto al codice del branch.
-- `nextway_clear_stale_setter_output` e il relativo trigger sono una protezione di correttezza per la riassegnazione di lease con output staged: assenza classificata P1.
-- `nextway_prune_setter_generation_requests()` è manutenzione manuale admin-only, non nel percorso ordinario di generazione: assenza classificata P2.
-- Limite: il dump e il codice sorgente del branch non provano quale versione Edge Function sia distribuita né lo stato del registro migrazioni remoto. Nessuna chiamata RPC remota, lettura del registro migrazioni, migrazione o modifica al database è stata eseguita in questa fase.
-- Aggiornata `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` con la classificazione per impatto. Prossimo controllo: acquisire evidenza read-only sul registro migrazioni e sullo stato delle funzioni distribuite, solo con procedura che non comporti scritture o deploy; in alternativa predisporre una richiesta mirata di verifica SQL da eseguire in sola lettura nel dashboard Supabase.
-- Nessun import locale, seed, test runtime, deploy, merge, modifica a `main` o deploy Netlify.
+1. Risolvere il disallineamento tra `scripts/validate-nextway-audit.mjs` e l'implementazione corrente di `NEXTWAY_LOCAL_ARCHIVE`; mantenere il test rigoroso e rilanciare CI sul branch PR.
+2. Ottenere il JSON della diagnostica `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`; poi completare la riconciliazione CRM senza applicare migrazioni alla cieca.
+3. Recuperare un dump schema-only in formato testuale `pg_dump` oppure ricostruire e revisionare la baseline core statement per statement; non trasformare automaticamente lo snapshot corrente in baseline.
+4. Solo dopo baseline e test statici verdi, valutare staging isolato e test runtime Auth/PostgreSQL/concorrenza. Non usare `nextway-platform` come staging e non fare merge/deploy in assenza dei gate richiesti.
 
+### Registro cronologico del MASTER
 
-### Verifica SQL read-only preparata — 13 novembre 2026
-
-- Creato `docs/NEXTWAY-READONLY-RECONCILIATION-CHECK.sql`.
-- La query controlla il registro `supabase_migrations.schema_migrations` per sei migrazioni selezionate e verifica via cataloghi PostgreSQL la presenza delle tabelle/RPC/trigger Setter rilevanti.
-- La query è racchiusa in `BEGIN TRANSACTION READ ONLY` / `COMMIT` e contiene esclusivamente SELECT e letture dei cataloghi. Nessuna DDL/DML.
-- È destinata al SQL Editor del progetto `nextway-platform` (ref `obqwbtlltxjfeirstsya`); se il registro migrazioni non è accessibile, fermarsi e riportare l'errore, senza tentare query alternative non documentate.
-- Prossimo passo operativo: eseguire questa sola query nel SQL Editor e riportare la tabella dei risultati. Non inviare password, token o chiavi.
-- Nessuna query è stata eseguita sul database remoto da questo passaggio; nessuna migrazione, deploy, merge, import locale o modifica a `main`.
-
-
-### Correzione query read-only: registro migrazioni non presente — 13 novembre 2026
-
-- Prima esecuzione di `docs/NEXTWAY-READONLY-RECONCILIATION-CHECK.sql` interrotta con PostgreSQL `42P01`: la relazione `supabase_migrations.schema_migrations` non esiste nel progetto.
-- Nessuna modifica al database: la query era in sola lettura e si è fermata al riferimento alla relazione inesistente.
-- Non dedurre da questo errore che le migrazioni non siano state applicate. Il registro potrebbe avere un altro nome/schema o non essere disponibile nel progetto.
-- Aggiornata la query sul branch: prima ricerca tabelle candidate al registro nei cataloghi PostgreSQL senza presumere un nome; poi verifica in sola lettura la presenza effettiva di tabelle, RPC e trigger Setter.
-- La nuova versione non interroga direttamente `supabase_migrations.schema_migrations` e non contiene DDL/DML.
-- L'utente deve eseguire nuovamente la versione aggiornata dal branch e riportare entrambi i risultati. Nessuna migrazione, deploy, merge, modifica a `main` o scrittura remota.
-
-
-### Esito controllo SQL read-only oggetti Setter — 13 novembre 2026
-
-- L'utente ha eseguito con successo una query diagnostica in sola lettura nel SQL Editor. La query usa una SELECT con CTE, cataloghi PostgreSQL e `to_regclass`/`to_regprocedure`; non contiene DDL/DML e non ha modificato il database.
-- **Tabelle presenti:** `public.nextway_setter_generation_requests` (legacy) e `public.nextway_setter_workspace_generation_requests` (workspace). Entrambe confermate; non ricrearle.
-- **Oggetti non trovati:** `public.nextway_api_rate_limits`, `public.nextway_consume_api_rate_limit(text,integer)`, `public.nextway_get_active_setter_governance(uuid)`, `public.nextway_clear_stale_setter_output()`, trigger `nextway_clear_stale_setter_output_trg`, `public.nextway_prune_setter_generation_requests()`.
-- **Registri candidati individuati dalla ricerca per nome:** `auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`. Sono soltanto candidati: il contenuto non è stato letto e non è ancora noto quale, se presente, contenga la cronologia delle migrazioni applicative NEXTWAY.
-- Priorità: P0 rate limit; P0 governance workspace; P1 cleanup staged output/trigger; P2 retention legacy. Le prime due RPC sono dipendenze del codice Edge Function presente nel branch, ma il risultato SQL non prova quale versione Edge Function sia distribuita.
-- Prossimo passo tecnico: identificare in modo read-only il registro corretto prima di consultarne le righe e verificare la versione Edge Function distribuita. Non eseguire migrazioni, DDL/DML o deploy in produzione.
-- **Nessuna modifica remota:** nessuna migrazione, scrittura, deploy, import, seed o test runtime è stato eseguito.
-
-
-### Identificazione registri migrazioni: prossimo controllo read-only — 13 novembre 2026
-
-- La ricerca cataloghi ha individuato tre relazioni candidate: `auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`. Non è ancora noto se una di esse contenga la cronologia delle migrazioni applicative.
-- Aggiunto `docs/NEXTWAY-REGISTRY-IDENTIFICATION-CHECK.sql` sul branch di lavoro. La query verifica esistenza e struttura delle sole tre relazioni usando `pg_catalog`; restituisce nomi/tipi delle colonne e non legge righe applicative.
-- L'utente dovrà eseguire questa query read-only nel SQL Editor e condividere il risultato. Solo dopo aver identificato una struttura pertinente si valuterà un'eventuale lettura mirata delle versioni migrazione.
-- Nessuna modifica al database, migrazione, deploy, merge, import, seed o test runtime.
+- 13-11-2026, 19:35 Europe/Rome — aggiunti stato GitHub aggiornato di `main` e PR #1, confronto 534 ahead/4 behind, CI #520 FAILURE e dettaglio dell'asserzione audit; sintetizzati i lavori del branch su prospect search, agenda/Zoom, workspace/Partner e preparazione staging; registrati il pull locale riferito, l'errore di formato del dump, i risultati Supabase P0 e CRM e i limiti di verifica. Modificato esclusivamente `MASTER_NEXTWAY.md`.
 
 
 ---
 
-## CONTINUITÀ NEXTWAY — REPORT TECNICO UNICO SQL — 13 NOVEMBRE 2026
+## CONTROLLO DI CONTINUITÀ — 13 NOVEMBRE 2026, ORE 19:49 (Europe/Rome)
 
-L'utente ha eseguito correttamente una query diagnostica consolidata in Supabase SQL Editor. L'output è stato restituito in una sola cella testuale; query read-only, nessuna modifica al database.
+### Fonti, repository e stato dei branch
 
-### Risultati confermati
-- **PRESENTI:** `public.nextway_setter_generation_requests` (legacy) e `public.nextway_setter_workspace_generation_requests` (workspace). Preservare entrambe; non ricrearle.
-- **NON TROVATI:** tabella `public.nextway_api_rate_limits`; RPC `nextway_consume_api_rate_limit(text,integer)`; RPC `nextway_get_active_setter_governance(uuid)`; RPC `nextway_clear_stale_setter_output()`; RPC `nextway_prune_setter_generation_requests()`; trigger `nextway_clear_stale_setter_output_trg`.
-- **REGISTRI CANDIDATI:** `auth.schema_migrations`, `realtime.schema_migrations`, `storage.migrations`. Sono stati individuati soltanto per nome; non sono state lette colonne o righe e non è noto quale contenga la cronologia migrazioni applicative.
+- Recuperato il MASTER da GitHub `main` immediatamente prima della modifica: blob SHA di partenza `db5fe1eb04aab4a658f14dc6373421102ab96418`; 2.754 righe. La sezione è aggiunta in coda, senza riscrivere le registrazioni cronologiche precedenti.
+- HEAD di `main` verificato tramite endpoint branch: `7bb8883f3198829511b4d9520591fc36de0cac67`, commit del 13-11-2026 18:40:38 UTC, messaggio `docs(nextway): update MASTER continuity for 13 Nov evening`. Il diff del commit contiene soltanto l'aggiornamento di `MASTER_NEXTWAY.md`; nessuna modifica applicativa è stata rilevata in quel commit.
+- PR #1 `NEXTWAY: verifica integrazione AI Setter governance`: OPEN, DRAFT, NOT MERGED; head remoto `e0b5098f88417597010e5845a61d0c16d65c2689` (13-11-2026 16:10:33 UTC); metadato PR: 84 file modificati, 534 commit. Il confronto aggiornato `main...fix/nextway-password-recovery` restituisce DIVERGED, 534 commit ahead e 7 behind; `mergeable=false`. La PR riporta ancora base SHA `a3fbec076221f0f043d60373e2864d7d07db30d7`, mentre il branch `main` è avanzato a `7bb8883`. Non è stato eseguito merge, rebase o aggiornamento del branch.
+- Gli 84 file del confronto includono modifiche a workflow, console e motore prospect, script di test, documentazione di baseline/staging, diagnostiche SQL, Edge Functions e migrazioni. I dettagli funzionali già descritti nella sezione delle 19:35 restano riferiti al branch PR, non a `main`; non sono stati promossi in produzione da questo controllo.
+- Il connettore GitHub ha consentito lettura di branch, commit, confronto PR, workflow, job e log. Non è disponibile un connettore Supabase o un accesso diretto al progetto Netlify. Sono state considerate le conversazioni e le evidenze effettivamente presenti nel contesto corrente e le note già registrate nel MASTER; non si presume accesso a tutte le chat storiche.
 
-### Priorità
-- **P0:** rate limit (tabella + RPC), dipendenza potenzialmente bloccante del percorso AI Setter.
-- **P0 workspace:** RPC governance, dipendenza potenzialmente bloccante per conversazioni workspace.
-- **P1:** funzione e trigger cleanup staged output, protezione della correttezza durante riassegnazione lease.
-- **P2:** RPC retention legacy, funzione di manutenzione e non percorso ordinario.
+### GitHub Actions e Netlify Deploy Preview
 
-Le assenze non dimostrano che le migrazioni siano state saltate o che gli oggetti siano stati rimossi. Il controllo non prova quale versione della Edge Function sia distribuita. Il successivo passo read-only è identificare la struttura dei tre registri tramite soli metadati di colonna; non leggere ancora le righe dei registri.
+- **PR #1, run #520**, ID `43460040655`, commit `e0b5098`: FAILURE. Il job `validate` fallisce allo step `Validate NEXTWAY audit`; gli step successivi (contratti SQL/sicurezza, controlli UI e type-check Deno) risultano SKIPPED. Il log del job è stato letto integralmente.
+- La causa immediata è ora circoscritta e confrontata con i due file del medesimo commit PR:
+  - `scripts/validate-nextway-audit.mjs`, blob `200138fab4ebbbaa300a52b0c29fc3ca060d7d0f`, riga 42, richiede con `assert.match` la sequenza senza spazi/newline `window.NEXTWAY_LOCAL_ARCHIVE={activate:activateLocalAccount,clear:clearLocalAccount`;
+  - `nextway-ai.html`, blob `99595147ff67e57abb305f306bac797fe10f9d5d`, riga 43, contiene `window.NEXTWAY_LOCAL_ARCHIVE={` e va a capo prima di `activate:activateLocalAccount`.
+- Il log conferma quindi un disallineamento di formattazione tra regex e sorgente: il test si aspetta che `activate` segua immediatamente la parentesi graffa, mentre il sorgente introduce un newline. Questo spiega la failure osservata, ma non decide da solo se rendere il test whitespace-tolerant o cambiare il formato sorgente. Non è stato modificato né il test né il codice in questa attività documentale.
+- Run #519 (ID `43459970766`) risulta anch'essa FAILURE; non è stata usata come prova della stessa causa senza una revisione separata del suo log. La #520 è l'ultima run PR disponibile nell'elenco controllato.
+- **Main, run #251**, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`. Job `validate` e tutti gli step elencati risultano SUCCESS, inclusi validatore audit, contratti SQL/sicurezza, controlli UI e cinque type-check Deno. La run è precedente al codice del branch PR e non ne certifica le modifiche.
+- Il log #251 riporta avvisi non bloccanti di deprecazione Node.js 20 per alcune GitHub Actions e del modulo Node `punycode`; il job è comunque SUCCESS.
+- Nei check associati alla run PR #520 compare anche un controllo Netlify `Pages changed` con esito neutral e una pagina generata in Deploy Preview: `nextway-motore-ricerca.html`, URL `https://deploy-preview-1--misura-test-benessere.netlify.app/nextway-motore-ricerca`. È un'anteprima PR, non prova di deploy Netlify in produzione e non è stata avviata manualmente in questo controllo. Non risulta verificato un deploy di produzione.
 
-### Stato operativo
-- **COMPLETATO:** report SQL unico eseguito; due tabelle Setter confermate; sei oggetti non trovati documentati.
-- **DA COMPLETARE:** identificare il registro migrazioni pertinente e ricostruire la cronologia; verificare la versione Edge Function effettivamente distribuita.
-- **NON ESEGUITO:** migrazioni, DDL/DML, deploy, merge, import locale, seed, test runtime o modifiche al database.
-- Branch di lavoro: `fix/nextway-password-recovery`. `main` invariato. PR #1 resta draft. Nessun deploy Netlify in produzione prima del 4 dicembre 2026.
+### Supabase e CRM — ultimo stato disponibile
 
+- Non è stata effettuata una nuova interrogazione diretta Supabase: il connettore non è disponibile. Resta valido l'ultimo JSON fornito dall'utente per la diagnostica CRM live: `public.nextway_leads` presente, RLS attiva, FORCE RLS non attivo; quattro policy SELECT/INSERT/UPDATE/DELETE per `authenticated`, con accesso al proprietario o a `platform_admin`; `nextway_lead_activities` e `nextway_lead_conversion_requests` assenti al momento della query.
+- La relazione `supabase_migrations.schema_migrations` non era disponibile nel contesto SQL e la diagnostica è stata corretta per non dipenderne. Questo non consente di dedurre lo storico delle migrazioni.
+- `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` è presente su `main`; non è ancora stato ricevuto un risultato di esecuzione. Colonne `archived_*`, vincoli degli stati, tabella idempotenza e firme RPC restano DA COMPLETARE. Non applicare le migrazioni CRM sulla sola base del contenuto del repository.
+- I risultati utente già registrati su Rate Limit/Governance P0, workspace, membership e Storage restano evidenze storiche riferite alle rispettive date; non sono stati ripetuti né presentati come nuove letture live.
 
-### Prossimo controllo pronto — metadati registri in un'unica cella — 13 novembre 2026
-- Creato `docs/NEXTWAY-REGISTRY-COLUMNS-REPORT.sql` sul branch di lavoro.
-- Restituisce un solo campo testuale `report` che riepiloga presenza e colonne dei tre registri candidati.
-- Legge solo metadati `pg_catalog`, senza leggere righe delle tabelle e senza DDL/DML.
-- Non è ancora stato eseguito. Il suo scopo è identificare la struttura, non assumere che uno dei registri managed sia quello delle migrazioni NEXTWAY.
-- Nessuna modifica al database o deploy.
+### Matrice di stato al 13 novembre, ore 19:49
 
+- MASTER su `main`, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** al termine di questa attività.
+- HEAD main e commit documentale `7bb8883`: **COMPLETATO E VERIFICATO**; commit limitato al MASTER.
+- PR #1, stato OPEN/DRAFT/NOT MERGED, confronto 534 ahead/7 behind e 84 file: **COMPLETATO E VERIFICATO** quanto ai metadati GitHub; merge **BLOCCATO** fino a riallineamento, CI verde e gate staging/runtime.
+- CI main #251: **COMPLETATO E VERIFICATO** per gli step statici/type-check di quel commit; non è validazione runtime né del branch PR.
+- CI PR #520: **BLOCCATO** dal disallineamento regex/newline nel validatore NEXTWAY audit; gli step successivi sono SKIPPED.
+- Deploy Preview Netlify PR: **ESEGUITO MA NON VERIFICATO** quanto al comportamento applicativo; GitHub segnala la pagina generata, ma non è stato eseguito un collaudo browser completo. Deploy Netlify produzione: **NON ESEGUITO/DA VERIFICARE**.
+- CRM live: **COMPLETATO E VERIFICATO** limitatamente al JSON utente su tabella Lead/RLS/policy e assenza delle due tabelle correlate; prerequisiti CRM completi **DA COMPLETARE**.
+- Applicazione migrazioni, test PostgreSQL/Auth/concorrenza, deploy Edge Functions e verifica Netlify produzione: **DA COMPLETARE/BLOCCATO** secondo i gate già registrati.
+- Vincolo operativo utente invariato: nessun deploy Netlify di produzione e nessun test con utenti/conversioni reali prima del 4 dicembre 2026. Nessuna modifica live è stata eseguita in questo controllo.
 
-### Esito struttura registri candidati — 13 novembre 2026
-L'utente ha eseguito il report SQL read-only in una sola cella. Metadati:
-- `auth.schema_migrations`: solo `version varchar(255) NOT NULL`; registro del componente Auth, non prova la cronologia SQL NEXTWAY.
-- `realtime.schema_migrations`: `version bigint NOT NULL`, `inserted_at timestamp(0)`; registro del componente Realtime, non prova la cronologia SQL NEXTWAY.
-- `storage.migrations`: `id integer`, `name varchar(100)`, `hash varchar(40)`, `executed_at timestamp`; registro interno Storage, non prova la cronologia SQL NEXTWAY.
-Nessuno dei tre è identificato come registro delle migrazioni applicative NEXTWAY. La relazione `supabase_migrations.schema_migrations` non esiste nel progetto. Questo non prova che le migrazioni applicative non siano state eseguite: potrebbero essere state eseguite via SQL Editor o altri strumenti senza un registro CLI accessibile.
-Decisione: non interrogare le righe dei tre registri managed. Ricostruire le migrazioni NEXTWAY confrontando definizioni live e file SQL del branch; verificare separatamente le versioni Edge Function effettivamente distribuite. Nessuna migrazione automatica.
-Stato: metadati registri completati; registro applicativo non identificato; nessuna modifica remota, DDL/DML, deploy, merge o modifica a `main`.
+### Prossimo passo operativo preciso
 
+1. Sul branch PR, correggere il contratto del test audit in modo che verifichi l'esportazione senza dipendere da spaziatura/newline, oppure uniformare il sorgente se il formato è un requisito esplicito; non indebolire i controlli di isolamento.
+2. Rilanciare la CI completa sul branch e verificare che tutti gli step prima saltati, inclusi i type-check Deno, vengano eseguiti e passino.
+3. Eseguire in Supabase la diagnostica read-only `nextway_crm_prerequisites_readonly.sql` e acquisire il JSON; completare la riconciliazione schema prima di proporre migrazioni.
+4. Mantenere staging isolato, backup completo/restore verificato e test sintetici come gate prima di qualsiasi migrazione o deploy live.
 
-### Preparazione ripristino controllato — 13 novembre 2026
-Preparati sul branch `fix/nextway-password-recovery`:
-- `docs/NEXTWAY-PRODUCTION-REPAIR-PLAN.md`: piano di ripristino per rate limit P0, governance workspace P0, cleanup staged P1 e retention P2; include dipendenze, ordine e cautele.
-- `docs/NEXTWAY-REPAIR-PREFLIGHT-REPORT.sql`: query read-only in una sola cella che controlla tabelle, colonne, helper, RLS e presenza delle RPC target. Non ancora eseguita.
-Sequenza: pre-flight; valutazione prerequisiti e privilegi; pacchetti separati basati sulle migrazioni originali; backup/rollback e autorizzazione esplicita prima di qualsiasi applicazione. Non riapplicare la migration workspace table isolation già dichiarata applicata; non applicare in blocco le migrazioni.
-Stato: preparazione completata; nessuna modifica database, migrazione, DDL/DML, deploy, merge o modifica a `main`.
+### Registro cronologico del MASTER
 
-### Esito pre-flight ripristino — 13 novembre 2026
-Pre-flight read-only ricevuto: fondamenta Auth/profiles/Lead/conversazioni, workspace, helper e RLS risultano presenti. Rate Limit e RPC governance risultano assenti. La tabella legacy Setter non possiede `user_id` e `lease_expires_at` perché la migrazione workspace-aware la definisce con `owner_profile_id` e `claimed_at`; la migrazione successiva crea uno store workspace distinto. Le vecchie migrazioni cleanup/retention che richiedono `user_id/lease_expires_at` sono incompatibili e vanno escluse, senza aggiungere colonne.
-Preparato `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` (non applicato) per ripristinare solo Rate Limit e Governance, con guardie sui prerequisiti. Nessuna migrazione, DDL/DML, deploy o merge eseguiti.
-
-
-### Autorizzazione ripristino P0 — 13 novembre 2026
-L'utente ha autorizzato il ripristino Rate Limit + Governance. Draft confrontato con migrazioni sorgenti e chiamate Edge Function; aggiunta guardia che impedisce la sostituzione della RPC governance se già presente. Esecuzione DB non effettuata: questa sessione non dispone di connessione Supabase/SQL Editor autenticata. Non dichiarare il ripristino applicato; l'esecuzione richiede il SQL Editor autenticato e successiva verifica read-only. Nessuna modifica al database.
-
-
-### Esecuzione SQL P0 — esito comunicato dall'utente, 13 novembre 2026
-L'utente ha eseguito `docs/NEXTWAY-P0-REPAIR-DRAFT.sql` nel SQL Editor Supabase e ha riportato `Success. No rows returned`. Questo conferma l'esecuzione senza errori segnalati; resta in attesa una verifica read-only post-esecuzione della tabella Rate Limit, delle due RPC e dei relativi privilegi/RLS. Non considerare ancora il ripristino verificato.
-
-
-### Verifica finale ripristino P0 — 13 novembre 2026
-L'utente ha eseguito la query di verifica read-only dopo l'applicazione dello script P0 e ha riportato tutti gli esiti positivi:
-- Tabella Rate Limit: OK.
-- RPC Rate Limit: OK.
-- RPC Governance: OK.
-- RLS Rate Limit: ATTIVA.
-- Accesso RPC Rate Limit: OK.
-- Accesso RPC Governance: OK.
-
-**STATO: COMPLETATO E VERIFICATO** per tabella/RPC Rate Limit, RPC Governance, RLS e accesso alle due RPC secondo la verifica SQL riportata dall'utente. Il ripristino P0 è quindi concluso; non ripetere questi controlli salvo necessità concreta.
-Nessun deploy Edge Function, deploy Netlify, merge o altra migrazione è implicato da questo risultato. Restano invariati i vincoli di produzione e il blocco Netlify fino al 4 dicembre 2026. Branch di lavoro: `fix/nextway-password-recovery`; `main` e PR draft non modificati.
-
-## AVANZAMENTO OPERATIVO — 13 NOVEMBRE 2026, ORE 08:40 (Europe/Rome)
-
-### Ripristino P0 Rate Limit + Governance
-
-L'utente ha eseguito il draft P0 nel SQL Editor Supabase e ha riportato `Success. No rows returned`. La query read-only finale ha confermato:
-- tabella Rate Limit: OK;
-- RPC Rate Limit: OK;
-- RPC Governance: OK;
-- RLS Rate Limit: ATTIVA;
-- accesso alle due RPC: OK.
-
-**STATO: COMPLETATO E VERIFICATO** secondo il report SQL dell'utente. Non ripetere questi controlli senza una nuova evidenza tecnica.
-
-### Correzione documentale per evitare attività duplicate
-
-Aggiornati sul branch di lavoro:
-- `docs/NEXTWAY-PRODUCTION-REPAIR-PLAN.md` — commit `f26f1f0b739797e666527e92884a21ca45b4b9e3`;
-- `docs/NEXTWAY-BASELINE-MIGRATION-RECONCILIATION.md` — commit `2151d19986b1a125cde5166d72e9100ea4e569a4`.
-
-I documenti ora registrano P0 concluso e chiariscono che le vecchie migrazioni cleanup/retention (`20261110000700`, `20261110000400`) sono incompatibili con il modello Setter corrente. Non aggiungere `user_id` o `lease_expires_at`, non riapplicare quelle migrazioni e non ricreare il vecchio schema. Un'eventuale protezione sostitutiva va progettata soltanto se un test runtime workspace-aware dimostra una necessità reale.
-
-### Stato GitHub / PR
-
-- Branch di lavoro: `fix/nextway-password-recovery`.
-- PR #1 resta aperta in draft e non merged.
-- Confronto GitHub aggiornato dopo i due commit documentali: branch feature **128 commit avanti e 4 dietro** rispetto a `main`; i rami sono divergenti.
-- Non eseguire merge, rebase o aggiornamento di `main` in questa fase. Prima di preparare il rilascio servirà una riconciliazione controllata dei quattro commit di `main` non ancora presenti nel branch.
-
-### Prossimo lavoro effettivo — senza ripetere P0
-
-1. Completare la riconciliazione della baseline schema-only (tipi, sequenze, ownership, grant, FK, funzioni, trigger e policy); lo script lessicale attuale non certifica l'importabilità PostgreSQL.
-2. Preparare una baseline locale riproducibile e seed solo sintetici, preservando `supabase/.temp/`.
-3. Avviare soltanto il profilo PostgreSQL locale dopo revisione di baseline/configurazione e misurazione risorse; non avviare full stack Supabase sul Mac da 8 GiB.
-4. Eseguire test SQL/concorrenza in isolamento; solo successivamente valutare Auth/API/Storage/Edge Runtime ridotto.
-5. Verificare separatamente le versioni Edge Functions effettivamente distribuite prima di un rilascio autorizzato.
-
-### Vincoli invariati
-
-Nessuna modifica a `main`, nessun merge/rebase PR, nessun deploy Supabase, nessun nuovo DDL/DML, nessun workspace o dato reale creato. Nessun deploy Netlify di produzione prima del 4 dicembre 2026. Nessuna spesa o nuovo progetto cloud senza autorizzazione esplicita.
-
-### Matrice di rilascio Edge Functions — 13 novembre 2026
-
-Creato `docs/NEXTWAY-EDGE-DEPLOYMENT-MATRIX.md` (commit `755da66e3e8920fb13b723de41e24873e40a9b11`). Il documento mappa staticamente le sei Edge Functions, le tabelle/RPC dipendenti e i nomi delle variabili/secrets richiesti, senza riportare valori segreti. Evidenzia i gate ancora da verificare: schema/Storage/Knowledge, presenza secrets, CORS produzione, versione remota delle funzioni e test runtime isolati. Il workflow #269 sul commit `774bdf55a49e0eee69b625bc2571aa84189f8215` è SUCCESS (static validation/type-check), ma non certifica il runtime.
-
-Confronto GitHub dopo gli aggiornamenti documentali: branch `fix/nextway-password-recovery` **130 commit avanti e 4 dietro** `main`. I quattro commit non ancora presenti nel branch sono stati esaminati: i diff disponibili modificano soltanto `MASTER_NEXTWAY.md`, senza cambiamenti applicativi o SQL. La divergenza resta da riconciliare in modo controllato prima del rilascio; nessun merge/rebase eseguito.
-
-### Correzione CI — copertura Edge Function di ricerca — 13 novembre 2026
-
-Durante la revisione della pipeline è stata individuata una lacuna concreta: `supabase/functions/nextway-search/**` non era incluso nei filtri di attivazione del workflow statico e `nextway-search/index.ts` non era sottoposto a `deno check`. La funzione di ricerca usa la RPC Rate Limit; una regressione poteva quindi sfuggire alla validazione automatica.
-
-Corretto `.github/workflows/nextway-static-validation.yml` sul branch di lavoro:
-- aggiunto il percorso `supabase/functions/nextway-search/**` ai filtri `push` e `pull_request`;
-- aggiunto lo step `deno check supabase/functions/nextway-search/index.ts`.
-
-Commit: `6eeae4c6486d7ad762de16823ab4a9c1a0a358f5` (seconda modifica della stessa correzione CI; il precedente commit aveva aggiunto lo step e il filtro push).
-**STATO: MODIFICA CODICE CI COMPLETATA; ESECUZIONE DEL NUOVO WORKFLOW ANCORA DA CONFERMARE.** Non dichiarare il nuovo controllo superato finché GitHub Actions non mostra un run successivo a questo commit.
-
-Nessun deploy, migrazione, merge o modifica a `main` eseguiti.
-
-### Preparazione pre-flight locale riproducibile — 13 novembre 2026
-
-Creato `scripts/nextway-local-preflight.sh` (commit `682897c19f6945b3f3a154be9bd8e35086798c0a`). Lo script produce un report testuale unico e di sola lettura: versione Supabase CLI, Docker Engine/memoria/container attivi, presenza e SHA-256 del dump `/tmp/nextway-public-schema.sql`, assenza di `COPY`/`INSERT`, stato di `supabase/config.toml`, presenza di `supabase/.temp/` e spazio disco. Non esegue init/start/link, connessioni remote, migrazioni, import, deploy o modifiche locali.
-
-La pipeline `.github/workflows/nextway-static-validation.yml` è stata aggiornata per:
-- includere `nextway-search` nei filtri push e pull request e sottoporla a `deno check`;
-- verificare la sintassi del pre-flight con `bash -n`;
-- includere lo script nei filtri push/PR;
-- attivarsi sui push a `main` e `fix/nextway-password-recovery`.
-
-Documentazione: `docs/NEXTWAY-STAGING-SETUP-PLAN.md` aggiornata con istruzioni e limiti. Il pre-flight va eseguito sul Mac solo dopo aver aggiornato il branch locale con i nuovi file. Comando previsto: `bash scripts/nextway-local-preflight.sh` dalla cartella repository.
-
-**Stato:** script e workflow configurati; run CI dopo le modifiche non ancora osservato; script non ancora eseguito sul Mac. Il suo esito non autorizza `supabase start` o import del dump. La baseline deve ancora superare la revisione strutturale prima di qualsiasi avvio.
-
-
-### Correzione pre-flight: scanner SQL consapevole del contesto — 13 novembre 2026
-
-La prima esecuzione locale del pre-flight ha segnalato 17 occorrenze COPY/INSERT. L'analisi delle righe indicate ha dimostrato che le occorrenze erano istruzioni INSERT INTO contenute nei corpi di funzioni SQL delimitati da dollar-quote (AS $$ ... $$), non statement di primo livello del dump. In particolare, le righe 31, 1325 e 1418 sono state ricondotte a corpi di funzione. Il conteggio basato su grep era quindi un falso positivo e non costituiva prova della presenza di dati.
-
-Correzione applicata sul branch fix/nextway-password-recovery:
-- aggiunto scripts/check-nextway-schema-dump.py, scanner lessicale che ignora stringhe, identificatori quotati, commenti e corpi dollar-quoted e segnala soltanto statement SQL di primo livello COPY / INSERT INTO;
-- aggiornato scripts/nextway-local-preflight.sh per usare lo scanner e bloccare in modo prudenziale in caso di errore di analisi o scanner mancante;
-- aggiunto un self-test sintetico dello scanner al workflow statico e incluso il file nei filtri push/PR.
-
-Commit: scanner 1e804c7, correzione quoting PostgreSQL 9b0fe4c, pre-flight cbcc707, test CI 4b9727b. La verifica GitHub conferma la presenza delle modifiche sul branch. SELF-TEST LOCALE E NUOVO PRE-FLIGHT ANCORA DA ESEGUIRE SUL MAC; ESITO CI DEL NUOVO CONTROLLO NON ANCORA CONFERMATO.
-
-Il dump originale non è stato modificato; nessun import, migrazione, avvio container, deploy o modifica al database remoto è stato eseguito. Prossimo passo: aggiornare il branch locale e lanciare il self-test, lo scanner sul dump esistente e il pre-flight corretto. Anche un esito positivo non autorizza import o avvio dello stack Supabase.
+- 13-11-2026, 19:49 Europe/Rome — verificati HEAD main `7bb8883`, stato/confronto PR #1 (534 ahead/7 behind, 84 file), run CI PR #520 e log dettagliato della failure audit, file sorgente e regex responsabili, run main #251 e relativi step, Deploy Preview Netlify segnalata dal check PR; ribaditi i risultati CRM forniti dall'utente e la diagnostica prerequisiti ancora da eseguire. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice, database, configurazioni, segreti, deploy o impostazioni.
 
 
 ---
 
-## AVANZAMENTO OPERATIVO — 13 NOVEMBRE 2026, ORE 09:10 (Europe/Rome)
+## CONTROLLO DI CONTINUITÀ — 14 NOVEMBRE 2026, ORE 19:23 (Europe/Rome)
 
-### Riconciliazione strutturale schema — report cataloghi preparato
+### Repository, branch main e fonti verificate
 
-Sul branch `fix/nextway-password-recovery` è stato aggiunto `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql`.
+- Recuperato questo MASTER da GitHub `main` prima della modifica: blob SHA di partenza `121add0e3facc9300f3e8874ceb8ebf911a873d3`; documento di 2.809 righe. La nuova registrazione viene aggiunta in coda, preservando il contenuto cronologico esistente.
+- HEAD di `main` verificato tramite GitHub: `d8b900cdd6d578f017706a8f6f1be5d9d89600dc`, commit del 13-11-2026 18:54:33 UTC, messaggio `docs(nextway): update MASTER continuity for 13 Nov 19:49`. Nei primi otto commit recenti esaminati, questo resta l'HEAD di `main`; non risultano nuovi commit applicativi su `main` dopo l'ultimo aggiornamento documentale precedente.
+- Il branch endpoint riporta `protected=false` per `main` e nessun required status check configurato. È un dato GitHub osservato, non una modifica effettuata. Da considerare nel processo di governance prima di un futuro merge.
+- Il connettore GitHub ha permesso di leggere file, branch, commit, confronti PR, workflow run e job. Nell'inventario degli strumenti disponibili in questa sessione non risultano connettori Supabase o Netlify. Non è stato interrogato direttamente il database né il sito Netlify. Sono state usate le evidenze presenti nella conversazione corrente e nel MASTER; non si presume accesso a chat storiche non disponibili.
 
-Il report read-only restituisce una singola cella JSON con:
-- tabelle/relazioni, proprietari e stato RLS;
-- colonne, tipi effettivi, default, identity/generated e nullability;
-- PK, FK, UNIQUE, CHECK ed EXCLUDE;
-- sequenze, parametri, proprietari e associazione alla colonna;
-- funzioni, firme, ritorni, proprietari, SECURITY DEFINER, impostazioni e ACL;
-- trigger e funzioni richiamate;
-- policy RLS e privilegi/ACL di schema, tabelle, sequenze e funzioni.
+### Pull request e divergenza dei branch
 
-La query legge solo metadati di catalogo. Non legge dati applicativi o corpi funzione, non esegue DDL/DML e non modifica il database. Commit del file e documentazione: `eae7875`, `dc2bd8c` (più commit di preparazione precedente `78e05a9`).
+**PR #1 — NEXTWAY: verifica integrazione AI Setter governance**
+- Stato GitHub: OPEN, DRAFT, NOT MERGED; base `main`, head `fix/nextway-password-recovery`.
+- Head osservato: `f76044111ae2ecd8c45d23dd8dfdb4c2660c8154`; base SHA ancora riportato dalla PR: `a3fbec076221f0f043d60373e2864d7d07db30d7`.
+- Metadati aggiornati: 727 commit, 87 file modificati, 12.159 aggiunte e 109 cancellazioni; confronto con main: DIVERGED, 727 commit ahead e 8 behind; `mergeable=false`.
+- Il diff PR include anche `MASTER_NEXTWAY.md` con 1.063 righe aggiunte. Questo è un rischio concreto di conflitto o sostituzione di registrazioni documentali più recenti se la PR venisse integrata senza riconciliazione. Non effettuare merge senza riallineare esplicitamente il MASTER del branch con la versione corrente di `main`.
+- Ultimo push workflow individuato sulla head PR #1: run #712, ID `43606004689`, SUCCESS sul commit `f760441`. La run certifica i controlli statici previsti per quel commit, non test runtime Supabase.
+
+**PR #2 — Fix NEXTWAY manual review RPC flag scope**
+- Stato GitHub: OPEN, non draft, NOT MERGED; base `fix/nextway-password-recovery` alla head PR #1 `f760441`; head `fix/nextway-manual-review-rpc-scope` a `f542e3c44078d0c55573854f1693ffa98a6294cf`.
+- Cinque commit, due file modificati, 83 aggiunte e una cancellazione. Il confronto tra head PR #1 e head PR #2 risulta ahead di cinque commit e behind zero. Il metadato `mergeable=true` vale per questa base branch, non equivale a un merge verso `main`.
+- La PR aggiunge `supabase/migrations/20261114161500_nextway_manual_review_rpc_scope.sql` (blob `01321e9a4f1cd6f9916a80699c9207396395db7a`) e aggiorna `scripts/test-nextway-manual-lead-review-sql.mjs` (blob `334d36f23d0b45cda803134ca5e13d42677b1ba7`). La migrazione è esplicitamente candidata e dichiara di non essere applicata senza autorizzazione separata.
+
+### Revisione statica: revisione manuale Lead
+
+- La migrazione candidata PR #1 `20261114150000_nextway_lead_manual_review.sql` (blob `872c9d27b3155c6185952bfdbdd8ccc76ec12efe`) aggiunge `manual_reviewed_at` e `manual_reviewed_by`, impone evidenza di revisione per la qualifica `Qualificato`, introduce un trigger di protezione e una RPC `nextway_confirm_lead_manual_review(uuid)`.
+- Le condizioni previste per la qualificazione manuale includono identità confermata e punteggio aggregato minimo di 50; il trigger invalida la revisione se cambiano identità o punteggi. Il sorgente è candidato nel branch PR e non prova che la migrazione sia applicata sul progetto Supabase.
+- Nel sorgente originario della RPC viene attivata l'impostazione transazionale `nextway.manual_review_rpc=on` prima dell'UPDATE, ma non viene riportato il reset a `off` prima del ritorno. PR #2 introduce una sostituzione della funzione che disattiva esplicitamente il flag subito dopo l'UPDATE e prima di restituire il JSON. La guardia richiede inoltre il contesto proprietario `postgres`, autenticazione e coerenza dei dati di revisione.
+- Il test statico aggiornato verifica l'ordine: attivazione flag, UPDATE protetto, disattivazione flag, return. Questo riduce il rischio che altre istruzioni nella stessa transazione ereditino il flag attivo; il comportamento effettivo resta da validare su PostgreSQL in staging.
+- La cronologia PR #2 mostra i commit di correzione del test e del contratto RPC. Non sono state modificate migrazioni, codice applicativo o database in questa attività documentale.
+
+### GitHub Actions — risultati più recenti esaminati
+
+- **PR #2 run #715**, ID `43609280854`, evento pull_request, commit `f542e3c`: SUCCESS. Job `validate` completato; tutti i 44 step funzionali e di validazione elencati dal job sono SUCCESS, inclusi il test del contratto di revisione manuale Lead, i controlli statici SQL/sicurezza/UI, gli script locali e i sei type-check Deno delle Edge Functions.
+- **PR #2 run #714**, ID `43609268265`, commit precedente `a61b245`: FAILURE allo step `Validate NEXTWAY manual Lead review contract`; i successivi controlli browser e Deno risultano SKIPPED. La run #715 successiva passa tutti gli step, quindi il problema immediato del test è stato corretto sul commit successivo. Non si deduce da ciò un test runtime.
+- **PR #1 run #712**, ID `43606004689`, SUCCESS sul suo head `f760441`.
+- **main**: ultima run push osservata resta #251, ID `43175706330`, SUCCESS sul commit `b2ce72e` del 12-11-2026. Non risultano run push più recenti su main nell'elenco controllato. La run #251 non valida i cambiamenti dei branch PR del 14 novembre.
+- I risultati CI sono validazioni statiche e type-check. Non dimostrano compilazione/esecuzione delle migrazioni sul database live, isolamento multi-tenant runtime, corretto invio Auth o funzionamento end-to-end del CRM.
+
+### Diagnostica CRM live — risultato fornito dall'utente il 14 novembre
+
+- La query corretta `supabase/diagnostics/nextway_crm_live_status_readonly.sql` è stata aggiornata per non interrogare `supabase_migrations.schema_migrations`, relazione non disponibile nel contesto SQL. Aggiornamento GitHub su main: commit `2876295001c66c7105eba20094bae49b11c48509`; blob finale del file `82be22c8ca93583557be8bdd4e22f9c4c0c67763`.
+- L'utente ha eseguito la versione corretta e ha fornito il JSON:
+  - `public.nextway_leads`: presente; RLS attivo; FORCE RLS non attivo.
+  - Quattro policy per `authenticated`: SELECT, INSERT, UPDATE e DELETE. Le condizioni consentono il proprietario (`owner_profile_id = auth.uid()`) oppure un profilo `platform_admin`. La policy INSERT usa `WITH CHECK`; UPDATE usa sia `USING` sia `WITH CHECK`.
+  - `public.nextway_lead_activities`: assente al momento della query.
+  - `public.nextway_lead_conversion_requests`: assente al momento della query.
+  - `supabase_migrations.schema_migrations`: non disponibile nel contesto interrogato. Lo storico delle migrazioni non è deducibile da questo risultato.
+- Questo risultato è una lettura riportata dall'utente; non è un accesso diretto dell'assistente al database. Non sono stati letti o modificati record applicativi.
+
+### Diagnostica prerequisiti CRM — file presente, esecuzione ancora attesa
+
+- Creato su main `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`, commit `b0034232809b124a1afcbfe352777ba34b0ac6e1`, blob `832d328fd84b0694f7e324866a2db4927ab83dd2`.
+- La query restituisce un solo JSON in sola lettura su: colonne `owner_profile_id`, `status`, `created_at`, `archived_at`, `archived_by`, `archive_reason`; vincoli CHECK che contengono `status`; presenza delle tabelle attività, conversion requests e idempotenza; firme e attributo SECURITY DEFINER delle RPC `nextway_create_lead_with_conversation` e `nextway_create_lead_with_conversation_idempotent`.
+- Al momento di questo aggiornamento non è stato ricevuto il JSON di esecuzione di tale diagnostica. Colonne archive, vincolo status, tabella idempotenza e firme RPC live restano quindi DA COMPLETARE. Non applicare migrazioni CRM in assenza di questo risultato e dei gate di backup/staging già registrati.
+
+### Matrice di stato al 14 novembre 2026
+
+- MASTER su main, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** per questa operazione documentale.
+- HEAD main e cronologia commit recenti: **COMPLETATO E VERIFICATO** per i dati GitHub consultati.
+- Protezione branch main: **COMPLETATO E VERIFICATO** come metadato GitHub (`protected=false`, nessun required check).
+- PR #1: **BLOCCATO** per divergenza 727 ahead/8 behind, `mergeable=false` e modifica concorrente del MASTER nel diff; non integrata.
+- PR #2: **COMPLETATO E VERIFICATO** quanto a metadati, file e CI statica #715; **DA COMPLETARE** per revisione, eventuale integrazione controllata nella PR #1 e test PostgreSQL runtime. Non integrata in main.
+- Contratto statico revisione manuale Lead: **COMPLETATO E VERIFICATO** limitatamente al passaggio del test CI #715; migrazioni e comportamento live: **DA COMPLETARE**.
+- CRM Lead core RLS/policy: **COMPLETATO E VERIFICATO** limitatamente al JSON fornito dall'utente.
+- Tabelle attività e richieste conversione: **DA COMPLETARE** (assenti nell'ultima diagnostica live).
+- Diagnostica prerequisiti CRM: file **COMPLETATO E VERIFICATO** nel repository; esecuzione Supabase **DA COMPLETARE**.
+- Applicazione migrazioni, test runtime, backup/restore, staging e deploy Edge Functions/Netlify: restano **BLOCCATI/DA COMPLETARE** secondo i gate già registrati. Nessuna modifica live eseguita in questo controllo.
+
+### Prossimo passo operativo preciso
+
+1. Eseguire in Supabase SQL Editor `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo, senza applicare migrazioni.
+2. Mantenere PR #2 come proposta separata finché il contratto RPC non è revisionato e la migrazione non è validata su PostgreSQL staging; la CI #715 non è una prova runtime.
+3. Prima di qualsiasi merge della PR #1, riallineare il branch con main e riconciliare esplicitamente `MASTER_NEXTWAY.md`, che compare nel diff PR con 1.063 righe aggiunte. Non sovrascrivere la cronologia documentale più recente.
+4. Mantenere backup/restore verificato, staging isolato e test sintetici come gate prima di modifiche Supabase o deploy.
 
-**STATO: PREPARATO, NON ANCORA ESEGUITO.** La riconciliazione oggetto-per-oggetto resta aperta finché non sarà disponibile il report effettivo del database. Non dichiarare verificati tipi, ownership, FK, sequenze, funzioni, trigger o privilegi sulla sola base dei file Git.
+### Registro cronologico del MASTER
+
+- 14-11-2026, 19:23 Europe/Rome — aggiornati HEAD main e commit recenti; verificati stato e confronto PR #1/#2, file e migrazione di revisione manuale Lead, run GitHub Actions #712/#714/#715 e relativi risultati; registrato il JSON CRM live fornito dall'utente, la correzione della diagnostica 42P01 e la nuova diagnostica prerequisiti ancora da eseguire; annotati assenza di connettori Supabase/Netlify e protezione branch main disattivata. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
+
 
-### Prossimo passaggio
+---
 
-Eseguire una sola volta `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` nel SQL Editor Supabase e riportare la cella `report`. Con quel risultato si potrà completare il confronto con dump e migrazioni e classificare le differenze prima del bootstrap PostgreSQL locale.
+## CONTROLLO DI CONTINUITÀ — 15 NOVEMBRE 2026, ORE 19:14 (Europe/Rome)
 
-Nessuna migrazione, modifica DB, deploy, merge, import o seed eseguito. `main` invariato; PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato. P0 Rate Limit/Governance resta COMPLETATO E VERIFICATO secondo il report SQL già fornito dall'utente; non ripetere quei controlli.
-
-
-### Aggiornamento report strutturale: output suddiviso in blocchi
-Il file `supabase/diagnostics/nextway_structural_reconciliation_readonly.sql` è stato aggiornato per restituire righe numerate `parte`, `totale_parti`, `report_parziale`, con segmenti da massimo 6.000 caratteri. Questo evita il limite di lunghezza del singolo messaggio. L'utente deve eseguire la query una sola volta e copiare tutte le righe in ordine, inviandole in messaggi separati. Query ancora da eseguire; nessuna modifica DB. Commit correzione CTE `50683a8` (versione chunked iniziale `de54793`).
-
-### Audit statico contratti Edge Functions e CI — 13 novembre 2026
-
-Completata la revisione statica delle sei Edge Functions presenti nel branch. Le RPC invocate dal codice sono state confrontate con le firme SQL delle migrazioni versionate:
-
-- AI Setter: rate limit finale `(text, integer)`, governance `(uuid)`, quattro RPC Setter workspace-aware (begin, get staged, store output, complete).
-- Ricerca: rate limit finale `(text, integer)`.
-- Workspace Admin: RPC di attivazione prompt e criteri `(uuid, uuid)`.
-- Conversion Provisioning: claim, finalize e release con firme `(uuid, uuid)` e `(uuid, uuid, uuid)`.
-- Le funzioni Setter workspace-aware operano sullo store dedicato `nextway_setter_workspace_generation_requests`; lo store legacy è preservato.
-
-**Esito statico: firme e nomi parametri coerenti con le migrazioni esaminate.** Sono stati inoltre controllati i principali confini di autenticazione, ruolo platform_admin, claim token e rate limit server-side. Nessuna incompatibilità statica è emersa nell'insieme esaminato.
-
-GitHub Actions: workflow `NEXTWAY static validation`, run #295, commit codice `4b9727b`, **SUCCESS**. Tutti gli step sono verdi, inclusi i test di sicurezza e `deno check` per tutte e sei le Edge Functions. Il successivo commit HEAD `3cefd52` è documentale e non modifica codice/SQL. Questo risultato non prova quale versione sia attualmente distribuita su Supabase e non sostituisce test runtime.
-
-Documento di dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Stato strutturale: `docs/NEXTWAY-STRUCTURAL-RECONCILIATION-STATUS.md`.
-
-**Gate aperti:** versione remota Edge Functions non verificata; test end-to-end runtime non eseguiti; importabilità del dump e riconciliazione completa di tipi/vincoli/sequenze/ownership/ACL non certificate. Nessuna migrazione, deploy, merge, seed, modifica DB live o modifica a `main` eseguita. PR #1 resta draft; blocco Netlify produzione fino al 4 dicembre 2026 invariato.
-
-### Audit Knowledge Base e caricamento documenti — 13 novembre 2026
-
-Completata revisione statica aggiuntiva di Edge Functions Knowledge Ingest/Upload, migrazioni Knowledge Base/Storage/Workspace RLS e test automatizzati.
-
-**Esito statico:**
-- entrambe le funzioni richiedono autenticazione valida e ruolo `platform_admin`;
-- ingest rifiuta workspace non valido o archiviato e deduplica per workspace/modulo/hash;
-- documenti inseriti in stato `pending`, mai approvati automaticamente;
-- chunking 9.000 caratteri con overlap 500; limite SQL chunk 12.000 caratteri;
-- bucket `nextway-knowledge` privato, file max 12 MiB, PDF/DOCX/TXT;
-- cleanup file su duplicato/errore e collegamento storage al documento dopo ingest;
-- PDF max 250 pagine; DOCX/TXT estratti lato server; PDF scansiti senza testo rifiutati, OCR non disponibile;
-- RLS e RPC di ricerca sono workspace-scoped; la vecchia firma di ricerca senza workspace viene revocata;
-- deduplicazione hash separata tra documenti centrali senza workspace e documenti dei singoli workspace.
-
-Test statici già presenti per SQL, ingest, upload e RLS workspace. Nessuna incompatibilità certa rilevata nel confronto codice/migrazioni.
-
-**Limite:** non sono stati eseguiti upload reali, test runtime/rollback storage, test di isolamento tra due workspace, né confronto con le versioni Edge remote. La Knowledge Base è quindi **ESEGUITA MA NON VERIFICATA A RUNTIME**, non certificata end-to-end.
-
-Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit documentale audit KB: `ec0d41b`.
-
-Nessuna migrazione, DDL/DML, deploy, seed, test con dati reali, merge o modifica a `main`. PR #1 resta draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
-
-### Audit dipendenze CRM / Membership / Conversione — 13 novembre 2026
-
-Revisione statica di foundation workspace, membership, RPC di creazione Lead, amministrazione workspace e provisioning conversione.
-
-**Coerenze rilevate:** accesso workspace basato su membership attiva e workspace attivo; ruoli distinti; owner unico per workspace; RPC di attivazione riservate a service_role; creazione Lead idempotente e workspace-aware; conversione con claim token e finalizzazione transazionale che riblocca il Lead.
-
-<badge>P1 — GAP DA RISOLVERE</badge>
-
-La catena conversione non è ancora workspace-aware: `nextway_lead_conversion_requests` non conserva `workspace_id`; claim/finalize non lo trasportano; la finalizzazione crea partner/clienti senza assegnare membership al partner né conservare il workspace sul record cliente. Non è quindi certificabile l'associazione automatica al workspace corretto quando lo sponsor opera in più workspace.
-
-**Decisione necessaria prima del primo onboarding partner multi-workspace:** ereditare il workspace dal Lead nella richiesta; definire ruolo/stato membership del partner convertito; conservare l'attribuzione workspace dei clienti; mantenere il comportamento legacy centralizzato. La correzione richiederà migrazione additiva e test di idempotenza/concorrenza. Non effettuata alcuna modifica automatica.
-
-Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`. Commit gap conversione: `bbd1ad3`.
-
-Nessuna modifica DB, migrazione, deploy, merge, seed o creazione membership/partner/cliente. `main` invariato; PR #1 draft; blocco deploy Netlify produzione fino al 4 dicembre 2026 invariato.
-
-
-## 13 novembre 2026 — Progettazione conversione multi-workspace
-
-- Verificato il flusso UI → richiesta CRM → claim → Edge provisioning → finalizzazione SQL.
-- Confermato il gap: la richiesta non conserva `workspace_id`; la finalizzazione non assegna membership al partner né attribuzione workspace al cliente.
-- Disegno raccomandato: workspace derivato dal Lead lato database; richiesta e claim immutabili/coerenti; partner con membership iniziale `invited` (nessun accesso fino ad attivazione); cliente senza Auth e con attribuzione workspace NEXTWAY dedicata, previa verifica schema/RLS legacy.
-- Le richieste storiche con workspace NULL devono mantenere il percorso centralizzato. Nessun backfill automatico.
-- Restano da verificare definizione e RLS di `clients` e `partner_details`, perimetro unicità email e query di lettura CRM.
-- Test richiesti: isolamento A/B, membership invited/suspended, workspace sospeso, inviti e retry, concorrenza/idempotenza, richieste legacy e RLS.
-- Stato: **PROGETTAZIONE IN CORSO — non pronta per migrazione**. Nessuna modifica DB, SQL, Edge Function, UI, deploy, merge o modifica a `main`.
-- Dettaglio: `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Progettazione correzione conversione multi-workspace”.
-
-
-## 13 novembre 2026 — Dipendenze CRM e preflight conversione
-
-- Ispezionate migrazioni, UI CRM, provisioning, finalizzazione, membership e policy workspace.
-- La migration di provisioning usa campi esistenti di `clients` e `partner_details`, ma il repository non contiene le definizioni originarie né le policy RLS di queste due tabelle.
-- Confermato che l'INSERT UI non legge/invia workspace; la coda admin non lo visualizza. Le policy workspace attuali ereditano l'accesso dalla relazione Lead, ma la richiesta non conserva uno snapshot immutabile.
-- Membership partner proposta: `invited` al momento della conversione, poi attivazione amministrativa esplicita dopo accettazione Auth; lo stato invited non concede accesso.
-- Cliente: mantenere record CRM senza Auth; attribuzione workspace in relazione NEXTWAY dedicata, da confermare dopo audit schema/RLS.
-- Aggiunto `supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql`: una sola riga JSON con metadati di tabelle, colonne, vincoli, indici, RLS/policy, trigger e funzioni; non legge record CRM e non modifica nulla.
-- **DA VERIFICARE:** schema e policy effettive `clients`/`partner_details`. Non preparare/applicare la migrazione finale prima di questo dato.
-- Nessuna query live, migrazione, DDL/DML, deploy, merge o modifica a `main`.
-- Dettagli in `docs/NEXTWAY-EDGE-FUNCTION-CONTRACT-AUDIT.md`, sezione “Approfondimento dipendenze CRM e preflight schema”.
-
-
-## 13 novembre 2026 — Autorizzazione conversione da membri workspace
-
-- Verificata la policy INSERT della richiesta: oggi autorizza solo proprietario Lead o platform_admin. La lettura workspace dei Lead non concede automaticamente il diritto di proporre conversioni.
-- Per Lead assegnati a workspace, proposta autorizzazione per membership attiva con ruolo owner/admin/manager/member; escluso viewer. Per Lead legacy senza workspace resta la regola owner/platform_admin.
-- Distinte le identità: proprietario/sponsor del Lead, collaboratore che crea la richiesta (`created_by`), platform_admin che revisiona e finalizza.
-- Coda e provisioning restano centrali platform_admin; eventuale delega ai manager richiede policy e audit separati.
-- Workspace snapshot derivato dal Lead lato DB; se il Lead viene trasferito dopo la richiesta, la finalizzazione deve fermarsi per revisione.
-- Corretto il preflight read-only: campo JSON `table_exists`.
-- Nessuna policy, UI o Edge Function modificata; nessun test live, DDL/DML o deploy.
-- Dettaglio nell'audit Edge Functions, sezione “Ulteriore verifica — autorizzazione avvio conversione da membri workspace”.
-
-
-## 13 novembre 2026 — Audit conversione Partner e annullamento post-invito
-
-- Audit aggiornato del branch: PR #1 open/draft, non mergeata; ultimo commit `fe5f116ef2cd1f65bb5803aad38ff49cf0a5e1ce`. Branch divergente da main: 264 commit avanti e 4 indietro. Nessun rebase o merge eseguito.
-- Edge Function Partner ora classifica l'invito come `create`, `resend` o `reuse_confirmed`; il reinvio verifica ID Auth, email e metadata request ID. Il classificatore puro ha superato 6/6 unit test già eseguiti. API Auth reale, email e retry restano da provare in staging.
-- Completata la specifica tecnica per annullare una richiesta da `pending`, `ready_for_activation` o `provisioning`, con motivo obbligatorio, autore/data, invalidazione claim e protezione dalla finalizzazione concorrente.
-- La specifica chiarisce che `activated` non è annullabile: richiede offboarding distinto. L'account Auth già confermato non deve essere eliminato automaticamente; una richiesta annullata non deve generare profilo o membership.
-- Individuati i punti DB da aggiornare in un'unica migrazione futura: status CHECK, review-state CHECK, activation-state CHECK, trigger `nextway_guard_conversion_request_review()` e nuova RPC amministrativa con lock `FOR UPDATE`. Aggiungere soltanto il valore `cancelled` al check status sarebbe incompleto.
-- Documenti aggiornati: `docs/NEXTWAY-PARTNER-CANCELLATION-TECHNICAL-SPEC.md` e `docs/NEXTWAY-PARTNER-CONVERSION-LIFECYCLE-TEST-PLAN.md`.
-- **DA COMPLETARE:** migrazione/RPC/guard non implementate; test SQL concorrenza, API Auth e flusso email bloccati finché non è disponibile un progetto staging separato.
-- GitHub Actions: nessun workflow run associato all'ultimo commit. L'ultimo commit è documentale e non ha attivato il workflow attraverso i path filter.
-- Nessuna modifica al database `nextway-platform`, nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email inviata, nessun utente o dato di prova creato. `main` invariato.
-- Vincoli confermati: PR #1 resta draft; niente merge; nessun deploy Netlify produzione prima del 4 dicembre 2026.
-
-
-## 13 novembre 2026 — Test statico annullamento Partner integrato
-
-- Aggiunto `scripts/test-nextway-partner-cancellation-spec.mjs`: verifica copertura della specifica, stati e metadati di annullamento, lock del finalizer, invalidazione claim, guard di immutabilità e limiti del cleanup Auth.
-- Integrato il test nel workflow `.github/workflows/nextway-static-validation.yml` per push e pull request; i path filter includono lo script e lo step esegue Node 22.
-- Il test è statico: non sostituisce le prove con PostgreSQL concorrente né il test API Auth in staging.
-- **Da verificare:** GitHub Actions non ha ancora restituito un run associato all'ultimo commit; non dichiarare CI superata finché il workflow non termina con successo.
-- Ultimo intervento su branch: commit `0d71dbcc5d471ed57db1746eed0764cf5a17a30b`; PR #1 ancora draft e non mergeata. Nessuna modifica a `main`, DB remoto, Edge Function remota o Netlify.
-
-
-## 13 novembre 2026 — Correzione CI e superamento workflow statico
-
-- I run precedenti hanno individuato due problemi reali nei test statici: filtro `pull_request` incompleto per il preflight conversione e asserzioni obsolete nel test snapshot che cercavano il vecchio ramo `existingInvite`, mentre l'Edge Function usa il classificatore `inviteAction`.
-- Corretti i path filter PR per preflight e test cancellazione; aggiornate le due asserzioni per distinguere `resend` e `reuse_confirmed`.
-- Corretto anche il workflow dopo aver rilevato una sezione `pull_request.paths` malformata introdotta durante l'aggiornamento: la struttura è stata ripristinata da una versione valida e ricontrollata.
-- **COMPLETATO E VERIFICATO:** GitHub Actions run `43409311679` — `NEXTWAY static validation`, conclusione **success**. Tutti gli step statici, i test Partner invite, il nuovo test di specifica cancellazione e i type-check Deno delle Edge Functions sono passati.
-- Il successo è riferito a test statici/unitari e type-check: non dimostra runtime PostgreSQL, concorrenza DB, invio/reinvio Auth o flusso email end-to-end.
-- Nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato. PR #1 resta draft e non mergeata.
-- Ultimo commit codice/workflow verificato: `9485a5cdcab0898489c7deeb7ddc49fa8a2f3603`; successivo aggiornamento di questo MASTER solo documentale.
-
-
-## 13 novembre 2026 — Implementazione SQL annullamento Partner sul branch
-
-- Preparata la migrazione `supabase/migrations/20261113140000_nextway_partner_conversion_cancellation.sql`.
-- Aggiunti `cancelled_at`, `cancelled_by`, `cancellation_reason`; aggiornati check di stato e revisione; aggiunto check di coerenza dei metadati cancellation.
-- Aggiornata `nextway_guard_conversion_request_review()`: permette annullamento soltanto da `pending`, `ready_for_activation`, `provisioning`, con platform_admin autenticato; conserva i dati di origine e revisione, richiede claim e activation fields null e rende immutabili i metadati di annullamento.
-- Aggiunta RPC `nextway_cancel_conversion_activation(uuid,text)`: SECURITY DEFINER, search_path fisso, platform_admin obbligatorio, motivo 1–1.000 caratteri, lock `FOR UPDATE`, retry idempotente, rifiuto di `activated` e `rejected`, invalidazione del claim, EXECUTE solo authenticated.
-- Il lock è sulla stessa riga usata da claim e finalizer. Il finalizer continua a richiedere stato `provisioning` e claim token valido; il release resta limitato a stato/token corrispondenti.
-- Aggiunto `scripts/test-nextway-partner-cancellation-sql.mjs`; integrato nei filtri push/PR e nel workflow.
-- **COMPLETATO E VERIFICATO:** controllo statico dei contratti SQL eseguito sui file branch: 15/15 asserzioni superate.
-- **COMPLETATO E VERIFICATO:** GitHub Actions run `43409635317`, commit `354baa76613dbf8d52e01211da60baf9b97e7852`: success. Sia `Validate Partner cancellation lifecycle specification` sia `Validate Partner cancellation SQL contract` sono passati; nessuno step fallito.
-- Migrazione e RPC sono soltanto nel branch. Non sono state applicate al progetto `nextway-platform`.
-- **DA COMPLETARE:** revisione SQL indipendente, test rollback-only con fixture di staging, prove concorrenti con due sessioni PostgreSQL, test API Auth e invito su progetto Supabase separato.
-- Nessuna modifica DB remoto, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
-
-## 13 novembre 2026 — Revisione indipendente annullamento e audit invito Auth
-
-- Confrontata la nuova `nextway_guard_conversion_request_review()` della migrazione `20261113140000` con la versione precedente in `20261111001500` e con l'aggiornamento workspace `20261113120000`.
-- **COMPLETATO E VERIFICATO (revisione statica):** le transizioni precedenti sono conservate: pending → ready/rejected; ready → provisioning; provisioning → provisioning (renew), ready (release), activated (finalize). Il nuovo ramo `cancelled` è separato e richiede platform_admin autenticato, metadati coerenti e campi claim/attivazione null.
-- Verificato che il preesistente `nextway_conversion_activation_state_check` accetta `cancelled` tramite il ramo generico per gli stati diversi da provisioning/activated, purché i quattro campi di attivazione siano null. Nessuna modifica a quel vincolo è necessaria.
-- Rafforzato `scripts/test-nextway-partner-cancellation-sql.mjs`: ora controlla anche activation-state CHECK, azzeramento di activation_user_id/activated_at e conservazione esplicita delle transizioni preesistenti.
-- **COMPLETATO E VERIFICATO:** GitHub Actions run `43410087510`, commit `69515d776a9ac855c40c910c3d84ebca55d35f46`, conclusione **success**. Tutti gli step del job `validate`, inclusi test Partner invite, specifica e contratto SQL cancellation, e type-check Deno, sono passati.
-- Audit supplementare Edge Function Auth: il ramo `resend` riutilizza l'ID Auth esistente e verifica email + metadata request ID dopo `inviteUserByEmail`; il ramo `reuse_confirmed` non reinvia né elimina l'account; il cleanup può eliminare solo un invito creato dal tentativo corrente e non confermato. Il finalizer verifica anche `auth.users.raw_user_meta_data.nextway_conversion_request_id` prima di associare il Partner.
-- **DA COMPLETARE / BLOCCATO:** il comportamento reale di reinvio su un account Supabase Auth esistente ma non confermato non è dimostrato dai test puri. La documentazione ufficiale indica di inviare un nuovo invito quando il link scade, ma il comportamento API va collaudato sul progetto staging e sulla versione Auth effettiva; esistono segnalazioni storiche su `/invite` e reinvii. Nessuna email di prova va inviata dal progetto reale.
-- Il test CI è statico/unitario: non dimostra invito email reale, accettazione, trigger Auth, membership invited→active, PostgreSQL runtime o gare concorrenti.
-- Stato Git: PR #1 open/draft, non mergeata; branch `fix/nextway-password-recovery`. `main` invariato. Nessun rebase/merge.
-- Stato operativo invariato: nessuna migrazione applicata, nessun deploy Edge Function/Netlify, nessuna email, nessun utente o dato di prova creato; nessuna modifica al database `nextway-platform`.
-- Prossimo lavoro: preparare un protocollo staging Auth + PostgreSQL con fixture sintetiche e test concorrenti a due sessioni; mantenere il progetto reale intatto fino ad autorizzazione esplicita.
-
-## 13 novembre 2026 — Correzione audit trail membership
-
-- Durante la revisione del passaggio `invited` → `active` è stato rilevato che `nextway-workspace-admin` sovrascriveva `invited_by` con l'ID dell'amministratore che attivava la membership, perdendo l'informazione sull'invitante originario.
-- Corretto `supabase/functions/nextway-workspace-admin/index.ts`: la lettura della membership recupera anche `invited_by`; l'upsert conserva il valore esistente e usa l'amministratore corrente soltanto quando si crea una membership senza invitante preesistente.
-- Aggiornato `scripts/test-nextway-workspace-admin-security.mjs` per verificare la conservazione dell'invitante.
-- **COMPLETATO E VERIFICATO:** GitHub Actions run `43410329154`, commit `6b24979df271df59b19b6c6e624e85f9dc769800`, conclusione **success**. Test membership, test Partner invite/cancellation, controlli statici e tutti i type-check Deno passati.
-- Nessun cambiamento alla regola di attivazione: workspace attivo, utente Auth con email confermata, membership `invited` preesistente; per Partner convertiti, richiesta `activated` e corrispondenza esatta tra utente e workspace.
-- La membership continua a essere attivata dall'amministratore tramite Edge Function; non esiste un'automatica attivazione al solo click del link email. `partner_details.status = active` non conferisce accesso workspace.
-- Nessun DB remoto modificato, nessuna migrazione applicata, nessun deploy, nessuna email o utente creato. `main` invariato; PR #1 resta draft e non mergeata.
-
-## 13 novembre 2026 — Preparazione collaudo transazionale e staging Partner
-
-- Rilevato e corretto un errore SQL nel test workspace A/B: tre istruzioni `PERFORM` erano fuori da un blocco PL/pgSQL; sostituite con `SELECT set_config(...)`.
-- Aggiunto `supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql`: fixture rollback-only per annullamento da `pending`, `ready_for_activation` e `provisioning`, retry idempotente, conservazione revisione, invalidazione claim e rifiuto di claim/release/finalizer tardivi. Richiede un partner, un Lead legacy `workspace_id IS NULL` libero e un platform_admin. Non crea Auth users, non invia email e termina con `ROLLBACK`.
-- Rafforzato `scripts/test-nextway-partner-cancellation-sql.mjs` per controllare staticamente che il test transazionale sia rollback-only, usi ruoli corretti e non invochi Auth/email/HTTP. Aggiornato il workflow per reagire anche alla modifica della fixture SQL.
-- Aggiunto `docs/NEXTWAY-PARTNER-STAGING-TEST-PROTOCOL.md` con fasi di staging isolato, test SQL, gare a due sessioni (finalize-vs-cancel, cancel-vs-finalize, claim-vs-cancel), prove Supabase Auth, RLS e criteri di accettazione.
-- Il protocollo evidenzia anche il caso critico in cui l'invito venga accettato mentre l'annullamento prevale: l'account Auth confermato non deve essere cancellato automaticamente e può richiedere riconciliazione amministrativa.
-- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43411870118`, commit `0aece2a527894176bcccd517f807552409a17631`, conclusione **success**. Tutti i controlli statici, fixture contract, test invite/cancellation e type-check Deno sono passati.
-- I test SQL rollback-only e concorrenza NON sono stati eseguiti: manca un progetto staging separato. Il test A/B continua a richiedere due partner e i rispettivi Lead; il test cancellazione richiede un partner e un Lead legacy libero.
-- Nessun progetto staging creato, nessuna migrazione applicata, nessun DB remoto modificato, nessun deploy, nessuna email o utente di test creato. Il progetto reale `nextway-platform` resta intatto.
-- `main` invariato; PR #1 resta aperta, draft e non mergeata. Nessun rebase o merge.
-- Prossimo passo: ottenere un ambiente staging isolato e le fixture sintetiche necessarie; soltanto lì eseguire il protocollo runtime. Fino ad allora, mantenere il ciclo Partner come implementato ma non collaudato end-to-end.
-
-- Chiarita nella fixture Partner la gestione dell'errore: il percorso riuscito termina con `ROLLBACK`; se un'asserzione fallisce, la transazione è abortita e occorre eseguire `ROLLBACK` prima di riutilizzare la sessione.
-- **CI riconfermato dopo la modifica della fixture:** run `43411999773`, commit `a88310dd5a2658f826f4fa8c9850073dccfdce05`, conclusione **success**. Test statici/contrattuali e type-check Deno completati.
-
-## 13 novembre 2026 — Preparazione staging e correzione Setter legacy
-
-- Preparazione staging avviata sul branch, senza creare un progetto remoto né collegarsi al database reale.
-- Inventario GitHub del branch: non è presente `supabase/config.toml`; le migrazioni versionate non ricostruiscono da sole tutte le tabelle core preesistenti (`profiles`, `nextway_leads`, `nextway_setter_conversations`, `nextway_setter_messages`, `partner_details`, `clients`). Serve una baseline schema-only completa e sanitizzata prima di una nuova installazione.
-- Individuato un difetto storico nella migrazione `20261110000700_nextway_clear_stale_staged_output.sql`: il trigger è installato sulla tabella legacy `nextway_setter_generation_requests` ma scrive `NEW.generated_output`, colonna non presente nella tabella legacy (che usa `response`). La tabella workspace separata creata da `20261112020000` contiene invece `generated_output`.
-- Preparata migrazione forward-only `20261113150000_nextway_setter_stale_output_trigger_workspace_fix.sql`: rimuove il trigger dalla tabella legacy e installa il reset `generated_output` sulla tabella workspace corretta. Le migrazioni storiche non sono state riscritte.
-- Aggiunto test statico `scripts/test-nextway-setter-stale-output-trigger.mjs`, integrato nel workflow CI.
-- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43412386590`, commit `12d05030ae772b2ab36ae259be6c3eb49d81741d`, SUCCESS; 44 step, nessun fallimento, nuovo test trigger superato. La CI non esegue la migrazione su PostgreSQL.
-- Creato `docs/NEXTWAY-STAGING-READINESS.md`, che elenca i blocchi residui e la sequenza sicura per lo staging.
-- Blocchi ancora aperti: (B1) preparare e revisionare `supabase/config.toml`; (B2) ottenere/creare una baseline schema-only core completa e sanitizzata; (B4) completare la riconciliazione delle migrazioni legacy Setter e verificarle su PostgreSQL pulito.
-- Nessun progetto staging creato, nessuna migrazione applicata, nessun deploy, nessun secret o chiave copiato, nessuna email/account di test creato. `nextway-platform` non modificato.
-- Mac Intel 8 GB: resta escluso l'avvio Supabase full stack locale per insufficienza di RAM.
-- `main` invariato; PR #1 resta aperta, draft e non mergeata; nessun deploy Netlify prima del 4 dicembre 2026.
-- Prossimo passo: completare revisione della catena migrazioni Setter e definire la baseline schema-only. Solo dopo, e con autorizzazione esplicita, creare il progetto staging separato.
-
-## 13 novembre 2026 — Precisazione audit migrazioni Setter
-
-- Approfondita la cronologia delle migrazioni legacy AI Setter: `20261110000200` crea la tabella con `user_id` e `response`; `20261110000500` aggiunge `generated_output`; il trigger in `20261110000700` era quindi coerente con lo schema legacy al momento della sua introduzione. La precedente descrizione che lo definiva incompatibile con la tabella legacy era imprecisa ed è stata corretta.
-- `20261111240000` usa `CREATE TABLE IF NOT EXISTS` sul nome della tabella legacy, ma su una catena pulita la tabella esiste già. La successiva `20261112020000` crea la tabella separata `nextway_setter_workspace_generation_requests` e ricollega le RPC correnti a essa.
-- La migrazione forward-only `20261113150000` è ora descritta correttamente come riallineamento post-separazione: disattiva il trigger legacy non più necessario al percorso RPC corrente e installa la protezione sulla tabella workspace. Non riscrive le migrazioni storiche.
-- Corretto `scripts/test-nextway-setter-stale-output-trigger.mjs`: ora verifica la sequenza reale legacy (aggiunta di `generated_output` in 00500) e la separazione workspace in 120200. La precedente asserzione che la tabella legacy non avesse mai `generated_output` era errata.
-- Il test statico va nuovamente eseguito in GitHub Actions; il precedente CI SUCCESS del test antecedente non certifica la versione corretta del contratto.
-- Nessuna migrazione applicata; nessun database o progetto staging creato o modificato.
-
-## 13 novembre 2026 — Configurazione e baseline staging preparate
-
-- Creato `supabase/config.toml` con project label locale `nextway-staging-prepared`, nessun remote/project ref, redirect localhost, signup e accesso anonimo disabilitati, Studio e Analytics disabilitati. Non contiene URL produzione o segreti. Non eseguire `supabase start` sul Mac Intel 8 GB.
-- Aggiunto `scripts/test-nextway-staging-config.py` e integrato nel workflow statico. Primo CI run `43413092105` fallito solo per un controllo troppo ampio che intercettava la stringa legittima `reset-password.html`; il controllo è stato ristretto a possibili assegnazioni di credenziali.
-- CI di retry `43413154410` (commit `488c97a8f9c8cadddc8eb358602f2c3a40bcd766`) in corso al momento dell'aggiornamento. Il parsing TOML e i controlli essenziali sono stati verificati separatamente con Python `tomllib`.
-- Creato `docs/NEXTWAY-STAGING-BASELINE-MANIFEST.md`: distingue tabelle core preesistenti dagli oggetti generati dalle migrazioni e definisce esclusioni assolute per dati/utenti/segreti.
-- Creata diagnostica read-only `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql`: controlla presenza di tabelle/colonne core e stato RLS interrogando solo cataloghi; non legge dati applicativi o righe Auth. Non eseguita.
-- Corretta la ricostruzione storica del trigger Setter: il trigger 007 era coerente con la tabella legacy dopo che la migrazione 005 aveva aggiunto `generated_output`; la migrazione 1315 lo riallinea dopo la separazione delle tabelle. Test statico corretto e CI `43412838823` SUCCESS.
-- Baseline SQL schema-only completa ancora da produrre e confrontare. Nessun progetto staging creato; nessuna migrazione applicata; nessun collegamento remote; nessun database reale modificato.
-
-## 13 novembre 2026 — Esito CI configurazione staging
-
-- Aggiornato `supabase/config.toml` per usare `[local_smtp]` con Mailpit sandbox, sezione corrente della CLI; non usare più `[inbucket]` nelle nuove configurazioni perché deprecata nelle versioni recenti.
-- Test `scripts/test-nextway-staging-config.py` aggiornato per verificare la sezione `local_smtp`, le porte SMTP e l'assenza di remotes/credenziali/URL produzione.
-- **COMPLETATO E VERIFICATO (statico/CI):** GitHub Actions run `43413398397`, commit `9288b3b0d5e93bb1e01592e8a86cda25a4e02978`, SUCCESS; 45 step, nessun fallimento, test staging config superato.
-- Parsing TOML e controlli essenziali verificati anche separatamente con Python `tomllib`.
-- La configurazione resta un file CLI locale: non crea un progetto cloud, non collega alcun remote e non è stata eseguita alcuna operazione Supabase. La documentazione CLI descrive `config.toml` come configurazione del progetto locale e `local_smtp` come server email locale di test; le email locali vengono intercettate e non inviate. Riferimento: https://supabase.com/docs/guides/local-development/cli/config
-- Preparata diagnostica `supabase/diagnostics/nextway_staging_baseline_preflight_readonly.sql` per verificare metadati e RLS della baseline core, senza leggere righe applicative. Non eseguita.
-- Restano aperti: baseline schema-only core completa, confronto con migrazioni, creazione progetto cloud staging (solo dopo autorizzazione esplicita), migrazioni PostgreSQL e test Auth/concorrenza.
-- Nessuna modifica a `nextway-platform`; nessun deploy, invito/email, account di test o migrazione applicata.
-
-## 13 novembre 2026 — Ricostruzione delta baseline core
-
-- Creata `docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md` per distinguere la DDL core originaria dalle modifiche già introdotte dalle migrazioni.
-- La mappa individua modifiche dirette su cinque tabelle core:
-  - `nextway_leads`: archiviazione logica, vincolo status, audit, workspace_id/FK/index e policy/trigger workspace;
-  - `nextway_setter_conversations`: workspace_id/FK/index e policy workspace;
-  - `nextway_knowledge_documents`: workspace_id/FK/index, indici di deduplicazione workspace/global e policy;
-  - `partner_details`: `nextway_conversion_request_id` con FK RESTRICT e unique index parziale (migrazione 110015);
-  - `clients`: `nextway_conversion_request_id` con FK RESTRICT e unique index parziale (migrazione 110015).
-- Nessun ALTER TABLE diretto individuato su `profiles` e `nextway_setter_messages`; le dipendenze funzionali vanno comunque preservate.
-- Aggiunto `scripts/test-nextway-core-baseline-delta.mjs`, che controlla la mappa contro tutte le migrazioni versionate. Integrato nel workflow CI.
-- Primo CI run `43413932182` fallito perché il test non includeva le aggiunte conversion request a `partner_details` e `clients`; la mappa e il test sono stati corretti. Run `43414160598` avviato sul commit `3faa66e517f0caf40988ebb581545c72355be5ce`, in corso al momento dell'annotazione.
-- **Blocco residuo reale:** il repository non contiene la DDL originaria completa pre-migrazioni. Il dump noto `/tmp/nextway-public-schema.sql` è uno snapshot dello schema corrente e contiene già modifiche versionate; non è sicuro trasformarlo automaticamente in baseline con sostituzioni testuali. Nessuna baseline SQL eseguibile è stata inventata.
-- Nessuna operazione DB eseguita; nessuna migrazione applicata; staging non creato; progetto reale invariato.
-
-- Esito successivo: CI run `43414160598` sul commit `3faa66e517f0caf40988ebb581545c72355be5ce` **SUCCESS**, 46 step, zero fallimenti; il test `Validate NEXTWAY core baseline migration deltas` è SUCCESS. Gli aggiornamenti successivi sono documentazione soltanto.
-
-- Ricerca storico Git: il repository nasce il 5 novembre 2026 con commit root `ee6e6ab707a1af658b05d999643c89f08ee9480a`, contenente solo la migrazione `20261105000100_nextway_ai_assistant_foundation.sql` (tabelle `nw_*`, dichiarata additiva e senza ALTER delle tabelle esistenti). Nessuna DDL pre-migrazioni per il core NEXTWAY è conservata nella cronologia Git esaminata. L'assenza nel repository non prova l'assenza di backup esterni o locali.
-
-
-## 13 novembre 2026 — Inventario oggetti baseline/migrazioni
-
-- Letti staticamente i file SQL delle migrazioni del branch e creato `docs/NEXTWAY-BASELINE-OBJECT-DELTA-INVENTORY.md`.
-- Il nuovo inventario distingue: tabelle core alterate; tabelle create e poi estese dalle migrazioni; funzioni con catene `CREATE OR REPLACE`; trigger Setter; policy RLS; grant; dipendenze managed `auth` e `storage`.
-- Confermate le modifiche a `partner_details` e `clients` introdotte da `20261111001500`; la precedente classificazione che le collocava anche tra le tabelle senza ALTER era contraddittoria ed è stata corretta nella mappa.
-- Identificate come core alterate direttamente: `nextway_leads`, `nextway_setter_conversations`, `partner_details`, `clients`; `nextway_setter_messages` non ha aggiunte di colonne individuate ma riceve modifiche a policy/privilegi. Le tabelle NEXTWAY create dalle migrazioni sono classificate separatamente.
-- **Limite operativo:** il dump `/tmp/nextway-public-schema.sql` risiede sul Mac dell'utente e non è accessibile dal workspace GitHub di questa sessione. Non sono stati quindi confrontati i blocchi DDL reali né ricostruiti i corpi originari di funzioni/policy/ACL. Nessun file SQL eseguibile è stato generato per supposizione.
-- Stato: inventario migrazioni **COMPLETATO staticamente**; confronto dump-oggetti **DA COMPLETARE**; baseline SQL **NON PRODOTTA**; nessuna operazione DB, deploy o merge.
-
-
-## 13 novembre 2026 — Preparazione estrazione DDL core dal dump locale
-
-- Creato `scripts/extract-nextway-core-ddl.py` sul branch `fix/nextway-password-recovery`.
-- Lo script legge il dump testuale locale `/tmp/nextway-public-schema.sql` e genera `/tmp/nextway-core-ddl-extract.sql`; non si collega a Supabase, non esegue SQL e non modifica il dump originale.
-- Il filtro include le definizioni DDL riferite alle tabelle core selezionate, i relativi vincoli/indici/policy/trigger/ACL e un elenco ristretto di funzioni centrali. È stata aggiunta un’esclusione esplicita delle sezioni `TABLE DATA` e delle istruzioni `COPY`.
-- Aggiunta la guida operativa `docs/NEXTWAY-CORE-DDL-EXTRACTION.md` con un comando breve da eseguire sul Mac. Nessun dump o dato è stato trasferito in GitHub.
-- Il dump locale non è accessibile da questa sessione: l’estrazione effettiva e il confronto delle definizioni restano **DA COMPLETARE** sul Mac.
-- PR #1 controllata: aperta, draft, base `main`, non mergeata. HEAD branch osservato: `f9c01ea282db1e5d633e4af91e599f3a23019bb2`.
-- Nessuna migrazione applicata, nessuna modifica al database Supabase, nessun deploy, nessuna modifica a `main`.
+### Repository, branch main e fonti effettivamente verificate
+
+- Recuperato questo MASTER da GitHub `main` prima della modifica: blob SHA di partenza `37ac329668ea642e9738854db7893d71694069f5`; documento di 2892 righe. L'aggiornamento viene aggiunto in coda senza riscrivere le registrazioni precedenti.
+- HEAD di `main` verificato tramite endpoint branch: `1686fd5ec7014479e1a88dc8a614aba0005d8a90`, commit del 14-11-2026 18:25:07 UTC, messaggio `docs(nextway): update MASTER continuity for 14 Nov 19:23`. Il diff di questo commit modifica esclusivamente `MASTER_NEXTWAY.md`. Non risultano nuovi commit su `main` dopo tale aggiornamento documentale.
+- I commit recenti consultati confermano la sequenza documentale su `main` (1686fd5, d8b900c, 7bb8883 e precedenti). Le modifiche applicative più recenti osservate sono su branch di pull request, non sul branch principale.
+- Il workflow su `main` `.github/workflows/nextway-static-validation.yml` è stato recuperato (blob SHA `07380290955939d265a739fe6ebb2f9cfb766eae`). Il workflow attiva validazioni su push a main e pull request in base ai percorsi dichiarati. Il branch PR #3 propone un'estensione dei percorsi e dei test per il motore prospect.
+- L'endpoint Actions filtrato per `branch=main,event=push` restituisce come ultima run push su main la #251, ID `43175706330`, SUCCESS sul commit `b2ce72e4212f41334bbbcb542722c380bad29b08`, creata il 12-11-2026. Non risultano run push più recenti su main nell'elenco restituito. Le run #798 e #799 descritte sotto sono eventi pull_request, non validazioni del branch main.
+- Il connettore GitHub ha consentito di leggere file, branch, commit, confronti, pull request, workflow, job e log. Non è disponibile un connettore Supabase o Netlify in questa sessione; non è stato effettuato accesso diretto ai rispettivi servizi. Sono state usate le informazioni della conversazione corrente e le registrazioni già presenti nel MASTER; non si presume accesso a tutte le chat storiche.
+
+### Pull request aperte e relazioni tra branch
+
+Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono metadati GitHub al momento della lettura.
+
+**PR #1 — NEXTWAY: verifica integrazione AI Setter governance**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/1
+- OPEN, DRAFT, non merged; base `main`, head `fix/nextway-password-recovery`.
+- Head `f76044111ae2ecd8c45d23dd8dfdb4c2660c8154`; base SHA ancora indicato dalla PR `a3fbec076221f0f043d60373e2864d7d07db30d7`, quindi non coincide con l'attuale HEAD main `1686fd5`.
+- Metadati PR: 727 commit, 87 file modificati, 12.159 aggiunte e 109 cancellazioni. Il confronto aggiornato `main...fix/nextway-password-recovery` è DIVERGED: 727 commit ahead, 9 behind; GitHub indica `mergeable=false`.
+- Rimane il rischio documentale già segnalato: il diff della PR include una versione di `MASTER_NEXTWAY.md` che potrebbe sovrascrivere registrazioni successive su main. Nessun merge o riallineamento è stato eseguito.
+
+**PR #2 — Fix NEXTWAY manual review RPC flag scope**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/2
+- OPEN, non draft, non merged; base `fix/nextway-password-recovery` (head PR #1), head `fix/nextway-manual-review-rpc-scope`.
+- Head `7451f22b4d04359d4a28f7230a61136fbc971b07`; 28 commit, 7 file modificati, 331 aggiunte e 7 cancellazioni. Il confronto con il branch base restituisce 28 ahead e 0 behind; GitHub indica mergeable=true rispetto a quel base branch, non rispetto a main.
+- La proposta riguarda la correzione del perimetro del flag transazionale della RPC di revisione manuale Lead, con relativo test SQL statico. La migrazione resta candidata nel branch PR e non è prova di applicazione sul database live.
+
+**PR #3 — NEXTWAY: migliora qualità e verifica temporale dei prospect**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/3
+- OPEN, DRAFT, non merged; base `fix/nextway-manual-review-rpc-scope` (head PR #2), head `feat/nextway-prospect-search-accuracy`.
+- Head `786b5e26d3f15696df815ebf03163c6dea9646a5`; 68 commit, 16 file modificati, 711 aggiunte e 37 cancellazioni. Il confronto con il base branch restituisce 68 ahead e 0 behind; mergeable=true rispetto al base branch indicato, non rispetto a main.
+- File modificati/aggiunti nel confronto: `nextway-motore-ricerca.html`, `nextway-cloud.js`, `nextway-ai.html`, workflow static validation, test di sincronizzazione Lead e numerosi nuovi test per pipeline, classificazione, contattabilità, deduplicazione, dimensioni di valutazione, provenienza dei campi, copertura ricerca e limiti risultati.
+- La descrizione PR dichiara: limite unificato di 10 risultati; copertura di 9 segmenti con query italiane e inglesi; distinzione tra menzioni e interesse esplicito; verifica manuale in caso di segnali temporali discordanti; valutazioni separate di attendibilità fonte, attualità, pertinenza e opportunità; deduplicazione prudente che non fonde record sul solo nome; contattabilità basata su evidenze senza presumere consenso; tracciabilità della provenienza dei campi professionali e località.
+- La descrizione PR dichiara inoltre un flusso Ricerca → CRM in cui il risultato resta `research_result` locale finché l'operatore non assegna una categoria valida; la sincronizzazione avviene come Lead `Da approfondire`, senza qualificazione automatica. La qualificazione cloud è descritta in due fasi: prima salvataggio non qualificato, poi RPC `nextway_confirm_lead_manual_review`; identità confermata, punteggio minimo 50 e conferma manuale sono richiesti. Se la RPC fallisce, il cloud resta non qualificato. Queste sono descrizioni della proposta e dei test del branch, non verifiche runtime.
+- La PR dichiara che non sono state eseguite ricerche web prospect, non sono stati consumati crediti Tavily e non sono stati modificati dati CRM reali; non è stato eseguito un controllo diretto dei consumi o dei servizi esterni in questa sessione.
+
+**PR #4 — Fix AI Setter retry after prospect creation**
+- URL: https://github.com/servellodm-a11y/misura-test-benessere/pull/4
+- OPEN, DRAFT, non merged; base `main`, head `fix/nextway-setter-retry-validation`.
+- Head `cbcad32999be1d74d52fd2c21fdce9267f68d6b0`; 1 commit, 1 file modificato (`nextway-setter.js`), 19 aggiunte e 0 cancellazioni. Il confronto con main restituisce 1 ahead e 0 behind; GitHub indica mergeable=true, ma la PR è ancora draft.
+- File recuperato sul branch PR: blob SHA `33895c175cc4a3690307283f2fd395f4e184092d`. La modifica imposta `form.noValidate = true` durante il submit, sposta la validazione manuale dei campi obbligatori nel percorso di creazione di un nuovo prospect e fa precedere il retry al controllo dei campi che `form.reset()` può avere svuotato. Il ramo retry riutilizza l'ID conversazione e la chiave idempotenza pendenti; pulisce i riferimenti pending solo dopo generazione riuscita.
+- La PR non aggiunge un file di test dedicato: il confronto mostra soltanto `nextway-setter.js`. La CI generale superata non costituisce da sola una prova specifica end-to-end del retry AI Setter.
+
+### GitHub Actions — risultati e log esaminati
+
+- **PR #4, run #799**, ID `43732767922`, URL https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43732767922: SUCCESS sul commit `cbcad32999be`. Job `validate` concluso SUCCESS; 32 step riportati, tutti SUCCESS. Sono passati validatore audit, contratti di sicurezza provisioning/Edge Functions, rate limit e idempotenza SQL, contratti Knowledge Base/Upload/Ingest, workspace, script browser e cinque type-check Deno. Nessuno step del workflow ha un nome che dimostri un test specifico del nuovo retry.
+- **PR #3, run #798**, ID `43716121072`, URL https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/43716121072: SUCCESS sul commit `786b5e26d3f1`. Job `validate` concluso SUCCESS; 58 step riportati, tutti SUCCESS. Tra gli step superati: test di classificazione, copertura segmenti, dimensioni di valutazione, deduplicazione prudente, contattabilità, provenienza campi, pipeline di acquisizione con mock, controlli browser e type-check delle Edge Functions, inclusa `nextway-search`.
+- La run PR #3 #797, ID `43716080830`, è SUCCESS sul commit `9eee6c60c9cb`; la #796, ID `43715420348`, è SUCCESS sul commit `cd7678b285fa`.
+- **Failure intermedia PR #3, run #795**, ID `43715122609`, commit `66c485d90348`: il job fallisce allo step `Validate NEXTWAY Lead sync duplicate reconciliation contract`. Il log mostra una `SyntaxError: Invalid or unexpected token` in `scripts/test-nextway-lead-sync-contract.mjs`, riga 70, nella regex/asserzione con un'interruzione di riga non valida. Il commit successivo `cd7678b` è intitolato `Fix CRM sync contract test line break` e la run #796 sul relativo commit risulta SUCCESS. La correzione osservata riguarda la sintassi del test; non va descritta come correzione di un difetto runtime CRM.
+- I log #798 e #799 riportano avvisi non bloccanti relativi alla deprecazione del modulo Node `punycode` e all'esecuzione di alcune GitHub Actions che usano Node.js 20. Le run sono comunque SUCCESS.
+- **Main:** ultima run push osservata #251 SUCCESS del 12-11-2026 sul commit `b2ce72e`. Le run PR #798/#799 non validano il branch main e non provano l'applicazione di migrazioni o il comportamento runtime Supabase.
+
+### Supabase, CRM e Netlify — stato invariato, nessuna nuova lettura live
+
+- Nessuna interrogazione diretta Supabase è stata eseguita: il connettore non è disponibile. Resta valido l'ultimo JSON fornito dall'utente e già registrato: `public.nextway_leads` presente con RLS attivo, FORCE RLS non attivo e quattro policy proprietario/`platform_admin`; `nextway_lead_activities` e `nextway_lead_conversion_requests` assenti al momento della query.
+- Non è stato ricevuto un nuovo risultato di esecuzione per `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql`. Colonne archive, vincoli di stato, tabella idempotenza e firme RPC live restano DA COMPLETARE. Non dedurre lo stato delle migrazioni dallo storico non disponibile né dalla sola presenza dei file nel repository.
+- Nessuna modifica a Supabase, account Auth, record CRM, Storage, RPC, Edge Functions deployate o configurazioni.
+- Nessuna lettura diretta Netlify: stato dei deploy live non verificato. Le PR e i workflow letti non dimostrano un deploy in produzione.
+
+### Matrice di stato al 15 novembre 2026
+
+- MASTER su main, lettura pre-modifica e verifica post-salvataggio: **COMPLETATO E VERIFICATO** per questa operazione documentale.
+- HEAD main e diff del commit precedente: **COMPLETATO E VERIFICATO**; nessuna modifica applicativa successiva osservata su main.
+- PR #1: **BLOCCATO** per divergenza 727 ahead/9 behind, base SHA non allineato all'attuale main, `mergeable=false` e rischio di sovrascrittura del MASTER.
+- PR #2: **COMPLETATO E VERIFICATO** quanto a metadati, file e CI statica #715 già documentata nella sezione del 14 novembre; **DA COMPLETARE** per la verifica runtime PostgreSQL e l'integrazione controllata nella catena PR. Resta aperta e non integrata in main.
+- PR #3: **COMPLETATO E VERIFICATO** quanto a file, metadati e CI statica #798; **DA COMPLETARE** per revisione funzionale, test runtime, integrazione controllata nella catena PR e verifica live.
+- PR #4: **COMPLETATO E VERIFICATO** quanto al diff e alla CI generale #799; **DA COMPLETARE** per un test di regressione specifico del retry e prova browser/runtime; PR ancora draft e non integrata.
+- CI statica PR #3 (#798) e PR #4 (#799): **COMPLETATO E VERIFICATO** per gli step effettivamente eseguiti; non equivale a test runtime o deploy.
+- CRM live: **COMPLETATO E VERIFICATO** solo per il risultato JSON utente già acquisito; diagnostica prerequisiti e tabelle correlate restano **DA COMPLETARE**.
+- Applicazione migrazioni CRM, test PostgreSQL/Auth/concorrenza, backup/restore verificato, staging e deploy Edge Functions/Netlify: **DA COMPLETARE/BLOCCATO** secondo i gate precedenti.
+- Nessun codice applicativo, database, impostazione, segreto, configurazione o deploy è stato modificato in questa attività.
+
+### Prossimi passi operativi precisi
+
+1. Eseguire in Supabase la diagnostica read-only `supabase/diagnostics/nextway_crm_prerequisites_readonly.sql` e acquisire il JSON completo; non applicare ancora migrazioni.
+2. Per PR #4 aggiungere un test di regressione mirato al caso retry dopo `form.reset()`, dimostrando che l'ID conversazione e la chiave idempotenza sono riutilizzati e che i riferimenti pending non vengono cancellati prima della generazione riuscita.
+3. Per PR #3 mantenere obbligatoria la revisione umana; verificare in staging il flusso Ricerca → classificazione → sincronizzazione Lead e la gestione dei conflitti/deduplicazione prima di qualsiasi uso con dati reali.
+4. Prima di un merge della catena PR #1/#2/#3, riallineare i branch in modo controllato e riconciliare `MASTER_NEXTWAY.md`; non integrare la versione documentale obsoleta presente nel diff PR #1.
+5. Mantenere backup/restore verificato e staging isolato come gate per ogni modifica Supabase o deploy.
+
+### Registro cronologico del MASTER
+
+- 15-11-2026, 19:14 Europe/Rome — verificati HEAD main `1686fd5`, workflow principale e ultima run push main #251; aggiornati metadati e confronti delle PR #1–#4; esaminati i file modificati delle PR #3/#4, le run e i log #795–#799, inclusa la causa della failure sintattica del test Lead sync e il successivo passaggio; registrate le nuove funzionalità di ricerca prospect e la correzione del retry AI Setter distinguendo descrizioni PR, controlli statici e assenza di prove runtime. Modificato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
+
+---
+
+## CONTROLLO DI CONTINUITÀ — 16 NOVEMBRE 2026, ORE 19:15 (Europe/Rome)
+
+### Repository e fonti verificate
+
+- Recuperato il MASTER da main immediatamente prima dell'aggiornamento: blob SHA iniziale 7be31e49d5fac678b7db7556a1f23f11abdfe517; documento di 2980 righe. L'aggiornamento viene aggiunto in coda, senza riscrivere le sezioni precedenti.
+- HEAD del branch main: 658e5b75face0feeb3ebab6f360fb8afefa70d5a. Il commit è documentale e il relativo diff GitHub contiene esclusivamente MASTER_NEXTWAY.md. Non sono state osservate nuove modifiche applicative su main dopo la baseline applicativa già registrata.
+- Il workflow principale .github/workflows/nextway-static-validation.yml su main è stato recuperato (blob SHA 07380290955939d265a739fe6ebb2f9cfb766eae, 133 righe). Le estensioni per la memoria centrale e la configurazione commerciale risultano nei branch PR #12–#14, non ancora in main.
+- Il branch endpoint riporta main.protected=false. La lettura dettagliata dell'endpoint branch-protection ha restituito HTTP 403 “Resource not accessible by integration”; pertanto non è stato possibile verificare regole dettagliate o eventuali ruleset a livello repository. Non dedurre da questo solo risultato l'assenza di ogni regola applicabile.
+- Il repository è accessibile tramite il connettore GitHub con permessi di lettura e scrittura. In questa sessione non sono disponibili connettori Supabase o Netlify: non è stato effettuato accesso diretto ai database, ai segreti, alle Edge Functions deployate o ai deploy Netlify. Sono state usate le informazioni della conversazione corrente e le registrazioni già presenti nel MASTER; non si presume accesso a tutte le chat storiche.
+
+### Stato GitHub e pull request
+
+- La lettura della raccolta delle PR aperte ha restituito 14 pull request aperte (#1–#14); tutte risultano draft tranne la PR #2. Nessuna delle PR #11–#14 risulta merged.
+- PR #1 resta OPEN/DRAFT, non merged e mergeable=false. Il confronto aggiornato con main è DIVERGED: 727 commit ahead e 11 behind. Non è stata eseguita alcuna operazione di riallineamento o merge.
+- PR #11 — Add persistent prospect identity memory and query cache: OPEN/DRAFT, non merged, mergeable=false; base fix/nextway-prospect-partial-results-feedback, head feat/nextway-prospect-identity-memory; 10 commit, 3 file, 96 aggiunte e 11 cancellazioni. Propone memoria identità locale account-scoped fino a 500 identità e cache locale delle query riuscite fino a 20 query per 7 giorni. La descrizione PR precisa che la cache evita la chiamata Tavily per query identiche ancora valide, mentre query differenti possono comunque consumare unità prima della deduplicazione dei risultati. Non è una memoria cloud condivisa.
+- PR #12 — Add workspace-scoped central prospect identity archive and query cache: OPEN/DRAFT, non merged; base PR #11, head feat/nextway-prospect-identity-memory-sql; 32 commit, 6 file, 509 aggiunte e 2 cancellazioni; GitHub indica mergeable=true rispetto al base branch della PR, non rispetto a main. Aggiunge la migrazione candidata 20261116100000_nextway_prospect_identity_memory.sql, documentazione e contratti statici. La migrazione prepara nextway_prospect_identity_archive e nextway_search_query_cache, entrambe workspace-scoped e con RLS. Le impronte identità sono hash SHA-256; i dati di evidenza e gli eventuali recapiti professionali pubblici sono campi distinti. La cache è indicizzata per workspace, impronta query, segmento, mercato e provider, con massimo 10 risultati e TTL massimo di 7 giorni. Gli utenti autenticati hanno lettura controllata, non scrittura diretta; la persistenza cache è riservata a RPC server-side con ruolo service_role. Nessun backfill, seed o import di Lead è previsto dalla migrazione.
+- PR #13 — Connect NEXTWAY search to central prospect memory and query cache: OPEN/DRAFT, non merged; base PR #12, head feat/nextway-central-prospect-memory-integration; 196 commit, 9 file, 1.452 aggiunte e 191 cancellazioni; mergeable=true rispetto al base branch PR #12. Aggiunge 20261116120000_nextway_prospect_identity_memory_rpcs.sql e 20261116130000_nextway_list_accessible_workspaces.sql, modifica supabase/functions/nextway-search/index.ts e l'interfaccia del motore. Le RPC candidate includono nextway_lookup_prospect_crm_matches, nextway_merge_prospect_identity, nextway_check_prospect_memory_ready e nextway_list_accessible_workspaces. La ricerca cloud proposta verifica workspace e membership, controlla corrispondenze CRM, consulta la cache prima della chiamata al provider e usa scritture server-side protette per cache e merge identità. La migrazione di lookup CRM richiede esplicitamente le colonne workspace_id e source_url in public.nextway_leads, oltre agli helper di autorizzazione workspace: questi prerequisiti non sono ancora stati verificati sul database live in questa sessione.
+- PR #14 — Load commercial configuration from each NEXTWAY workspace: OPEN/DRAFT, non merged; base PR #13, head feat/nextway-workspace-commercial-config; 37 commit, 14 file, 1.195 aggiunte e 32 cancellazioni; mergeable=true rispetto al base branch PR #13. Aggiunge 20261116140000_nextway_workspace_commercial_config.sql, nextway-workspace-commercial-config.js, docs/companies/zinzino/workspace-commercial-settings.json, documentazione e test; modifica nextway-admin.html/js, nextway-motore-ricerca.html e nextway-search/index.ts. La RPC candidata nextway_get_workspace_commercial_config(uuid) legge solo settings.commercial di un workspace attivo e richiede autenticazione e ruolo/membership ammessi; la normalizzazione browser blocca configurazioni mancanti o incomplete, senza fallback silenzioso a un altro brand. L'interfaccia admin propone un controllo di readiness e la gestione esplicita della configurazione, non una modifica già eseguita sul database.
+- Il confronto del branch head PR #14 feat/nextway-workspace-commercial-config con main è DIVERGED: 1.110 commit ahead e 11 behind. GitHub indica mergeable rispetto al base PR #13, non rispetto a main. Nel confronto con main compare anche una versione di MASTER_NEXTWAY.md con 1.063 righe aggiunte: permane il rischio di sovrascrivere la cronologia documentale se la catena viene integrata senza riconciliazione.
+- PR #11–#14 costituiscono una catena dipendente (#11 → #12 → #13 → #14). Non vanno considerate quattro modifiche indipendenti né integrate fuori ordine. Nessun merge, update branch o modifica ai branch è stato eseguito in questa attività.
+
+### GitHub Actions — run e log esaminati
+
+- PR #12, run #896, ID 43833879826, commit ccb4608878043130894c6b96d4a6741322302799: SUCCESS; job validate, 61 step completati, nessuno fallito. Il log riporta 14 controlli per memoria identità/cache e il contratto SQL/RLS della migrazione. Il test d'integrazione centrale in questa fase dichiara esplicitamente il rinvio alla PR dipendente #13.
+- PR #13, run #940, ID 43920704576, commit d1c4f0cd710482db97c49ce71bd2f062a5a29115: SUCCESS; job validate, 61 step completati, nessuno fallito. Il log conferma il passaggio del contratto d'integrazione memoria centrale/duplicati CRM e il type-check Deno della Edge Function di ricerca.
+- PR #14, run #941, ID 43920798322, commit 9e1a5a9ea348daca7174c12607130eb10768f342: SUCCESS; job validate, 62 step completati, nessuno fallito. Il log riporta NEXTWAY workspace commercial config: 25+ contract assertions passed, i contratti memoria centrale e il type-check della Edge Function di ricerca.
+- Le tre run sono controlli CI sui rispettivi branch PR: test statici/di contratto, script locali e type-check. Non dimostrano applicazione delle migrazioni, RLS effettivo sul database live, funzionamento runtime con utenti/workspace reali, chiamate Tavily/OpenAI o deploy.
+- I log riportano ancora avvisi non bloccanti: deprecazione del modulo Node punycode e avviso di deprecazione del runtime Node.js 20 per alcune GitHub Actions. Le run sono comunque SUCCESS.
+- L'ultima run push su main restituita dalla raccolta Actions è ancora la #251, ID 43175706330, SUCCESS sul commit b2ce72e4212f41334bbbcb542722c380bad29b08, del 12-11-2026. Le run #896/#940/#941 sono eventi PR e non aggiornano la validazione del branch principale.
+
+### Configurazione commerciale Zinzino — proposta su PR #14
+
+- Il file docs/companies/zinzino/workspace-commercial-settings.json è stato recuperato dal branch PR #14 e analizzato: schema versione 1, 9 segmenti, 45 query italiane e 45 query inglesi. La configurazione include termini del brand, canali di approfondimento e regole di conformità.
+- I cinque gruppi di materiali ufficiali (catalogo prodotti, piano compensi, formazione prodotto, linee guida compliance e presentazione brand) risultano tutti marcati da_caricare. Il modello vieta di inventare prezzi, commissioni, qualifiche, risultati o claim medici e distingue il sito generale dal sito replica personale Zinzino.
+- Il JSON è un modello/seed documentale nel branch PR: non prova che esista un workspace Zinzino configurato su Supabase, che il seed sia stato caricato o che la RPC sia stata applicata. Nessun workspace, membership o setting è stato creato/modificato.
+
+### Supabase e stato CRM — fatti live forniti dall'utente e limiti
+
+- Ultimo risultato live fornito dall'utente nella conversazione del 16-11-2026: public.nextway_leads esiste, RLS è attivo, FORCE RLS è false e sono presenti quattro policy SELECT/INSERT/UPDATE/DELETE per proprietario o platform_admin. Nello stesso risultato nextway_lead_activities e nextway_lead_conversion_requests risultano assenti.
+- La diagnostica supabase/diagnostics/nextway_crm_prerequisites_readonly.sql non ha ancora un risultato di esecuzione comunicato in questa sessione. Colonne archive, vincoli degli stati, tabella idempotenza, firme RPC e in particolare nextway_leads.workspace_id/source_url restano da verificare sul live.
+- Il riferimento precedente a supabase_migrations.schema_migrations ha generato l'errore PostgreSQL 42P01; la diagnostica CRM live è stata corretta per non dipendere da quella relazione assente. Non usare l'assenza della tabella di storico come prova che una migrazione sia o non sia stata applicata.
+- Le migrazioni 20261116100000, 20261116120000, 20261116130000 e 20261116140000 sono candidate presenti nei branch PR #12–#14. Non sono state applicate in questa attività e non esiste una verifica live della loro applicazione.
+- La Edge Function nextway-search modificata nelle PR #13/#14 non è stata deployata da questa sessione. La presenza e la corretta configurazione dei segreti server richiesti dal codice candidato non sono state verificate; nessun valore segreto è stato letto o riportato.
+- Nessun accesso diretto a Supabase o Netlify è disponibile tramite i connettori di questa sessione. Lo stato dei deploy, delle variabili ambiente e dei dati operativi rimane non verificato.
+
+### Matrice di stato al 16 novembre 2026
+
+- HEAD main, commit documentale e recupero pre/post modifica del MASTER: COMPLETATO E VERIFICATO.
+- Ultima run push main #251: COMPLETATO E VERIFICATO per il risultato CI registrato; è una run del 12 novembre e non copre le nuove PR.
+- PR #11 memoria locale: ESEGUITO MA NON VERIFICATO a livello runtime; PR aperta draft e mergeable=false.
+- PR #12 schema memoria centrale/cache e contratti CI #896: COMPLETATO E VERIFICATO per i controlli statici; DA COMPLETARE per revisione SQL/runtime e applicazione autorizzata.
+- PR #13 RPC/Edge Function/lookup CRM e CI #940: COMPLETATO E VERIFICATO per i controlli statici/type-check; DA COMPLETARE per verifica dei prerequisiti live, test PostgreSQL/RLS multi-workspace e deploy controllato.
+- PR #14 configurazione commerciale workspace e CI #941: COMPLETATO E VERIFICATO per i contratti statici; DA COMPLETARE per revisione runtime, verifica membership, caricamento documenti ufficiali e configurazione effettiva di un workspace.
+- Catena PR #11–#14 verso main: BLOCCATO fino a riallineamento controllato, revisione delle dipendenze, risoluzione della divergenza e riconciliazione del MASTER.
+- Diagnostica CRM prerequisiti Supabase: DA COMPLETARE; nessun risultato live ricevuto.
+- Applicazione migrazioni, test runtime PostgreSQL/RLS, backup/restore verificato, staging e deploy: DA COMPLETARE/BLOCCATO secondo i gate già registrati.
+- Nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy è stata effettuata in questa attività.
+
+### Prossimi passi operativi precisi
+
+1. Eseguire in Supabase SQL Editor supabase/diagnostics/nextway_crm_prerequisites_readonly.sql e acquisire il JSON completo. In particolare verificare che nextway_leads.workspace_id e source_url esistano prima di considerare applicabile la migrazione di lookup CRM della PR #13.
+2. Revisionare nell'ordine le migrazioni candidate #12 → #13 → #14 e le relative RPC/policy, usando la baseline reale del database; non applicare le migrazioni finché i prerequisiti non sono confermati e il test PostgreSQL isolato non è disponibile.
+3. Mantenere la catena PR #11 → #12 → #13 → #14 separata da main; prima di qualunque merge, aggiornare i branch in modo controllato e riconciliare il MASTER, che compare nel diff della catena con una versione più vecchia.
+4. Prima di attivare la configurazione Zinzino, caricare e versionare i materiali ufficiali Italia mancanti; mantenere disabilitata ogni inferenza di prezzi, compensi, claim o caratteristiche non documentate.
+5. Aggiungere/mantenere test runtime per isolamento tra workspace, viewer/member/manager/admin, duplicati CRM, concorrenza del merge e cache scaduta; i test CI attuali sono statici/contrattuali e non sostituiscono tali prove.
+
+### Registro cronologico del MASTER
+
+- 16-11-2026, 19:15 Europe/Rome — recuperato il MASTER da main con blob SHA iniziale 7be31e49d5fac678b7db7556a1f23f11abdfe517; verificati HEAD main 658e5b7 e diff del commit documentale; esaminati PR aperte #1–#14, confronti main/branch, file e migrazioni delle PR #12–#14, configurazione commerciale Zinzino, workflow e log GitHub Actions #896/#940/#941. Registrati i nuovi livelli di memoria prospect workspace-scoped, le RPC di integrazione/lookup CRM, il caricamento della configurazione commerciale per workspace e i limiti delle verifiche statiche rispetto al runtime. Aggiornato lo stato dei prerequisiti live, delle dipendenze PR e dei rischi di merge del MASTER. Modificato esclusivamente MASTER_NEXTWAY.md; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
+
+---
+
+## 17 novembre 2026 — Riconciliazione catena prospect e configurazione commerciale
+
+### Stato GitHub e integrazione
+- La catena autorizzata PR #9 → #11 → #12 → #13 → #14 è stata integrata in sequenza nei rispettivi branch dipendenti. PR #10 resta aperta in bozza ed è esclusa.
+- Il branch cumulativo `feat/nextway-central-prospect-memory-integration` contiene anche la correzione completa PR14 del collegamento CRM → memoria centrale, commit `2c920cc21559b00c587fb1e3da80fde689b10a63`.
+- La CI statica sul commit correttivo è risultata SUCCESS; sono stati ripristinati i file della patch PR14 che in precedenza erano incompleti.
+- Il confronto con `main` ha evidenziato una divergenza storica: il branch contiene 118 file modificati rispetto alla base comune; `main` ha aggiornato anche questo MASTER. Non effettuare merge diretto o forzato.
+- Per la riconciliazione è stata aperta PR #15 in bozza verso `main`: https://github.com/servellodm-a11y/misura-test-benessere/pull/15. Nessun merge su `main` è stato eseguito.
+- Il MASTER viene riallineato alla versione corrente di `main`, conservando la cronologia canonica più recente e aggiungendo questo aggiornamento operativo; la versione storica più vecchia del branch non deve sovrascrivere gli aggiornamenti di `main`.
+
+### Database e Edge Function — fatti confermati dall'utente
+- Il 17 novembre l'utente ha eseguito con successo, in ordine, le cinque migrazioni: `20261116100000_nextway_prospect_identity_memory.sql`, `20261116120000_nextway_prospect_identity_memory_rpcs.sql`, `20261116130000_nextway_list_accessible_workspaces.sql`, `20261116140000_nextway_workspace_commercial_config.sql` e `20261116150000_nextway_confirm_prospect_crm_acquisition.sql`. Ogni esecuzione ha restituito `Success. No rows returned`.
+- La Edge Function `nextway-search` è stata pubblicata con successo sul progetto Supabase `obqwbtlltxjfeirstsya`; script bundle 77 kB. Non è stato effettuato deploy Netlify.
+- Test locali eseguiti sul branch cumulativo: conferma acquisizione CRM 11 asserzioni; semantica stato acquisizione 9; acquisizione workspace/CRM 9; configurazione aziendale PASS; persistenza storico ricerche PASS; `node --check nextway-cloud.js` e `git diff --check` senza errori.
+- Questi test sono statici/contrattuali: non equivalgono a una prova end-to-end della ricerca con provider esterno o di un flusso CRM con dati reali.
+
+### Stato operativo e vincoli
+- Database e Edge Function per la catena prospect: COMPLETATI secondo gli esiti comunicati dall'utente.
+- Test locali contrattuali della catena CRM/acquisizione/configurazione: COMPLETATI E SUPERATI.
+- PR #15 verso `main`: APERTA IN BOZZA; riconciliazione e merge restano da completare dopo risoluzione della divergenza e verifica CI.
+- Ricerca end-to-end: DA TESTARE in ambiente controllato senza consumo di crediti a pagamento e senza utenti/conversioni reali.
+- Configurazione effettiva del workspace Zinzino, creazione/attivazione workspace e caricamento dei materiali ufficiali: da confermare separatamente; non dedurre che il seed sia già stato scritto su Supabase.
+- Il deploy Netlify in produzione resta sospeso fino al 4 dicembre 2026. Nessun test con utenti o conversioni reali prima di tale data. Nessun provider a pagamento o credito Tavily deve essere attivato senza autorizzazione esplicita.
+- Backup locale PR14 conservato nello stash Git `NEXTWAY backup locale PR14 prima deploy`; non eliminarlo né applicarlo finché non è stato verificato che la copia remota riconciliata sia completa.
