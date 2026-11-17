@@ -3363,3 +3363,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La pagina Partner italiana continua a collegare un PDF italiano distinto. La versione EU 2025 non prova che le condizioni siano quelle vigenti in Italia nel 2026.
 - `commercial-base.v1.json` registra il riferimento EU 2025 ma mantiene `calculations_enabled=false` e `rules=[]`. Nessuna commissione, qualifica o proiezione può essere calcolata fino alla verifica della versione italiana corrente.
 - Fonte: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf
+
+
+## 17 novembre 2026 — Riferimento Piano Compensi EU 2025 integrato (PR #32)
+
+- PR #32 integrata, merge squash `99a881ddffc328bcf1ec2be4be7d6beee05bcfdf`; CI PR run `44100217267` SUCCESS.
+- Aggiunta `docs/companies/zinzino/knowledge/compensation-plan-eu-2025-italian-reference.md`, scheda italiana di orientamento non ufficiale del PDF Zinzino EU 2025.
+- `commercial-base.v1.json` registra fonte ufficiale, versione 12-02-2025, lingua inglese e mercato EU; `calculations_enabled=false`, `rules=[]` restano invariati.
+- Il manifesto KB include il riferimento come documento storico/secondario. Non è una traduzione integrale: non si riproduce in italiano l'intero documento protetto.
+- La pagina Partner Italia continua a collegare un PDF italiano separato, che resta da acquisire e riconciliare per confermare il piano vigente in Italia nel 2026.
+- Il contenuto è nel repository GitHub main, ma non è stato caricato nella KB Supabase: il workspace Zinzino non è ancora creato. Nessuna modifica DB o deploy.
