@@ -58,7 +58,7 @@ for (const [index, tier] of cab.tiers.entries()) {
 }
 assert.equal(cab.source_interpretation.status, 'structured_reference_not_executable');
 assert.match(cab.source_interpretation.active_partner_requirement.small_through_5xl, /Partner attivo/);
-assert.match(cab.source_interpretation.active_partner_requirement.mini, /non lo presume/);
+assert.match(cab.source_interpretation.active_partner_requirement.mini, /non deve estendere automaticamente/);
 assert.ok(cab.source_interpretation.calculation_guardrails.length >= 4);
 
 const otb = byId.get('partner_one_time_title_bonuses').rows;
