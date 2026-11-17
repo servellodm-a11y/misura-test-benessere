@@ -81,6 +81,7 @@
     const missingQueries=SEGMENTS.filter(segment=>!searchQueries.it[segment].length||!searchQueries.en[segment].length);
     if(missingQueries.length)throw new Error('Query commerciali IT/EN mancanti per: '+missingQueries.join(', ')+'. Ricerca sospesa.');
     const commercialData=normalizeCommercialData(config.commercial_data,id);
+    if(id==='zinzino'&&!commercialData)throw new Error('Base commerciale Zinzino Cliente/Partner obbligatoria. Caricare il modello completo prima del salvataggio.');
     return {
       id,name,active:true,country:clean(company.country||raw.market_country,80),
       language:clean(company.language||raw.language_code,12)||'it',
