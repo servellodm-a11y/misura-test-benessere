@@ -3307,3 +3307,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La soglia del settimo ordine per il livello 2 è riportata nel PDF del 1/12/2024, ma non nella pagina italiana corrente: marcata come regola storica non riconfermata, non usare come requisito attuale certo.
 - Aggiunta campagna Black Week 2026 come fonte temporanea separata dal catalogo permanente: dal 13/11/2026 ore 10:00 CET al 2/12/2026 ore 12:00 CET. Verificare al checkout e non riutilizzare dopo scadenza.
 - Nessuna modifica DB, workspace, attivazione o deploy.
+
+
+## 17 novembre 2026 — Ampliamento catalogo Premier Kit (PR #29)
+
+- PR #29 integrata: aggiunte cinque offerte con schede ufficiali italiane: ZinoGene+ Kit (910533), Menoplex Kit (910808), Berry Blast Kit (910754), Tropical Blast Kit (910758) e SKNY-U Kit (910761).
+- Per ciascuna offerta sono registrati separatamente importo iniziale, canone mensile, consegna bimestrale e Credits; i dati prepagati sono inseriti solo dove la scheda ufficiale li esponeva.
+- Catalogo Cliente Premier Kit ora contiene 16 voci strutturate, ma resta parziale e non esaustivo. Prezzi e condizioni sono snapshot del 17/11/2026: aggiornare da schede ufficiali e checkout prima di ogni proposta.
+- Test contrattuale aggiornato a 16 offerte con assert sulle cinque nuove voci. CI PR #29 run `44097688361`: SUCCESS.
+- PR #29 merge squash commit: `6b6f28aa95a2ab3981501863d07cecd2a304e771`.
+- Nessuna modifica DB, creazione/attivazione workspace o deploy Netlify.
