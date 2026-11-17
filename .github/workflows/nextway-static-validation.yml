@@ -36,6 +36,7 @@ on:
       - "nextway-admin.js"
       - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
+      - "scripts/test-nextway-zinzino-knowledge-import.mjs"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
@@ -171,6 +172,8 @@ jobs:
         run: node scripts/test-nextway-knowledge-ingest-security.mjs
       - name: Validate NEXTWAY Knowledge Upload security contract
         run: node scripts/test-nextway-knowledge-upload-security.mjs
+      - name: Validate Zinzino Knowledge bulk import contract
+        run: node scripts/test-nextway-zinzino-knowledge-import.mjs
       - name: Validate NEXTWAY multi-workspace SQL contract
         run: node scripts/test-nextway-multi-workspace-sql.mjs
       - name: Validate NEXTWAY workspace admin security contract
