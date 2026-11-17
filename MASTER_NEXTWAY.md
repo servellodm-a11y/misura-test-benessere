@@ -3270,3 +3270,10 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La scheda CRM ora consente di impostare/modificare Cliente, Partner o Da classificare; il valore viene sincronizzato e riletto dal database.
 - Compatibilità: un record locale precedente privo della proprietà `commercial_audience` non cancella il valore già presente nel cloud durante una sincronizzazione non correlata.
 - Nessun deploy Netlify: le modifiche frontend sono su GitHub main ma non pubblicate in produzione per il vincolo del 4 dicembre.
+
+
+### Refresh fonti Zinzino — 17 novembre 2026
+
+- Ricontrollata la scheda ufficiale Nails, Hair & Skin Care Kit: stato pagina **Discontinued**. Aggiornata la base JSON affinché il kit non venga proposto come acquistabile.
+- Correzione della precedente nota sui sei mesi: non usarla come condizione corrente; la pagina italiana consultata mostra stato discontinuato e valori solo descrittivi.
+- Restano bloccati i calcoli compensi finché il PDF italiano ufficiale completo non è stato acquisito e validato.
