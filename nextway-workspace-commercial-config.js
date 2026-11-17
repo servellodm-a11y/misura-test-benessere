@@ -67,12 +67,9 @@
     for(const [key,value] of Object.entries(consultantChannels).slice(0,12)){
       if(!value||typeof value!=='object')continue;
       const url=clean(value.url,500);
-      const lowerUrl=url.toLowerCase();
-      if(!(lowerUrl.startsWith('https://')||lowerUrl.startsWith('http://')))continue;
-      let parsedUrl;
-      try{parsedUrl=new URL(url);}catch{continue;}
-      if(!['http:','https:'].includes(parsedUrl.protocol)||!parsedUrl.hostname||parsedUrl.username||parsedUrl.password)continue;
-      channels[key]={url:parsedUrl.href,label:clean(value.label,120)||key,role:clean(value.role,180),companyBranding:clean(value.company_branding,80)||'aziendale',use:clean(value.use,500)};
+      const safeUrlMatch=url.match(/^https?:\/\/([a-z0-9.-]+)(?::[0-9]{1,5})?(?:[/?#]|$)/i);
+      if(!safeUrlMatch||safeUrlMatch[1].startsWith('.')||safeUrlMatch[1].endsWith('.')||safeUrlMatch[1].includes('..'))continue;
+      channels[key]={url,label:clean(value.label,120)||key,role:clean(value.role,180),companyBranding:clean(value.company_branding,80)||'aziendale',use:clean(value.use,500)};
     }
     const materials={};
     for(const [key,value] of Object.entries(officialMaterials).slice(0,30)){
