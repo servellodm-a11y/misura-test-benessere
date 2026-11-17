@@ -190,3 +190,12 @@ Preparati nel repository quattro documenti italiani da importare nella Knowledge
 L'utente conferma che il documento ufficiale Zinzino Compensation Plan — Europe, versione 12/02/2025, è tuttora in vigore a novembre 2026 senza modifiche. NEXTWAY lo tratta quindi come fonte ufficiale vigente per il mercato Italia (incluso nel perimetro EU). La conferma di validità è attribuita all'utente e non viene descritta come verifica indipendente Zinzino.
 
 La scheda italiana nel repository è una guida originale, non una traduzione integrale. La base commerciale conserva i calcoli disabilitati finché non saranno strutturate e testate tutte le regole economiche e di qualifica.
+
+
+## Piano Compensi — PDF italiano collegato dal portale Italia (verifica 17 novembre 2026)
+
+La pagina ufficiale Partner Italia https://www.zinzino.com/site/it/it-it/partnerweb collega il PDF https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf. Il PDF caricato in questa conversazione riporta la data **14/11/2024**. È quindi una versione italiana ufficiale pubblicata/collegata dal portale, ma precedente al master EU inglese 12/02/2025. Il documento stesso stabilisce la prevalenza della versione originale inglese in caso di traduzione errata o differenze.
+
+Il confronto ha individuato: (a) tensione sulla nota Fast Start Enrollment Points: il corpo del master richiede un Partner a sinistra e uno a destra, mentre la sua nota a piè pagina richiede almeno 1 dei 6 punti a sinistra oppure a destra; il PDF italiano 2024 richiede un Partner su entrambi i lati; (b) il master 2025 aggiunge una nota su bonus Fast Start 60/90 giorni aumentati secondo le regole della campagna, assente nel PDF italiano 2024. Non risolvere l'ambiguità con inferenze: mantenere il calcolo disabilitato finché la regola non è chiarita e testata.
+
+La conferma dell'utente del 17/11/2026 che il master EU 12/02/2025 è tuttora vigente senza modifiche in Italia resta registrata come conferma dell'utente, non come verifica indipendente dell'azienda. Il PDF italiano 2024 non prova da solo tale vigenza né l'assenza di modifiche successive. Sintesi e confronto sono in docs/companies/zinzino/knowledge/compensation-plan-italian-2024-comparison.md.
