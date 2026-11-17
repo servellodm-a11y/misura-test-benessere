@@ -174,3 +174,11 @@ Fonte indice: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits .
 ## Knowledge Base — documenti pronti per importazione (17 novembre 2026)
 
 Preparati nel repository quattro documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: knowledge/customer-rewards-program.md, knowledge/partner-kits-and-compensation-boundaries.md, knowledge/premier-kit-catalog-validation.md e knowledge/IMPORT-MANIFEST.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
+
+
+## Piano Compensi — riferimento europeo inglese acquisito (17 novembre 2026)
+
+- Fonte ufficiale Zinzino: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf
+- Titolo: Zinzino Compensation Plan — Europe; versione impressa 12-02-2025; 60 pagine circa, testo indicizzato in 1.828 righe.
+- È stata preparata una scheda italiana di orientamento non ufficiale, non una traduzione integrale. Il documento stesso dichiara che la versione inglese prevale in caso di differenze di traduzione.
+- La pagina Partner Italia collega un PDF distinto in italiano; finché quel documento non è acquisito e riconciliato con la versione europea, la scheda inglese resta riferimento secondario/storico e i calcoli restano disabilitati.
