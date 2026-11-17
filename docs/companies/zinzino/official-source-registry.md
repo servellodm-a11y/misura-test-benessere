@@ -262,3 +262,13 @@ Fonti ufficiali individuate:
 L'Annual Report 2025 dichiara che il Code of Conduct e le Business Ethics Guidelines sono adottati annualmente dal Consiglio di amministrazione e inclusi negli accordi dei distributori; il testo integrale e la versione effettivamente applicabile al Partner italiano non sono allegati al rapporto. NEXTWAY deve acquisire dal Back Office Partner il Partner Agreement italiano vigente e i relativi allegati etici aggiornati.
 
 Stato: compliance Zinzino Italia PARZIALE / NON APPROVATA. Non importare la policy MYS come policy italiana e non usare i termini 2022-02 come fonte esclusiva per condizioni correnti. Valutazione interna: docs/companies/zinzino/compliance-source-assessment.md. Documento non inserito nel manifest Knowledge Base perché è un assessment interno e non una policy aziendale approvata.
+
+
+## Aggiornamento fonti compliance — documenti globali e contratto EU storico (17 novembre 2026)
+
+Ulteriori fonti ufficiali Zinzino reperite:
+- Marketing Rules & Ethics en-WW: https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Marketing-rules-and-ethics-en-WW.pdf — documento generale per Partner, senza data/versione leggibile nella copia consultata; include regole su marchi, pubblicità, siti, vendita online e marketplace. Non è stato verificato che sia la policy contrattuale vigente per l'Italia.
+- Partner Agreement EU en-GB: https://zinzinowebstorage.blob.core.windows.net/contracts/PartnerContract_EU_en-GB.pdf — intestato Zinzino Operations AB, 14/01/2022, Version 4.0. È una fonte storica europea, non prova del contratto italiano vigente nel 2026.
+- Social Selling Guide en-EN: https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Social-Selling-Guide-en-EN.pdf — guida formativa inglese che richiama le Marketing Rules & Ethics, i limiti sui claim medici/promesse e il Back Office per gli asset aggiornati; data/versione non verificata.
+
+Queste fonti ampliano il riferimento interno, ma non sostituiscono Partner Agreement Italia, allegati etici annuali e Marketing Rules & Ethics confermati dal Back Office Partner. Compliance Italia resta PARZIALE / NON APPROVATA. Valutazione aggiornata in docs/companies/zinzino/compliance-source-assessment.md.
