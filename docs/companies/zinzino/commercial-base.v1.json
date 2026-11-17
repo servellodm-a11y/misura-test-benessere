@@ -744,17 +744,54 @@
       "catalog_scope_note": "Catalogo strutturato parziale delle offerte visibili nella pagina ufficiale Italia. I prezzi sono snapshot; verificare scheda e condizioni della campagna prima di ogni proposta. Le etichette Full Refund Possible non autorizzano promesse di rimborso."
     },
     "compensation_plan": {
-      "status": "english_eu_master_2025_reference_summary_only",
+      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
       "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
       "source_title": "Zinzino Compensation Plan — Europe",
       "source_version": "12-02-2025",
       "source_language": "en",
       "source_market": "EU",
       "source_type": "official_company_document",
-      "italian_translation_status": "summary_only_unofficial",
+      "italian_translation_status": "original_italian_operational_summary_not_official_translation",
       "calculations_enabled": false,
       "rules": [],
-      "blocking_reason": "The official Italian page links a separate Italian PDF that could not be fully acquired. The English EU master is dated 12-02-2025 and states that the English master prevails over translations. It is retained as a historical/reference source only; do not treat it as the current Italian plan or enable commission/qualification calculations until the current Italian rules are acquired and reconciled."
+      "blocking_reason": "Fonte ufficiale europea vigente secondo conferma dell'utente del 17-11-2026. La sequenza Fast Start operativa è stata confermata dall'utente e registrata. La strutturazione puntuale delle restanti regole, formule, soglie, eccezioni e test automatici è ancora da completare. Non abilitare calcoli commissioni/qualifiche finché le regole non sono state estratte e verificate una per una contro il documento master.",
+      "validity_confirmation": {
+        "status": "confirmed_by_user",
+        "confirmed_at": "2026-11-17",
+        "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore a novembre 2026 senza modifiche."
+      },
+      "fast_start_operational_rule": {
+        "status": "confirmed_by_project_owner_for_nextway",
+        "confirmed_at": "2026-11-17",
+        "confirmation_basis": "explicit_user_operational_confirmation",
+        "sequence": [
+          {
+            "step": 1,
+            "requirement": "4 punti cliente"
+          },
+          {
+            "step": 2,
+            "requirement": "2 Partner con Ultimate Partner Kit",
+            "placement": {
+              "left": 1,
+              "right": 1
+            }
+          },
+          {
+            "step": 3,
+            "requirement": "duplicazione dei due Partner"
+          },
+          {
+            "step": 4,
+            "requirement": "10 ulteriori punti cliente",
+            "breakdown": {
+              "first": 4,
+              "second": 6
+            }
+          }
+        ],
+        "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
+      }
     }
   },
   "source_register": [
@@ -797,7 +834,16 @@
       "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
       "observed_at": "2026-11-17",
       "refresh": "before_calculation",
-      "status": "blocked_full_document_not_acquired"
+      "status": "official_italian_localized_pdf_2024_historical_reference_not_equivalent_by_default_to_eu_2025_master",
+      "validity_confirmed_by_user_at": "2026-11-17",
+      "validity_note": "L'utente conferma che la versione EU 12-02-2025 è in vigore in Italia a novembre 2026 senza modifiche.",
+      "source_version": "14-11-2024",
+      "source_language": "it",
+      "source_market": "Italy",
+      "translation_status": "official_italian_pdf_linked_from_italy_partner_page_but_older_than_eu_2025_master",
+      "reconciliation_status": "known_document_differences_recorded_fast_start_operational_rule_confirmed_by_user_for_nextway",
+      "master_precedence_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "notes": "Il PDF italiano 14/11/2024 è collegato dalla pagina ufficiale Partner Italia e resta riferimento localizzato precedente al master EU 12/02/2025. Per NEXTWAY la sequenza Fast Start attualmente applicata è stata confermata dal titolare del progetto il 17/11/2026; vedere compensation-plan-italian-2024-comparison.md. Il master EU resta la fonte primaria. Le condizioni dei bonus 60/90 giorni restano dipendenti dal regolamento della campagna specifica."
     },
     {
       "id": "black_week_2026_it",
@@ -810,6 +856,19 @@
       "refresh": "before_quote",
       "status": "active_campaign_snapshot_not_permanent_catalog",
       "notes": "Promozione Black Week con Premier Kit selezionati e prodotti gratuiti; non incorporare prezzi/promozioni nel catalogo permanente; verificare disponibilità, personalizzazione e condizioni al checkout."
+    },
+    {
+      "id": "compensation_plan_eu_master_2025",
+      "type": "official_company_document",
+      "audience": "partner",
+      "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "observed_at": "2026-11-17",
+      "source_version": "12-02-2025",
+      "source_language": "en",
+      "source_market": "EU",
+      "status": "current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "validity_note": "L'utente conferma il 17/11/2026 che il master EU 12/02/2025 è vigente in Italia senza modifiche; la conferma è dell'utente, non una dichiarazione indipendente Zinzino.",
+      "refresh": "before_calculation"
     }
   ],
   "condition_engine": {
