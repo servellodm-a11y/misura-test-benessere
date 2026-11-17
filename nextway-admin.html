@@ -28,6 +28,12 @@
   <p class="muted">Area riservata a platform_admin. Le operazioni vengono autorizzate nuovamente dal server. Questa pagina non crea account, non invia inviti e non spedisce messaggi.</p>
   <div id="admin-status" class="status" role="status" aria-live="polite">Accedi dalla Connessione centrale per iniziare.</div>
 
+  <section class="panel" id="workspace-readiness-panel">
+    <h2>Preflight operativo · sola lettura</h2>
+    <p class="muted">Riepilogo dei prerequisiti del workspace selezionato. Questa verifica non modifica dati, non attiva workspace e non pubblica configurazioni.</p>
+    <div id="workspace-readiness" class="status" aria-live="polite">Seleziona un workspace e aggiorna i relativi dati per eseguire il preflight.</div>
+  </section>
+
   <section class="panel">
     <h2>1. Workspace</h2>
     <p class="muted">La creazione registra un nuovo workspace nel database. I campi partono vuoti: compila e invia solo dopo aver verificato i dati e deciso di procedere.</p>
@@ -56,8 +62,22 @@
     <div id="workspace-list" class="muted">Nessun elenco caricato.</div>
   </section>
 
+  <section class="panel" id="workspace-commercial-config">
+    <h2>2. Configurazione commerciale del workspace</h2>
+    <p class="muted">La configurazione viene salvata nelle impostazioni del workspace selezionato. Puoi caricare il modello Zinzino oppure incollare il JSON di un'altra azienda. Il salvataggio avviene soltanto quando premi il pulsante e confermi.</p>
+    <div class="row">
+      <button class="btn alt" id="load-zinzino-commercial-seed" type="button">Carica configurazione Zinzino</button>
+      <span class="muted" id="commercial-config-current">Seleziona un workspace.</span>
+    </div>
+    <label>Configurazione commerciale JSON<textarea id="commercial-config-json" maxlength="40000" rows="14" spellcheck="false" placeholder="Carica il modello Zinzino o incolla qui un oggetto JSON commerciale."></textarea></label>
+    <div class="row">
+      <button class="btn" id="save-commercial-config" type="button">Salva configurazione nel workspace</button>
+    </div>
+    <div id="commercial-config-status" class="muted" aria-live="polite">Nessuna modifica salvata.</div>
+  </section>
+
   <section class="panel">
-    <h2>2. Membri e ruoli</h2>
+    <h2>3. Membri e ruoli</h2>
     <label>Workspace selezionato<select id="selected-workspace"><option value="">Carica prima i workspace</option></select></label>
     <div class="grid">
       <label>Profilo già registrato<select id="member-profile"><option value="">Carica i profili</option></select></label>
@@ -71,7 +91,7 @@
   </section>
 
   <section class="panel">
-    <h2>3. Knowledge Base</h2>
+    <h2>4. Knowledge Base</h2>
     <p class="muted">Carica PDF, DOCX o TXT. I documenti vengono indicizzati come pending e non sono utilizzabili dall'assistente finché non vengono approvati.</p>
     <form id="knowledge-upload">
       <div class="grid">
@@ -90,14 +110,14 @@
   </section>
 
   <section class="panel">
-    <h2>4. Verifica ricerca Knowledge Base</h2>
+    <h2>5. Verifica ricerca Knowledge Base</h2>
     <label>Query<input id="knowledge-query" type="search" maxlength="500" placeholder="Scrivi una domanda da cercare nei documenti approvati"></label>
     <button class="btn" id="knowledge-search" type="button">Cerca nel workspace</button>
     <div id="knowledge-results" class="muted">La ricerca restituisce soltanto contenuti approvati e validi del workspace selezionato.</div>
   </section>
 
   <section class="panel">
-    <h2>5. Istruzioni AI e criteri di qualificazione</h2>
+    <h2>6. Istruzioni AI e criteri di qualificazione</h2>
     <p class="muted">Le nuove versioni vengono salvate come bozze. L'assistente non le utilizza finché un amministratore non le attiva. L'attivazione sostituisce la versione attiva precedente.</p>
     <div class="row"><h3>Istruzioni dell'assistente</h3><button class="btn alt" id="governance-refresh" type="button">Aggiorna istruzioni e criteri</button></div>
     <form id="prompt-create">
@@ -129,6 +149,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/nextway-admin-archive-bridge.js"></script>
 <script src="/nextway-cloud.js"></script>
+<script src="/nextway-workspace-commercial-config.js"></script>
 <script src="/nextway-admin.js"></script>
 </body>
 </html>

@@ -66,11 +66,11 @@ input,select{width:100%;padding:11px;border:1px solid #cbd4e1;border-radius:8px;
 <p class="small muted">Collegamenti: <a href="/nextway-ricerca.html">Ricerca assistita</a> · <a href="/nextway-ai.html">Archivio Lead</a></p>
 </section>
 </main>
-<script src="/nextway-company-config.js"></script>
+<script src="/nextway-workspace-commercial-config.js"></script>
 <script>
 const $=id=>document.getElementById(id);let generated=[],dailyProspects=[],searchHistoryOwnerId='',searchWorkspaceId='';
-const companyConfig=window.NEXTWAY_COMPANY_CONFIG||null;
-const activeCompany=companyConfig?.active||null;
+let activeCompany=null;
+function setWorkspaceCommercialStatus(message,ready=false){const context=$('company-context');if(context)context.textContent=message;['generate','runsearch','runallsearch'].forEach(id=>{const button=$(id);if(button)button.disabled=!ready;});}
 const SEARCH_HISTORY_LIMIT=10;
 const SEARCH_IDENTITY_ARCHIVE_LIMIT=500;
 const SEARCH_QUERY_CACHE_LIMIT=20;
@@ -124,6 +124,16 @@ function saveSearchHistory(prospects){
   const history=readSearchHistory();history.unshift(record);localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();return true;
  }catch(error){console.warn('NEXTWAY: impossibile salvare lo storico locale.',error);return false;}
 }
+async function loadWorkspaceCommercialConfig(clientSession,workspaceId){
+ activeCompany=null;setWorkspaceCommercialStatus('Caricamento configurazione commerciale del workspace…',false);
+ if(!workspaceId)throw new Error('Seleziona un workspace prima di caricare la configurazione commerciale.');
+ if(!window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG?.normalize)throw new Error('Modulo di configurazione commerciale non caricato.');
+ const {data,error}=await clientSession.rpc('nextway_get_workspace_commercial_config',{p_workspace_id:workspaceId});
+ if(error)throw error;
+ activeCompany=window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG.normalize(data);
+ setWorkspaceCommercialStatus('Azienda attiva: '+activeCompany.name+' · configurazione caricata dal workspace '+(data.workspace_name||''),true);
+ return activeCompany;
+}
 async function initializeSearchHistory(){
  try{
   if(!window.NEXTWAY_CLOUD?.active)return false;
@@ -137,9 +147,9 @@ async function initializeSearchHistory(){
   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=data.length?'Seleziona il workspace di lavoro':'Nessun workspace attivo autorizzato';select.append(placeholder);
   data.forEach(item=>{const option=document.createElement('option');option.value=item.workspace_id;option.textContent=String(item.workspace_name||'Workspace')+' · '+String(item.workspace_role||'membro');select.append(option);});
   select.disabled=data.length===0;
-  if(data.length===1){select.value=data[0].workspace_id;searchWorkspaceId=data[0].workspace_id;}
-  else{searchWorkspaceId='';}
-  select.addEventListener('change',()=>{searchWorkspaceId=select.value;});
+  if(data.length===1){select.value=data[0].workspace_id;searchWorkspaceId=data[0].workspace_id;await loadWorkspaceCommercialConfig(s,searchWorkspaceId);}
+  else{searchWorkspaceId='';setWorkspaceCommercialStatus('Seleziona un workspace: la configurazione commerciale verrà letta da quello spazio di lavoro.',false);}
+  select.addEventListener('change',async()=>{searchWorkspaceId=select.value;generated=[];render();if(!searchWorkspaceId){activeCompany=null;setWorkspaceCommercialStatus('Seleziona un workspace per caricare la configurazione commerciale.',false);return;}try{await loadWorkspaceCommercialConfig(s,searchWorkspaceId);$('searchstatus').textContent='Configurazione commerciale caricata. Puoi preparare la ricerca.';}catch(error){activeCompany=null;setWorkspaceCommercialStatus('Configurazione commerciale non disponibile: '+error.message,false);$('searchstatus').textContent='Ricerca sospesa: '+error.message;}});
   if(data.length===0)$('searchstatus').textContent='Ricerca sospesa: prima occorre attivare o assegnare un workspace. Nessuna chiamata esterna verrà eseguita.';
   else if(data.length>1)$('searchstatus').textContent='Seleziona il workspace corretto prima di eseguire una ricerca.';
   else $('searchstatus').textContent='Workspace centrale pronto. Le query già presenti in cache non consumeranno unità Tavily.';
@@ -218,8 +228,7 @@ function classifyNextBestAction(activity,crmStatus,now=new Date()){
 function markSearchHistoryAcquired(url,identityKeys=[]){const key=searchHistoryKey();if(!key)return;const canonical=canonicalProspectUrl(url);const keys=new Set(identityKeys);const history=readSearchHistory();let changed=false;history.forEach(entry=>(entry.prospects||[]).forEach(p=>{if(canonicalProspectUrl(p.url)===canonical||(p.identity_keys||[]).some(value=>keys.has(value))){if(p.archive_status!=='acquired'){p.archive_status='acquired';changed=true;}}}));if(changed){localStorage.setItem(key,JSON.stringify(history.slice(0,SEARCH_HISTORY_LIMIT)));renderSearchHistory();}}
 function renderSearchHistory(){const root=$('search-history');if(!root)return;root.replaceChildren();const history=readSearchHistory();if(!history.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='Nessuna ricerca salvata. Lo storico viene creato dopo la prima ricerca completata.';root.append(empty);return;}history.forEach(entry=>{const row=document.createElement('article');row.style.cssText='padding:10px 0;border-top:1px solid #dfe5ef';const title=document.createElement('strong');title.textContent=new Date(entry.date).toLocaleString('it-IT')+' · '+(entry.segment||'segmento non indicato')+' · '+(entry.area||'area non indicata');const detail=document.createElement('p');detail.className='muted';const acquired=(entry.prospects||[]).filter(p=>p.archive_status==='acquired').length,followup=(entry.prospects||[]).filter(p=>p.archive_status==='followup').length;detail.textContent=(entry.count||0)+' risultati unici · '+acquired+' già acquisiti · '+followup+' in follow-up · '+Math.max(0,(entry.prospects||[]).length-acquired-followup)+' nuovi/non acquisiti nel CRM';const links=document.createElement('div');links.className='actions';(entry.prospects||[]).slice(0,8).forEach(p=>{const a=document.createElement('a');a.href=p.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=p.name+' · '+p.priority_score+'/100';links.append(a);});row.append(title,detail,links);root.append(row);});}
 renderSearchHistory();
-if(activeCompany){$('company-context').textContent='Azienda attiva: '+activeCompany.name+' · criteri di ricerca caricati dalla configurazione aziendale.';}
-else{$('company-context').textContent='Configurazione aziendale non caricata: impossibile generare ricerche commerciali.';$('generate').disabled=true;$('runsearch').disabled=true;$('runallsearch').disabled=true;}
+setWorkspaceCommercialStatus('La configurazione commerciale viene caricata dal workspace selezionato.',false);
 const templates={
 networker:[
 ['Ricerca attiva di collaboratori','("cerco collaboratori" OR "cerco collaboratrici" OR "nuove persone nel team" OR "amplio il team") ("network marketing" OR networker OR "vendita diretta")'],
@@ -440,17 +449,19 @@ function getProspectSearchLane(index,platform,hasCompanyTerms){
 }
 function build(){
  const seg=$('segment').value,area=$('area').value.trim()||'Italia',platform=$('platform').value,extra=$('extra').value.trim(),lang=$('language').value,engine=$('engine').value;
- const base=templates[seg],refined=refinedItalianQueries[seg]||base;
+ const base=templates[seg],configuredItalian=activeCompany?.searchQueries?.it?.[seg],configuredEnglish=activeCompany?.searchQueries?.en?.[seg];
+ const refined=configuredItalian?.length?configuredItalian:(refinedItalianQueries[seg]||base);
+ const englishQueries=configuredEnglish?.length?configuredEnglish:(refinedEnglishQueries[seg]||enTerms[seg]);
  let terms=refined.map(x=>Array.isArray(x)?x[1]:x);
- if(lang==='en')terms=refinedEnglishQueries[seg]||enTerms[seg];
- if(lang==='both')terms=terms.slice(0,3).concat((refinedEnglishQueries[seg]||enTerms[seg]).slice(0,2));
+ if(lang==='en')terms=englishQueries.map(x=>Array.isArray(x)?x[1]:x);
+ if(lang==='both')terms=terms.slice(0,3).concat(englishQueries.slice(0,2).map(x=>Array.isArray(x)?x[1]:x));
  const companyTerms=activeCompany?.searchModifiers?.[seg]||[];
  generated=terms.slice(0,5).map((q,i)=>{
    const lane=getProspectSearchLane(i,platform,companyTerms.length>0);
    const includeCompanyContext=i===4&&companyTerms.length>0;
    const modifier=includeCompanyContext?companyTerms[(i-4+companyTerms.length)%companyTerms.length]:[];
    const full=buildProspectSearchQuery(q,area,platform,extra,seg,modifier,includeCompanyContext,lane.scope);
-   const baseLabel=lang==='en'?((Array.isArray(refinedEnglishQueries[seg])?refinedEnglishQueries[seg][i]:null)?.[0]||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?('English search '+(i-2)):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
+   const baseLabel=lang==='en'?((Array.isArray(englishQueries[i])?englishQueries[i][0]:null)||'Ricerca in inglese '+(i+1)):lang==='both'&&i>=3?((Array.isArray(englishQueries[i-3])?englishQueries[i-3][0]:null)||('English search '+(i-2))):(refined[i]?.[0]||base[i]?.[0]||'Ricerca');
    const label=baseLabel+' · '+lane.label+(includeCompanyContext?' · focus '+(activeCompany?.name||'azienda'):'');
    return {label,query:full,url:(engine==='google'?'https://www.google.com/search?q=':'https://www.bing.com/search?q=')+encodeURIComponent(full),source_lane:lane.label,company_context:includeCompanyContext};
  });
@@ -658,6 +669,7 @@ async function runSearch(runAll=false){
     capture.dataset.initialDisabled=String(capture.disabled);capture.dataset.initialText=capture.textContent;capture.dataset.initialTitle=capture.title;
     capture.addEventListener('click',()=>{
      if(notSuitable){status.textContent='Acquisizione bloccata: il risultato è stato classificato come non adatto. Verifica la fonte e la classificazione prima di procedere.';return;}
+     if(dailyEntry.crm_match===true||dailyEntry.central_identity_blocked===true||dailyEntry.central_identity_ambiguous===true||dailyEntry.central_archive_status==='acquired'){status.textContent='Acquisizione bloccata: questa identità risulta già acquisita nel CRM o richiede una verifica dei duplicati.';return;}
      try{
       const segment=$('segment').value;
       const outcome=commercialFit.commercial_outcome;
@@ -666,7 +678,7 @@ async function runSearch(runAll=false){
       const evidence=['SCHEDA PROSPECT · revisione umana obbligatoria','DOCUMENTATO NELLA FONTE (dichiarazioni, non fatti verificati): '+evidenceReview.documented.map(e=>e.kind+' ['+e.field+']: '+e.excerpt).join(' | '),'INTERPRETAZIONE NEXTWAY (non accertata): '+evidenceReview.inference.map(e=>e.kind+': '+e.value+' — '+e.reason).join(' | '),'DA VERIFICARE MANUALMENTE: '+evidenceReview.verify.join('; '),'Nome: '+profile.name,'Professione: '+profile.profession,'Azienda: '+profile.organization,'Località: '+profile.location,'Priorità di verifica: '+profile.priority,'Motivazione priorità: '+profile.priority_reason,'Classificazione: '+profile.category,'Motivazione classificazione: '+targetAssessment.reason,'Qualificazione commerciale: '+qualification.status,'Esito commerciale: '+commercialFit.commercial_outcome_label,'Tipo prospect: '+commercialFit.prospect_type,'Pertinenza commerciale: '+commercialFit.commercial_fit_score+'/100','Segnale commerciale: '+commercialFit.signal_label,'Intenzione: '+commercialFit.explicit_intent,'Prossima azione: '+commercialFit.suggested_next_step,'Azione suggerita: '+qualification.action,'Motivazioni qualificazione: '+qualification.reasons.join(' · '),'Fonte: '+url,item.snippet||'',pageContent].filter(Boolean).join('\\n\\n').slice(0,3900);
       const networkerStage=classifyNetworkerStage(item.title+' '+item.snippet+' '+pageContent);
       const enrichedAssessment={...assessment,target_classification:targetAssessment,prospect_profile:profile,commercial_qualification:{...qualification,commercial_fit:commercialFit},commercial_fit:commercialFit};
-      const result=window.NEXTWAY_CLOUD.addSearchLeadToLocalArchive(s.user.id,{title:item.title,evidence,url,sources:dailyEntry.source_evidence,category,partner_type:targetAssessment.role||partnerTypes[targetAssessment.segment]||partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:{emails:dailyEntry.emails,phones:dailyEntry.phones,whatsapp:dailyEntry.whatsapp,socials:dailyEntry.socials},identity_keys:identityKeys,evidence_quality:enrichedAssessment,fit_status:'Non valutato',company_id:activeCompany?.id||'zinzino',company_name:activeCompany?.name||'Zinzino'});
+      const result=window.NEXTWAY_CLOUD.addSearchLeadToLocalArchive(s.user.id,{title:item.title,evidence,url,sources:dailyEntry.source_evidence,category,partner_type:targetAssessment.role||partnerTypes[targetAssessment.segment]||partnerTypes[segment]||'',networker_stage:networkerStage,public_contacts:{emails:dailyEntry.emails,phones:dailyEntry.phones,whatsapp:dailyEntry.whatsapp,socials:dailyEntry.socials},identity_keys:identityKeys,evidence_quality:enrichedAssessment,fit_status:'Non valutato',company_id:activeCompany?.id||'',company_name:activeCompany?.name||''});
       if(!result)throw new Error('Il collegamento all’Archivio Lead non ha restituito una conferma di salvataggio.');
       dailyEntry.archive_status='acquired';markSearchHistoryAcquired(url,identityKeys);
       capture.textContent=result.duplicate?'Già presente nell’archivio':'Acquisito nell’archivio';
@@ -707,6 +719,8 @@ async function runSearch(runAll=false){
       }
       if(!match.record)return;
       const record=match.record;
+      prospect.crm_match=record.crm_match===true;
+      prospect.central_identity_blocked=record.archive_status==='acquired'||record.crm_match===true;
       prospect.history_seen_before=true;
       prospect.history_first_seen=record.first_seen_at||prospect.history_first_seen;
       prospect.history_last_seen=record.last_seen_at||prospect.history_last_seen;
@@ -722,7 +736,7 @@ async function runSearch(runAll=false){
        const note=document.createElement('p');note.className='muted central-identity-match';note.textContent=(record.archive_status==='acquired'?'GIÀ ACQUISITO NEL CRM DEL WORKSPACE':record.archive_status==='ignored'?'GIÀ ESAMINATO · ESCLUSO IN PRECEDENZA':'GIÀ PRESENTE NELLA MEMORIA CONDIVISA')+' · prima rilevazione: '+(record.first_seen_at?new Date(record.first_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+' · ultima rilevazione: '+(record.last_seen_at?new Date(record.last_seen_at).toLocaleDateString('it-IT'):'data non disponibile')+'.';
        card.append(note);
        const captureButton=card.querySelector('.prospect-capture-button');
-       if(captureButton&&record.archive_status==='acquired'){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
+       if(captureButton&&(record.archive_status==='acquired'||record.crm_match===true)){captureButton.dataset.centralIdentityBlocked='true';captureButton.disabled=true;captureButton.textContent='Già acquisito nel CRM';captureButton.title='Identità già acquisita nel CRM condiviso del workspace.';}
       }
      });
     }
@@ -732,7 +746,7 @@ async function runSearch(runAll=false){
    try{
     let archivedCount=0;
     for(let offset=0;offset<dailyProspects.length;offset+=25){
-     const archiveRows=dailyProspects.slice(offset,offset+25).map(p=>({url:p.url,title:p.title,identity_keys:p.identity_keys||[],profile:p.profile||{},emails:p.emails||[],phones:p.phones||[],whatsapp:p.whatsapp||[],socials:p.socials||[],source_evidence:(p.source_evidence||[]).slice(0,1).map(source=>({url:source.url,title:String(source.title||'').slice(0,180),snippet:String(source.snippet||'').slice(0,700),evidence:String(source.evidence||'').slice(0,1200),collected_at:source.collected_at||''})),evidence_summary:p.profile?.evidence_summary||p.reason||'',reason:p.reason||'',classification:p.classification||'',segment:p.segment||'',person_confirmed:!!p.person_confirmed,archive_status:p.archive_status||''}));
+     const archiveRows=dailyProspects.slice(offset,offset+25).map(p=>({url:p.url,title:p.title,target_type:p.commercial_fit?.commercial_outcome==='partner_potential'?'potential_partner':p.commercial_fit?.commercial_outcome==='customer_potential'?'potential_customer':'unknown',identity_keys:p.identity_keys||[],profile:p.profile||{},emails:p.emails||[],phones:p.phones||[],whatsapp:p.whatsapp||[],socials:p.socials||[],source_evidence:(p.source_evidence||[]).slice(0,1).map(source=>({url:source.url,title:String(source.title||'').slice(0,180),snippet:String(source.snippet||'').slice(0,700),evidence:String(source.evidence||'').slice(0,1200),collected_at:source.collected_at||''})),evidence_summary:p.profile?.evidence_summary||p.reason||'',reason:p.reason||'',classification:p.classification||'',segment:p.segment||'',person_confirmed:!!p.person_confirmed,archive_status:p.archive_status||''}));
      const archiveResponse=await fetch(cfg.url+'/functions/v1/nextway-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':cfg.key},body:JSON.stringify({action:'archive_prospects',workspace_id:searchWorkspaceId,prospects:archiveRows})});
      const archivePayload=await archiveResponse.json();
      if(!archiveResponse.ok||archivePayload.failed_count)throw new Error(archivePayload.error||('Archiviazione parziale: '+(archivePayload.failed_count||0)+' record non salvati.'));
@@ -824,11 +838,11 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  const linkLabel=document.createElement('label');linkLabel.textContent='Sito da proporre (facoltativo)';linkLabel.style.cssText='display:block;font-weight:700;margin:10px 0 5px;';
  const linkSelect=document.createElement('select');linkSelect.style.cssText='display:block;width:100%;margin:6px 0;padding:9px;';
  const links=activeCompany?.consultantChannels||{};
- const general=links.generalWellnessWebsite,replica=links.zinzinoReplicaWebsite;
+ const general=links.general_website||links.generalWellnessWebsite,replica=links.company_website||links.zinzinoReplicaWebsite;
  const addOption=(value,label)=>{const o=document.createElement('option');o.value=value;o.textContent=label;linkSelect.append(o);};
  addOption('none','Nessun link — consigliato per il primo contatto');
  if(general)addOption('general',general.label+' — sito generale');
- if(replica)addOption('replica',replica.label+' — approfondimento Zinzino');
+ if(replica)addOption('replica',replica.label+' — sito aziendale');
  const select=document.createElement('select');select.className='input';select.style.cssText='display:block;width:100%;margin:8px 0;padding:9px;';
  const output=document.createElement('textarea');output.className='input';output.rows=7;output.style.cssText='display:block;width:100%;min-height:150px;margin:8px 0;padding:10px;white-space:pre-wrap;';
  const copy=document.createElement('button');copy.type='button';copy.className='btn alt';copy.textContent='Copia bozza';
@@ -836,7 +850,8 @@ function createMessageDraftPanel(title,snippet,pageContent,segment,url,contacts)
  const audience=segmentLabels[segment]||'un potenziale contatto';
  const rawEvidence=(String(title||'')+' '+String(snippet||'')+' '+String(pageContent||'')).replace(/\s+/g,' ').trim();
  const evidence=rawEvidence.toLocaleLowerCase('it');
- const explicitZinzinoInterest=/zinzino|balancetest|balance test|balance oil|zinzino products/.test(evidence);
+ const configuredBrandTerms=Array.isArray(activeCompany?.brandTerms)?activeCompany.brandTerms:[];
+  const explicitZinzinoInterest=configuredBrandTerms.some(term=>term&&evidence.includes(String(term).toLocaleLowerCase('it')));
  const recommended=segment==='customers'||segment==='wellness_pro'?'general':explicitZinzinoInterest?'replica':'none';
  linkSelect.value=recommended;
  const recommendation=document.createElement('p');recommendation.className='muted';

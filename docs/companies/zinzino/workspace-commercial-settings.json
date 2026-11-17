@@ -1,0 +1,626 @@
+{
+  "schema_version": 1,
+  "company": {
+    "id": "zinzino",
+    "name": "Zinzino",
+    "sector": [
+      "benessere",
+      "nutrizione",
+      "integrazione alimentare",
+      "vendita diretta"
+    ],
+    "positioning": "Progetto commerciale nel settore benessere e nutrizione. Le caratteristiche di prodotti, test e piano compensi devono essere ricavate esclusivamente dalla documentazione ufficiale aggiornata.",
+    "country": "Italia",
+    "language": "it"
+  },
+  "brand_terms": [
+    "zinzino",
+    "balancetest",
+    "balance test",
+    "balance oil"
+  ],
+  "search_queries": {
+    "it": {
+      "customers": [
+        [
+          "Interesse per omega-3",
+          "(\"omega 3\" OR omega-3 OR \"acidi grassi\") (informazioni OR confronto OR esperienza)"
+        ],
+        [
+          "Test e misurazione",
+          "(\"BalanceTest\" OR \"test acidi grassi\" OR \"profilo degli acidi grassi\")"
+        ],
+        [
+          "Educazione nutrizionale",
+          "(\"educazione alimentare\" OR nutrizione OR \"stile di vita\") (benessere OR informazione)"
+        ],
+        [
+          "Contenuti sull'integrazione",
+          "(\"integratori alimentari\" OR integrazione) (esperienza OR confronto OR recensione)"
+        ],
+        [
+          "Ricerca di consulenza",
+          "(\"consulenza nutrizionale\" OR \"consiglio nutrizionale\") (benessere OR omega-3)"
+        ]
+      ],
+      "wellness_pro": [
+        [
+          "Professionisti della nutrizione",
+          "(nutrizionista OR dietista OR biologo nutrizionista) (studio OR consulenza OR professione)"
+        ],
+        [
+          "Professionisti olistici",
+          "(naturopata OR osteopata OR fisioterapista) (benessere OR attività OR studio)"
+        ],
+        [
+          "Personal trainer e fitness",
+          "(\"personal trainer\" OR \"coach fitness\" OR \"istruttore fitness\") (clienti OR studio OR collaborazione)"
+        ],
+        [
+          "Collaborazioni professionali",
+          "(professionista OR consulente) (nutrizione OR benessere) (collaborazione OR partnership)"
+        ],
+        [
+          "Educazione e misurazione",
+          "(\"educazione al benessere\" OR \"test acidi grassi\" OR \"misurazione\") professionista"
+        ]
+      ],
+      "wellness_networker": [
+        [
+          "Networker nel wellness",
+          "(\"network marketing wellness\" OR \"networker benessere\" OR \"vendita diretta wellness\")"
+        ],
+        [
+          "Leader di team wellness",
+          "(\"team leader\" OR \"leader di gruppo\") (wellness OR nutrizione OR benessere)"
+        ],
+        [
+          "Sviluppo organizzativo",
+          "(\"sviluppo team\" OR \"costruzione team\") (wellness OR \"vendita diretta\")"
+        ],
+        [
+          "Collaborazione tra networker",
+          "(networker OR distributore OR incaricato) (wellness OR nutrizione) collaborazione"
+        ],
+        [
+          "Attività attuale dichiarata",
+          "(\"sono un networker\" OR \"attività di network marketing\") (benessere OR wellness)"
+        ]
+      ],
+      "new_networker": [
+        [
+          "Inizio nel network marketing",
+          "(\"iniziare nel network marketing\" OR \"iniziare con la vendita diretta\")"
+        ],
+        [
+          "Ricerca di formazione",
+          "(\"formazione network marketing\" OR \"come iniziare\" OR \"primi passi\") network marketing"
+        ],
+        [
+          "Nuovi incaricati",
+          "(\"nuovi incaricati\" OR \"nuovi collaboratori\") (benessere OR wellness OR nutrizione)"
+        ],
+        [
+          "Primi clienti e supporto",
+          "(\"primi clienti\" OR \"costruire una rete\") (formazione OR supporto)"
+        ],
+        [
+          "Nuova attività wellness",
+          "(\"nuova attività\" OR \"progetto indipendente\") (wellness OR benessere)"
+        ]
+      ],
+      "other_networker": [
+        [
+          "Networker di altri settori",
+          "(network marketing OR \"vendita diretta\") -wellness -nutrizione"
+        ],
+        [
+          "Leader commerciali",
+          "(\"team leader\" OR \"team builder\" OR \"responsabile vendite\") network marketing"
+        ],
+        [
+          "Distributori indipendenti",
+          "(\"distributore indipendente\" OR \"consulente indipendente\") (team OR formazione)"
+        ],
+        [
+          "Collaborazioni tra settori",
+          "(networker OR \"vendita diretta\") (collaborazione OR partnership)"
+        ],
+        [
+          "Sviluppo team",
+          "(\"sviluppo team\" OR \"formazione rete\") network marketing"
+        ]
+      ],
+      "exnetworker": [
+        [
+          "Esperienza precedente",
+          "(\"ex networker\" OR \"ex distributore\" OR \"ex incaricato\")"
+        ],
+        [
+          "Transizione professionale",
+          "(\"nuovo progetto professionale\" OR \"nuovo percorso\") (network marketing OR vendita diretta)"
+        ],
+        [
+          "Esperienza commerciale",
+          "(\"esperienza network marketing\" OR \"esperienza vendita diretta\")"
+        ],
+        [
+          "Ex leader e formazione",
+          "(\"ex team leader\" OR \"ex distributore\") (vendite OR formazione OR imprenditoria)"
+        ],
+        [
+          "Rientro nel settore",
+          "(\"nuova collaborazione\" OR \"nuova opportunità professionale\") network marketing"
+        ]
+      ],
+      "entrepreneur": [
+        [
+          "Imprenditori wellness",
+          "(imprenditore OR titolare OR founder) (benessere OR nutrizione OR fitness)"
+        ],
+        [
+          "Partnership professionali",
+          "(imprenditore OR professionista) (partnership OR collaborazione) benessere"
+        ],
+        [
+          "Diversificazione attività",
+          "(imprenditore OR titolare) (diversificazione OR \"nuovo progetto\")"
+        ],
+        [
+          "Sviluppo commerciale",
+          "(\"sviluppo commerciale\" OR \"business development\") wellness"
+        ],
+        [
+          "Attività e servizi",
+          "(\"centro benessere\" OR \"studio professionale\" OR palestra) (titolare OR fondatore)"
+        ]
+      ],
+      "side_income": [
+        [
+          "Ricerca attività extra",
+          "(\"attività extra\" OR \"seconda attività\") (lavoro OR professione)"
+        ],
+        [
+          "Interesse per part-time",
+          "(\"lavoro part-time\" OR \"attività part-time\") (flessibile OR indipendente)"
+        ],
+        [
+          "Seconda entrata dichiarata",
+          "(\"entrata aggiuntiva\" OR \"reddito extra\") (attività OR progetto)"
+        ],
+        [
+          "Progetto parallelo",
+          "(\"progetto parallelo\" OR \"attività complementare\") (lavoro OR professione)"
+        ],
+        [
+          "Formazione per attività indipendente",
+          "(\"formazione imprenditoriale\" OR \"attività indipendente\") (benessere OR vendita diretta)"
+        ]
+      ],
+      "business_seeking": [
+        [
+          "Nuovo progetto imprenditoriale",
+          "(\"nuovo progetto imprenditoriale\" OR \"nuova attività\")"
+        ],
+        [
+          "Avvio attività indipendente",
+          "(\"mettersi in proprio\" OR \"avviare un'attività\")"
+        ],
+        [
+          "Ricerca partnership",
+          "(\"cerco una partnership\" OR \"cerco collaborazioni\") imprenditoriale"
+        ],
+        [
+          "Diversificazione professionale",
+          "(\"nuove opportunità professionali\" OR diversificazione) imprenditore"
+        ],
+        [
+          "Progetto nel wellness",
+          "(\"progetto nel benessere\" OR \"business wellness\") (collaborazione OR attività)"
+        ]
+      ]
+    },
+    "en": {
+      "customers": [
+        [
+          "Omega-3 interest",
+          "(\"omega 3\" OR omega-3 OR \"fatty acids\") (information OR comparison OR experience)"
+        ],
+        [
+          "Testing and measurement",
+          "(\"fatty acid test\" OR BalanceTest OR \"fatty acid profile\")"
+        ],
+        [
+          "Nutrition education",
+          "(\"nutrition education\" OR nutrition OR \"healthy lifestyle\") (wellness OR information)"
+        ],
+        [
+          "Supplement content",
+          "(supplements OR \"food supplements\") (experience OR comparison OR review)"
+        ],
+        [
+          "Nutrition advice",
+          "(\"nutrition advice\" OR \"nutrition consultation\") (wellness OR omega-3)"
+        ]
+      ],
+      "wellness_pro": [
+        [
+          "Nutrition professionals",
+          "(nutritionist OR dietitian OR \"registered dietitian\") (practice OR consultation OR professional)"
+        ],
+        [
+          "Holistic professionals",
+          "(naturopath OR osteopath OR physiotherapist) (wellness OR practice)"
+        ],
+        [
+          "Fitness professionals",
+          "(\"personal trainer\" OR \"fitness coach\") (clients OR studio OR collaboration)"
+        ],
+        [
+          "Professional partnerships",
+          "(professional OR consultant) (nutrition OR wellness) (collaboration OR partnership)"
+        ],
+        [
+          "Wellness education",
+          "(\"wellness education\" OR \"fatty acid test\" OR measurement) professional"
+        ]
+      ],
+      "wellness_networker": [
+        [
+          "Wellness network marketers",
+          "(\"wellness network marketing\" OR \"wellness networker\" OR \"direct selling wellness\")"
+        ],
+        [
+          "Wellness team leaders",
+          "(\"team leader\" OR \"team builder\") (wellness OR nutrition)"
+        ],
+        [
+          "Team development",
+          "(\"team development\" OR \"building a team\") (wellness OR \"direct selling\")"
+        ],
+        [
+          "Networker collaboration",
+          "(networker OR distributor) (wellness OR nutrition) collaboration"
+        ],
+        [
+          "Current activity statement",
+          "(\"I am a network marketer\" OR \"network marketing business\") (wellness OR nutrition)"
+        ]
+      ],
+      "new_networker": [
+        [
+          "Starting in network marketing",
+          "(\"starting in network marketing\" OR \"getting started in direct sales\")"
+        ],
+        [
+          "Training and first steps",
+          "(\"network marketing training\" OR \"how to get started\")"
+        ],
+        [
+          "New distributors",
+          "(\"new distributors\" OR \"new team members\") (wellness OR nutrition)"
+        ],
+        [
+          "First customers and support",
+          "(\"first customers\" OR \"building a network\") (training OR support)"
+        ],
+        [
+          "New wellness business",
+          "(\"new business\" OR \"independent project\") (wellness OR nutrition)"
+        ]
+      ],
+      "other_networker": [
+        [
+          "Networkers in other sectors",
+          "(\"network marketer\" OR \"direct seller\") -wellness -nutrition"
+        ],
+        [
+          "Sales team leaders",
+          "(\"team leader\" OR \"team builder\" OR \"sales manager\") network marketing"
+        ],
+        [
+          "Independent distributors",
+          "(\"independent distributor\" OR \"independent consultant\") (team OR training)"
+        ],
+        [
+          "Cross-sector partnerships",
+          "(networker OR \"direct selling\") (collaboration OR partnership)"
+        ],
+        [
+          "Team growth",
+          "(\"team development\" OR \"sales team training\") network marketing"
+        ]
+      ],
+      "exnetworker": [
+        [
+          "Former network marketers",
+          "(\"former network marketer\" OR \"former distributor\" OR \"ex distributor\")"
+        ],
+        [
+          "Career transition",
+          "(\"new professional project\" OR \"career transition\") (network marketing OR direct sales)"
+        ],
+        [
+          "Direct sales experience",
+          "(\"network marketing experience\" OR \"direct sales experience\")"
+        ],
+        [
+          "Former team leaders",
+          "(\"former team leader\" OR \"former distributor\") (sales OR training OR entrepreneur)"
+        ],
+        [
+          "New collaboration",
+          "(\"new collaboration\" OR \"new business opportunity\") network marketing"
+        ]
+      ],
+      "entrepreneur": [
+        [
+          "Wellness entrepreneurs",
+          "(entrepreneur OR founder OR owner) (wellness OR nutrition OR fitness)"
+        ],
+        [
+          "Professional partnerships",
+          "(entrepreneur OR professional) (partnership OR collaboration) wellness"
+        ],
+        [
+          "Business diversification",
+          "(business owner OR entrepreneur) (diversification OR \"new project\")"
+        ],
+        [
+          "Business development",
+          "(\"business development\" OR \"commercial development\") wellness"
+        ],
+        [
+          "Wellness business owners",
+          "(\"wellness center\" OR \"fitness studio\" OR \"nutrition practice\") (owner OR founder)"
+        ]
+      ],
+      "side_income": [
+        [
+          "Additional activity",
+          "(\"extra income\" OR \"side activity\") (job OR professional)"
+        ],
+        [
+          "Part-time interest",
+          "(\"part time work\" OR \"part-time activity\") (flexible OR independent)"
+        ],
+        [
+          "Additional income statement",
+          "(\"additional income\" OR \"supplementary income\") (business OR project)"
+        ],
+        [
+          "Parallel project",
+          "(\"side project\" OR \"additional business\") (job OR professional)"
+        ],
+        [
+          "Independent business training",
+          "(\"entrepreneurial training\" OR \"independent business\") (wellness OR direct selling)"
+        ]
+      ],
+      "business_seeking": [
+        [
+          "New business project",
+          "(\"new business project\" OR \"starting a business\")"
+        ],
+        [
+          "Independent business",
+          "(\"become self employed\" OR \"start my own business\")"
+        ],
+        [
+          "Partnership search",
+          "(\"looking for a business partner\" OR \"seeking partnerships\")"
+        ],
+        [
+          "Professional diversification",
+          "(\"new professional opportunities\" OR diversification) entrepreneur"
+        ],
+        [
+          "Wellness project",
+          "(\"wellness business\" OR \"health and wellness project\") (partnership OR business)"
+        ]
+      ]
+    }
+  },
+  "search_modifiers": {
+    "customers": [
+      [
+        "omega 3",
+        "acidi grassi",
+        "benessere personalizzato"
+      ],
+      [
+        "BalanceTest",
+        "test acidi grassi",
+        "misurazione"
+      ],
+      [
+        "integrazione alimentare",
+        "omega-3",
+        "stile di vita"
+      ]
+    ],
+    "wellness_pro": [
+      [
+        "nutrizione",
+        "omega-3",
+        "educazione al benessere"
+      ],
+      [
+        "test acidi grassi",
+        "misurazione",
+        "consulenza nutrizionale"
+      ],
+      [
+        "benessere",
+        "integrazione alimentare",
+        "collaborazione professionale"
+      ]
+    ],
+    "wellness_networker": [
+      [
+        "network marketing wellness",
+        "vendita diretta benessere",
+        "nutrizione"
+      ],
+      [
+        "sviluppo team",
+        "wellness",
+        "integrazione alimentare"
+      ],
+      [
+        "collaborazione",
+        "network marketing",
+        "benessere"
+      ]
+    ],
+    "new_networker": [
+      [
+        "iniziare nel network marketing",
+        "wellness",
+        "formazione"
+      ],
+      [
+        "nuovo distributore",
+        "benessere",
+        "vendita diretta"
+      ],
+      [
+        "primi clienti",
+        "nutrizione",
+        "supporto commerciale"
+      ]
+    ],
+    "other_networker": [
+      [
+        "network marketing",
+        "benessere",
+        "nuovi progetti"
+      ],
+      [
+        "vendita diretta",
+        "wellness",
+        "collaborazione"
+      ],
+      [
+        "sviluppo team",
+        "nutrizione",
+        "business"
+      ]
+    ],
+    "exnetworker": [
+      [
+        "esperienza network marketing",
+        "benessere",
+        "nuovo progetto"
+      ],
+      [
+        "vendita diretta",
+        "nutrizione",
+        "collaborazione"
+      ],
+      [
+        "nuovo percorso professionale",
+        "wellness",
+        "formazione"
+      ]
+    ],
+    "entrepreneur": [
+      [
+        "imprenditore",
+        "benessere",
+        "partnership"
+      ],
+      [
+        "attività professionale",
+        "nutrizione",
+        "collaborazione"
+      ],
+      [
+        "sviluppo commerciale",
+        "wellness",
+        "nuovo progetto"
+      ]
+    ],
+    "side_income": [
+      [
+        "attività extra",
+        "benessere",
+        "vendita diretta"
+      ],
+      [
+        "lavoro part-time",
+        "wellness",
+        "progetto flessibile"
+      ],
+      [
+        "seconda attività",
+        "nutrizione",
+        "formazione"
+      ]
+    ],
+    "business_seeking": [
+      [
+        "attività imprenditoriale",
+        "wellness",
+        "vendita diretta"
+      ],
+      [
+        "nuovo progetto",
+        "benessere",
+        "business"
+      ],
+      [
+        "attività indipendente",
+        "nutrizione",
+        "formazione"
+      ]
+    ]
+  },
+  "consultant_channels": {
+    "general_website": {
+      "url": "https://misura-test-benessere.netlify.app",
+      "label": "Misura Test Benessere",
+      "role": "sito generale del metodo e del benessere",
+      "company_branding": "neutro",
+      "use": "Primo punto di ingresso per persone interessate a misurazione, consapevolezza e benessere; non presentarlo come sito ufficiale Zinzino."
+    },
+    "company_website": {
+      "url": "https://www.zinzino.com/2017234122",
+      "label": "Sito replica personale Zinzino",
+      "role": "approfondimento personale su prodotti e proposta Zinzino",
+      "company_branding": "Zinzino",
+      "use": "Condividerlo quando il contatto ha già manifestato interesse specifico per Zinzino, i suoi prodotti o la collaborazione."
+    }
+  },
+  "official_materials": {
+    "product_catalogue": {
+      "status": "da_caricare",
+      "source": "Catalogo ufficiale Zinzino valido per l'Italia"
+    },
+    "compensation_plan": {
+      "status": "da_caricare",
+      "source": "Piano compensi ufficiale Zinzino vigente in Italia"
+    },
+    "product_training": {
+      "status": "da_caricare",
+      "source": "Materiali ufficiali di formazione prodotto"
+    },
+    "compliance_guidelines": {
+      "status": "da_caricare",
+      "source": "Policy, claim e linee guida ufficiali"
+    },
+    "brand_presentation": {
+      "status": "da_caricare",
+      "source": "Presentazione aziendale ufficiale aggiornata"
+    }
+  },
+  "guardrails": [
+    "Non inventare prezzi, commissioni, qualifiche, risultati o caratteristiche di prodotto.",
+    "Non formulare promesse di reddito o affermazioni mediche.",
+    "Distinguere informazioni ufficiali, contenuti pubblici di terzi e ipotesi da verificare.",
+    "Non presentare una persona come interessata a una collaborazione senza un segnale pubblico esplicito.",
+    "Non confondere il sito generale Misura Test Benessere con il sito ufficiale o replica Zinzino.",
+    "Non inserire automaticamente link commerciali in ogni primo messaggio: scegliere il sito in base all'interesse espresso dal contatto.",
+    "Rispettare le regole applicabili in materia di privacy, protezione dei dati e contatti commerciali."
+  ]
+}

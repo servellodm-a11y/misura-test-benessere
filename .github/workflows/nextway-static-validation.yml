@@ -2,7 +2,7 @@ name: NEXTWAY static validation
 
 on:
   push:
-    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration]
+    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config]
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
@@ -20,6 +20,11 @@ on:
       - "nextway-ai.html"
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
+      - "nextway-workspace-commercial-config.js"
+      - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
+      - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
+      - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "docs/companies/zinzino/workspace-commercial-settings.json"
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-company-config.mjs"
       - "scripts/test-nextway-manual-lead-review-sql.mjs"
@@ -70,6 +75,11 @@ on:
       - "nextway-ai.html"
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
+      - "nextway-workspace-commercial-config.js"
+      - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
+      - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
+      - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "docs/companies/zinzino/workspace-commercial-settings.json"
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-manual-lead-review-sql.mjs"
       - "scripts/test-nextway-company-config.mjs"
@@ -203,6 +213,8 @@ jobs:
         run: python3 scripts/test-nextway-local-static.py
       - name: Validate Zinzino company configuration and search integration
         run: node scripts/test-nextway-company-config.mjs
+      - name: Validate workspace commercial configuration
+        run: node scripts/test-nextway-workspace-commercial-config.mjs
       - name: Validate NEXTWAY manual Lead review contract
         run: node scripts/test-nextway-manual-lead-review-sql.mjs
       - name: Validate NEXTWAY Lead sync duplicate reconciliation contract

@@ -64,6 +64,23 @@ assert.match(js, /textContent/);
 assert.doesNotMatch(js, /\.innerHTML\s*=/, "Untrusted admin data must not be rendered through innerHTML");
 assert.doesNotMatch(js, /service[_-]?role|SUPABASE_SERVICE_ROLE_KEY/i, "Service-role credentials must never appear in browser code");
 assert.match(js, /Nessuna email o invito è stato inviato/);
+assert.ok(html.includes('nextway-workspace-commercial-config.js'), 'Admin must load the commercial config validator');
+assert.ok(html.includes('workspace-readiness-panel'), 'Admin must expose a read-only workspace readiness preflight');
+assert.match(js, /function renderWorkspaceReadiness\(\)/);
+assert.match(js, /commercial_config: workspace\.settings\?\.commercial/);
+assert.match(js, /approvedDocuments > 0/);
+assert.match(js, /Prerequisiti essenziali della ricerca soddisfatti/);
+for (const id of ['workspace-commercial-config','load-zinzino-commercial-seed','commercial-config-json','save-commercial-config','commercial-config-status']) {
+  assert.ok(html.includes(id), 'Admin page missing commercial configuration control ' + id);
+}
+assert.match(js, /workspace-commercial-settings\.json/);
+assert.match(js, /NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG/);
+assert.match(js, /normalizer\.segments\.filter/);
+assert.match(js, /const settings = \{ \.\.\.\(workspace\.settings \|\| \{\}\), commercial \}/);
+assert.match(js, /action: "update_workspace", workspace_id: workspace\.id, settings/);
+assert.match(js, /confirm\("Salvare la configurazione commerciale/);
+assert.match(edge, /if \("settings" in body\)/);
+
 assert.match(edge, /profile\?\.role !== "platform_admin"/);
 assert.match(edge, /auth\.admin\.getUserById\(body\.user_id\)/);
 assert.match(edge, /approval_status: "approved"/);

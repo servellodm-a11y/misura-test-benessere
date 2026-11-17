@@ -216,6 +216,10 @@ assert.match(edge, /p_target_type:\s*targetType/,
   "archive records must preserve customer/partner/unknown classification");
 assert.match(edge, /classification\.includes\("cliente"\)/,
   "Italian customer classification must map to potential_customer");
+assert.match(ui, /target_type:p\.commercial_fit\?\.commercial_outcome===\'partner_potential\'\?\'potential_partner\':p\.commercial_fit\?\.commercial_outcome===\'customer_potential\'\?\'potential_customer\':\'unknown\'/,
+  "the UI must pass the explicit commercial outcome to central identity storage");
+assert.match(edge, /requestedTargetType === "potential_partner" \|\| requestedTargetType === "potential_customer"/,
+  "the Edge Function must prefer a validated explicit prospect type and retain legacy classification fallback");
 assert.match(edge, /new_networker: "other_networker"/,
   "new networkers must map into the supported other-networker archive segment");
 assert.match(edge, /exnetworker: "other_networker"/,
@@ -290,6 +294,12 @@ assert.match(ui, /record\.archive_status==='acquired'\|\|record\.crm_match===tru
   "an acquired CRM match must show the acquired label even when archive history exists");
 assert.match(ui, /Già acquisito nel CRM/,
   "the UI must prevent reacquiring identities already acquired in the shared CRM");
+assert.match(ui, /prospect\.crm_match=record\.crm_match===true/,
+  "CRM duplicate matches must be retained on the prospect object, not only in presentation state");
+assert.match(ui, /dailyEntry\.crm_match===true\|\|dailyEntry\.central_identity_blocked===true\|\|dailyEntry\.central_identity_ambiguous===true/,
+  "the manual capture handler must independently reject CRM matches and ambiguous central identities");
+assert.match(ui, /record\.archive_status===\'acquired\'\|\|record\.crm_match===true/,
+  "the UI must block capture for every authoritative acquired CRM match");
 assert.match(ui, /central_identity_ambiguous/,
   "ambiguous shared identity matches must be surfaced to the operator");
 assert.match(ui, /Duplicato centrale da verificare/,

@@ -7,7 +7,7 @@
     if (!cloud) return;
 
     const $ = (id) => document.getElementById(id);
-    const state = { workspaces: [], profiles: [], memberships: [], documents: [] };
+    const state = { workspaces: [], profiles: [], memberships: [], documents: [], prompts: [], criteria: [] };
     const status = (message) => { $("admin-status").textContent = message; };
 
     function node(tag, text, className) {
@@ -261,9 +261,126 @@
     async function loadSelectedWorkspace() {
       const workspace = selectedWorkspace();
       const moduleInput = $("knowledge-upload").elements.namedItem("module_key");
+      const commercialEditor = $("commercial-config-json");
+      const commercialCurrent = $("commercial-config-current");
       if (workspace && moduleInput && !moduleInput.value.trim()) moduleInput.value = workspace.workspace_key.slice(0, 64);
+      if (commercialEditor) commercialEditor.value = workspace?.settings?.commercial ? JSON.stringify(workspace.settings.commercial, null, 2) : "";
+      if (commercialCurrent) commercialCurrent.textContent = workspace?.settings?.commercial ? "Configurazione commerciale presente · " + workspace.name : (workspace ? "Configurazione commerciale non ancora impostata · " + workspace.name : "Seleziona un workspace.");
+      if (!workspace) {
+        state.memberships = [];
+        state.documents = [];
+        state.prompts = [];
+        state.criteria = [];
+        renderWorkspaceReadiness();
+        return;
+      }
       await Promise.all([loadMemberships(), loadDocuments(), loadGovernance()]);
+      renderWorkspaceReadiness();
     }
+
+    function renderWorkspaceReadiness() {
+      const target = $("workspace-readiness");
+      if (!target) return;
+      target.replaceChildren();
+      const workspace = selectedWorkspace();
+      if (!workspace) {
+        target.textContent = "Seleziona un workspace.";
+        return;
+      }
+      const checks = [];
+      checks.push({ label: "Workspace attivo", ok: workspace.status === "active", detail: "Stato: " + workspace.status });
+      let commercialOk = false;
+      let commercialDetail = "Configurazione commerciale assente.";
+      try {
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG?.normalize;
+        if (!normalizer) throw new Error("Validatore non caricato.");
+        normalizer({
+          commercial_config: workspace.settings?.commercial,
+          workspace_key: workspace.workspace_key,
+          partner_name: workspace.partner_name,
+          workspace_name: workspace.name,
+          market_country: workspace.market_country,
+          language_code: workspace.language_code
+        });
+        commercialOk = true;
+        commercialDetail = "Configurazione valida: 9 segmenti, criteri e query IT/EN.";
+      } catch (error) {
+        commercialDetail = error.message;
+      }
+      checks.push({ label: "Configurazione commerciale", ok: commercialOk, detail: commercialDetail });
+      const activeMemberships = state.memberships.filter(item => item.membership_status === "active").length;
+      checks.push({ label: "Membri attivi", ok: activeMemberships > 0, detail: activeMemberships + " membership attive." });
+      const approvedDocuments = state.documents.filter(item => item.approval_status === "approved").length;
+      checks.push({ label: "Knowledge Base", ok: approvedDocuments > 0, optional: true, detail: approvedDocuments + " documenti approvati; requisito consigliato, non blocca la ricerca prospect." });
+      const activePrompts = state.prompts.filter(item => item.status === "active").length;
+      const activeCriteria = state.criteria.filter(item => item.status === "active").length;
+      checks.push({ label: "Istruzioni AI attive", ok: activePrompts > 0, optional: true, detail: activePrompts + " versioni attive." });
+      checks.push({ label: "Criteri di qualificazione attivi", ok: activeCriteria > 0, optional: true, detail: activeCriteria + " versioni attive." });
+      checks.forEach(check => {
+        const line = node("p", undefined, "item");
+        line.append(node("strong", (check.ok ? "OK · " : check.optional ? "DA PREPARARE · " : "BLOCCANTE · ") + check.label));
+        line.append(node("span", check.detail, "muted"));
+        target.append(line);
+      });
+      const blockers = checks.filter(check => !check.ok && !check.optional);
+      const optional = checks.filter(check => !check.ok && check.optional);
+      const summary = node("p", blockers.length ? "Ricerca non pronta: " + blockers.length + " prerequisiti bloccanti." : "Prerequisiti essenziali della ricerca soddisfatti. Nessuna attivazione è stata eseguita.");
+      summary.style.fontWeight = "700";
+      target.prepend(summary);
+      if (optional.length) target.append(node("p", "Da completare per una configurazione più completa: " + optional.map(item => item.label).join(", ") + ".", "muted"));
+    }
+
+    $("load-zinzino-commercial-seed").addEventListener("click", async () => {
+      const target = $("commercial-config-status");
+      const button = $("load-zinzino-commercial-seed");
+      button.disabled = true;
+      try {
+        const response = await fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("File seed Zinzino non disponibile (HTTP " + response.status + ").");
+        const seed = await response.json();
+        $("commercial-config-json").value = JSON.stringify(seed, null, 2);
+        target.textContent = "Modello Zinzino caricato nell'editor. Non è stato ancora salvato.";
+      } catch (error) {
+        target.textContent = "Caricamento non riuscito: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("save-commercial-config").addEventListener("click", async () => {
+      const button = $("save-commercial-config");
+      const target = $("commercial-config-status");
+      const workspace = selectedWorkspace();
+      if (!workspace) { target.textContent = "Seleziona prima un workspace."; return; }
+      button.disabled = true;
+      try {
+        const commercial = JSON.parse($("commercial-config-json").value || "{}");
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) throw new Error("Validatore della configurazione commerciale non caricato.");
+        const normalized = normalizer.normalize({
+          workspace_id: workspace.id,
+          workspace_key: workspace.workspace_key,
+          workspace_name: workspace.name,
+          partner_name: workspace.partner_name,
+          market_country: workspace.market_country,
+          language_code: workspace.language_code,
+          commercial_config: commercial
+        });
+        const missingSegments = normalizer.segments.filter(segment => !normalized.searchModifiers[segment]?.length);
+        if (missingSegments.length) throw new Error("Criteri mancanti per: " + missingSegments.join(", "));
+        if (!confirm("Salvare la configurazione commerciale " + normalized.name + " nel workspace " + workspace.name + "?")) return;
+        const settings = { ...(workspace.settings || {}), commercial };
+        await adminAction({ action: "update_workspace", workspace_id: workspace.id, settings });
+        await loadWorkspaces();
+        target.textContent = "Configurazione commerciale salvata nel workspace " + workspace.name + ". La ricerca la leggerà al prossimo caricamento.";
+        status("Configurazione commerciale aggiornata.");
+      } catch (error) {
+        target.textContent = "Configurazione non salvata: " + error.message;
+        status("Salvataggio configurazione commerciale non completato: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     $("workspace-create").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -349,9 +466,12 @@
         adminAction({ action: "list_prompts", workspace_id: workspace.id }),
         adminAction({ action: "list_criteria", workspace_id: workspace.id })
       ]);
-      renderGovernanceItems(promptsTarget, prompts.items || [], "prompt");
-      renderGovernanceItems(criteriaTarget, criteria.items || [], "criteria");
-      status("Istruzioni AI: " + (prompts.items || []).length + " · Criteri: " + (criteria.items || []).length + ".");
+      state.prompts = prompts.items || [];
+      state.criteria = criteria.items || [];
+      renderGovernanceItems(promptsTarget, state.prompts, "prompt");
+      renderGovernanceItems(criteriaTarget, state.criteria, "criteria");
+      renderWorkspaceReadiness();
+      status("Istruzioni AI: " + state.prompts.length + " · Criteri: " + state.criteria.length + ".");
     }
 
     function renderGovernanceItems(target, items, kind) {

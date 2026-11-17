@@ -394,8 +394,11 @@ Deno.serve(async (req: Request) => {
       )])].filter(Boolean).slice(0, 20);
       const fingerprints = await Promise.all(normalizedKeys.map(sha256));
       const classification = cleanString(prospect.classification, 80).toLocaleLowerCase("it");
-      const targetType = classification.includes("partner") ? "potential_partner" :
-        (classification.includes("client") || classification.includes("cliente")) ? "potential_customer" : "unknown";
+      const requestedTargetType = cleanString(prospect.target_type, 40);
+      const targetType = requestedTargetType === "potential_partner" || requestedTargetType === "potential_customer"
+        ? requestedTargetType
+        : classification.includes("partner") ? "potential_partner" :
+          (classification.includes("client") || classification.includes("cliente")) ? "potential_customer" : "unknown";
       // The client cannot attest CRM acquisition or human review. The protected RPC accepts only "seen";
       // existing trusted states (acquired/reviewed/ignored) are preserved by the database merge.
       const archiveStatus = "seen";

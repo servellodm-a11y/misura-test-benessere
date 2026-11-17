@@ -36,8 +36,12 @@ for (const key of ['productCatalogue', 'compensationPlan', 'productTraining', 'c
 
 const searchHtml = fs.readFileSync('nextway-motore-ricerca.html', 'utf8');
 const archiveHtml = fs.readFileSync('nextway-ai.html', 'utf8');
-assert.ok(searchHtml.includes('<script src="/nextway-company-config.js"></script>'));
-assert.ok(searchHtml.includes('const activeCompany=companyConfig?.active||null'));
+assert.ok(searchHtml.includes('<script src="/nextway-workspace-commercial-config.js"></script>'));
+assert.ok(searchHtml.includes('let activeCompany=null;'));
+assert.ok(searchHtml.includes("clientSession.rpc('nextway_get_workspace_commercial_config'"));
+assert.ok(searchHtml.includes('loadWorkspaceCommercialConfig(s,searchWorkspaceId)'));
+assert.ok(searchHtml.includes('setWorkspaceCommercialStatus'));
+assert.ok(!searchHtml.includes("company_id:activeCompany?.id||'zinzino'"));
 assert.ok(searchHtml.includes('const companyTerms=activeCompany?.searchModifiers?.[seg]||[]'));
 assert.ok(searchHtml.includes('function createMessageDraftPanel('));
 assert.ok(searchHtml.includes('Sito da proporre (facoltativo)'));
@@ -345,7 +349,7 @@ assert.ok(messageScript, 'Inline search script with message drafts must exist');
 new vm.Script(messageScript, { filename: 'nextway-motore-ricerca.inline.js' });
 
 assert.ok(searchHtml.includes('company_id:activeCompany?.id||null'));
-assert.ok(searchHtml.includes(`company_id:activeCompany?.id||'zinzino'`));
+assert.ok(searchHtml.includes(`company_id:activeCompany?.id||''`));
 assert.ok(archiveHtml.includes(`partner_company_id:String(record.company_id||'zinzino')`));
 assert.ok(archiveHtml.includes(`partner_company_name:String(record.company_name||'Zinzino')`));
 assert.ok(archiveHtml.includes("'partner_company_id','partner_company_name'"));
