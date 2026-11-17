@@ -3052,6 +3052,14 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ---
 
+
+
+### Conferma operativa Fast Start Zinzino — 17 novembre 2026
+- Il titolare del progetto conferma che la sequenza Fast Start attualmente applicata è: 4 punti cliente; 2 Partner con Ultimate Partner Kit (uno a sinistra e uno a destra); duplicazione dei due Partner; ulteriori 10 punti cliente (4 + 6).
+- Questa sequenza è stata registrata nella guida italiana, nel confronto documentale e nella base commerciale JSON come conferma operativa dell'utente per NEXTWAY, non come attestazione aziendale indipendente.
+- Il master EU 2025 resta il riferimento ufficiale assunto per NEXTWAY sulla base della conferma dell'utente. Le condizioni dei bonus Fast Start 60/90 giorni restano subordinate al regolamento della campagna specifica.
+- I calcoli automatici di commissioni e qualifiche restano disabilitati finché le restanti regole e formule non sono state strutturate e testate.
+
 ## 17 novembre 2026 — Riconciliazione catena prospect e configurazione commerciale
 
 ### Stato GitHub e integrazione
