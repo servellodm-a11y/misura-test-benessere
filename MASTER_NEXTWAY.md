@@ -3227,3 +3227,15 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - API esposte al runtime: risoluzione esplicita audience `customer` / `partner`, accesso al solo catalogo della rispettiva audience, ricerca offerta per ID e controllo fail-closed dei calcoli compensi.
 - Admin UI aggiornata: il pulsante “Carica configurazione Zinzino” carica insieme il seed di ricerca e `commercial-base.v1.json`, li valida e li propone come singola configurazione da salvare nel workspace. Il salvataggio resta esplicito e protetto.
 - Test contrattuali estesi per separazione audience, lookup offerte, mismatch brand e blocco calcoli compensi. Nessun import automatico nel DB, nessuna attivazione e nessun deploy.
+
+
+## 17 novembre 2026 — Audience commerciale esplicita in CRM e AI Setter
+
+- Nuovo branch `feat/nextway-commercial-audience-setter-20261117`.
+- Nuova migrazione candidata `20261117170000_nextway_lead_commercial_audience.sql`: aggiunge `nextway_leads.commercial_audience` con valori ammessi `customer` e `partner`; i Lead esistenti restano NULL (non viene inventata una classificazione retroattiva).
+- Nuova RPC idempotente `nextway_create_lead_with_conversation_commercial_v3`: richiede audience esplicita e delega la creazione alla RPC workspace-aware esistente, poi associa il percorso al Lead autenticato nel medesimo workspace. Accesso concesso solo ad authenticated; anon/PUBLIC revocati.
+- AI Setter UI: scelta obbligatoria Cliente/Partner separata dalla categoria descrittiva del prospect; il valore è incluso nel payload idempotente e inviato alla nuova RPC.
+- Edge Function AI Setter: legge l'audience persistita e, se il Lead appartiene a un workspace, recupera la configurazione commerciale tramite RPC autorizzata. Inietta soltanto il catalogo Cliente oppure Partner coerente con l'audience.
+- Per Zinzino, generazione bloccata se manca la base commerciale o se il Lead è ancora non classificato. Regole esplicite: prezzi snapshot da verificare; nessun calcolo commissioni/qualifiche finché il piano italiano ufficiale non è validato.
+- Test contrattuale aggiunto: `scripts/test-nextway-commercial-audience-setter.mjs` (12 asserzioni). Nessun test end-to-end reale ancora eseguito.
+- Migrazione NON applicata e Edge Function NON deployata; PR e CI da completare prima dell'applicazione. Nessun workspace creato/attivato e nessun deploy Netlify.

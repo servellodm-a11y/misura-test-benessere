@@ -57,7 +57,14 @@
             <label>Nome / identificativo pubblico *
               <input name="display_name" maxlength="120" required>
             </label>
-            <label>Categoria *
+            <label>Percorso commerciale *
+              <select name="commercial_audience" required>
+                <option value="">Seleziona Cliente o Partner</option>
+                <option value="customer">Cliente — prodotti, Shop e abbonamenti</option>
+                <option value="partner">Partner — kit, attività e piano compensi</option>
+              </select>
+            </label>
+            <label>Categoria del prospect *
               <select name="category">
                 <option value="potential_partner">Potenziale partner</option>
                 <option value="final_customer">Cliente finale</option>
@@ -119,6 +126,7 @@
       return payload && typeof payload === 'object'
         && typeof payload.display_name === 'string'
         && typeof payload.category === 'string'
+        && ['customer','partner'].includes(payload.commercial_audience)
         && typeof payload.source_name === 'string'
         && typeof payload.source_url === 'string'
         && typeof payload.public_evidence === 'string'
@@ -414,6 +422,7 @@
           : {
               display_name: formValues.display_name.trim(),
               category: formValues.category,
+              commercial_audience: formValues.commercial_audience,
               source_name: formValues.source_name.trim(),
               source_url: formValues.source_url.trim(),
               public_evidence: formValues.public_evidence.trim(),
@@ -434,12 +443,12 @@
         const createRequest = await prepareLeadCreateRequest(values, s.user.id);
         say('Creazione prospect e conversazione…');
         const workspaceId = values.workspace_id || null;
-        const rpcName = workspaceId
-          ? 'nextway_create_lead_with_conversation_idempotent_v2'
-          : 'nextway_create_lead_with_conversation_idempotent';
+        const rpcName = 'nextway_create_lead_with_conversation_commercial_v3';
         const rpcArgs = {
           p_request_id: createRequest.request_id,
           p_request_hash: createRequest.request_hash,
+          p_workspace_id: workspaceId,
+          p_commercial_audience: values.commercial_audience,
           p_display_name: values.display_name,
           p_category: values.category,
           p_source_name: values.source_name,
@@ -448,7 +457,6 @@
           p_objective: values.objective,
           p_channel: values.channel
         };
-        if (workspaceId) rpcArgs.p_workspace_id = workspaceId;
         const { data, error } = await c.rpc(rpcName, rpcArgs);
         if (error) throw error;
         const result = Array.isArray(data) ? data[0] : data;

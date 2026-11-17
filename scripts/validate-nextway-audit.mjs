@@ -12,6 +12,7 @@ const audit = read("../supabase/migrations/20261110000900_nextway_lead_audit_tra
 const archiveSchema = read("../supabase/migrations/20261110000800_nextway_leads_soft_archive.sql");
 const privacy = read("../supabase/migrations/20261110001000_nextway_audit_data_minimization.sql");
 const leadCreationIdempotency = read("../supabase/migrations/20261110001100_nextway_lead_creation_idempotency.sql");
+const commercialAudienceMigration = read("../supabase/migrations/20261117170000_nextway_lead_commercial_audience.sql");
 const leadActivities = read("../supabase/migrations/20261110001200_nextway_lead_activities.sql");
 const leadLifecycle = read("../supabase/migrations/20261110001300_nextway_lead_lifecycle.sql");
 const leadConversion = read("../supabase/migrations/20261110001400_nextway_lead_conversion_requests.sql");
@@ -225,7 +226,10 @@ assert.match(setter, /const PENDING_LEAD_CREATE_KEY = 'nextway_setter_pending_le
 assert.match(setter, /sessionStorage\.setItem\(PENDING_LEAD_CREATE_KEY/);
 assert.match(setter, /sessionStorage\.getItem\(PENDING_LEAD_CREATE_KEY/);
 assert.match(setter, /crypto\.subtle\.digest\('SHA-256'/);
-assert.match(setter, /nextway_create_lead_with_conversation_idempotent/);
+assert.match(setter, /nextway_create_lead_with_conversation_commercial_v3/);
+assert.ok(setter.includes("p_commercial_audience: values.commercial_audience"));
+assert.match(commercialAudienceMigration, /nextway_create_lead_with_conversation_idempotent_v2/);
+assert.ok(commercialAudienceMigration.includes("commercial_audience in ('customer','partner')"));
 assert.match(setter, /p_request_id: createRequest\.request_id/);
 assert.match(setter, /p_request_hash: createRequest\.request_hash/);
 assert.match(setter, /clearPendingLeadCreateRequest\(\)/);

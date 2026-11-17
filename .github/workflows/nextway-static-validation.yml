@@ -24,6 +24,7 @@ on:
       - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
       - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
       - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "scripts/test-nextway-commercial-audience-setter.mjs"
       - "docs/companies/zinzino/workspace-commercial-settings.json"
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-company-config.mjs"
@@ -79,6 +80,7 @@ on:
       - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
       - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
       - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "scripts/test-nextway-commercial-audience-setter.mjs"
       - "docs/companies/zinzino/workspace-commercial-settings.json"
       - "docs/companies/zinzino/**"
       - "scripts/test-nextway-manual-lead-review-sql.mjs"
@@ -217,6 +219,8 @@ jobs:
         run: node scripts/test-nextway-company-config.mjs
       - name: Validate workspace commercial configuration
         run: node scripts/test-nextway-workspace-commercial-config.mjs
+      - name: Validate NEXTWAY commercial audience and AI Setter integration
+        run: node scripts/test-nextway-commercial-audience-setter.mjs
       - name: Validate NEXTWAY manual Lead review contract
         run: node scripts/test-nextway-manual-lead-review-sql.mjs
       - name: Validate NEXTWAY Lead sync duplicate reconciliation contract
