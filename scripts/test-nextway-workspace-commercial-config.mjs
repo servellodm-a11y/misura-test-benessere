@@ -6,7 +6,7 @@ const source=fs.readFileSync('nextway-workspace-commercial-config.js','utf8');
 const sandbox={window:{}};
 vm.runInNewContext(source,sandbox);
 const api=sandbox.window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
-assert.equal(api.version,1);
+assert.equal(api.version,2);
 assert.equal(api.segments.length,9);
 const allModifiers=Object.fromEntries(api.segments.map(segment=>[segment,segment==='customers'?[['omega 3','BalanceTest']]:['termine '+segment]]));
 const allQueries={
@@ -14,7 +14,7 @@ const allQueries={
   en:Object.fromEntries(api.segments.map(segment=>[segment,[[segment,'english query '+segment]]]))
 };
 const baseCommercial={
-  company:{id:'zinzino',name:'Zinzino',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
+  company:{id:'test-brand',name:'Test Brand',sector:['benessere','nutrizione'],positioning:'Configurazione test'},
   brand_terms:['zinzino','balancetest'],
   search_queries:allQueries,
   search_modifiers:allModifiers,
@@ -26,8 +26,8 @@ const valid=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',
   commercial_config:baseCommercial
 });
-assert.equal(valid.id,'zinzino');
-assert.equal(valid.name,'Zinzino');
+assert.equal(valid.id,'test-brand');
+assert.equal(valid.name,'Test Brand');
 assert.equal(valid.workspaceId,'ws-1');
 assert.deepEqual([...valid.brandTerms],['zinzino','balancetest']);
 assert.equal(valid.searchQueries.it.customers[0][1],'query italiana customers');
@@ -46,9 +46,12 @@ const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',com
 assert.equal(Object.keys(badUrl.consultantChannels).length,0);
 
 const seed=JSON.parse(fs.readFileSync('docs/companies/zinzino/workspace-commercial-settings.json','utf8'));
+const commercialData=JSON.parse(fs.readFileSync('docs/companies/zinzino/commercial-base.v1.json','utf8'));
+const integratedSeed={...seed,commercial_data:commercialData};
+assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:seed}),/Base commerciale Zinzino Cliente\/Partner obbligatoria/);
 const seedWorkspace=api.normalize({
   workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
-  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:seed
+  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
 });
 for(const segment of api.segments){
   assert.ok(seedWorkspace.searchModifiers[segment].length>0, 'Missing Zinzino modifiers: '+segment);
@@ -58,6 +61,34 @@ for(const segment of api.segments){
 assert.equal(Object.keys(seedWorkspace.officialMaterials).length,5);
 assert.ok(Object.values(seedWorkspace.officialMaterials).every(item=>item.status==='da_caricare'));
 assert.ok(seedWorkspace.guardrails.some(rule=>rule.includes('promesse di reddito')));
+
+// Commercial base is attached by the admin loader and stored in the same
+// protected workspace commercial settings document.
+const integrated=api.normalize({
+  workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
+  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
+});
+assert.equal(integrated.commercialData.schema_version,1);
+assert.equal(integrated.commercialData.customer.premier_kits.offers.length,8);
+assert.equal(integrated.commercialData.partner.partner_kits.offers.length,4);
+assert.equal(api.resolveAudience('customer'),'customer');
+assert.equal(api.resolveAudience('partner'),'partner');
+assert.equal(api.resolveAudience('cliente'),null,'Audience must be explicit, not guessed');
+assert.ok(api.getAudienceCatalog(integrated,'customer').premier_kits);
+assert.ok(api.getAudienceCatalog(integrated,'partner').partner_kits);
+assert.equal(api.getOffer(integrated,'customer','viva-plus-kit-910277').recurring_amount_eur,31);
+assert.equal(api.getOffer(integrated,'partner','basic-kit').standard_price_snapshot_eur,556);
+assert.equal(api.getOffer(integrated,'customer','basic-kit'),null,'Partner offers must not leak into customer catalog');
+assert.equal(api.getOffer(integrated,'partner','viva-plus-kit-910277'),null,'Customer offers must not leak into partner catalog');
+assert.equal(api.canCalculateCompensation(integrated),false,'Unverified compensation plan must never calculate');
+const otherBrand={...integratedSeed,commercial_data:{...commercialData,company:{...commercialData.company,id:'other-brand'}}};
+assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:otherBrand}),/brand diverso/);
+const unsafeCompensation={...integratedSeed,commercial_data:{...commercialData,partner:{...commercialData.partner,compensation_plan:{...commercialData.partner.compensation_plan,calculations_enabled:true,rules:[{rate:99}]}}}};
+assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:unsafeCompensation}),/Calcoli compensi bloccati/);
+const adminJs=fs.readFileSync('nextway-admin.js','utf8');
+assert.ok(adminJs.includes('commercial-base.v1.json'),'Admin must load the structured commercial data file');
+assert.ok(adminJs.includes('seed.commercial_data = commercialData'),'Admin must attach the commercial base before save');
+assert.ok(adminJs.includes('normalizer.normalize('),'Admin must validate the integrated commercial config before save');
 
 const sql=fs.readFileSync('supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql','utf8');
 assert.match(sql,/security definer/i);

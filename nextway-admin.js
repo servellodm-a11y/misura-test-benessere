@@ -335,11 +335,23 @@
       const button = $("load-zinzino-commercial-seed");
       button.disabled = true;
       try {
-        const response = await fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" });
-        if (!response.ok) throw new Error("File seed Zinzino non disponibile (HTTP " + response.status + ").");
-        const seed = await response.json();
+        const [settingsResponse, dataResponse] = await Promise.all([
+          fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" }),
+          fetch("/docs/companies/zinzino/commercial-base.v1.json", { cache: "no-store" })
+        ]);
+        if (!settingsResponse.ok) throw new Error("File seed Zinzino non disponibile (HTTP " + settingsResponse.status + ").");
+        if (!dataResponse.ok) throw new Error("Base commerciale Zinzino non disponibile (HTTP " + dataResponse.status + ").");
+        const [seed, commercialData] = await Promise.all([settingsResponse.json(), dataResponse.json()]);
+        seed.commercial_data = commercialData;
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) throw new Error("Validatore della configurazione commerciale non caricato.");
+        normalizer.normalize({
+          workspace_key: "zinzino-italia",
+          workspace_name: "Zinzino Italia",
+          commercial_config: seed
+        });
         $("commercial-config-json").value = JSON.stringify(seed, null, 2);
-        target.textContent = "Modello Zinzino caricato nell'editor. Non è stato ancora salvato.";
+        target.textContent = "Modello di ricerca e base commerciale Cliente/Partner caricati. Non sono ancora stati salvati nel workspace.";
       } catch (error) {
         target.textContent = "Caricamento non riuscito: " + error.message;
       } finally {
@@ -372,7 +384,7 @@
         const settings = { ...(workspace.settings || {}), commercial };
         await adminAction({ action: "update_workspace", workspace_id: workspace.id, settings });
         await loadWorkspaces();
-        target.textContent = "Configurazione commerciale salvata nel workspace " + workspace.name + ". La ricerca la leggerà al prossimo caricamento.";
+        target.textContent = "Configurazione commerciale salvata nel workspace " + workspace.name + (normalized.commercialData ? ". Base Cliente/Partner collegata; le regole saranno disponibili al prossimo caricamento." : ". La base commerciale strutturata non è inclusa.");
         status("Configurazione commerciale aggiornata.");
       } catch (error) {
         target.textContent = "Configurazione non salvata: " + error.message;

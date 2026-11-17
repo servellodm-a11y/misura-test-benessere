@@ -3217,3 +3217,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il piano compensi italiano è censito ma non decodificato: calcoli e simulazioni Partner restano disabilitati finché il PDF ufficiale completo non è acquisito e validato.
 - La base è nel repository e nella PR #21; non è ancora importata nel workspace Supabase, il workspace Zinzino non è creato e il runtime non la consuma ancora.
 - Nessuna migrazione, modifica dati Supabase, attivazione workspace, deploy o test con utenti reali eseguito.
+
+
+## 17 novembre 2026 — Collegamento base commerciale al runtime workspace
+
+- PR #21 documentale è stata integrata in main dopo esito CI SUCCESS (run #973).
+- Nuovo branch `feat/nextway-commercial-data-runtime-20261117`: il normalizzatore workspace passa alla versione 2 e valida la base commerciale strutturata quando presente.
+- Per il workspace Zinzino la base Cliente/Partner è obbligatoria; la configurazione viene rifiutata se il brand ID non coincide, i cataloghi hanno ID mancanti/duplicati o il piano compensi viene marcato calcolabile senza stato ufficiale validato e regole.
+- API esposte al runtime: risoluzione esplicita audience `customer` / `partner`, accesso al solo catalogo della rispettiva audience, ricerca offerta per ID e controllo fail-closed dei calcoli compensi.
+- Admin UI aggiornata: il pulsante “Carica configurazione Zinzino” carica insieme il seed di ricerca e `commercial-base.v1.json`, li valida e li propone come singola configurazione da salvare nel workspace. Il salvataggio resta esplicito e protetto.
+- Test contrattuali estesi per separazione audience, lookup offerte, mismatch brand e blocco calcoli compensi. Nessun import automatico nel DB, nessuna attivazione e nessun deploy.
