@@ -594,24 +594,29 @@
   },
   "official_materials": {
     "product_catalogue": {
-      "status": "da_caricare",
-      "source": "Catalogo ufficiale Zinzino valido per l'Italia"
+      "status": "preparato_non_importato",
+      "source": "Catalogo Partner Kit, Premier Kit e Shop Italia; knowledge/shop-catalog-index.md e premier-kit-catalog-validation.md; 8 documenti nel manifest KB",
+      "market": "Italia"
     },
     "compensation_plan": {
-      "status": "da_caricare",
-      "source": "Piano compensi ufficiale Zinzino vigente in Italia"
+      "status": "20_regole_calcoli_disabilitati",
+      "source": "Master EU 2025 12/02/2025; knowledge/compensation-plan-eu-2025-structured-rules.md; T-Balance e campagne ancora bloccanti",
+      "market": "Europa/Italia"
     },
     "product_training": {
-      "status": "da_caricare",
-      "source": "Materiali ufficiali di formazione prodotto"
+      "status": "parziale_documentazione_pubblica",
+      "source": "Product Sheet BalanceTest 06/10/2026 e guide pubbliche; documentazione completa degli altri prodotti da acquisire",
+      "market": "Italia"
     },
     "compliance_guidelines": {
-      "status": "da_caricare",
-      "source": "Policy, claim e linee guida ufficiali"
+      "status": "policy_da_acquisire_guardrail_parziali",
+      "source": "Guardrail NEXTWAY su claim, privacy e promesse; policy ufficiali Zinzino complete da acquisire",
+      "market": "Italia/UE"
     },
     "brand_presentation": {
-      "status": "da_caricare",
-      "source": "Presentazione aziendale ufficiale aggiornata"
+      "status": "da_acquisire",
+      "source": "Presentazione aziendale ufficiale aggiornata per il mercato Italia",
+      "market": "Italia"
     }
   },
   "guardrails": [
@@ -621,6 +626,10 @@
     "Non presentare una persona come interessata a una collaborazione senza un segnale pubblico esplicito.",
     "Non confondere il sito generale Misura Test Benessere con il sito ufficiale o replica Zinzino.",
     "Non inserire automaticamente link commerciali in ogni primo messaggio: scegliere il sito in base all'interesse espresso dal contatto.",
-    "Rispettare le regole applicabili in materia di privacy, protezione dei dati e contatti commerciali."
+    "Rispettare le regole applicabili in materia di privacy, protezione dei dati e contatti commerciali.",
+    "Non acquisire nel CRM prospecting ID BalanceTest, referti, valori individuali o questionari: possono contenere dati relativi alla salute.",
+    "Non ricostruire o simulare il Valore di Protezione BalanceTest: la formula completa di normalizzazione non è pubblicata.",
+    "Non usare la citazione 98/79/CE della scheda BalanceTest come verifica autonoma della conformità normativa attuale.",
+    "Per ogni prodotto verificare scheda italiana, disponibilità, ingredienti, allergeni, prezzo e checkout; non riutilizzare prezzi di snapshot."
   ]
 }
