@@ -3326,3 +3326,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - `getOffer()` ora esclude anche le voci `details_pending` e `listing_only_details_pending`, oltre alle discontinued. Restano selezionabili solo le offerte che hanno superato la validazione commerciale prevista.
 - Test contrattuali aggiornati: 35 voci totali; due offerte listing-only non selezionabili; un'offerta già validata resta selezionabile.
 - Nessuna modifica DB, workspace, attivazione o deploy.
+
+
+## 17 novembre 2026 — Indice Premier Kit esteso e selezione protetta (PR #30)
+
+- PR #30 integrata con 19 ulteriori voci rilevate nel catalogo ufficiale italiano Premier Kit. L'indice strutturato passa da 16 a 35 voci.
+- Le 19 nuove voci riportano solo il prezzo mostrato nella scheda elenco (campo `catalogue_price_snapshot_eur`) e, dove visibile, il canone pubblicizzato (`displayed_subscription_eur_per_month`). Questi valori non vengono confusi con importi iniziali/condizioni contrattuali.
+- Tutte le nuove voci sono marcate `details_pending` / `listing_only_details_pending`; non sono selezionabili finché non vengono verificati singolarmente scheda, Credits, durata, contenuto, frequenza, prepagato e checkout.
+- Il runtime `getOffer()` esclude offerte discontinue e offerte listing-only non validate. Test contrattuali PR #30 run `44098505877`: SUCCESS; asserzioni su conteggio 35, gating di due voci e selezionabilità di un'offerta già validata.
+- PR #30 merge squash commit: `e103c22152887c4ec8e4a2c9be622dcd5530ba43`.
+- Nessuna modifica Supabase, workspace, attivazione o deploy Netlify.
