@@ -25,7 +25,7 @@ https://www.zinzino.com/site/it/it-it/partnerweb
 Il link "Il nostro Piano Compensi" sulla pagina porta a:
 https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf
 
-Il PDF è effettivamente il collegamento raggiunto dalla pagina Partner italiana. Il recupero automatico del PDF integrale non è riuscito perché il file è di circa 14,25 MB e il lettore web rifiuta file oltre il limite. **Non** sostituirlo con un PDF in altra lingua o con la versione 2021 trovata su archivi terzi. È possibile preparare la traduzione/strutturazione solo dopo aver acquisito il PDF italiano completo e verificato la data di validità stampata.
+Il PDF italiano è un collegamento distinto; per la configurazione commerciale NEXTWAY si assume come riferimento vigente il master ufficiale europeo in inglese `CompensationPlan_EU_eng.pdf`, versione 12/02/2025. L'utente ha confermato il 17/11/2026 che questa versione è tuttora in vigore senza modifiche anche per l'Italia. La conferma è registrata come dichiarazione dell'utente, non come verifica indipendente del portale aziendale. La guida italiana NEXTWAY è una sintesi originale e non una traduzione ufficiale integrale. Prima di attivare calcoli automatici, tutte le regole devono essere estratte, modellate e testate contro il master.
 
 ## B. Canale Cliente — Premier Kit
 
@@ -95,7 +95,8 @@ Regole contenute nel PDF:
 - [x] Schede ufficiali individuali di più Premier Kit consultate; differenze di abbonamento e Credits documentate.
 - [x] Shop ufficiale Italia individuato.
 - [x] Pagina Partner italiana e collegamento diretto al Piano Compensi italiano verificati.
-- [ ] PDF Piano Compensi italiano scaricato ed esaminato integralmente: bloccato dal limite tecnico di recupero del file da 14,25 MB. Non sostituire con traduzioni/vecchie versioni terze.
+- [x] Piano Compensi EU ufficiale, versione 12/02/2025, assunto come vigente in Italia a novembre 2026 sulla base della conferma esplicita dell'utente del 17/11/2026.
+- [ ] Regole, formule, soglie, requisiti, eccezioni e cicli del Piano Compensi da strutturare e validare con test prima di abilitare calcoli automatici.
 - [x] PDF ufficiale italiano Programma a premi Clienti consultato (versione 1 dicembre 2024).
 - [x] Regole sintetiche Zinzino4Free verificate sulla pagina ufficiale italiana (4 clienti con Premier Kit; Credits aggregati almeno 4 volte l'abbonamento del Cliente; abbonamento mensile gratuito, spedizione a carico del Cliente). Regolamento dettagliato e condizioni di eccezione: da acquisire.
 - [ ] Termini e condizioni generali italiani correnti verificati: il PDF trovato precedentemente è datato 2022-02 e non è sufficiente come fonte attuale.
@@ -182,3 +183,10 @@ Preparati nel repository quattro documenti italiani da importare nella Knowledge
 - Titolo: Zinzino Compensation Plan — Europe; versione impressa 12-02-2025; 60 pagine circa, testo indicizzato in 1.828 righe.
 - È stata preparata una scheda italiana di orientamento non ufficiale, non una traduzione integrale. Il documento stesso dichiara che la versione inglese prevale in caso di differenze di traduzione.
 - La pagina Partner Italia collega un PDF distinto in italiano; finché quel documento non è acquisito e riconciliato con la versione europea, la scheda inglese resta riferimento secondario/storico e i calcoli restano disabilitati.
+
+
+## Aggiornamento 17 novembre 2026 — conferma di vigenza Piano Compensi EU
+
+L'utente conferma che il documento ufficiale Zinzino Compensation Plan — Europe, versione 12/02/2025, è tuttora in vigore a novembre 2026 senza modifiche. NEXTWAY lo tratta quindi come fonte ufficiale vigente per il mercato Italia (incluso nel perimetro EU). La conferma di validità è attribuita all'utente e non viene descritta come verifica indipendente Zinzino.
+
+La scheda italiana nel repository è una guida originale, non una traduzione integrale. La base commerciale conserva i calcoli disabilitati finché non saranno strutturate e testate tutte le regole economiche e di qualifica.
