@@ -140,11 +140,36 @@ La sequenza NEXTWAY e il posizionamento un Partner per lato sono registrati sull
 ### Bonus azionari per i titoli superiori
 Il master riporta bonus in azioni: President 200.000 PP; Elite President 300.000 PP; Global President 500.000 PP; 1 Star Global President e ogni livello superiore 1.000.000 PP. Condizioni: raggiungere il titolo nell'anno solare; mantenere il titolo un livello sotto dal 1 gennaio al 30 marzo dell'anno seguente; valorizzazione in base al prezzo medio di febbraio; approvazione dell'Assemblea generale a maggio e consegna a settembre; lock-up di 6 mesi o quello imposto dalle autorità fiscali del paese di residenza.
 
+## 14. Enrollment Incentive Program e premi lifetime
+Per ogni nuovo Partner personalmente iscritto e qualificato entro 365 giorni, il piano riconosce:
+| Premier Customers del nuovo Partner | Credits inclusi ECB | Pay Points |
+|---:|---:|---:|
+| 1 | 150 | 50 |
+| 4 | 300 | 50 |
+| 10 | 600 | 100 |
+| 25 | 900 | 100 |
+
+I Credits derivano dagli ordini del Partner Kit personale e dalle vendite Premier Kit ai suoi Clienti personali. Il massimo per Partner è 300 PP.
+
+Per i premi lifetime si accumula un punto per ogni Partner personale per cui viene raggiunto il primo bonus del programma:
+- 5 Partner: biglietto Annual Event gratuito e Annual Leadership Day;
+- 10: T-shirt e voucher 1.000 PP;
+- 15: penna MontBlanc incisa;
+- 30: esperienza VIP Annual Event con 3 notti hotel;
+- 50: visita a Göteborg con 3 notti hotel e 500 EUR per voli;
+- 100: 10.000 PP;
+- 500: Hall of Fame.
+La qualifica deve essere raggiunta almeno 30 giorni prima dell'Annual Event; altrimenti il premio slitta all'evento dell'anno successivo.
+
+## 15. Incentive trips
+- Director Trip: viaggio educativo annuale; il piano indica che un nuovo Director è qualificato per un Director Trip.
+- Ambassador Trip: esperienza annuale riservata agli Ambassador attivi.
+- Le regole di dettaglio, i periodi di qualifica, le destinazioni e le condizioni di partecipazione sono rinviati ai regolamenti di campagna e non sono presenti nel piano generale.
+
 ## Regole ancora non pronte per calcolo
 - Formula/definizione operativa di T-Balance e logica OTB automatizzabile.
-- Verifica tecnica delle modalità alternative di avanzamento Ambassador/President tramite più Income Centers o Enrollment Lines.
 - Campagne Fast Start 60/90 giorni e qualsiasi importo promozionale.
-- Regole dettagliate dei viaggi incentivo e condizioni annuali.
-- Esempi numerici ufficiali e test indipendenti per formule, banking, compressione, più Income Centers e arrotondamenti.
+- Regolamenti annuali Director Trip e Ambassador Trip.
+- Esempi numerici ufficiali e test indipendenti per formule, banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus.
 
-**Stato:** estrazione di riferimento fase 1; non è un motore di calcolo. `calculations_enabled=false` resta obbligatorio.
+**Stato:** estrazione di riferimento fase 2; non è un motore di calcolo. `calculations_enabled=false` resta obbligatorio.
