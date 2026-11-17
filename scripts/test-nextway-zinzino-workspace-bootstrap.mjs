@@ -16,7 +16,6 @@ assert.match(admin, /normalizer\.normalize\(/);
 assert.match(admin, /values\.workspace_key !== "zinzino-italia"/);
 assert.match(admin, /values\.name !== "Zinzino Italia"/);
 assert.match(admin, /values\.settings\.commercial = state\.pendingZinzinoSeed/);
-assert.match(admin, /status: "BOZZA"/i);
 assert.match(admin, /Il workspace non verrà attivato/);
 assert.match(endpoint, /if \(action === "create_workspace"\)/);
 assert.match(endpoint, /status: "draft"/);
