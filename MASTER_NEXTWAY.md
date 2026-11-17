@@ -3472,3 +3472,17 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Istruzione operativa permanente
 - Quando l'utente dice “completa tutto” o “procedi”, continuare in sequenza le attività sicure e necessarie senza chiedere il comando a ogni passaggio.
 - Non dichiarare attività in background tra conversazioni. Riprendere dal presente MASTER quando si riapre il lavoro.
+
+
+---
+
+## 17 novembre 2026 — BalanceTest Knowledge Base e correzione manifest
+
+- PR #40 integrata nel commit `04c67299a0e2daee740a3d93c701985e84ea49e2`.
+- Aggiunta `docs/companies/zinzino/knowledge/balancetest-product-and-use-reference.md`, basata sulla scheda prodotto italiana, sulla guida rapida e sul Product Sheet ufficiale datato 06/10/2026.
+- La scheda registra DBS, 11 acidi grassi, indicatori e formule pubblicate, istruzioni di raccolta e tempi indicativi 10–20 giorni.
+- NEXTWAY non deve simulare il Valore di Protezione, formulare diagnosi o promesse terapeutiche, né archiviare ID/referti/risultati individuali nel CRM prospecting.
+- La citazione normativa 98/79/CE e il marchio CE sono attribuiti alla documentazione Zinzino, senza dichiarazione di verifica della conformità attuale.
+- Knowledge Base preparatoria: 7 documenti italiani; importazione non eseguita perché workspace Zinzino non creato e ingestione richiede sessione platform_admin autenticata.
+- Sistemata la riga del manifest per mantenere una tabella Markdown valida.
+- Nessuna modifica a Supabase, nessun deploy, nessun test con utenti reali.
