@@ -28,26 +28,56 @@
   <p class="muted">Area riservata a platform_admin. Le operazioni vengono autorizzate nuovamente dal server. Questa pagina non crea account, non invia inviti e non spedisce messaggi.</p>
   <div id="admin-status" class="status" role="status" aria-live="polite">Accedi dalla Connessione centrale per iniziare.</div>
 
+  <section class="panel" id="workspace-readiness-panel">
+    <h2>Preflight operativo · sola lettura</h2>
+    <p class="muted">Riepilogo dei prerequisiti del workspace selezionato. Questa verifica non modifica dati, non attiva workspace e non pubblica configurazioni.</p>
+    <div id="workspace-readiness" class="status" aria-live="polite">Seleziona un workspace e aggiorna i relativi dati per eseguire il preflight.</div>
+  </section>
+
   <section class="panel">
     <h2>1. Workspace</h2>
+    <p class="muted">La creazione registra un nuovo workspace nel database. I campi partono vuoti: compila e invia solo dopo aver verificato i dati e deciso di procedere.</p>
     <form id="workspace-create">
       <div class="grid">
-        <label>Nome workspace *<input name="name" required maxlength="160" value="Zinzino Italia"></label>
-        <label>Chiave univoca *<input name="workspace_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" value="zinzino-italia"></label>
-        <label>Partner / organizzazione<input name="partner_name" maxlength="160"></label>
+        <label>Nome workspace *<input name="name" required maxlength="160" placeholder="Es. Azienda partner Italia"></label>
+        <label>Chiave univoca *<input name="workspace_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="Es. azienda-partner-italia"></label>
+        <label>Partner / organizzazione<input name="partner_name" maxlength="160" placeholder="Nome dell’azienda partner"></label>
+        <label>Sito ufficiale<input name="website_url" type="url" maxlength="500" placeholder="https://www.azienda.it"></label>
         <label>Settore<input name="sector" maxlength="120"></label>
-        <label>Paese mercato<input name="market_country" maxlength="120" value="Italia"></label>
+        <label>Paese mercato<input name="market_country" maxlength="120" placeholder="Es. Italia"></label>
         <label>Lingua<select name="language_code"><option value="it">Italiano</option></select></label>
       </div>
-      <label>Descrizione<textarea name="description" maxlength="2000"></textarea></label>
+      <label>Descrizione generale dell’azienda<textarea name="description" maxlength="2000" placeholder="Descrizione neutra dell’azienda e del suo settore."></textarea></label>
+      <details>
+        <summary><strong>Profilo commerciale iniziale (facoltativo)</strong></summary>
+        <p class="muted">Queste informazioni vengono salvate nelle impostazioni del workspace. Una voce per riga; inserisci soltanto informazioni documentate.</p>
+        <label>Prodotti e servizi<textarea name="profile_offering" maxlength="5000" rows="3" placeholder="Un prodotto o servizio per riga"></textarea></label>
+        <label>Pubblici e clienti ideali<textarea name="profile_audiences" maxlength="5000" rows="3" placeholder="Un pubblico o segmento per riga"></textarea></label>
+        <label>Parole chiave per la ricerca<textarea name="profile_discovery_terms" maxlength="5000" rows="3" placeholder="Una parola chiave o frase per riga"></textarea></label>
+        <label>Posizionamento e proposta di valore approvati<textarea name="profile_positioning" maxlength="3000" rows="3" placeholder="Descrivi in modo verificabile il valore dell’offerta."></textarea></label>
+      </details>
       <button class="btn" type="submit">Crea workspace in bozza</button>
     </form>
     <div class="row"><h3>Workspace registrati</h3><button class="btn alt" id="workspace-refresh" type="button">Aggiorna elenco</button></div>
     <div id="workspace-list" class="muted">Nessun elenco caricato.</div>
   </section>
 
+  <section class="panel" id="workspace-commercial-config">
+    <h2>2. Configurazione commerciale del workspace</h2>
+    <p class="muted">La configurazione viene salvata nelle impostazioni del workspace selezionato. Puoi caricare il modello Zinzino oppure incollare il JSON di un'altra azienda. Il salvataggio avviene soltanto quando premi il pulsante e confermi.</p>
+    <div class="row">
+      <button class="btn alt" id="load-zinzino-commercial-seed" type="button">Carica configurazione Zinzino</button>
+      <span class="muted" id="commercial-config-current">Seleziona un workspace.</span>
+    </div>
+    <label>Configurazione commerciale JSON<textarea id="commercial-config-json" maxlength="40000" rows="14" spellcheck="false" placeholder="Carica il modello Zinzino o incolla qui un oggetto JSON commerciale."></textarea></label>
+    <div class="row">
+      <button class="btn" id="save-commercial-config" type="button">Salva configurazione nel workspace</button>
+    </div>
+    <div id="commercial-config-status" class="muted" aria-live="polite">Nessuna modifica salvata.</div>
+  </section>
+
   <section class="panel">
-    <h2>2. Membri e ruoli</h2>
+    <h2>3. Membri e ruoli</h2>
     <label>Workspace selezionato<select id="selected-workspace"><option value="">Carica prima i workspace</option></select></label>
     <div class="grid">
       <label>Profilo già registrato<select id="member-profile"><option value="">Carica i profili</option></select></label>
@@ -61,11 +91,11 @@
   </section>
 
   <section class="panel">
-    <h2>3. Knowledge Base</h2>
+    <h2>4. Knowledge Base</h2>
     <p class="muted">Carica PDF, DOCX o TXT. I documenti vengono indicizzati come pending e non sono utilizzabili dall'assistente finché non vengono approvati.</p>
     <form id="knowledge-upload">
       <div class="grid">
-        <label>Modulo<input name="module_key" value="zinzino" required maxlength="64"></label>
+        <label>Modulo / area documentale<input name="module_key" required maxlength="64" placeholder="Si propone la chiave del workspace selezionato"></label>
         <label>Titolo documento<input name="title" required maxlength="240"></label>
         <label>Tipo fonte<select name="source_type"><option value="official_document">Documento ufficiale</option><option value="scientific_publication">Pubblicazione scientifica</option><option value="training_material">Materiale formativo</option><option value="faq">FAQ</option><option value="policy">Policy</option><option value="other">Altro</option></select></label>
         <label>Versione<input name="version_label" maxlength="80" placeholder="Es. 2026-11"></label>
@@ -80,14 +110,46 @@
   </section>
 
   <section class="panel">
-    <h2>4. Verifica ricerca Knowledge Base</h2>
+    <h2>5. Verifica ricerca Knowledge Base</h2>
     <label>Query<input id="knowledge-query" type="search" maxlength="500" placeholder="Scrivi una domanda da cercare nei documenti approvati"></label>
     <button class="btn" id="knowledge-search" type="button">Cerca nel workspace</button>
     <div id="knowledge-results" class="muted">La ricerca restituisce soltanto contenuti approvati e validi del workspace selezionato.</div>
   </section>
+
+  <section class="panel">
+    <h2>6. Istruzioni AI e criteri di qualificazione</h2>
+    <p class="muted">Le nuove versioni vengono salvate come bozze. L'assistente non le utilizza finché un amministratore non le attiva. L'attivazione sostituisce la versione attiva precedente.</p>
+    <div class="row"><h3>Istruzioni dell'assistente</h3><button class="btn alt" id="governance-refresh" type="button">Aggiorna istruzioni e criteri</button></div>
+    <form id="prompt-create">
+      <div class="grid">
+        <label>Chiave istruzione *<input name="prompt_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. ai_setter_base"></label>
+        <label>Versione *<input name="version" type="number" min="1" step="1" value="1" required></label>
+      </div>
+      <label>Scopo dell'istruzione *<input name="purpose" required maxlength="240" placeholder="es. Qualificazione iniziale dei potenziali partner"></label>
+      <label>Testo completo dell'istruzione *<textarea name="prompt_body" required maxlength="50000" rows="7" placeholder="Definisci tono, obiettivi, limiti, domande e comportamento dell'assistente."></textarea></label>
+      <button class="btn" type="submit">Salva istruzione come bozza</button>
+    </form>
+    <div id="prompt-list" class="muted">Seleziona un workspace per consultare le istruzioni.</div>
+    <h3>Criteri di qualificazione dei contatti</h3>
+    <form id="criteria-create">
+      <div class="grid">
+        <label>Chiave criteri *<input name="criteria_key" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" placeholder="es. partner_qualification"></label>
+        <label>Versione *<input name="version" type="number" min="1" step="1" value="1" required></label>
+      </div>
+      <label>Nome criteri *<input name="name" required maxlength="160" placeholder="es. Qualificazione partner Italia"></label>
+      <label>Descrizione<textarea name="description" maxlength="2000" placeholder="Spiega cosa deve valutare il sistema."></textarea></label>
+      <label>Configurazione JSON<textarea name="config" required maxlength="20000" rows="6">{}</textarea></label>
+      <p class="muted">La configurazione deve essere un oggetto JSON valido. Esempio iniziale: {"interest":"high|medium|low","availability":"high|medium|low"}.</p>
+      <button class="btn" type="submit">Salva criteri come bozza</button>
+    </form>
+    <div id="criteria-list" class="muted">Seleziona un workspace per consultare i criteri.</div>
+  </section>
+
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nextway-admin-archive-bridge.js"></script>
 <script src="/nextway-cloud.js"></script>
+<script src="/nextway-workspace-commercial-config.js"></script>
 <script src="/nextway-admin.js"></script>
 </body>
 </html>

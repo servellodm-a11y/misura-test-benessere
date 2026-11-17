@@ -4,6 +4,14 @@ import assert from "node:assert/strict";
 const edge = readFileSync(new URL("../supabase/functions/nextway-workspace-admin/index.ts", import.meta.url), "utf8");
 const sql = readFileSync(new URL("../supabase/migrations/20261111200000_nextway_workspace_activation_rpc.sql", import.meta.url), "utf8");
 
+// CORS regression guard: local admin development must receive an explicit origin
+// on both the OPTIONS preflight and the authenticated POST response.
+assert.ok(edge.includes('"http://localhost:8000"'), "Local NEXTWAY admin origin must be allow-listed");
+assert.match(edge, /\.\.\.configuredOrigins/);
+assert.match(edge, /req\.method === "OPTIONS"[\s\S]*?respond\(\{\}, 200, origin\)/);
+assert.match(edge, /Access-Control-Allow-Origin/);
+assert.match(edge, /allowedOrigins\.includes\(origin\)/);
+
 assert.match(edge, /Deno\.serve\(async \(req\)/);
 assert.match(edge, /auth\.getUser\(token\)/);
 assert.match(edge, /profile\?\.role !== "platform_admin"/);
@@ -22,6 +30,8 @@ assert.doesNotMatch(edge, /select\([^\n]*email[^\n]*\)/i, "admin profile directo
 
 assert.match(edge, /auth\.admin\.getUserById\(body\.user_id\)/);
 assert.match(edge, /onConflict: "workspace_id,user_id"/);
+assert.match(edge, /select\("id,membership_status,activated_at,invited_by"\)/);
+assert.match(edge, /invited_by: existing\?\.invited_by \?\? authData\.user\.id/);
 assert.match(edge, /membership_status === "active"/);
 assert.match(edge, /workspace\.status !== "active"/);
 assert.match(edge, /workspace_owner[\s\S]*?workspace_admin[\s\S]*?workspace_manager[\s\S]*?workspace_member[\s\S]*?workspace_viewer/);

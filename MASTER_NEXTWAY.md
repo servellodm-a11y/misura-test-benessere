@@ -3049,3 +3049,30 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Registro cronologico del MASTER
 
 - 16-11-2026, 19:15 Europe/Rome — recuperato il MASTER da main con blob SHA iniziale 7be31e49d5fac678b7db7556a1f23f11abdfe517; verificati HEAD main 658e5b7 e diff del commit documentale; esaminati PR aperte #1–#14, confronti main/branch, file e migrazioni delle PR #12–#14, configurazione commerciale Zinzino, workflow e log GitHub Actions #896/#940/#941. Registrati i nuovi livelli di memoria prospect workspace-scoped, le RPC di integrazione/lookup CRM, il caricamento della configurazione commerciale per workspace e i limiti delle verifiche statiche rispetto al runtime. Aggiornato lo stato dei prerequisiti live, delle dipendenze PR e dei rischi di merge del MASTER. Modificato esclusivamente MASTER_NEXTWAY.md; nessuna modifica a codice applicativo, database, impostazioni, segreti, configurazioni o deploy.
+
+---
+
+## 17 novembre 2026 — Riconciliazione catena prospect e configurazione commerciale
+
+### Stato GitHub e integrazione
+- La catena autorizzata PR #9 → #11 → #12 → #13 → #14 è stata integrata in sequenza nei rispettivi branch dipendenti. PR #10 resta aperta in bozza ed è esclusa.
+- Il branch cumulativo `feat/nextway-central-prospect-memory-integration` contiene anche la correzione completa PR14 del collegamento CRM → memoria centrale, commit `2c920cc21559b00c587fb1e3da80fde689b10a63`.
+- La CI statica sul commit correttivo è risultata SUCCESS; sono stati ripristinati i file della patch PR14 che in precedenza erano incompleti.
+- Il confronto con `main` ha evidenziato una divergenza storica: il branch contiene 118 file modificati rispetto alla base comune; `main` ha aggiornato anche questo MASTER. Non effettuare merge diretto o forzato.
+- Per la riconciliazione è stata aperta PR #15 in bozza verso `main`: https://github.com/servellodm-a11y/misura-test-benessere/pull/15. Nessun merge su `main` è stato eseguito.
+- Il MASTER viene riallineato alla versione corrente di `main`, conservando la cronologia canonica più recente e aggiungendo questo aggiornamento operativo; la versione storica più vecchia del branch non deve sovrascrivere gli aggiornamenti di `main`.
+
+### Database e Edge Function — fatti confermati dall'utente
+- Il 17 novembre l'utente ha eseguito con successo, in ordine, le cinque migrazioni: `20261116100000_nextway_prospect_identity_memory.sql`, `20261116120000_nextway_prospect_identity_memory_rpcs.sql`, `20261116130000_nextway_list_accessible_workspaces.sql`, `20261116140000_nextway_workspace_commercial_config.sql` e `20261116150000_nextway_confirm_prospect_crm_acquisition.sql`. Ogni esecuzione ha restituito `Success. No rows returned`.
+- La Edge Function `nextway-search` è stata pubblicata con successo sul progetto Supabase `obqwbtlltxjfeirstsya`; script bundle 77 kB. Non è stato effettuato deploy Netlify.
+- Test locali eseguiti sul branch cumulativo: conferma acquisizione CRM 11 asserzioni; semantica stato acquisizione 9; acquisizione workspace/CRM 9; configurazione aziendale PASS; persistenza storico ricerche PASS; `node --check nextway-cloud.js` e `git diff --check` senza errori.
+- Questi test sono statici/contrattuali: non equivalgono a una prova end-to-end della ricerca con provider esterno o di un flusso CRM con dati reali.
+
+### Stato operativo e vincoli
+- Database e Edge Function per la catena prospect: COMPLETATI secondo gli esiti comunicati dall'utente.
+- Test locali contrattuali della catena CRM/acquisizione/configurazione: COMPLETATI E SUPERATI.
+- PR #15 verso `main`: APERTA IN BOZZA; riconciliazione e merge restano da completare dopo risoluzione della divergenza e verifica CI.
+- Ricerca end-to-end: DA TESTARE in ambiente controllato senza consumo di crediti a pagamento e senza utenti/conversioni reali.
+- Configurazione effettiva del workspace Zinzino, creazione/attivazione workspace e caricamento dei materiali ufficiali: da confermare separatamente; non dedurre che il seed sia già stato scritto su Supabase.
+- Il deploy Netlify in produzione resta sospeso fino al 4 dicembre 2026. Nessun test con utenti o conversioni reali prima di tale data. Nessun provider a pagamento o credito Tavily deve essere attivato senza autorizzazione esplicita.
+- Backup locale PR14 conservato nello stash Git `NEXTWAY backup locale PR14 prima deploy`; non eliminarlo né applicarlo finché non è stato verificato che la copia remota riconciliata sia completa.

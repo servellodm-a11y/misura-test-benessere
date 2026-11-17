@@ -1,12 +1,22 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { classifyPartnerInvite } from "./invite-lifecycle.mjs";
 
 const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+// Permette il test locale; autenticazione e autorizzazioni restano obbligatorie.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function response(body: unknown, status: number, origin: string) {
@@ -16,8 +26,14 @@ function response(body: unknown, status: number, origin: string) {
       ...(origin && allowedOrigins.includes(origin) ? { "Access-Control-Allow-Origin": origin } : {}) },
   });
 }
-function safeMessage(error: unknown) {
-  return error instanceof Error ? error.message.slice(0, 300) : "Errore provisioning";
+function safeErrorCode(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && /^[A-Z0-9_-]{1,32}$/.test(code)) {
+      return code;
+    }
+  }
+  return "UNCLASSIFIED";
 }
 
 async function findExistingInvite(admin: any, email: string, requestId: string) {
@@ -93,22 +109,50 @@ Deno.serve(async (req) => {
     }
 
     let invitedUserId: string | null = null;
+    let inviteCreatedByThisAttempt = false;
     try {
       if (claim.conversion_type === "partner") {
         const email = String(claim.email);
         // Recover an invite created by a previous timed-out attempt, but never attach
         // an unrelated Auth account that happens to use the same email address.
         const existingInvite = await findExistingInvite(admin, email, requestId);
-        if (existingInvite) {
+        const inviteMetadata = {
+          full_name: String(claim.full_name),
+          nextway_conversion_request_id: requestId,
+        };
+
+        const inviteAction = classifyPartnerInvite(existingInvite, email, requestId);
+        if (inviteAction === "reuse_confirmed") {
+          // An already accepted invite is not resent or deleted. The finalizer
+          // will bind this exact Auth user to the pending conversion.
+          invitedUserId = existingInvite.id;
+        } else if (inviteAction === "resend") {
+          // Supabase Auth can re-send an invitation to an existing, unconfirmed
+          // invitee. Reuse the same user; never create a second identity. Confirm
+          // the API returned that exact user and that request metadata survived.
+          const { data: resent, error: resendError } = await admin.auth.admin.inviteUserByEmail(
+            email,
+            { data: inviteMetadata },
+          );
+          if (resendError || !resent.user || resent.user.id !== existingInvite.id) {
+            throw resendError ?? new Error("Reinvio invito non coerente con l'account esistente");
+          }
+          const { data: refreshed, error: refreshError } =
+            await admin.auth.admin.getUserById(existingInvite.id);
+          if (refreshError || !refreshed.user ||
+              String(refreshed.user.email ?? "").toLowerCase() !== email.toLowerCase() ||
+              refreshed.user.user_metadata?.nextway_conversion_request_id !== requestId) {
+            throw refreshError ?? new Error("Metadata invito non verificati dopo il reinvio");
+          }
           invitedUserId = existingInvite.id;
         } else {
           const { data: invite, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
             email,
-            { data: { full_name: String(claim.full_name),
-                nextway_conversion_request_id: requestId } },
+            { data: inviteMetadata },
           );
           if (inviteError || !invite.user) throw inviteError ?? new Error("Invito Auth non creato");
           invitedUserId = invite.user.id;
+          inviteCreatedByThisAttempt = true;
         }
       } else if (claim.conversion_type !== "customer") {
         throw new Error("Tipo conversione non supportato");
@@ -130,9 +174,27 @@ Deno.serve(async (req) => {
           return response({ success: true, already_activated: true,
             conversion_type: claim.conversion_type, request_id: requestId }, 200, origin);
         }
-        if (invitedUserId) {
-          const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
-          if (deleteError) console.error("Compensating Auth cleanup failed", deleteError.message);
+        // Delete only an invite created by this execution. A recovered invite may
+        // belong to an earlier timed-out attempt and must remain available for retry.
+        if (invitedUserId && inviteCreatedByThisAttempt) {
+          // The invite may have been accepted while finalization was in flight.
+          // Never delete an Auth account after its email has been confirmed.
+          const { data: cleanupUser, error: cleanupLookupError } =
+            await admin.auth.admin.getUserById(invitedUserId);
+          if (cleanupLookupError) {
+            console.error("Compensating Auth cleanup lookup failed", {
+              request_id: requestId,
+              code: safeErrorCode(cleanupLookupError),
+            });
+          } else if (cleanupUser.user && !cleanupUser.user.email_confirmed_at) {
+            const { error: deleteError } = await admin.auth.admin.deleteUser(invitedUserId);
+            if (deleteError) {
+              console.error("Compensating Auth cleanup failed", {
+                request_id: requestId,
+                code: safeErrorCode(deleteError),
+              });
+            }
+          }
         }
         await admin.rpc("nextway_release_conversion_activation", {
           p_request_id: requestId, p_claim_token: claimToken,
@@ -150,7 +212,13 @@ Deno.serve(async (req) => {
       throw error;
     }
   } catch (error) {
-    console.error("NEXTWAY conversion provisioning failed", safeMessage(error));
-    return response({ error: safeMessage(error) }, 400, origin);
+    console.error("NEXTWAY conversion provisioning failed", {
+      request_id: requestId,
+      code: safeErrorCode(error),
+    });
+    return response({
+      error: "Operazione di provisioning non completata. Verifica lo stato della richiesta prima di riprovare.",
+      request_id: requestId,
+    }, 500, origin);
   }
 });

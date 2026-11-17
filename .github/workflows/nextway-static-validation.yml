@@ -2,7 +2,7 @@ name: NEXTWAY static validation
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config]
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
@@ -10,8 +10,24 @@ on:
       - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
+      - "scripts/test-nextway-partner-cancellation-spec.mjs"
+      - "scripts/test-nextway-partner-cancellation-sql.mjs"
+      - "supabase/diagnostics/nextway_partner_cancellation_transactional_test.sql"
+      - "scripts/test-nextway-partner-invite-lifecycle.mjs"
+      - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
+      - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
+      - "nextway-motore-ricerca.html"
+      - "nextway-company-config.js"
+      - "nextway-workspace-commercial-config.js"
+      - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
+      - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
+      - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "docs/companies/zinzino/workspace-commercial-settings.json"
+      - "docs/companies/zinzino/**"
+      - "scripts/test-nextway-company-config.mjs"
+      - "scripts/test-nextway-manual-lead-review-sql.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/migrations/**"
@@ -19,6 +35,10 @@ on:
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-idempotency-sql-security.mjs"
       - "scripts/test-nextway-knowledge-base-sql.mjs"
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
@@ -29,27 +49,77 @@ on:
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
+      - "scripts/test-nextway-setter-stale-output-trigger.mjs"
+      - "supabase/config.toml"
+      - "scripts/test-nextway-staging-config.py"
+      - "scripts/test-nextway-core-baseline-delta.mjs"
+      - "docs/NEXTWAY-CORE-BASELINE-DELTA-MAP.md"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
+      - "scripts/test-nextway-local-cors.mjs"
+      - "scripts/test-nextway-local-static.py"
+      - "scripts/nextway-local-preflight.sh"
+      - "scripts/check-nextway-schema-dump.py"
       - ".github/workflows/nextway-static-validation.yml"
   pull_request:
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
       - "nextway-ai.html"
+      - "nextway-motore-ricerca.html"
+      - "nextway-company-config.js"
+      - "nextway-workspace-commercial-config.js"
+      - "docs/NEXTWAY-WORKSPACE-COMMERCIAL-CONFIG.md"
+      - "supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql"
+      - "scripts/test-nextway-workspace-commercial-config.mjs"
+      - "docs/companies/zinzino/workspace-commercial-settings.json"
+      - "docs/companies/zinzino/**"
+      - "scripts/test-nextway-manual-lead-review-sql.mjs"
+      - "scripts/test-nextway-company-config.mjs"
+      - "scripts/test-nextway-lead-sync-contract.mjs"
+      - "scripts/test-nextway-lead-conflict-resolution.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
+      - "scripts/test-nextway-prospect-classification.mjs"
+      - "scripts/test-nextway-prospect-search-coverage.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "supabase/migrations/20261116120000_nextway_prospect_identity_memory_rpcs.sql"
+      - "scripts/test-nextway-prospect-dimensions.mjs"
+      - "scripts/test-nextway-prospect-deduplication.mjs"
+      - "scripts/test-nextway-prospect-contactability.mjs"
+      - "scripts/test-nextway-prospect-field-evidence.mjs"
+      - "scripts/test-nextway-prospect-capture-pipeline.mjs"
       - "nextway-admin.html"
       - "nextway-admin.js"
       - "supabase/functions/nextway-ai-setter/**"
       - "supabase/functions/nextway-knowledge-ingest/**"
       - "supabase/functions/nextway-knowledge-upload/**"
       - "supabase/functions/nextway-conversion-provisioning/**"
+      - "scripts/test-nextway-partner-invite-lifecycle.mjs"
+      - "scripts/test-nextway-partner-cancellation-spec.mjs"
+      - "scripts/test-nextway-partner-cancellation-sql.mjs"
+      - "scripts/test-nextway-conversion-workspace-preflight.mjs"
+      - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
+      - "supabase/functions/nextway-conversion-provisioning/invite-lifecycle.mjs"
       - "supabase/functions/nextway-workspace-admin/**"
+      - "supabase/functions/nextway-search/**"
       - "supabase/migrations/**"
       - "scripts/test-nextway-knowledge-upload-security.mjs"
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-idempotency-sql-security.mjs"
       - "scripts/test-nextway-knowledge-base-sql.mjs"
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
@@ -60,9 +130,12 @@ on:
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
       - "scripts/test-nextway-setter-generation-workspace.mjs"
       - "scripts/test-nextway-lead-creation-workspace.mjs"
+      - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
+      - "scripts/test-nextway-setter-governance.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
+      - "scripts/test-nextway-local-cors.mjs"
       - ".github/workflows/nextway-static-validation.yml"
 
 permissions:
@@ -96,6 +169,16 @@ jobs:
         run: node scripts/test-nextway-multi-workspace-sql.mjs
       - name: Validate NEXTWAY workspace admin security contract
         run: node scripts/test-nextway-workspace-admin-security.mjs
+      - name: Validate NEXTWAY local CORS allow-lists
+        run: node scripts/test-nextway-local-cors.mjs
+      - name: Validate NEXTWAY local preflight shell syntax
+        run: bash -n scripts/nextway-local-preflight.sh
+      - name: Test NEXTWAY schema dump SQL scanner
+        run: python3 scripts/check-nextway-schema-dump.py --self-test
+      - name: Validate isolated NEXTWAY staging CLI config
+        run: python3 scripts/test-nextway-staging-config.py
+      - name: Validate NEXTWAY core baseline migration deltas
+        run: node scripts/test-nextway-core-baseline-delta.mjs
       - name: Validate NEXTWAY workspace data association contract
         run: node scripts/test-nextway-workspace-data-association.mjs
       - name: Validate NEXTWAY workspace membership contract
@@ -106,12 +189,60 @@ jobs:
         run: node scripts/test-nextway-setter-generation-workspace.mjs
       - name: Validate AI Setter legacy/workspace table isolation
         run: node scripts/test-nextway-setter-generation-table-isolation.mjs
+      - name: Validate AI Setter stale-output trigger migration
+        run: node scripts/test-nextway-setter-stale-output-trigger.mjs
       - name: Validate NEXTWAY workspace-aware Lead creation contract
         run: node scripts/test-nextway-lead-creation-workspace.mjs
+      - name: Validate conversion workspace preflight is read-only
+        run: node scripts/test-nextway-conversion-workspace-preflight.mjs
+      - name: Validate conversion workspace snapshot and transactional fixture contract
+        run: node scripts/test-nextway-conversion-workspace-snapshot.mjs
+      - name: Test Partner invitation lifecycle decisions
+        run: node scripts/test-nextway-partner-invite-lifecycle.mjs
+      - name: Validate Partner cancellation lifecycle specification
+        run: node scripts/test-nextway-partner-cancellation-spec.mjs
+      - name: Validate Partner cancellation SQL contract
+        run: node scripts/test-nextway-partner-cancellation-sql.mjs
       - name: Validate NEXTWAY AI Setter workspace selector contract
         run: node scripts/test-nextway-setter-workspace-ui.mjs
+      - name: Validate NEXTWAY AI Setter governance integration
+        run: node scripts/test-nextway-setter-governance.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
+      - name: Validate NEXTWAY local static checks with Python 3
+        run: python3 scripts/test-nextway-local-static.py
+      - name: Validate Zinzino company configuration and search integration
+        run: node scripts/test-nextway-company-config.mjs
+      - name: Validate workspace commercial configuration
+        run: node scripts/test-nextway-workspace-commercial-config.mjs
+      - name: Validate NEXTWAY manual Lead review contract
+        run: node scripts/test-nextway-manual-lead-review-sql.mjs
+      - name: Validate NEXTWAY Lead sync duplicate reconciliation contract
+        run: node scripts/test-nextway-lead-sync-contract.mjs
+      - name: Test NEXTWAY Lead conflict resolution with mocked Supabase
+        run: node scripts/test-nextway-lead-conflict-resolution.mjs
+      - name: Validate NEXTWAY prospect search result-limit contract
+        run: node scripts/test-nextway-prospect-search-contract.mjs
+      - name: Test NEXTWAY prospect classification evidence gates
+        run: node scripts/test-nextway-prospect-classification.mjs
+      - name: Validate NEXTWAY prospect search coverage by segment
+        run: node scripts/test-nextway-prospect-search-coverage.mjs
+      - name: Test NEXTWAY prospect identity memory and query cache
+        run: node scripts/test-nextway-prospect-identity-memory.mjs
+      - name: Validate NEXTWAY central prospect identity memory SQL and RLS
+        run: node scripts/test-nextway-prospect-identity-memory-sql.mjs
+      - name: Validate NEXTWAY central prospect memory integration and CRM duplicate checks
+        run: node scripts/test-nextway-prospect-central-memory-integration.mjs
+      - name: Test NEXTWAY explainable prospect assessment dimensions
+        run: node scripts/test-nextway-prospect-dimensions.mjs
+      - name: Test NEXTWAY conservative cross-source prospect deduplication
+        run: node scripts/test-nextway-prospect-deduplication.mjs
+      - name: Test NEXTWAY prospect contactability evidence
+        run: node scripts/test-nextway-prospect-contactability.mjs
+      - name: Test NEXTWAY prospect profile-field source evidence
+        run: node scripts/test-nextway-prospect-field-evidence.mjs
+      - name: Test NEXTWAY prospect capture pipeline with mocked archive and CRM payload
+        run: node scripts/test-nextway-prospect-capture-pipeline.mjs
       - name: Syntax-check NEXTWAY platform admin browser script
         run: node --check nextway-admin.js
       - name: Syntax-check NEXTWAY AI Setter browser script
@@ -130,3 +261,5 @@ jobs:
         run: deno check supabase/functions/nextway-conversion-provisioning/index.ts
       - name: Type-check workspace admin Edge Function
         run: deno check supabase/functions/nextway-workspace-admin/index.ts
+      - name: Type-check public search Edge Function
+        run: deno check supabase/functions/nextway-search/index.ts

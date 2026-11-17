@@ -526,3 +526,25 @@ Stato codice: migrazione `20261110001100_nextway_lead_creation_idempotency.sql`,
 - [ ] Verificare i conteggi contattati, in follow-up, in valutazione e convertiti.
 - [ ] Verificare che "Convertito cliente" e "Convertito partner" siano solo stati CRM e non creino automaticamente record in `clients` o `profiles`.
 - Stato: codice e migrazione predisposti su GitHub; migrazione non applicata; test runtime da eseguire.
+
+
+## Test istruzioni e criteri attivi per workspace
+
+Prerequisiti: applicare in ambiente di test la migrazione 20261112030000_nextway_setter_governance_read_rpc.sql; distribuire la Edge Function aggiornata; predisporre un workspace attivo, due membership di partner, un profilo workspace_viewer, un account platform_admin, prompt/criteri in stato draft e active. Non usare dati personali reali.
+
+- [ ] Un partner con membership attiva workspace_member può generare una bozza e l'AI Setter riceve soltanto prompt/criteri active del workspace associato alla conversazione.
+- [ ] Un partner di un altro workspace non può leggere la governance del workspace non associato: RPC rifiutata con 42501.
+- [ ] workspace_viewer non può generare una bozza né leggere la governance; il ruolo resta in sola lettura.
+- [ ] platform_admin può leggere la governance del workspace secondo il bypass amministrativo già previsto.
+- [ ] Prompt/criteri draft o archived non compaiono nel risultato RPC e non vengono passati al modello.
+- [ ] Workspace senza prompt/criteri attivi: RPC restituisce array vuoti e l'AI Setter usa le istruzioni standard.
+- [ ] Conversazione legacy con workspace_id nullo: nessuna chiamata alla RPC governance e comportamento precedente invariato.
+- [ ] RPC governance indisponibile o membership revocata: AI Setter risponde HTTP 503 prima di acquisire la prenotazione idempotente; nessuna chiamata OpenAI e nessuna bozza creata.
+- [ ] I criteri attivi aiutano a individuare informazioni mancanti e il prossimo passo; il modello non inventa punteggi, interessi o caratteristiche non supportati.
+- [ ] Verificare i limiti di contesto: massimo 5 prompt, 6.000 caratteri per prompt; massimo 5 criteri, configurazione JSON limitata a 5.000 caratteri.
+- [ ] Nessun prompt/criterio aggiuntivo può autorizzare pressioni, promesse di guadagno, invio automatico o trattamento non trasparente.
+- [ ] La risposta continua a contenere sent:false e approved:false; nessun canale esterno viene contattato.
+
+### Limiti di collaudo
+
+La migrazione e l'integrazione Edge Function sono preparate nel branch, ma non applicate/distribuite. I test sopra sono requisiti di collaudo, non risultati già ottenuti. La verifica statica del repository non dimostra il comportamento runtime di PostgreSQL, membership, RLS o OpenAI.

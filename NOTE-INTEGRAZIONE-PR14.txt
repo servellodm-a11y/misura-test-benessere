@@ -1,0 +1,17 @@
+NEXTWAY - PR14 - Integrazione workspace-aware lead capture
+
+Base: archivio GitHub PR14 fornito dall'utente (commit dc7dda58f41150a6648f0e693a1e5d0ffcc70a3f).
+
+Modifiche incluse:
+- nextway-cloud.js: indice archivio locale filtrabile per workspace; workspace_id conservato nei prospect locali e durante l'idratazione cloud; validazione UUID; workspace_id incluso nel payload CRM; riconciliazione duplicati limitata a owner + URL + workspace (o NULL per record legacy).
+- nextway-motore-ricerca.html: ricerca duplicati e acquisizione trasmettono il workspace selezionato.
+- scripts/test-nextway-workspace-lead-capture.mjs: nuovo test contrattuale per l'associazione workspace end-to-end.
+- scripts/test-nextway-company-config.mjs: asserzioni aggiornate per il nuovo contratto.
+
+Test locali eseguiti: 16 script di test pertinenti superati; controlli sintattici Node su nextway-cloud.js, nextway-admin.js e nextway-setter.js superati.
+
+Limiti:
+- Nessun test Deno/TypeScript delle Edge Functions: Deno non è disponibile in questo ambiente. La patch non modifica Edge Functions.
+- Nessun test runtime con Supabase/Tavily.
+- Nessuna migrazione applicata, nessuna scrittura DB, nessun deploy, merge o push.
+- Questo archivio contiene il codice PR14 con la patch locale applicata; non significa che GitHub PR14 sia stato aggiornato.

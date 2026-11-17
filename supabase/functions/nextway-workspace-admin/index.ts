@@ -5,8 +5,18 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
-const allowedOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
-  "https://misura-test-benessere.netlify.app").split(",").map((v) => v.trim()).filter(Boolean);
+const configuredOrigins = (Deno.env.get("NEXTWAY_ALLOWED_ORIGINS") ??
+  "https://misura-test-benessere.netlify.app")
+  .split(",")
+  .map((v) => v.trim())
+  .filter(Boolean);
+
+// Consente l'interfaccia locale di sviluppo senza rimuovere le origini configurate.
+// L'autorizzazione CORS non sostituisce i controlli server-side di autenticazione e ruolo.
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "http://localhost:8000",
+])];
 const keyPattern = /^[a-z0-9][a-z0-9_-]{1,79}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 100_000;
@@ -164,13 +174,52 @@ Deno.serve(async (req) => {
       if (userError || !authUser.user) {
         return respond({ error: "Utente NEXTWAY non trovato" }, 404, origin);
       }
+      if (body.membership_status === "active" && !authUser.user.email_confirmed_at) {
+        return respond({
+          error: "L'utente deve prima accettare l'invito e confermare l'indirizzo email."
+        }, 409, origin);
+      }
 
       const { data: existing, error: existingError } = await admin.from("nextway_workspace_memberships")
-        .select("id,membership_status,activated_at")
+        .select("id,membership_status,activated_at,invited_by")
         .eq("workspace_id", body.workspace_id)
         .eq("user_id", body.user_id)
         .maybeSingle();
       if (existingError) throw existingError;
+
+      if (body.membership_status === "active") {
+        if (!existing || !["invited", "active"].includes(existing.membership_status)) {
+          return respond({
+            error: "Per attivare l'accesso deve esistere una membership invited. Crea prima l'invito."
+          }, 409, origin);
+        }
+
+        // For conversion-created Partners, bind activation to the exact completed
+        // conversion and workspace. Manual memberships remain manageable by admins.
+        const { data: partnerDetails, error: partnerDetailsError } = await admin
+          .from("partner_details")
+          .select("nextway_conversion_request_id")
+          .eq("profile_id", body.user_id)
+          .maybeSingle();
+        if (partnerDetailsError) throw partnerDetailsError;
+
+        if (partnerDetails?.nextway_conversion_request_id) {
+          const { data: conversionRequest, error: conversionRequestError } = await admin
+            .from("nextway_lead_conversion_requests")
+            .select("id,workspace_id,status,activation_user_id")
+            .eq("id", partnerDetails.nextway_conversion_request_id)
+            .maybeSingle();
+          if (conversionRequestError) throw conversionRequestError;
+          if (!conversionRequest ||
+              conversionRequest.status !== "activated" ||
+              conversionRequest.activation_user_id !== body.user_id ||
+              conversionRequest.workspace_id !== body.workspace_id) {
+            return respond({
+              error: "La conversione Partner non risulta completata per questo utente e workspace."
+            }, 409, origin);
+          }
+        }
+      }
 
       const membershipStatus = String(body.membership_status);
       const activatedAt = membershipStatus === "active"
@@ -184,7 +233,8 @@ Deno.serve(async (req) => {
         user_id: body.user_id,
         workspace_role: body.workspace_role,
         membership_status: membershipStatus,
-        invited_by: authData.user.id,
+        // Preserve the original inviter when activating or changing an existing membership.
+        invited_by: existing?.invited_by ?? authData.user.id,
         activated_at: activatedAt,
         updated_at: new Date().toISOString(),
       }, { onConflict: "workspace_id,user_id" })
