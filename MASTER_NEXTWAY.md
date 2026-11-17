@@ -3093,3 +3093,30 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Ricerca end-to-end, controllo del workspace Zinzino realmente attivo e caricamento dei materiali ufficiali restano DA COMPLETARE/DA VERIFICARE. I materiali ufficiali nel JSON sono ancora marcati `da_caricare`; non presumere che siano presenti in Supabase.
 - Prima di testare la ricerca, usare solo un ambiente controllato e verificare il provider configurato e il costo delle chiamate; nessun credito Tavily a pagamento senza autorizzazione. Nessun test con utenti o conversioni reali prima del 4 dicembre 2026.
 - Il merge integra il codice in `main`, ma non prova che il sito Netlify pubblicato contenga il codice aggiornato né che il flusso funzioni end-to-end.
+
+
+## 17 novembre 2026 — Allineamento stato canonico dopo merge PR #16
+
+### Stato verificato su GitHub
+- PR #16 è stata unita a `main` con squash: commit `b6f519aea7c7862bf456b62b451ed4503c67075b`.
+- La validazione GitHub Actions successiva al merge è la run #957 sul commit esatto `b6f519aea7c7862bf456b62b451ed4503c67075b`: `completed / success`. Questa è una verifica CI del workflow, non una prova runtime end-to-end.
+- PR #15, duplicata e superata dalla PR #16, è stata chiusa senza merge il 17-11-2026. Non riaprirla e non usarla per ulteriori integrazioni.
+- PR #10 resta esclusa dall'integrazione, secondo la decisione esplicita dell'utente.
+
+### Correzione delle informazioni storiche
+- Le sezioni precedenti che descrivono PR #15 come aperta, PR #16 come non ancora eseguita o la catena #11–#14 come non integrata sono registrazioni storiche e non rappresentano lo stato corrente.
+- La baseline corrente del codice è `main` al commit `b6f519aea7c7862bf456b62b451ed4503c67075b`, con CI post-merge verde.
+- Le cinque migrazioni prospect/workspace e la Edge Function `nextway-search` risultano già applicate/deployate secondo gli esiti confermati dall'utente; non ripeterle.
+
+### Lavori ancora aperti e limiti
+- Workspace Zinzino Italia: NON confermato creato nel database. La configurazione JSON e i controlli statici sono nel repository, ma il record workspace e il salvataggio della configurazione effettiva richiedono una sessione amministrativa Supabase.
+- Documentazione ufficiale Zinzino: i cinque materiali previsti risultano ancora `da_caricare`; non attivare il workspace finché non sono caricati e approvati.
+- Ricerca reale end-to-end, comportamento runtime CRM e isolamento multi-workspace: DA COMPLETARE in ambiente controllato; i test statici/contrattuali non provano il funzionamento end-to-end.
+- L'accesso locale `http://localhost:8000/nextway-admin.html` è risultato non raggiungibile (`ERR_CONNECTION_REFUSED`), quindi l'operazione amministrativa non è stata eseguita.
+- Nessun deploy Netlify di produzione prima del 4 dicembre 2026; nessun test con utenti o conversioni reali prima di tale data; nessun credito Tavily a pagamento senza autorizzazione esplicita.
+
+### Prossima priorità
+1. Mantenere la documentazione e il codice su `main` coerenti con lo stato reale, evitando altre verifiche ripetitive già superate.
+2. Individuare un percorso amministrativo già disponibile e sicuro per creare il workspace Zinzino senza deploy Netlify, senza esposizione di chiavi e senza richiedere al cliente operazioni da Terminale.
+3. Solo dopo accesso amministrativo, creare il workspace in bozza, salvare la configurazione, caricare i cinque documenti ufficiali, eseguire il preflight e valutare l'attivazione.
+
