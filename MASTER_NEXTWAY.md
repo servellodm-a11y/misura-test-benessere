@@ -3207,3 +3207,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La pagina Partner in versione italiana Svizzera, esaminata per confronto, reindirizzava al PDF tedesco: non usarla come prova del piano Italia; il link corretto è stato confermato sulla pagina italiana `/site/it/it-it/partnerweb`.
 - Stato: fonti principali individuate e regole pubbliche Cliente/Partner strutturate nel registro. Acquisizione integrale del PDF Piano Compensi, verifica dei termini generali correnti, importazione nella Knowledge Base e creazione del workspace restano da completare.
 - Nessun database o workspace è stato modificato; nessun upload documentale è stato eseguito; nessun deploy Netlify/produzione né test con utenti reali. Restano validi i vincoli di progetto già registrati.
+
+
+## 17 novembre 2026 — Base commerciale strutturata Zinzino Italia
+
+- Aggiunto `docs/companies/zinzino/commercial-base.v1.json`: struttura dati separata per Cliente e Partner, cataloghi, offerte Premier Kit, abbonamenti, Credits, ZinoCash, Zinzino4Free, Partner Kit, stato del piano compensi e registro delle fonti.
+- Aggiunto `docs/companies/zinzino/commercial-base.md`: dizionario dei campi, semantica degli importi e delle frequenze, stati di validità e regole di utilizzo per il motore commerciale NEXTWAY.
+- I prezzi osservati sono snapshot del 17 novembre 2026 e richiedono aggiornamento prima di qualsiasi preventivo. Le condizioni sono specifiche per singolo kit; i campi non verificati restano null.
+- Il piano compensi italiano è censito ma non decodificato: calcoli e simulazioni Partner restano disabilitati finché il PDF ufficiale completo non è acquisito e validato.
+- La base è nel repository e nella PR #21; non è ancora importata nel workspace Supabase, il workspace Zinzino non è creato e il runtime non la consuma ancora.
+- Nessuna migrazione, modifica dati Supabase, attivazione workspace, deploy o test con utenti reali eseguito.
