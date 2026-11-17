@@ -753,8 +753,915 @@
       "source_type": "official_company_document",
       "italian_translation_status": "original_italian_operational_summary_not_official_translation",
       "calculations_enabled": false,
-      "rules": [],
-      "blocking_reason": "Fonte ufficiale europea vigente secondo conferma dell'utente del 17-11-2026. La sequenza Fast Start operativa è stata confermata dall'utente e registrata. La strutturazione puntuale delle restanti regole, formule, soglie, eccezioni e test automatici è ancora da completare. Non abilitare calcoli commissioni/qualifiche finché le regole non sono state estratte e verificate una per una contro il documento master.",
+      "rules": [
+        {
+          "id": "customer_activity_and_points",
+          "area": "customer",
+          "status": "structured_reference_not_executable",
+          "source_section": "Glossary — Active Customer and Customer Points",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "active_customer": {
+            "minimum_credits": 1.25,
+            "valid_days_from_last_purchase": 90
+          },
+          "customer_points": {
+            "base_per_active_customer": 1,
+            "additional_distinct_product_minimum_credits": 1.25,
+            "same_product_repeat_additional_points": 0,
+            "eligible_types": [
+              "Premier Subscriptions",
+              "Premier Items",
+              "Retail Items",
+              "Prepaid Kits"
+            ],
+            "valid_days": 90
+          }
+        },
+        {
+          "id": "credits_balance_and_banking",
+          "area": "volume",
+          "status": "structured_reference_not_executable",
+          "source_section": "Glossary — Credits, Balanced Credits 2:1 and Banking Credits",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "maximum_larger_team_share": 0.6666666667,
+          "minimum_smaller_team_share": 0.3333333333,
+          "maximum_balance_ratio": "2:1",
+          "banking_requires_active_partner": true,
+          "banked_credits_usable_in_cycles": [
+            "weekly",
+            "monthly"
+          ],
+          "maximum_banked_credits_weekly": 1000000,
+          "maximum_banked_credits_monthly": 1000000
+        },
+        {
+          "id": "credit_accelerators",
+          "area": "volume",
+          "status": "structured_reference_not_executable",
+          "source_section": "Glossary — Credit accelerators",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "ECB": {
+            "multiplier": 2,
+            "order_types": [
+              "new Premier Customer Kit",
+              "new Partner Kit"
+            ],
+            "cycles": [
+              "WCV",
+              "MCV"
+            ]
+          },
+          "ECBx": {
+            "multiplier": null,
+            "cycle": "MCV",
+            "campaign_dependent": true,
+            "standard_campaign_example": 3
+          },
+          "RCB": {
+            "multiplier": 2,
+            "order_types": [
+              "orders not eligible for ECB by Customers and Partners"
+            ],
+            "cycles": [
+              "WCV",
+              "MCV"
+            ]
+          }
+        },
+        {
+          "id": "partner_activation_and_grace_period",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Partner titles — Grace Period and Active Partner; Glossary — Activation deadlines",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "grace_period_calendar_months": 5,
+          "grace_period_includes_join_month": true,
+          "grace_period_monthly_credits": 10,
+          "grace_period_credit_sources": [
+            "Auto Order",
+            "Customers"
+          ],
+          "partner_kit_activates_ECB": true,
+          "from_fifth_month": {
+            "customer_points": 4,
+            "monthly_credits": 20,
+            "credit_sources": [
+              "personal Customers",
+              "own product orders"
+            ]
+          },
+          "activation_deadline": {
+            "local_time": "24:00 CET",
+            "day": "last calendar day of month",
+            "effect": "active in following calendar month"
+          }
+        },
+        {
+          "id": "customer_career_titles",
+          "area": "customer",
+          "status": "structured_reference_not_executable",
+          "source_section": "Customer Career Plan",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "titles": [
+            {
+              "title": "Q-Team",
+              "customer_points": 4,
+              "pcv": 20
+            },
+            {
+              "title": "X-Team",
+              "customer_points": 10,
+              "pcv": 50
+            },
+            {
+              "title": "A-Team",
+              "customer_points": 25,
+              "pcv": 125
+            },
+            {
+              "title": "Pro-Team",
+              "customer_points": 50,
+              "pcv": 250
+            },
+            {
+              "title": "Top-Team",
+              "customer_points": 100,
+              "pcv": 500
+            },
+            {
+              "title": "Top-Team 200",
+              "customer_points": 200,
+              "pcv": 1000
+            }
+          ],
+          "increment_above_200": {
+            "customer_points": 100,
+            "pcv": 500
+          }
+        },
+        {
+          "id": "customer_cash_bonus",
+          "area": "customer",
+          "status": "structured_reference_not_executable",
+          "source_section": "How you get paid for your personal Customers — Cash Bonus",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "tiers": [
+            {
+              "titles": [
+                "Back Office Entrance",
+                "Q-Team",
+                "X-Team"
+              ],
+              "percent": 10
+            },
+            {
+              "titles": [
+                "A-Team"
+              ],
+              "percent": 20
+            },
+            {
+              "titles": [
+                "Pro-Team"
+              ],
+              "percent": 25
+            },
+            {
+              "titles": [
+                "Top-Team"
+              ],
+              "percent": 30
+            }
+          ],
+          "scope": "personal Customers and Customers referred by them in subsequent generations",
+          "requires_active_partner": false
+        },
+        {
+          "id": "customer_recurring_rewards",
+          "area": "customer",
+          "status": "structured_reference_not_executable",
+          "source_section": "Monthly Customer Bonus and Customer Care Rewards Program",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "mcb_starts": "Active A-Team",
+          "zrewards_start": "Active X-Team",
+          "tiers": [
+            {
+              "title": "X-Team",
+              "mcb": 0,
+              "zrewards": 50
+            },
+            {
+              "title": "A-Team",
+              "mcb": 100,
+              "zrewards": 100
+            },
+            {
+              "title": "Pro-Team",
+              "mcb": 200,
+              "zrewards": 100
+            },
+            {
+              "title": "Top-Team",
+              "mcb": 400,
+              "zrewards": 100
+            },
+            {
+              "title": "Top-Team 200",
+              "mcb": 1000,
+              "zrewards": 100
+            }
+          ],
+          "increment_above_200": {
+            "customer_points": 100,
+            "mcb_pay_points": 500
+          },
+          "zrewards_rules": [
+            "single-item orders only",
+            "orders paid with zRewards generate no Credits"
+          ]
+        },
+        {
+          "id": "customer_one_time_and_fast_start_bonuses",
+          "area": "customer",
+          "status": "structured_reference_not_executable",
+          "source_section": "Monthly Customer Bonus — One-Time Bonuses and Customer Fast Start Bonuses",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "one_time_bonuses": [
+            {
+              "title": "A-Team",
+              "pcv": 125,
+              "customer_points": 25,
+              "pay_points_label": "UPK Refund",
+              "installments": 1,
+              "campaign_rules_required": true
+            },
+            {
+              "title": "Pro-Team",
+              "pcv": 250,
+              "customer_points": 50,
+              "pay_points": 500,
+              "installments": 10
+            },
+            {
+              "title": "Top-Team",
+              "pcv": 500,
+              "customer_points": 100,
+              "pay_points": 10000,
+              "installments": 25
+            }
+          ],
+          "fast_start": [
+            {
+              "title": "Q-Team",
+              "credits_without_ECB": 20,
+              "customer_points": 4,
+              "pay_points": 100,
+              "deadline_days": 30
+            },
+            {
+              "title": "X-Team",
+              "credits_without_ECB": 50,
+              "customer_points": 10,
+              "pay_points": 150,
+              "deadline_days": 120
+            }
+          ],
+          "lost_qualification": "remaining installments resume when qualification is regained"
+        },
+        {
+          "id": "partner_team_titles",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Partner titles — Team Partner titles table",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "titles": [
+            {
+              "title": "Bronze",
+              "mcv": 375,
+              "pcv": 20,
+              "personal_customer_points": 4
+            },
+            {
+              "title": "Silver",
+              "mcv": 750,
+              "pcv": 20,
+              "personal_customer_points": 4
+            },
+            {
+              "title": "Gold",
+              "mcv": 1500,
+              "pcv": 20,
+              "personal_customer_points": 4
+            },
+            {
+              "title": "Executive",
+              "mcv": 3000,
+              "pcv": 50,
+              "personal_customer_points": 10
+            },
+            {
+              "title": "Platinum",
+              "mcv": 6000,
+              "pcv": 50,
+              "personal_customer_points": 10
+            },
+            {
+              "title": "Diamond",
+              "mcv": 12000,
+              "pcv": 50,
+              "personal_customer_points": 10
+            },
+            {
+              "title": "Director",
+              "mcv": 24000,
+              "pcv": 125,
+              "personal_customer_points": 25
+            },
+            {
+              "title": "Crown",
+              "mcv": 48000,
+              "pcv": 125,
+              "personal_customer_points": 25
+            },
+            {
+              "title": "Royal Crown",
+              "mcv": 80000,
+              "pcv": 125,
+              "personal_customer_points": 25
+            },
+            {
+              "title": "Black Crown",
+              "mcv": 130000,
+              "pcv": 125,
+              "personal_customer_points": 25
+            }
+          ],
+          "higher_titles_status": "not_structured_in_phase_1"
+        },
+        {
+          "id": "team_commission",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Team Commission",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "frequency": "weekly_per_income_center",
+          "basis": "WCV balanced 2:1",
+          "table": [
+            {
+              "balanced_credits": 500,
+              "pay_points": 50,
+              "rate_percent": 10
+            },
+            {
+              "balanced_credits": 1000,
+              "pay_points": 100,
+              "rate_percent": 10
+            },
+            {
+              "balanced_credits": 1500,
+              "pay_points": 150,
+              "rate_percent": 10
+            },
+            {
+              "balanced_credits": 2000,
+              "pay_points": 200,
+              "rate_percent": 10
+            },
+            {
+              "balanced_credits": 2500,
+              "pay_points": 250,
+              "rate_percent": 10
+            },
+            {
+              "balanced_credits": 3000,
+              "pay_points": 450,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 4000,
+              "pay_points": 600,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 5000,
+              "pay_points": 750,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 6000,
+              "pay_points": 900,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 7000,
+              "pay_points": 1050,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 8000,
+              "pay_points": 1200,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 9000,
+              "pay_points": 1350,
+              "rate_percent": 15
+            },
+            {
+              "balanced_credits": 10000,
+              "pay_points": 1500,
+              "rate_percent": 15
+            }
+          ],
+          "notes": [
+            "intermediate values and rounding not modeled",
+            "maximum table value 1500 PP per IC at 10000 balanced Credits"
+          ]
+        },
+        {
+          "id": "volume_commission",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Team Commission — Volume Commission",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "frequency": "weekly",
+          "eligibility": "WCV above 10000 Credits balanced 2:1",
+          "tiers": [
+            {
+              "title": "Director",
+              "rate_percent": 1,
+              "weekly_cap_pay_points": 1000
+            },
+            {
+              "title": "Crown",
+              "rate_percent": 1.5,
+              "weekly_cap_pay_points": 2000
+            },
+            {
+              "title": "Royal Crown",
+              "rate_percent": 1.75,
+              "weekly_cap_pay_points": 3000
+            },
+            {
+              "title": "Black Crown",
+              "rate_percent": 2,
+              "weekly_cap_pay_points": 5000
+            },
+            {
+              "title": "Ambassador",
+              "rate_percent": 2.25,
+              "weekly_cap_pay_points": 8000
+            },
+            {
+              "title": "Royal Ambassador",
+              "rate_percent": 2.5,
+              "weekly_cap_pay_points": 10000
+            },
+            {
+              "title": "Black Ambassador",
+              "rate_percent": 2.75,
+              "weekly_cap_pay_points": 12000
+            },
+            {
+              "title": "President",
+              "rate_percent": 3,
+              "weekly_cap_pay_points": 14000
+            },
+            {
+              "title": "Elite President",
+              "rate_percent": 3.5,
+              "weekly_cap_pay_points": 16000
+            },
+            {
+              "title": "Global President",
+              "rate_percent": 4,
+              "weekly_cap_pay_points": 20000
+            },
+            {
+              "title": "1 Star Global President",
+              "rate_percent": 4,
+              "weekly_cap_pay_points": 30000
+            },
+            {
+              "title": "2 Star Global President",
+              "rate_percent": 4,
+              "weekly_cap_pay_points": 40000
+            }
+          ],
+          "star_increment_weekly_pay_point_depth_per_ic": 10000
+        },
+        {
+          "id": "customer_acquisition_bonus",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Customer Acquisition Bonus (CAB)",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "frequency": "weekly",
+          "eligible_orders": [
+            "new Customer Premier Kits",
+            "new Partner Product Kits"
+          ],
+          "income_center_limit": 1,
+          "tiers": [
+            {
+              "tier": "Mini",
+              "left_credits": 200,
+              "right_credits": 200,
+              "total_pay_points": 50,
+              "cumulative_increment_pay_points": 0
+            },
+            {
+              "tier": "Small",
+              "left_credits": 500,
+              "right_credits": 500,
+              "total_pay_points": 200,
+              "cumulative_increment_pay_points": 150
+            },
+            {
+              "tier": "Medium",
+              "left_credits": 1500,
+              "right_credits": 1500,
+              "total_pay_points": 400,
+              "cumulative_increment_pay_points": 200
+            },
+            {
+              "tier": "Large",
+              "left_credits": 3500,
+              "right_credits": 3500,
+              "total_pay_points": 600,
+              "cumulative_increment_pay_points": 200
+            },
+            {
+              "tier": "XL",
+              "left_credits": 7500,
+              "right_credits": 7500,
+              "total_pay_points": 1000,
+              "cumulative_increment_pay_points": 400
+            },
+            {
+              "tier": "XXL",
+              "left_credits": 15000,
+              "right_credits": 15000,
+              "total_pay_points": 1500,
+              "cumulative_increment_pay_points": 500
+            },
+            {
+              "tier": "3XL",
+              "left_credits": 35000,
+              "right_credits": 35000,
+              "total_pay_points": 3000,
+              "cumulative_increment_pay_points": 1500
+            },
+            {
+              "tier": "4XL",
+              "left_credits": 75000,
+              "right_credits": 75000,
+              "total_pay_points": 4500,
+              "cumulative_increment_pay_points": 1500
+            },
+            {
+              "tier": "5XL",
+              "left_credits": 150000,
+              "right_credits": 150000,
+              "total_pay_points": 6000,
+              "cumulative_increment_pay_points": 1500
+            }
+          ]
+        },
+        {
+          "id": "mentor_matching_bonus",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Mentor Matching Bonus",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "frequency": "weekly",
+          "base": "Team Commission of personally sponsored Partners",
+          "range_percent": [
+            5,
+            25
+          ],
+          "maximum": "cannot exceed Mentor weekly Team Commission",
+          "levels": [
+            {
+              "level": 1,
+              "personally_enrolled": 2,
+              "title": "Bronze",
+              "generation_percentages": [
+                5
+              ]
+            },
+            {
+              "level": 2,
+              "personally_enrolled": 4,
+              "title": "Silver",
+              "generation_percentages": [
+                10
+              ]
+            },
+            {
+              "level": 3,
+              "personally_enrolled": 6,
+              "title": "Gold",
+              "generation_percentages": [
+                15
+              ]
+            },
+            {
+              "level": 4,
+              "personally_enrolled": 8,
+              "title": "Executive",
+              "generation_percentages": [
+                20
+              ]
+            },
+            {
+              "level": 5,
+              "personally_enrolled": 10,
+              "title": "Platinum",
+              "generation_percentages": [
+                25
+              ]
+            },
+            {
+              "level": 6,
+              "personally_enrolled": 12,
+              "title": "Diamond",
+              "generation_percentages": [
+                25,
+                10
+              ]
+            },
+            {
+              "level": 7,
+              "personally_enrolled": 14,
+              "title": "Diamond",
+              "generation_percentages": [
+                25,
+                10,
+                10
+              ]
+            },
+            {
+              "level": 8,
+              "personally_enrolled": 16,
+              "title": "Diamond",
+              "generation_percentages": [
+                25,
+                10,
+                10,
+                10
+              ]
+            },
+            {
+              "level": 9,
+              "personally_enrolled": 18,
+              "title": "Diamond",
+              "generation_percentages": [
+                25,
+                10,
+                10,
+                10,
+                10
+              ]
+            },
+            {
+              "level": 10,
+              "personally_enrolled": 20,
+              "title": "Diamond",
+              "generation_percentages": [
+                25,
+                10,
+                10,
+                10,
+                10,
+                10
+              ]
+            }
+          ],
+          "active_monthly_required": true,
+          "dynamic_compression": true
+        },
+        {
+          "id": "partner_one_time_title_bonuses",
+          "area": "partner",
+          "status": "partially_structured_not_executable",
+          "source_section": "One-Time Title Bonuses",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "maximum_bonuses_per_title": 3,
+          "conditions": [
+            "qualify in first month title or higher reached",
+            "balanced Credits 2:1 and PCP",
+            "T-Balance and PCP",
+            "Enrollment Lines Rank left/right and PCP",
+            "active at respective rank to be paid",
+            "monthly installments over 4–10 months; remaining installments resume after qualification regained"
+          ],
+          "rows": [
+            {
+              "title": "Bronze",
+              "first": {
+                "credits_2_to_1": 375,
+                "pcp": 4,
+                "pp": 50
+              },
+              "second": {
+                "t_balance": 50,
+                "pcp": 25,
+                "pp": 50
+              },
+              "third": {
+                "enrollment_rank": "Bronze",
+                "pcp": 4,
+                "pp": 50
+              },
+              "months": 4,
+              "pp_per_month": 12.5,
+              "total_if_all_three": 150
+            },
+            {
+              "title": "Silver",
+              "first": {
+                "credits_2_to_1": 750,
+                "pcp": 4,
+                "pp": 100
+              },
+              "second": {
+                "t_balance": 100,
+                "pcp": 25,
+                "pp": 100
+              },
+              "third": {
+                "enrollment_rank": "Silver",
+                "pcp": 4,
+                "pp": 100
+              },
+              "months": 4,
+              "pp_per_month": 25,
+              "total_if_all_three": 300
+            },
+            {
+              "title": "Gold",
+              "first": {
+                "credits_2_to_1": 1500,
+                "pcp": 4,
+                "pp": 200
+              },
+              "second": {
+                "t_balance": 200,
+                "pcp": 25,
+                "pp": 200
+              },
+              "third": {
+                "enrollment_rank": "Gold",
+                "pcp": 4,
+                "pp": 200
+              },
+              "months": 4,
+              "pp_per_month": 50,
+              "total_if_all_three": 600
+            },
+            {
+              "title": "Executive",
+              "first": {
+                "credits_2_to_1": 3000,
+                "pcp": 10,
+                "pp": 400
+              },
+              "second": {
+                "t_balance": 400,
+                "pcp": 25,
+                "pp": 400
+              },
+              "third": {
+                "enrollment_rank": "Executive",
+                "pcp": 10,
+                "pp": 400
+              },
+              "months": 4,
+              "pp_per_month": 100,
+              "total_if_all_three": 1200
+            },
+            {
+              "title": "Platinum",
+              "first": {
+                "credits_2_to_1": 6000,
+                "pcp": 10,
+                "pp": 800
+              },
+              "second": {
+                "t_balance": 800,
+                "pcp": 25,
+                "pp": 800
+              },
+              "third": {
+                "enrollment_rank": "Platinum",
+                "pcp": 10,
+                "pp": 800
+              },
+              "months": null,
+              "pp_per_month": null,
+              "total_if_all_three": null
+            }
+          ],
+          "unresolved": [
+            "T-Balance definition and formula",
+            "full OTB rows for all titles"
+          ]
+        },
+        {
+          "id": "zphone_and_zcar",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "One-Time Title Bonuses — zPhone and zCar",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "bonuses": [
+            {
+              "name": "zPhone",
+              "pay_points": 200,
+              "frequency": "monthly",
+              "active_title": "Executive or above"
+            },
+            {
+              "name": "zCar",
+              "pay_points": 1000,
+              "frequency": "monthly",
+              "active_title": "Diamond or above"
+            }
+          ]
+        },
+        {
+          "id": "income_centers_and_pay_points",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Glossary — Income Center and Pay Points",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "back_office_entrance_income_centers": 1,
+          "partner_kit_additional_income_centers": 2,
+          "additional_income_centers_available_from": "Diamond",
+          "additional_income_center_above_001_from": "President",
+          "additional_ic_kit": "Basic Partner Kit",
+          "pay_point_target_eur": 1,
+          "pay_point_value_adjustable": true,
+          "currency_conversion": "monthly or fixed exchange rate"
+        },
+        {
+          "id": "zinzino4free_partner",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Receive your Zinzino4Free (Z4F)",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "requires_active_z4f_auto_order": true,
+          "first_generation_subscribing_customers_minimum": 4,
+          "first_generation_combined_credits_minimum": 40,
+          "benefit": "free monthly Auto Order; shipping excluded",
+          "first_four_grace_period_orders": {
+            "customer_points": 4,
+            "credits": 20,
+            "title": "Q-Team"
+          },
+          "from_fifth_auto_order": {
+            "customer_points_minimum": 4,
+            "credits": 40,
+            "title": "Q-Team"
+          }
+        },
+        {
+          "id": "fast_start_operational_rule_user_confirmed",
+          "area": "partner",
+          "status": "confirmed_by_project_owner_for_nextway",
+          "source_section": "Fast Start Plan — user-confirmed current sequence",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "confirmation_basis": "explicit_user_operational_confirmation",
+          "confirmed_at": "2026-11-17",
+          "sequence": [
+            {
+              "step": 1,
+              "requirement": "4 punti cliente"
+            },
+            {
+              "step": 2,
+              "requirement": "2 Partner con Ultimate Partner Kit",
+              "placement": {
+                "left": 1,
+                "right": 1
+              }
+            },
+            {
+              "step": 3,
+              "requirement": "duplicazione dei due Partner"
+            },
+            {
+              "step": 4,
+              "requirement": "10 ulteriori punti cliente",
+              "breakdown": {
+                "first": 4,
+                "second": 6
+              }
+            }
+          ]
+        }
+      ],
+      "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
       "validity_confirmation": {
         "status": "confirmed_by_user",
         "confirmed_at": "2026-11-17",
@@ -791,6 +1698,19 @@
           }
         ],
         "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
+      },
+      "rules_status": "phase_1_structured_reference",
+      "rule_coverage": {
+        "structured_rules": 18,
+        "phase": "phase_1_structured_reference",
+        "remaining": [
+          "T-Balance e criteri completi OTB per tutti i titoli",
+          "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
+          "campagne Fast Start 60/90 giorni",
+          "regole dettagliate dei viaggi incentivo",
+          "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
+        ],
+        "calculations_enabled": false
       }
     }
   },
@@ -900,5 +1820,961 @@
       "guaranteed_refunds_without_campaign_terms",
       "commission_estimates_without_verified_plan"
     ]
+  },
+  "compensation": {
+    "rules": [
+      {
+        "id": "customer_activity_and_points",
+        "area": "customer",
+        "status": "structured_reference_not_executable",
+        "source_section": "Glossary — Active Customer and Customer Points",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "active_customer": {
+          "minimum_credits": 1.25,
+          "valid_days_from_last_purchase": 90
+        },
+        "customer_points": {
+          "base_per_active_customer": 1,
+          "additional_distinct_product_minimum_credits": 1.25,
+          "same_product_repeat_additional_points": 0,
+          "eligible_types": [
+            "Premier Subscriptions",
+            "Premier Items",
+            "Retail Items",
+            "Prepaid Kits"
+          ],
+          "valid_days": 90
+        }
+      },
+      {
+        "id": "credits_balance_and_banking",
+        "area": "volume",
+        "status": "structured_reference_not_executable",
+        "source_section": "Glossary — Credits, Balanced Credits 2:1 and Banking Credits",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "maximum_larger_team_share": 0.6666666667,
+        "minimum_smaller_team_share": 0.3333333333,
+        "maximum_balance_ratio": "2:1",
+        "banking_requires_active_partner": true,
+        "banked_credits_usable_in_cycles": [
+          "weekly",
+          "monthly"
+        ],
+        "maximum_banked_credits_weekly": 1000000,
+        "maximum_banked_credits_monthly": 1000000
+      },
+      {
+        "id": "credit_accelerators",
+        "area": "volume",
+        "status": "structured_reference_not_executable",
+        "source_section": "Glossary — Credit accelerators",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "ECB": {
+          "multiplier": 2,
+          "order_types": [
+            "new Premier Customer Kit",
+            "new Partner Kit"
+          ],
+          "cycles": [
+            "WCV",
+            "MCV"
+          ]
+        },
+        "ECBx": {
+          "multiplier": null,
+          "cycle": "MCV",
+          "campaign_dependent": true,
+          "standard_campaign_example": 3
+        },
+        "RCB": {
+          "multiplier": 2,
+          "order_types": [
+            "orders not eligible for ECB by Customers and Partners"
+          ],
+          "cycles": [
+            "WCV",
+            "MCV"
+          ]
+        }
+      },
+      {
+        "id": "partner_activation_and_grace_period",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Partner titles — Grace Period and Active Partner; Glossary — Activation deadlines",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "grace_period_calendar_months": 5,
+        "grace_period_includes_join_month": true,
+        "grace_period_monthly_credits": 10,
+        "grace_period_credit_sources": [
+          "Auto Order",
+          "Customers"
+        ],
+        "partner_kit_activates_ECB": true,
+        "from_fifth_month": {
+          "customer_points": 4,
+          "monthly_credits": 20,
+          "credit_sources": [
+            "personal Customers",
+            "own product orders"
+          ]
+        },
+        "activation_deadline": {
+          "local_time": "24:00 CET",
+          "day": "last calendar day of month",
+          "effect": "active in following calendar month"
+        }
+      },
+      {
+        "id": "customer_career_titles",
+        "area": "customer",
+        "status": "structured_reference_not_executable",
+        "source_section": "Customer Career Plan",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "titles": [
+          {
+            "title": "Q-Team",
+            "customer_points": 4,
+            "pcv": 20
+          },
+          {
+            "title": "X-Team",
+            "customer_points": 10,
+            "pcv": 50
+          },
+          {
+            "title": "A-Team",
+            "customer_points": 25,
+            "pcv": 125
+          },
+          {
+            "title": "Pro-Team",
+            "customer_points": 50,
+            "pcv": 250
+          },
+          {
+            "title": "Top-Team",
+            "customer_points": 100,
+            "pcv": 500
+          },
+          {
+            "title": "Top-Team 200",
+            "customer_points": 200,
+            "pcv": 1000
+          }
+        ],
+        "increment_above_200": {
+          "customer_points": 100,
+          "pcv": 500
+        }
+      },
+      {
+        "id": "customer_cash_bonus",
+        "area": "customer",
+        "status": "structured_reference_not_executable",
+        "source_section": "How you get paid for your personal Customers — Cash Bonus",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "tiers": [
+          {
+            "titles": [
+              "Back Office Entrance",
+              "Q-Team",
+              "X-Team"
+            ],
+            "percent": 10
+          },
+          {
+            "titles": [
+              "A-Team"
+            ],
+            "percent": 20
+          },
+          {
+            "titles": [
+              "Pro-Team"
+            ],
+            "percent": 25
+          },
+          {
+            "titles": [
+              "Top-Team"
+            ],
+            "percent": 30
+          }
+        ],
+        "scope": "personal Customers and Customers referred by them in subsequent generations",
+        "requires_active_partner": false
+      },
+      {
+        "id": "customer_recurring_rewards",
+        "area": "customer",
+        "status": "structured_reference_not_executable",
+        "source_section": "Monthly Customer Bonus and Customer Care Rewards Program",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "mcb_starts": "Active A-Team",
+        "zrewards_start": "Active X-Team",
+        "tiers": [
+          {
+            "title": "X-Team",
+            "mcb": 0,
+            "zrewards": 50
+          },
+          {
+            "title": "A-Team",
+            "mcb": 100,
+            "zrewards": 100
+          },
+          {
+            "title": "Pro-Team",
+            "mcb": 200,
+            "zrewards": 100
+          },
+          {
+            "title": "Top-Team",
+            "mcb": 400,
+            "zrewards": 100
+          },
+          {
+            "title": "Top-Team 200",
+            "mcb": 1000,
+            "zrewards": 100
+          }
+        ],
+        "increment_above_200": {
+          "customer_points": 100,
+          "mcb_pay_points": 500
+        },
+        "zrewards_rules": [
+          "single-item orders only",
+          "orders paid with zRewards generate no Credits"
+        ]
+      },
+      {
+        "id": "customer_one_time_and_fast_start_bonuses",
+        "area": "customer",
+        "status": "structured_reference_not_executable",
+        "source_section": "Monthly Customer Bonus — One-Time Bonuses and Customer Fast Start Bonuses",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "one_time_bonuses": [
+          {
+            "title": "A-Team",
+            "pcv": 125,
+            "customer_points": 25,
+            "pay_points_label": "UPK Refund",
+            "installments": 1,
+            "campaign_rules_required": true
+          },
+          {
+            "title": "Pro-Team",
+            "pcv": 250,
+            "customer_points": 50,
+            "pay_points": 500,
+            "installments": 10
+          },
+          {
+            "title": "Top-Team",
+            "pcv": 500,
+            "customer_points": 100,
+            "pay_points": 10000,
+            "installments": 25
+          }
+        ],
+        "fast_start": [
+          {
+            "title": "Q-Team",
+            "credits_without_ECB": 20,
+            "customer_points": 4,
+            "pay_points": 100,
+            "deadline_days": 30
+          },
+          {
+            "title": "X-Team",
+            "credits_without_ECB": 50,
+            "customer_points": 10,
+            "pay_points": 150,
+            "deadline_days": 120
+          }
+        ],
+        "lost_qualification": "remaining installments resume when qualification is regained"
+      },
+      {
+        "id": "partner_team_titles",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Partner titles — Team Partner titles table",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "titles": [
+          {
+            "title": "Bronze",
+            "mcv": 375,
+            "pcv": 20,
+            "personal_customer_points": 4
+          },
+          {
+            "title": "Silver",
+            "mcv": 750,
+            "pcv": 20,
+            "personal_customer_points": 4
+          },
+          {
+            "title": "Gold",
+            "mcv": 1500,
+            "pcv": 20,
+            "personal_customer_points": 4
+          },
+          {
+            "title": "Executive",
+            "mcv": 3000,
+            "pcv": 50,
+            "personal_customer_points": 10
+          },
+          {
+            "title": "Platinum",
+            "mcv": 6000,
+            "pcv": 50,
+            "personal_customer_points": 10
+          },
+          {
+            "title": "Diamond",
+            "mcv": 12000,
+            "pcv": 50,
+            "personal_customer_points": 10
+          },
+          {
+            "title": "Director",
+            "mcv": 24000,
+            "pcv": 125,
+            "personal_customer_points": 25
+          },
+          {
+            "title": "Crown",
+            "mcv": 48000,
+            "pcv": 125,
+            "personal_customer_points": 25
+          },
+          {
+            "title": "Royal Crown",
+            "mcv": 80000,
+            "pcv": 125,
+            "personal_customer_points": 25
+          },
+          {
+            "title": "Black Crown",
+            "mcv": 130000,
+            "pcv": 125,
+            "personal_customer_points": 25
+          }
+        ],
+        "higher_titles_status": "not_structured_in_phase_1"
+      },
+      {
+        "id": "team_commission",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Team Commission",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "frequency": "weekly_per_income_center",
+        "basis": "WCV balanced 2:1",
+        "table": [
+          {
+            "balanced_credits": 500,
+            "pay_points": 50,
+            "rate_percent": 10
+          },
+          {
+            "balanced_credits": 1000,
+            "pay_points": 100,
+            "rate_percent": 10
+          },
+          {
+            "balanced_credits": 1500,
+            "pay_points": 150,
+            "rate_percent": 10
+          },
+          {
+            "balanced_credits": 2000,
+            "pay_points": 200,
+            "rate_percent": 10
+          },
+          {
+            "balanced_credits": 2500,
+            "pay_points": 250,
+            "rate_percent": 10
+          },
+          {
+            "balanced_credits": 3000,
+            "pay_points": 450,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 4000,
+            "pay_points": 600,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 5000,
+            "pay_points": 750,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 6000,
+            "pay_points": 900,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 7000,
+            "pay_points": 1050,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 8000,
+            "pay_points": 1200,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 9000,
+            "pay_points": 1350,
+            "rate_percent": 15
+          },
+          {
+            "balanced_credits": 10000,
+            "pay_points": 1500,
+            "rate_percent": 15
+          }
+        ],
+        "notes": [
+          "intermediate values and rounding not modeled",
+          "maximum table value 1500 PP per IC at 10000 balanced Credits"
+        ]
+      },
+      {
+        "id": "volume_commission",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Team Commission — Volume Commission",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "frequency": "weekly",
+        "eligibility": "WCV above 10000 Credits balanced 2:1",
+        "tiers": [
+          {
+            "title": "Director",
+            "rate_percent": 1,
+            "weekly_cap_pay_points": 1000
+          },
+          {
+            "title": "Crown",
+            "rate_percent": 1.5,
+            "weekly_cap_pay_points": 2000
+          },
+          {
+            "title": "Royal Crown",
+            "rate_percent": 1.75,
+            "weekly_cap_pay_points": 3000
+          },
+          {
+            "title": "Black Crown",
+            "rate_percent": 2,
+            "weekly_cap_pay_points": 5000
+          },
+          {
+            "title": "Ambassador",
+            "rate_percent": 2.25,
+            "weekly_cap_pay_points": 8000
+          },
+          {
+            "title": "Royal Ambassador",
+            "rate_percent": 2.5,
+            "weekly_cap_pay_points": 10000
+          },
+          {
+            "title": "Black Ambassador",
+            "rate_percent": 2.75,
+            "weekly_cap_pay_points": 12000
+          },
+          {
+            "title": "President",
+            "rate_percent": 3,
+            "weekly_cap_pay_points": 14000
+          },
+          {
+            "title": "Elite President",
+            "rate_percent": 3.5,
+            "weekly_cap_pay_points": 16000
+          },
+          {
+            "title": "Global President",
+            "rate_percent": 4,
+            "weekly_cap_pay_points": 20000
+          },
+          {
+            "title": "1 Star Global President",
+            "rate_percent": 4,
+            "weekly_cap_pay_points": 30000
+          },
+          {
+            "title": "2 Star Global President",
+            "rate_percent": 4,
+            "weekly_cap_pay_points": 40000
+          }
+        ],
+        "star_increment_weekly_pay_point_depth_per_ic": 10000
+      },
+      {
+        "id": "customer_acquisition_bonus",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Customer Acquisition Bonus (CAB)",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "frequency": "weekly",
+        "eligible_orders": [
+          "new Customer Premier Kits",
+          "new Partner Product Kits"
+        ],
+        "income_center_limit": 1,
+        "tiers": [
+          {
+            "tier": "Mini",
+            "left_credits": 200,
+            "right_credits": 200,
+            "total_pay_points": 50,
+            "cumulative_increment_pay_points": 0
+          },
+          {
+            "tier": "Small",
+            "left_credits": 500,
+            "right_credits": 500,
+            "total_pay_points": 200,
+            "cumulative_increment_pay_points": 150
+          },
+          {
+            "tier": "Medium",
+            "left_credits": 1500,
+            "right_credits": 1500,
+            "total_pay_points": 400,
+            "cumulative_increment_pay_points": 200
+          },
+          {
+            "tier": "Large",
+            "left_credits": 3500,
+            "right_credits": 3500,
+            "total_pay_points": 600,
+            "cumulative_increment_pay_points": 200
+          },
+          {
+            "tier": "XL",
+            "left_credits": 7500,
+            "right_credits": 7500,
+            "total_pay_points": 1000,
+            "cumulative_increment_pay_points": 400
+          },
+          {
+            "tier": "XXL",
+            "left_credits": 15000,
+            "right_credits": 15000,
+            "total_pay_points": 1500,
+            "cumulative_increment_pay_points": 500
+          },
+          {
+            "tier": "3XL",
+            "left_credits": 35000,
+            "right_credits": 35000,
+            "total_pay_points": 3000,
+            "cumulative_increment_pay_points": 1500
+          },
+          {
+            "tier": "4XL",
+            "left_credits": 75000,
+            "right_credits": 75000,
+            "total_pay_points": 4500,
+            "cumulative_increment_pay_points": 1500
+          },
+          {
+            "tier": "5XL",
+            "left_credits": 150000,
+            "right_credits": 150000,
+            "total_pay_points": 6000,
+            "cumulative_increment_pay_points": 1500
+          }
+        ]
+      },
+      {
+        "id": "mentor_matching_bonus",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Mentor Matching Bonus",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "frequency": "weekly",
+        "base": "Team Commission of personally sponsored Partners",
+        "range_percent": [
+          5,
+          25
+        ],
+        "maximum": "cannot exceed Mentor weekly Team Commission",
+        "levels": [
+          {
+            "level": 1,
+            "personally_enrolled": 2,
+            "title": "Bronze",
+            "generation_percentages": [
+              5
+            ]
+          },
+          {
+            "level": 2,
+            "personally_enrolled": 4,
+            "title": "Silver",
+            "generation_percentages": [
+              10
+            ]
+          },
+          {
+            "level": 3,
+            "personally_enrolled": 6,
+            "title": "Gold",
+            "generation_percentages": [
+              15
+            ]
+          },
+          {
+            "level": 4,
+            "personally_enrolled": 8,
+            "title": "Executive",
+            "generation_percentages": [
+              20
+            ]
+          },
+          {
+            "level": 5,
+            "personally_enrolled": 10,
+            "title": "Platinum",
+            "generation_percentages": [
+              25
+            ]
+          },
+          {
+            "level": 6,
+            "personally_enrolled": 12,
+            "title": "Diamond",
+            "generation_percentages": [
+              25,
+              10
+            ]
+          },
+          {
+            "level": 7,
+            "personally_enrolled": 14,
+            "title": "Diamond",
+            "generation_percentages": [
+              25,
+              10,
+              10
+            ]
+          },
+          {
+            "level": 8,
+            "personally_enrolled": 16,
+            "title": "Diamond",
+            "generation_percentages": [
+              25,
+              10,
+              10,
+              10
+            ]
+          },
+          {
+            "level": 9,
+            "personally_enrolled": 18,
+            "title": "Diamond",
+            "generation_percentages": [
+              25,
+              10,
+              10,
+              10,
+              10
+            ]
+          },
+          {
+            "level": 10,
+            "personally_enrolled": 20,
+            "title": "Diamond",
+            "generation_percentages": [
+              25,
+              10,
+              10,
+              10,
+              10,
+              10
+            ]
+          }
+        ],
+        "active_monthly_required": true,
+        "dynamic_compression": true
+      },
+      {
+        "id": "partner_one_time_title_bonuses",
+        "area": "partner",
+        "status": "partially_structured_not_executable",
+        "source_section": "One-Time Title Bonuses",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "maximum_bonuses_per_title": 3,
+        "conditions": [
+          "qualify in first month title or higher reached",
+          "balanced Credits 2:1 and PCP",
+          "T-Balance and PCP",
+          "Enrollment Lines Rank left/right and PCP",
+          "active at respective rank to be paid",
+          "monthly installments over 4–10 months; remaining installments resume after qualification regained"
+        ],
+        "rows": [
+          {
+            "title": "Bronze",
+            "first": {
+              "credits_2_to_1": 375,
+              "pcp": 4,
+              "pp": 50
+            },
+            "second": {
+              "t_balance": 50,
+              "pcp": 25,
+              "pp": 50
+            },
+            "third": {
+              "enrollment_rank": "Bronze",
+              "pcp": 4,
+              "pp": 50
+            },
+            "months": 4,
+            "pp_per_month": 12.5,
+            "total_if_all_three": 150
+          },
+          {
+            "title": "Silver",
+            "first": {
+              "credits_2_to_1": 750,
+              "pcp": 4,
+              "pp": 100
+            },
+            "second": {
+              "t_balance": 100,
+              "pcp": 25,
+              "pp": 100
+            },
+            "third": {
+              "enrollment_rank": "Silver",
+              "pcp": 4,
+              "pp": 100
+            },
+            "months": 4,
+            "pp_per_month": 25,
+            "total_if_all_three": 300
+          },
+          {
+            "title": "Gold",
+            "first": {
+              "credits_2_to_1": 1500,
+              "pcp": 4,
+              "pp": 200
+            },
+            "second": {
+              "t_balance": 200,
+              "pcp": 25,
+              "pp": 200
+            },
+            "third": {
+              "enrollment_rank": "Gold",
+              "pcp": 4,
+              "pp": 200
+            },
+            "months": 4,
+            "pp_per_month": 50,
+            "total_if_all_three": 600
+          },
+          {
+            "title": "Executive",
+            "first": {
+              "credits_2_to_1": 3000,
+              "pcp": 10,
+              "pp": 400
+            },
+            "second": {
+              "t_balance": 400,
+              "pcp": 25,
+              "pp": 400
+            },
+            "third": {
+              "enrollment_rank": "Executive",
+              "pcp": 10,
+              "pp": 400
+            },
+            "months": 4,
+            "pp_per_month": 100,
+            "total_if_all_three": 1200
+          },
+          {
+            "title": "Platinum",
+            "first": {
+              "credits_2_to_1": 6000,
+              "pcp": 10,
+              "pp": 800
+            },
+            "second": {
+              "t_balance": 800,
+              "pcp": 25,
+              "pp": 800
+            },
+            "third": {
+              "enrollment_rank": "Platinum",
+              "pcp": 10,
+              "pp": 800
+            },
+            "months": null,
+            "pp_per_month": null,
+            "total_if_all_three": null
+          }
+        ],
+        "unresolved": [
+          "T-Balance definition and formula",
+          "full OTB rows for all titles"
+        ]
+      },
+      {
+        "id": "zphone_and_zcar",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "One-Time Title Bonuses — zPhone and zCar",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "bonuses": [
+          {
+            "name": "zPhone",
+            "pay_points": 200,
+            "frequency": "monthly",
+            "active_title": "Executive or above"
+          },
+          {
+            "name": "zCar",
+            "pay_points": 1000,
+            "frequency": "monthly",
+            "active_title": "Diamond or above"
+          }
+        ]
+      },
+      {
+        "id": "income_centers_and_pay_points",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Glossary — Income Center and Pay Points",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "back_office_entrance_income_centers": 1,
+        "partner_kit_additional_income_centers": 2,
+        "additional_income_centers_available_from": "Diamond",
+        "additional_income_center_above_001_from": "President",
+        "additional_ic_kit": "Basic Partner Kit",
+        "pay_point_target_eur": 1,
+        "pay_point_value_adjustable": true,
+        "currency_conversion": "monthly or fixed exchange rate"
+      },
+      {
+        "id": "zinzino4free_partner",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Receive your Zinzino4Free (Z4F)",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "requires_active_z4f_auto_order": true,
+        "first_generation_subscribing_customers_minimum": 4,
+        "first_generation_combined_credits_minimum": 40,
+        "benefit": "free monthly Auto Order; shipping excluded",
+        "first_four_grace_period_orders": {
+          "customer_points": 4,
+          "credits": 20,
+          "title": "Q-Team"
+        },
+        "from_fifth_auto_order": {
+          "customer_points_minimum": 4,
+          "credits": 40,
+          "title": "Q-Team"
+        }
+      },
+      {
+        "id": "fast_start_operational_rule_user_confirmed",
+        "area": "partner",
+        "status": "confirmed_by_project_owner_for_nextway",
+        "source_section": "Fast Start Plan — user-confirmed current sequence",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "confirmation_basis": "explicit_user_operational_confirmation",
+        "confirmed_at": "2026-11-17",
+        "sequence": [
+          {
+            "step": 1,
+            "requirement": "4 punti cliente"
+          },
+          {
+            "step": 2,
+            "requirement": "2 Partner con Ultimate Partner Kit",
+            "placement": {
+              "left": 1,
+              "right": 1
+            }
+          },
+          {
+            "step": 3,
+            "requirement": "duplicazione dei due Partner"
+          },
+          {
+            "step": 4,
+            "requirement": "10 ulteriori punti cliente",
+            "breakdown": {
+              "first": 4,
+              "second": 6
+            }
+          }
+        ]
+      }
+    ],
+    "rules_status": "phase_1_structured_reference",
+    "rule_coverage": {
+      "structured_rules": 18,
+      "phase": "phase_1_structured_reference",
+      "remaining": [
+        "T-Balance e criteri completi OTB per tutti i titoli",
+        "soglie e condizioni dei titoli oltre Black Crown e gradi Ambassador/President",
+        "campagne Fast Start 60/90 giorni",
+        "regole dettagliate dei viaggi incentivo",
+        "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers e arrotondamenti"
+      ],
+      "calculations_enabled": false
+    },
+    "fast_start_operational_rule": {
+      "status": "confirmed_by_project_owner_for_nextway",
+      "confirmed_at": "2026-11-17",
+      "confirmation_basis": "explicit_user_operational_confirmation",
+      "sequence": [
+        {
+          "step": 1,
+          "requirement": "4 punti cliente"
+        },
+        {
+          "step": 2,
+          "requirement": "2 Partner con Ultimate Partner Kit",
+          "placement": {
+            "left": 1,
+            "right": 1
+          }
+        },
+        {
+          "step": 3,
+          "requirement": "duplicazione dei due Partner"
+        },
+        {
+          "step": 4,
+          "requirement": "10 ulteriori punti cliente",
+          "breakdown": {
+            "first": 4,
+            "second": 6
+          }
+        }
+      ],
+      "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
+    },
+    "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi."
   }
 }
