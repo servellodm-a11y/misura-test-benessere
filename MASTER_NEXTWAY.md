@@ -3161,3 +3161,24 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La candidate migration manual-review scope non è applicata; non dichiarare concluso il controllo runtime del flag RPC.
 - Il codice di gestione errori upstream AI Setter della PR #18 è su GitHub `main`, ma la Edge Function Supabase non è stata ridistribuita.
 - Nessun deploy Netlify prima del 4 dicembre 2026; nessun test con utenti reali o conversioni reali prima della stessa data.
+
+
+## 17 novembre 2026 — Stato aggiornato PR #19 e PR #20
+
+### Correzioni di sicurezza integrate e applicate
+- PR #19 integrata su `main`: commit squash `3385663b7bc8f4555e27e1ffc356aa789b39bd6d`. Registra la correzione del `search_path` di `public.nextway_set_lead_updated_at()`, già applicata e verificata su Supabase.
+- PR #20 integrata su `main`: commit squash `0591bb6d59b3b1fc6bfe76745d88216fe0a15400`. Registra la correzione del `search_path` di `public.nextway_is_platform_admin()` e dell'overload SMALLINT di `public.nextway_save_ai_analysis(...)`, già applicata e verificata su Supabase con `proconfig={search_path=pg_catalog, public}`.
+- CI PR #20: run #965 completata con esito SUCCESS; tutti gli step del job `validate` risultano completati con successo.
+- Il workflow corrente è configurato per eventi pull_request; il connettore non ha restituito un run post-merge associato al commit di merge. Non dichiarare una CI post-merge per PR #20.
+- Le migrazioni applicate sul progetto Supabase sono registrate nel ledger con versioni `20261117114333` e `20261117123426`.
+- La PR #20 non modifica dati applicativi né il comportamento autorizzativo delle funzioni.
+
+### Baseline aggiornata
+- `main` include PR #19 e PR #20 oltre alle integrazioni precedenti.
+- PR #10 resta esclusa per decisione esplicita dell'utente.
+- Le candidate migration per manual review restano non applicate e richiedono autorizzazione separata.
+- Nessun deploy Netlify di produzione e nessun test con utenti o conversioni reali prima del 4 dicembre 2026.
+
+### Verifiche ancora necessarie, senza interventi distruttivi
+- Esaminare l'overload legacy INTEGER di `public.nextway_save_ai_analysis`, distinto dall'overload SMALLINT corretto nella PR #20. Risulta avere `search_path` vuoto: prima di modificarlo occorre accertare dipendenze, chiamanti e compatibilità. Non eliminarlo né alterarne i grants senza analisi.
+- Il workspace Zinzino Italia non risulta ancora creato: la creazione richiede la sessione amministrativa autenticata nell'interfaccia. La configurazione nel repository non equivale a un workspace salvato nel database.
