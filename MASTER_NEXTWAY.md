@@ -3430,3 +3430,10 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Strutturati i quattro step ufficiali 30/60/90/120 giorni, i bonus standard (100/400/1.200/150 PP), i requisiti di attività, i valori Enrollment Points dei kit e il requisito separato di 12 punti per il successivo Enrollment Bonus.
 - La sequenza NEXTWAY resta quella confermata dall'utente: 4 punti cliente; due UPK uno a sinistra e uno a destra; duplicazione; altri 10 punti cliente (4+6). La conferma dell'utente risolve per la configurazione operativa la nota del master sui punti di iscrizione, senza essere presentata come dichiarazione indipendente Zinzino.
 - I bonus Fast Start a 60/90 giorni sono indicati dal master come aumentati secondo regole di campagna; non è stato inserito un importo promozionale non verificato.
+
+
+## 17 novembre 2026 — Estrazione fase 2: Enrollment Incentive Program e viaggi
+- Aggiunte 2 regole strutturate: Enrollment Incentive Program (4 soglie entro 365 giorni, fino a 300 PP per Partner) e Lifetime Awards (7 soglie da 5 a 500 Partner personali).
+- Aggiunti i riferimenti Director Trip e Ambassador Trip, mantenendo le condizioni di campagna non presenti nel piano generale come non verificate.
+- Completate le descrizioni dei requisiti di qualifica dei titoli Ambassador–2 Star Global President, incluse alternative Income Centers/Enrollment Lines, e registrato Infinity Bonus 0,5% per 1/2 Star GP.
+- Il registro contiene ora 20 regole; `calculations_enabled=false` resta obbligatorio per T-Balance, campagne e assenza di test numerici completi.

@@ -219,3 +219,10 @@ Documento: docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured
 
 ### Aggiornamento Fast Start — 17 novembre 2026
 Il master EU 2025 è stato strutturato in quattro step (30/60/90/120 giorni), con requisiti, PP standard, Credits senza ECB, Enrollment Points e requisito separato di 12 punti per l'Enrollment Bonus successivo. La sequenza operativa NEXTWAY resta quella confermata dall'utente (4 CP; 2 UPK, uno per lato; duplicazione; altri 10 CP ripartiti 4+6). I valori promozionali 60/90 giorni restano dipendenti dal regolamento di campagna.
+
+
+### Estrazione fase 2 — 17 novembre 2026
+- Enrollment Incentive Program: 4 soglie (1/4/10/25 Premier Customers e 150/300/600/900 Credits inclusi ECB) entro 365 giorni, 50/50/100/100 PP, massimo 300 PP per Partner personale.
+- Lifetime Awards: 5, 10, 15, 30, 50, 100 e 500 Partner personali; qualifica 30 giorni prima dell'Annual Event.
+- Incentive trips: Director Trip annuale e Ambassador Trip annuale per Ambassador attivi; regolamenti specifici non inclusi nel piano generale.
+- Requisiti dettagliati titoli senior da Ambassador a 2 Star Global President e Infinity Bonus 0,5% per 1/2 Star GP inseriti nel JSON.

@@ -1112,6 +1112,14 @@
               "single_ic_lines": {
                 "line_count": 3,
                 "each_mcv": 10000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 2,
+                "minimum_credits_per_team_per_ic": 10000,
+                "total_balanced_mcv_in_ic1": 150000,
+                "alternative_enrollment_lines": 3,
+                "minimum_credits_per_enrollment_line": 10000
               }
             },
             {
@@ -1128,6 +1136,14 @@
               "single_ic_lines": {
                 "line_count": 3,
                 "each_mcv": 20000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 2,
+                "minimum_credits_per_team_per_ic": 20000,
+                "total_balanced_mcv_in_ic1": 200000,
+                "alternative_enrollment_lines": 3,
+                "minimum_credits_per_enrollment_line": 20000
               }
             },
             {
@@ -1144,6 +1160,14 @@
               "single_ic_lines": {
                 "line_count": 3,
                 "each_mcv": 30000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 2,
+                "minimum_credits_per_team_per_ic": 30000,
+                "total_balanced_mcv_in_ic1": 250000,
+                "alternative_enrollment_lines": 3,
+                "minimum_credits_per_enrollment_line": 30000
               }
             },
             {
@@ -1164,6 +1188,14 @@
               "single_ic_lines": {
                 "line_count": 4,
                 "each_mcv": 40000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 3,
+                "minimum_credits_per_team_per_ic": 40000,
+                "total_balanced_mcv_in_ic1": 300000,
+                "alternative_enrollment_lines": 4,
+                "minimum_credits_per_enrollment_line": 40000
               }
             },
             {
@@ -1184,6 +1216,14 @@
               "single_ic_lines": {
                 "line_count": 4,
                 "each_mcv": 80000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 3,
+                "minimum_credits_per_team_per_ic": 80000,
+                "total_balanced_mcv_in_ic1": 500000,
+                "alternative_enrollment_lines": 4,
+                "minimum_credits_per_enrollment_line": 80000
               }
             },
             {
@@ -1204,6 +1244,14 @@
               "single_ic_lines": {
                 "line_count": 4,
                 "each_mcv": 130000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 3,
+                "minimum_credits_per_team_per_ic": 130000,
+                "total_balanced_mcv_in_ic1": 1000000,
+                "alternative_enrollment_lines": 4,
+                "minimum_credits_per_enrollment_line": 130000
               }
             },
             {
@@ -1225,6 +1273,14 @@
               "single_ic_lines": {
                 "line_count": 5,
                 "each_mcv": 130000
+              },
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 4,
+                "minimum_credits_per_team_per_ic": 130000,
+                "total_balanced_mcv_in_ic1": 2000000,
+                "alternative_enrollment_lines": 5,
+                "minimum_credits_per_enrollment_line": 130000
               }
             },
             {
@@ -1234,7 +1290,22 @@
                 "additional_ic_mcv": 390000,
                 "alternative_enrollment_line_mcv": 130000
               },
-              "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV."
+              "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV.",
+              "rank_qualification": {
+                "personal_customer_points": 25,
+                "required_income_centers": 5,
+                "minimum_credits_per_team_per_ic": 130000,
+                "total_balanced_mcv_in_ic1": 3000000,
+                "alternative_enrollment_lines": 6,
+                "minimum_credits_per_enrollment_line": 130000
+              },
+              "additional_star_rule": {
+                "additional_income_center_or_enrollment_line_minimum_credits": 130000,
+                "balanced_mcv_in_ic1_increment": 1000000,
+                "additional_income_center_option": true,
+                "additional_enrollment_line_option": true,
+                "weekly_volume_commission_pay_depth_increment_per_ic": 10000
+              }
             }
           ],
           "share_bonus": {
@@ -1407,15 +1478,18 @@
             {
               "title": "1 Star Global President",
               "rate_percent": 4,
-              "weekly_cap_pay_points": 30000
+              "weekly_cap_pay_points": 30000,
+              "infinity_bonus_percent": 0.5
             },
             {
               "title": "2 Star Global President",
               "rate_percent": 4,
-              "weekly_cap_pay_points": 40000
+              "weekly_cap_pay_points": 40000,
+              "infinity_bonus_percent": 0.5
             }
           ],
-          "star_increment_weekly_pay_point_depth_per_ic": 10000
+          "star_increment_weekly_pay_point_depth_per_ic": 10000,
+          "infinity_bonus_scope": "volume outside the Team Commission and Volume Commission pay increments for 1 Star and 2 Star Global President"
         },
         {
           "id": "customer_acquisition_bonus",
@@ -2150,6 +2224,105 @@
             "campaign_note": "The EU master says 60-day and 90-day Fast Start bonuses are increased according to campaign rules. The current campaign-specific increased values are not included here and must not be inferred."
           },
           "note": "La sequenza operativa NEXTWAY è confermata dal titolare del progetto: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due; altri 10 punti cliente (4+6). Il dettaglio dei requisiti/bonus standard del master è registrato separatamente sopra. La conferma utente non è un'attestazione aziendale indipendente."
+        },
+        {
+          "id": "enrollment_incentive_program",
+          "area": "partner",
+          "status": "structured_reference_not_executable",
+          "source_section": "Enrollment Incentive Program",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "qualification_window_days": 365,
+          "credits_accumulation_sources": [
+            "personal Partner Kit orders",
+            "Premier Kit sales to personal Customers"
+          ],
+          "per_new_personally_enrolled_partner": [
+            {
+              "premier_customers": 1,
+              "credits_including_ECB": 150,
+              "pay_points": 50
+            },
+            {
+              "premier_customers": 4,
+              "credits_including_ECB": 300,
+              "pay_points": 50
+            },
+            {
+              "premier_customers": 10,
+              "credits_including_ECB": 600,
+              "pay_points": 100
+            },
+            {
+              "premier_customers": 25,
+              "credits_including_ECB": 900,
+              "pay_points": 100
+            }
+          ],
+          "maximum_pay_points_per_partner": 300,
+          "notes": [
+            "Ogni soglia si riferisce al nuovo Partner personalmente iscritto e qualificato entro 365 giorni dalla registrazione.",
+            "I Credits includono ECB come specificato nel piano."
+          ]
+        },
+        {
+          "id": "lifetime_enrollment_awards_and_incentive_trips",
+          "area": "partner",
+          "status": "structured_reference_campaign_rules_pending",
+          "source_section": "Lifetime Awards for personal Enrollment and Incentive trips",
+          "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+          "point_rule": "1 punto per ogni Partner personalmente iscritto per cui viene ottenuto il primo bonus dell'Enrollment Incentive Program",
+          "lifetime_awards": [
+            {
+              "partners": 5,
+              "award": "Biglietto gratuito Annual Event; include Annual Leadership Day"
+            },
+            {
+              "partners": 10,
+              "award": "T-shirt e voucher da 1.000 PP per abbigliamento Zinzino e prodotti al prezzo retail"
+            },
+            {
+              "partners": 15,
+              "award": "Penna MontBlanc incisa"
+            },
+            {
+              "partners": 30,
+              "award": "Esperienza VIP Annual Event; 3 notti hotel, trattamento VIP, cene e pranzi"
+            },
+            {
+              "partners": 50,
+              "award": "Visita a Zinzino a Göteborg; 3 notti hotel e 500 EUR per voli"
+            },
+            {
+              "partners": 100,
+              "award": "10.000 PP"
+            },
+            {
+              "partners": 500,
+              "award": "Hall of Fame"
+            }
+          ],
+          "annual_event_deadline_days": 30,
+          "deadline_effect": "se la qualifica è raggiunta meno di 30 giorni prima dell'evento, il premio è utilizzabile per l'evento dell'anno successivo",
+          "trips": [
+            {
+              "name": "Director Trip",
+              "frequency": "annual",
+              "description": "viaggio educativo annuale",
+              "eligibility_reference": "il piano indica che un nuovo Director è qualificato per un Director Trip",
+              "campaign_rules_required": true
+            },
+            {
+              "name": "Ambassador Trip",
+              "frequency": "annual",
+              "description": "esperienza annuale riservata agli Ambassador attivi",
+              "campaign_rules_required": true
+            }
+          ],
+          "unresolved": [
+            "regolamento specifico Director Trip",
+            "dettagli e regole di qualifica Ambassador Trip",
+            "destinazioni e date delle campagne annuali"
+          ]
         }
       ],
       "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
@@ -2190,14 +2363,14 @@
         ],
         "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
       },
-      "rules_status": "phase_1_structured_reference",
+      "rules_status": "phase_2_structured_reference",
       "rule_coverage": {
-        "structured_rules": 18,
-        "phase": "phase_1_structured_reference",
+        "structured_rules": 20,
+        "phase": "phase_2_structured_reference",
         "remaining": [
           "formula/definizione operativa di T-Balance e logica OTB testabile",
           "condizioni complete e aggiornate delle campagne Fast Start 60/90 giorni",
-          "regole dettagliate dei viaggi incentivo",
+          "regolamenti annuali Director Trip e Ambassador Trip",
           "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus"
         ],
         "calculations_enabled": false
@@ -2680,6 +2853,14 @@
             "single_ic_lines": {
               "line_count": 3,
               "each_mcv": 10000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 2,
+              "minimum_credits_per_team_per_ic": 10000,
+              "total_balanced_mcv_in_ic1": 150000,
+              "alternative_enrollment_lines": 3,
+              "minimum_credits_per_enrollment_line": 10000
             }
           },
           {
@@ -2696,6 +2877,14 @@
             "single_ic_lines": {
               "line_count": 3,
               "each_mcv": 20000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 2,
+              "minimum_credits_per_team_per_ic": 20000,
+              "total_balanced_mcv_in_ic1": 200000,
+              "alternative_enrollment_lines": 3,
+              "minimum_credits_per_enrollment_line": 20000
             }
           },
           {
@@ -2712,6 +2901,14 @@
             "single_ic_lines": {
               "line_count": 3,
               "each_mcv": 30000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 2,
+              "minimum_credits_per_team_per_ic": 30000,
+              "total_balanced_mcv_in_ic1": 250000,
+              "alternative_enrollment_lines": 3,
+              "minimum_credits_per_enrollment_line": 30000
             }
           },
           {
@@ -2732,6 +2929,14 @@
             "single_ic_lines": {
               "line_count": 4,
               "each_mcv": 40000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 3,
+              "minimum_credits_per_team_per_ic": 40000,
+              "total_balanced_mcv_in_ic1": 300000,
+              "alternative_enrollment_lines": 4,
+              "minimum_credits_per_enrollment_line": 40000
             }
           },
           {
@@ -2752,6 +2957,14 @@
             "single_ic_lines": {
               "line_count": 4,
               "each_mcv": 80000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 3,
+              "minimum_credits_per_team_per_ic": 80000,
+              "total_balanced_mcv_in_ic1": 500000,
+              "alternative_enrollment_lines": 4,
+              "minimum_credits_per_enrollment_line": 80000
             }
           },
           {
@@ -2772,6 +2985,14 @@
             "single_ic_lines": {
               "line_count": 4,
               "each_mcv": 130000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 3,
+              "minimum_credits_per_team_per_ic": 130000,
+              "total_balanced_mcv_in_ic1": 1000000,
+              "alternative_enrollment_lines": 4,
+              "minimum_credits_per_enrollment_line": 130000
             }
           },
           {
@@ -2793,6 +3014,14 @@
             "single_ic_lines": {
               "line_count": 5,
               "each_mcv": 130000
+            },
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 4,
+              "minimum_credits_per_team_per_ic": 130000,
+              "total_balanced_mcv_in_ic1": 2000000,
+              "alternative_enrollment_lines": 5,
+              "minimum_credits_per_enrollment_line": 130000
             }
           },
           {
@@ -2802,7 +3031,22 @@
               "additional_ic_mcv": 390000,
               "alternative_enrollment_line_mcv": 130000
             },
-            "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV."
+            "notes": "Un'ulteriore Star si ottiene aggiungendo 1.000.000 MCV bilanciati in IC1 e un ulteriore IC con 390.000 MCV oppure una ulteriore Enrollment Line con 130.000 MCV.",
+            "rank_qualification": {
+              "personal_customer_points": 25,
+              "required_income_centers": 5,
+              "minimum_credits_per_team_per_ic": 130000,
+              "total_balanced_mcv_in_ic1": 3000000,
+              "alternative_enrollment_lines": 6,
+              "minimum_credits_per_enrollment_line": 130000
+            },
+            "additional_star_rule": {
+              "additional_income_center_or_enrollment_line_minimum_credits": 130000,
+              "balanced_mcv_in_ic1_increment": 1000000,
+              "additional_income_center_option": true,
+              "additional_enrollment_line_option": true,
+              "weekly_volume_commission_pay_depth_increment_per_ic": 10000
+            }
           }
         ],
         "share_bonus": {
@@ -2975,15 +3219,18 @@
           {
             "title": "1 Star Global President",
             "rate_percent": 4,
-            "weekly_cap_pay_points": 30000
+            "weekly_cap_pay_points": 30000,
+            "infinity_bonus_percent": 0.5
           },
           {
             "title": "2 Star Global President",
             "rate_percent": 4,
-            "weekly_cap_pay_points": 40000
+            "weekly_cap_pay_points": 40000,
+            "infinity_bonus_percent": 0.5
           }
         ],
-        "star_increment_weekly_pay_point_depth_per_ic": 10000
+        "star_increment_weekly_pay_point_depth_per_ic": 10000,
+        "infinity_bonus_scope": "volume outside the Team Commission and Volume Commission pay increments for 1 Star and 2 Star Global President"
       },
       {
         "id": "customer_acquisition_bonus",
@@ -3718,6 +3965,105 @@
           "campaign_note": "The EU master says 60-day and 90-day Fast Start bonuses are increased according to campaign rules. The current campaign-specific increased values are not included here and must not be inferred."
         },
         "note": "La sequenza operativa NEXTWAY è confermata dal titolare del progetto: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due; altri 10 punti cliente (4+6). Il dettaglio dei requisiti/bonus standard del master è registrato separatamente sopra. La conferma utente non è un'attestazione aziendale indipendente."
+      },
+      {
+        "id": "enrollment_incentive_program",
+        "area": "partner",
+        "status": "structured_reference_not_executable",
+        "source_section": "Enrollment Incentive Program",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "qualification_window_days": 365,
+        "credits_accumulation_sources": [
+          "personal Partner Kit orders",
+          "Premier Kit sales to personal Customers"
+        ],
+        "per_new_personally_enrolled_partner": [
+          {
+            "premier_customers": 1,
+            "credits_including_ECB": 150,
+            "pay_points": 50
+          },
+          {
+            "premier_customers": 4,
+            "credits_including_ECB": 300,
+            "pay_points": 50
+          },
+          {
+            "premier_customers": 10,
+            "credits_including_ECB": 600,
+            "pay_points": 100
+          },
+          {
+            "premier_customers": 25,
+            "credits_including_ECB": 900,
+            "pay_points": 100
+          }
+        ],
+        "maximum_pay_points_per_partner": 300,
+        "notes": [
+          "Ogni soglia si riferisce al nuovo Partner personalmente iscritto e qualificato entro 365 giorni dalla registrazione.",
+          "I Credits includono ECB come specificato nel piano."
+        ]
+      },
+      {
+        "id": "lifetime_enrollment_awards_and_incentive_trips",
+        "area": "partner",
+        "status": "structured_reference_campaign_rules_pending",
+        "source_section": "Lifetime Awards for personal Enrollment and Incentive trips",
+        "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+        "point_rule": "1 punto per ogni Partner personalmente iscritto per cui viene ottenuto il primo bonus dell'Enrollment Incentive Program",
+        "lifetime_awards": [
+          {
+            "partners": 5,
+            "award": "Biglietto gratuito Annual Event; include Annual Leadership Day"
+          },
+          {
+            "partners": 10,
+            "award": "T-shirt e voucher da 1.000 PP per abbigliamento Zinzino e prodotti al prezzo retail"
+          },
+          {
+            "partners": 15,
+            "award": "Penna MontBlanc incisa"
+          },
+          {
+            "partners": 30,
+            "award": "Esperienza VIP Annual Event; 3 notti hotel, trattamento VIP, cene e pranzi"
+          },
+          {
+            "partners": 50,
+            "award": "Visita a Zinzino a Göteborg; 3 notti hotel e 500 EUR per voli"
+          },
+          {
+            "partners": 100,
+            "award": "10.000 PP"
+          },
+          {
+            "partners": 500,
+            "award": "Hall of Fame"
+          }
+        ],
+        "annual_event_deadline_days": 30,
+        "deadline_effect": "se la qualifica è raggiunta meno di 30 giorni prima dell'evento, il premio è utilizzabile per l'evento dell'anno successivo",
+        "trips": [
+          {
+            "name": "Director Trip",
+            "frequency": "annual",
+            "description": "viaggio educativo annuale",
+            "eligibility_reference": "il piano indica che un nuovo Director è qualificato per un Director Trip",
+            "campaign_rules_required": true
+          },
+          {
+            "name": "Ambassador Trip",
+            "frequency": "annual",
+            "description": "esperienza annuale riservata agli Ambassador attivi",
+            "campaign_rules_required": true
+          }
+        ],
+        "unresolved": [
+          "regolamento specifico Director Trip",
+          "dettagli e regole di qualifica Ambassador Trip",
+          "destinazioni e date delle campagne annuali"
+        ]
       }
     ],
     "blocking_reason": "Fase 1 di estrazione strutturata completata. Restano parti da estrarre e formalizzare (T-Balance/OTB completi, titoli superiori, campagne e incentivi) e test numerici indipendenti. Non abilitare calcoli o simulazioni finché copertura e test non sono completi.",
@@ -3758,14 +4104,14 @@
       ],
       "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
     },
-    "rules_status": "phase_1_structured_reference",
+    "rules_status": "phase_2_structured_reference",
     "rule_coverage": {
-      "structured_rules": 18,
-      "phase": "phase_1_structured_reference",
+      "structured_rules": 20,
+      "phase": "phase_2_structured_reference",
       "remaining": [
         "formula/definizione operativa di T-Balance e logica OTB testabile",
         "condizioni complete e aggiornate delle campagne Fast Start 60/90 giorni",
-        "regole dettagliate dei viaggi incentivo",
+        "regolamenti annuali Director Trip e Ambassador Trip",
         "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus"
       ],
       "calculations_enabled": false
