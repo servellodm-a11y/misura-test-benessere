@@ -3139,3 +3139,8 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Nessun deploy Netlify in produzione prima del 4 dicembre 2026.
 - Nessun test con utenti reali o conversioni reali prima del 4 dicembre 2026.
 - La correzione upstream della PR #18 è nel codice GitHub, ma la Edge Function non è stata ridistribuita: il comportamento runtime del servizio resta da aggiornare con un deploy Supabase autorizzato e controllato.
+
+### Nota di sicurezza — manual review RPC
+- La migrazione `20261114161500_nextway_manual_review_rpc_scope.sql` è presente nel repository come **candidate migration** e dichiara esplicitamente di non applicarla senza autorizzazione separata.
+- Non risulta tra le cinque migrazioni Supabase applicate il 17 novembre. Non è stata eseguita in questa sessione.
+- La PR #2 resta aperta: il suo branch contiene versioni differenti di file già evoluti su `main`; non va integrata integralmente né chiusa finché non si chiarisce se la correzione di scope sia necessaria e compatibile con lo stato effettivo del database.
