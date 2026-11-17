@@ -18,7 +18,7 @@ Nel testo principale del Fast Start, entrambi i documenti descrivono l'iscrizion
 
 La nota a piè pagina del PDF italiano 2024 richiede almeno un nuovo Partner a sinistra e uno a destra. La nota a piè pagina del master inglese 2025 afferma invece che almeno 1 Enrollment Point dei 6 deve essere collocato a sinistra oppure a destra.
 
-La nota inglese è in tensione con il testo principale dello stesso master. Non scegliere automaticamente una delle due interpretazioni: il requisito va chiarito con Zinzino o con il regolamento ufficiale applicabile alla campagna prima di modellare un calcolo.
+La nota inglese è in tensione con il testo principale dello stesso master. Per la configurazione operativa NEXTWAY, il titolare del progetto ha confermato il 17/11/2026 la regola Fast Start attualmente applicata e ne ha autorizzato l'uso come riferimento operativo: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due Partner; ulteriori 10 punti cliente, ripartiti in 4 + 6. Questa conferma risolve il punto per la configurazione NEXTWAY, ma è registrata come conferma operativa dell'utente e non come attestazione aziendale indipendente. Non dedurre da questa sequenza importi o bonus non specificati.
 
 ### 2. Fast Start — bonus 60 e 90 giorni
 
@@ -38,6 +38,8 @@ La strutturazione economica NEXTWAY deve basarsi sul master EU 2025 e mantenere 
 
 - PDF italiano 2024: riferimento localizzato storico acquisito e confrontato.
 - Master EU 2025: riferimento primario per il modello, vigenza in Italia confermata dall'utente il 17/11/2026.
+- Fast Start: sequenza operativa confermata dall'utente il 17/11/2026 e registrata per NEXTWAY (4 punti cliente; 2 Partner Ultimate Partner Kit, uno per lato; duplicazione dei due Partner; ulteriori 10 punti cliente in ripartizione 4 + 6).
+- La nota sui bonus Fast Start 60/90 giorni resta subordinata alle condizioni della campagna specifica.
 - Regole automatiche: disabilitate.
 - calculations_enabled=false; rules=[].
 - Da completare: estrazione puntuale delle formule e delle eccezioni, acquisizione dei regolamenti di campagna e test indipendenti dei calcoli.
