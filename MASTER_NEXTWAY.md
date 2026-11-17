@@ -3336,3 +3336,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il runtime `getOffer()` esclude offerte discontinue e offerte listing-only non validate. Test contrattuali PR #30 run `44098505877`: SUCCESS; asserzioni su conteggio 35, gating di due voci e selezionabilità di un'offerta già validata.
 - PR #30 merge squash commit: `e103c22152887c4ec8e4a2c9be622dcd5530ba43`.
 - Nessuna modifica Supabase, workspace, attivazione o deploy Netlify.
+
+
+## 17 novembre 2026 — Pacchetto documentale Zinzino pronto per Knowledge Base
+
+- Preparati quattro file Markdown in docs/companies/zinzino/knowledge/: programma premi Cliente; Kit Partner e limiti compensi; catalogo Premier Kit con stati di validazione; manifesto di importazione.
+- Il manifesto indica module_key, source_type, validità e controlli pre-importazione. Tutti i documenti sono in italiano e citano le fonti ufficiali.
+- I documenti sono solo preparati nel repository; non importati in Supabase. nextway-knowledge-ingest richiede workspace_id valido e token utente platform_admin, accetta contenuto testuale e crea documenti con approval_status=pending.
+- Il workspace Zinzino non è ancora stato creato; nessun bypass DB/Service Role.
+- Nessun deploy Netlify.
