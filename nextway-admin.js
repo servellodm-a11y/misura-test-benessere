@@ -22,7 +22,7 @@
     }
 
     async function adminAction(payload) {
-      const { c } = await session();
+      const { c, s: initialSession } = await session();
       const cfg = cloud.getConfig();
       const invoke = async (accessToken) => {
         const response = await fetch(cfg.url + "/functions/v1/nextway-workspace-admin", {
@@ -38,9 +38,9 @@
         return { response, result };
       };
 
-      let { s } = await cloud.active();
-      if (!s?.access_token) throw new Error("Sessione Supabase assente. Accedi nuovamente.");
-      let outcome = await invoke(s.access_token);
+      let accessToken = initialSession?.access_token;
+      if (!accessToken) throw new Error("Sessione Supabase assente. Accedi nuovamente.");
+      let outcome = await invoke(accessToken);
 
       // A stale access token can survive in a restored browser tab. Refresh once
       // on 401, then retry with the new user JWT; never substitute a service key.
