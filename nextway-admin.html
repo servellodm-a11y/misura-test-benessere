@@ -37,6 +37,10 @@
   <section class="panel">
     <h2>1. Workspace</h2>
     <p class="muted">La creazione registra un nuovo workspace nel database. I campi partono vuoti: compila e invia solo dopo aver verificato i dati e deciso di procedere.</p>
+    <div class="row">
+      <button class="btn alt" id="prepare-zinzino-workspace" type="button">Prepara bozza Zinzino Italia</button>
+      <span class="muted" id="zinzino-bootstrap-status" aria-live="polite">Carica e valida i dati iniziali; la creazione richiede un successivo invio esplicito.</span>
+    </div>
     <form id="workspace-create">
       <div class="grid">
         <label>Nome workspace *<input name="name" required maxlength="160" placeholder="Es. Azienda partner Italia"></label>

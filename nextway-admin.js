@@ -7,7 +7,7 @@
     if (!cloud) return;
 
     const $ = (id) => document.getElementById(id);
-    const state = { workspaces: [], profiles: [], memberships: [], documents: [], prompts: [], criteria: [] };
+    const state = { workspaces: [], profiles: [], memberships: [], documents: [], prompts: [], criteria: [], pendingZinzinoSeed: null };
     const status = (message) => { $("admin-status").textContent = message; };
 
     function node(tag, text, className) {
@@ -350,6 +350,53 @@
       if (optional.length) target.append(node("p", "Da completare per una configurazione più completa: " + optional.map(item => item.label).join(", ") + ".", "muted"));
     }
 
+    $("prepare-zinzino-workspace").addEventListener("click", async () => {
+      const button = $("prepare-zinzino-workspace");
+      const target = $("zinzino-bootstrap-status");
+      button.disabled = true;
+      try {
+        const [settingsResponse, dataResponse] = await Promise.all([
+          fetch("/docs/companies/zinzino/workspace-commercial-settings.json", { cache: "no-store" }),
+          fetch("/docs/companies/zinzino/commercial-base.v1.json", { cache: "no-store" })
+        ]);
+        if (!settingsResponse.ok) throw new Error("Modello Zinzino non disponibile (HTTP " + settingsResponse.status + ").");
+        if (!dataResponse.ok) throw new Error("Base commerciale Zinzino non disponibile (HTTP " + dataResponse.status + ").");
+        const [seed, commercialData] = await Promise.all([settingsResponse.json(), dataResponse.json()]);
+        seed.commercial_data = commercialData;
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) throw new Error("Validatore commerciale non caricato.");
+        normalizer.normalize({
+          workspace_key: "zinzino-italia",
+          workspace_name: "Zinzino Italia",
+          partner_name: "Zinzino",
+          market_country: "Italia",
+          language_code: "it",
+          commercial_config: seed
+        });
+        const form = $("workspace-create");
+        const set = (name, value) => { form.elements.namedItem(name).value = value; };
+        set("name", "Zinzino Italia");
+        set("workspace_key", "zinzino-italia");
+        set("partner_name", "Zinzino");
+        set("website_url", "https://www.zinzino.com/site/it/it-it/partnerweb");
+        set("sector", "Benessere, nutrizione e vendita diretta");
+        set("market_country", "Italia");
+        set("language_code", "it");
+        set("description", seed.company.positioning);
+        set("profile_offering", seed.company.sector.join("\n"));
+        set("profile_audiences", Object.keys(seed.search_queries.it).join("\n"));
+        set("profile_discovery_terms", seed.brand_terms.join("\n"));
+        set("profile_positioning", seed.company.positioning);
+        state.pendingZinzinoSeed = seed;
+        target.textContent = "Dati Zinzino e base commerciale Cliente/Partner validati e precompilati. Nessun workspace è stato ancora creato.";
+      } catch (error) {
+        state.pendingZinzinoSeed = null;
+        target.textContent = "Preparazione non completata: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
     $("load-zinzino-commercial-seed").addEventListener("click", async () => {
       const target = $("commercial-config-status");
       const button = $("load-zinzino-commercial-seed");
@@ -426,6 +473,28 @@
         discovery: { keywords: lines(values.profile_discovery_terms) },
         messaging: { approved_positioning: String(values.profile_positioning || "").trim() }
       };
+      if (state.pendingZinzinoSeed) {
+        if (values.workspace_key !== "zinzino-italia" || values.name !== "Zinzino Italia" ||
+            values.market_country !== "Italia" || values.language_code !== "it") {
+          status("Identità workspace modificata: prepara nuovamente il modello Zinzino prima della creazione.");
+          return;
+        }
+        const normalizer = window.NEXTWAY_WORKSPACE_COMMERCIAL_CONFIG;
+        if (!normalizer?.normalize) {
+          status("Validatore commerciale non disponibile: workspace non creato.");
+          return;
+        }
+        normalizer.normalize({
+          workspace_key: values.workspace_key,
+          workspace_name: values.name,
+          partner_name: values.partner_name,
+          market_country: values.market_country,
+          language_code: values.language_code,
+          commercial_config: state.pendingZinzinoSeed
+        });
+        if (!confirm("Creare Zinzino Italia in stato BOZZA con la configurazione commerciale Cliente/Partner già validata? Il workspace non verrà attivato e i calcoli compensi resteranno disabilitati.")) return;
+        values.settings.commercial = state.pendingZinzinoSeed;
+      }
       delete values.profile_offering;
       delete values.profile_audiences;
       delete values.profile_discovery_terms;
@@ -438,7 +507,9 @@
         $("selected-workspace").value = result.workspace.id;
         await loadSelectedWorkspace();
         form.reset();
-        status("Workspace creato in bozza. Verifica i dati e attivalo quando è pronto.");
+        state.pendingZinzinoSeed = null;
+        $("zinzino-bootstrap-status").textContent = "Workspace creato in bozza. Configurazione commerciale già associata; verifica i dati prima di qualsiasi attivazione.";
+        status("Workspace creato in bozza. Nessuna attivazione eseguita.");
       } catch (error) {
         status("Creazione workspace non completata: " + error.message);
       } finally {
