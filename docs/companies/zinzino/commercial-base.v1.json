@@ -802,9 +802,16 @@
       "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
       "observed_at": "2026-11-17",
       "refresh": "before_calculation",
-      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "status": "official_italian_localized_pdf_2024_historical_reference_not_equivalent_by_default_to_eu_2025_master",
       "validity_confirmed_by_user_at": "2026-11-17",
-      "validity_note": "L'utente conferma che la versione EU 12-02-2025 è in vigore in Italia a novembre 2026 senza modifiche."
+      "validity_note": "L'utente conferma che la versione EU 12-02-2025 è in vigore in Italia a novembre 2026 senza modifiche.",
+      "source_version": "14-11-2024",
+      "source_language": "it",
+      "source_market": "Italy",
+      "translation_status": "official_italian_pdf_linked_from_italy_partner_page_but_older_than_eu_2025_master",
+      "reconciliation_status": "known_differences_and_internal_fast_start_ambiguity_identified_full_rule_validation_pending",
+      "master_precedence_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "notes": "Il PDF italiano caricato è la versione 14/11/2024, collegata dalla pagina ufficiale Partner Italia. Il documento dichiara che, in caso di traduzione errata o differenze, prevale il master inglese. Non usarlo da solo per calcoli o regole correnti. Differenze da riconciliare: nota Fast Start Enrollment Points e nota campagne 60/90 giorni; vedere compensation-plan-italian-2024-comparison.md."
     },
     {
       "id": "black_week_2026_it",
@@ -817,6 +824,19 @@
       "refresh": "before_quote",
       "status": "active_campaign_snapshot_not_permanent_catalog",
       "notes": "Promozione Black Week con Premier Kit selezionati e prodotti gratuiti; non incorporare prezzi/promozioni nel catalogo permanente; verificare disponibilità, personalizzazione e condizioni al checkout."
+    },
+    {
+      "id": "compensation_plan_eu_master_2025",
+      "type": "official_company_document",
+      "audience": "partner",
+      "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "observed_at": "2026-11-17",
+      "source_version": "12-02-2025",
+      "source_language": "en",
+      "source_market": "EU",
+      "status": "current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "validity_note": "L'utente conferma il 17/11/2026 che il master EU 12/02/2025 è vigente in Italia senza modifiche; la conferma è dell'utente, non una dichiarazione indipendente Zinzino.",
+      "refresh": "before_calculation"
     }
   ],
   "condition_engine": {
