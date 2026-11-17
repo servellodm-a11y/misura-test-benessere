@@ -105,3 +105,16 @@ Regole contenute nel PDF:
 ### Aggiornamento catalogo — stato offerta Nails, Hair & Skin Care Kit (17 novembre 2026)
 
 La scheda ufficiale italiana consultata mostra il kit come **Discontinued**. I valori visualizzati (€40 iniziali, €20/mese, consegna ogni due mesi, 2,5 Credits + 1,75 Credits/mese) sono conservati solo come traccia della pagina e non devono essere presentati come offerta disponibile. La precedente indicazione di durata minima di sei mesi non va riutilizzata come condizione corrente. Prima di qualsiasi proposta commerciale, verificare il catalogo e il checkout live.
+
+
+## Aggiornamento catalogo — LeanShake (17 novembre 2026)
+
+Sono state acquisite tre ulteriori schede ufficiali italiane e aggiunte alla base commerciale strutturata:
+
+- **LeanShake Kit** (ID 910237): kit iniziale €217 + €116/mese; consegna ogni due mesi; 14 Credits iniziali + 8/mese; cancellazione con preavviso di 30 giorni. Alternativa prepagata: €913, 38 Credits.
+- **LeanShake Kit x2** (ID 910637): kit iniziale €115 + €58/mese; consegna ogni due mesi; 7 Credits iniziali + 4/mese; cancellazione con preavviso di 30 giorni. Alternativa prepagata: €463, 19 Credits.
+- **LeanShake Challenge Kit** (ID 910324): kit iniziale €557 + €116/mese; consegna ogni due mesi; 40 Credits iniziali + 8/mese; cancellazione con preavviso di 30 giorni. Alternativa prepagata: €1.253, 64 Credits.
+
+Fonti ufficiali: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910237 ; https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910637 ; https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910324 .
+
+I valori sono snapshot rilevati il 17 novembre 2026 e vanno ricontrollati prima di ogni preventivo. L'elenco resta parziale, non un catalogo esaustivo.

@@ -69,7 +69,10 @@ const integrated=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
 });
 assert.equal(integrated.commercialData.schema_version,1);
-assert.equal(integrated.commercialData.customer.premier_kits.offers.length,8);
+assert.equal(integrated.commercialData.customer.premier_kits.offers.length,11);
+assert.equal(api.getOffer(integrated,'customer','leanshake-kit-910237').recurring_amount_eur,116);
+assert.equal(api.getOffer(integrated,'customer','leanshake-kit-x2-910637').credits_recurring_per_month,4);
+assert.equal(api.getOffer(integrated,'customer','leanshake-challenge-kit-910324').prepaid_amount_eur,1253);
 assert.equal(integrated.commercialData.partner.partner_kits.offers.length,4);
 assert.equal(api.resolveAudience('customer'),'customer');
 assert.equal(api.resolveAudience('partner'),'partner');
