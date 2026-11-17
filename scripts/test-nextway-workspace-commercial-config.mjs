@@ -77,6 +77,10 @@ assert.equal(api.resolveAudience('cliente'),null,'Audience must be explicit, not
 assert.ok(api.getAudienceCatalog(integrated,'customer').premier_kits);
 assert.ok(api.getAudienceCatalog(integrated,'partner').partner_kits);
 assert.equal(api.getOffer(integrated,'customer','viva-plus-kit-910277').recurring_amount_eur,31);
+const discontinuedSeed=JSON.parse(JSON.stringify(integratedSeed));
+discontinuedSeed.commercial_data.customer.premier_kits.offers.push({id:'retired-offer',name:'Retired offer',availability_status:'discontinued'});
+const discontinuedConfig=api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:discontinuedSeed});
+assert.equal(api.getOffer(discontinuedConfig,'customer','retired-offer'),null,'Discontinued offers must never be returned as selectable offers');
 assert.equal(api.getOffer(integrated,'partner','basic-kit').standard_price_snapshot_eur,556);
 assert.equal(api.getOffer(integrated,'customer','basic-kit'),null,'Partner offers must not leak into customer catalog');
 assert.equal(api.getOffer(integrated,'partner','viva-plus-kit-910277'),null,'Customer offers must not leak into partner catalog');
