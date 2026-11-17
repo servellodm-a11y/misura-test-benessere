@@ -1,17 +1,303 @@
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 
-const migration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
-
-// PR #12 prepares the schema only. The dependent PR #13 supplies the Edge
-// Function integration and replaces this guard with its full contract suite.
-if (!migration.includes("nextway_merge_prospect_identity")) {
-  assert.match(migration, /nextway_store_search_query_cache/,
-    "the schema-only PR must provide the validated cache persistence RPC");
-  console.log("NEXTWAY central integration contract: deferred to dependent PR #13.");
-  process.exit(0);
+const edge = readFileSync("supabase/functions/nextway-search/index.ts", "utf8");
+const ui = readFileSync("nextway-motore-ricerca.html", "utf8");
+const schemaMigration = readFileSync("supabase/migrations/20261116100000_nextway_prospect_identity_memory.sql", "utf8");
+const rpcMigration = readFileSync("supabase/migrations/20261116120000_nextway_prospect_identity_memory_rpcs.sql", "utf8");
+const workspaceMigration = readFileSync("supabase/migrations/20261116130000_nextway_list_accessible_workspaces.sql", "utf8");
+const membershipMigration = readFileSync("supabase/migrations/20261111220000_nextway_workspace_memberships.sql", "utf8");
+const workspaceAdmin = readFileSync("supabase/functions/nextway-workspace-admin/index.ts", "utf8");
+assert.equal((schemaMigration.match(/\bcommit;/gi) || []).length, 1,
+  "the schema migration must be one atomic transaction");
+assert.equal((rpcMigration.match(/\bcommit;/gi) || []).length, 1,
+  "the dependent RPC migration must be one atomic transaction");
+assert.equal((workspaceMigration.match(/\bcommit;/gi) || []).length, 1,
+  "the accessible-workspaces migration must be one atomic transaction");
+for (const [label, migration] of [["schema", schemaMigration], ["RPC", rpcMigration], ["workspace", workspaceMigration]]) {
+  assert.equal((migration.match(/\$\$/g) || []).length % 2, 0,
+    label + " migration must have balanced SQL dollar-quote delimiters");
+  assert.doesNotMatch(migration, /^\s*as \$(?!\$)/m,
+    label + " migration must not contain single-dollar function openers");
+  assert.doesNotMatch(migration, /^\s*\$;\s*$/m,
+    label + " migration must not contain single-dollar function closers");
 }
+assert.match(workspaceMigration, /create or replace function public\.nextway_list_accessible_workspaces\(\)/,
+  "the search UI must have a database RPC to list authorized workspaces");
+assert.match(workspaceMigration, /security definer[\s\S]*set search_path = pg_catalog, public/,
+  "the workspace listing RPC must use a fixed search path");
+assert.match(workspaceMigration, /public\.nextway_is_platform_admin\(\)/,
+  "platform administrators must be able to select active workspaces without a membership row");
+assert.match(workspaceMigration, /not public\.nextway_is_platform_admin\(\)/,
+  "ordinary membership results must not duplicate platform-admin workspace rows");
+assert.match(workspaceMigration, /m\.user_id = auth\.uid\(\)/,
+  "ordinary users must see only their own workspace memberships");
+assert.match(workspaceMigration, /order by 2, 1/,
+  "workspace listing must return a stable order across both result branches");
+assert.match(workspaceMigration, /w\.status = 'active'/,
+  "only active workspaces may be listed for prospect search");
+assert.match(workspaceMigration, /m\.membership_status = 'active'/,
+  "ordinary users must have an active membership to see a workspace");
+assert.match(workspaceMigration, /workspace_owner','workspace_admin','workspace_manager','workspace_member/,
+  "only roles permitted to search may be listed; viewers must not receive a search workspace");
+assert.match(workspaceMigration, /grant execute on function public\.nextway_list_accessible_workspaces\(\) to authenticated/,
+  "the read-only workspace listing RPC must be available to authenticated users");
+assert.match(workspaceMigration, /revoke all on function public\.nextway_list_accessible_workspaces\(\) from public, anon/,
+  "anonymous users must not enumerate workspaces");
+assert.doesNotMatch(workspaceMigration, /insert into public\.|update public\.|delete from public\./,
+  "the workspace listing migration must not modify workspace or membership data");
+assert.match(membershipMigration, /public\.nextway_is_platform_admin\(\)\s*or\s*\(/,
+  "platform administrators must pass workspace access checks without a membership row");
+assert.match(membershipMigration, /m\.membership_status = 'active'[\s\S]*w\.status = 'active'/,
+  "non-admin workspace access must require an active membership and active workspace");
+assert.match(workspaceAdmin, /profile\?\.role !== "platform_admin"/,
+  "workspace lifecycle administration must be restricted to platform administrators");
+assert.match(workspaceAdmin, /workspace_key: key,[\s\S]*status: "draft"/,
+  "new workspaces must start in draft state and never become searchable automatically");
+assert.match(workspaceAdmin, /if \(!\["draft", "active", "archived"\]\.includes\(String\(body\.status\)\)\)/,
+  "workspace activation must use the explicit admin status transition");
+assert.match(workspaceAdmin, /body\.membership_status === "active" && workspace\.status !== "active"/,
+  "a normal membership cannot be activated before its workspace is active");
+assert.match(workspaceAdmin, /!authUser\.user\.email_confirmed_at/,
+  "normal user membership activation must require a confirmed account");
+assert.match(workspaceAdmin, /!existing \|\| !\["invited", "active"\]\.includes/,
+  "normal user membership activation must follow an existing invitation");
+assert.match(rpcMigration, /nextway_merge_prospect_identity[\s\S]*commit;\s*$/,
+  "the identity merge RPC must be created before the single final transaction commit");
+assert.equal((rpcMigration.match(/create or replace function public\.nextway_merge_prospect_identity/g) || []).length, 1,
+  "the identity merge RPC must be defined exactly once");
+assert.match(rpcMigration, /alter function public\.nextway_merge_prospect_identity\([\s\S]*owner to postgres/,
+  "identity merge must execute under the trusted database owner");
+assert.match(rpcMigration, /revoke all on function public\.nextway_merge_prospect_identity\([\s\S]*from public, anon, authenticated/,
+  "ordinary authenticated clients must not call the identity merge RPC directly");
+assert.match(rpcMigration, /grant execute on function public\.nextway_merge_prospect_identity\([\s\S]*to service_role/,
+  "only the trusted server role may call the identity merge RPC");
+assert.match(rpcMigration, /auth\.role\(\) is distinct from 'service_role'/,
+  "the identity merge RPC must reject calls without the trusted server role");
+assert.match(rpcMigration, /set_config\('request\.jwt\.claim\.sub', p_actor_id::text, true\)/,
+  "the server-only identity merge must restore the verified actor identity for membership checks");
+assert.match(rpcMigration, /set_config\(\s*'request\.jwt\.claims'/,
+  "the identity merge must bind the verified actor in both Supabase claim settings");
+assert.match(rpcMigration, /auth\.uid\(\) is distinct from p_actor_id/,
+  "the identity merge must fail closed if the verified actor cannot be resolved");
+assert.match(rpcMigration, /create or replace function public\.nextway_check_prospect_memory_ready/,
+  "the Edge Function must have a server-only readiness preflight before paid search");
+assert.match(rpcMigration, /to_regprocedure\('public\.nextway_merge_prospect_identity/,
+  "readiness preflight must verify that the identity merge RPC is installed");
+assert.match(rpcMigration, /has_function_privilege\('authenticated'[\s\S]*nextway_lookup_prospect_crm_matches/,
+  "readiness preflight must verify the user-scoped CRM lookup privilege");
+assert.match(rpcMigration, /has_function_privilege\('service_role'[\s\S]*nextway_merge_prospect_identity/,
+  "readiness preflight must verify the server-only merge privilege");
+assert.match(edge, /trustedWriter\.rpc\([\s\S]*nextway_check_prospect_memory_ready/,
+  "the search Edge Function must run the readiness preflight using the trusted writer");
+assert.match(edge, /p_source_urls:\s*\[\]/,
+  "the CRM lookup must be exercised read-only before any external search");
+assert.match(edge, /from\("nextway_prospect_identity_archive"\)[\s\S]*select\("id"\)/,
+  "the user-scoped archive read policy must be checked before paid search");
+assert.ok(edge.indexOf("Memoria centrale o permessi non pronti") < edge.indexOf('"nextway_consume_api_rate_limit"'),
+  "all central memory prerequisites must be checked before consuming Tavily quota");
+assert.match(schemaMigration, /set_config\(\s*'request\.jwt\.claims'/,
+  "the cache write RPC must bind the verified actor in both Supabase claim settings");
+assert.match(schemaMigration, /auth\.uid\(\) is distinct from p_actor_id/,
+  "the cache write RPC must fail closed if the verified actor cannot be resolved");
+assert.match(schemaMigration, /revoke all on function public\.nextway_store_search_query_cache\([\s\S]*from public, anon, authenticated/,
+  "ordinary authenticated clients must not call the cache write RPC directly");
+assert.match(schemaMigration, /grant execute on function public\.nextway_store_search_query_cache\([\s\S]*to service_role/,
+  "only the trusted server role may write shared cache rows");
+assert.match(schemaMigration, /auth\.role\(\) is distinct from 'service_role'/,
+  "the cache write RPC must reject calls without the trusted server role");
+assert.match(schemaMigration, /p_actor_id uuid,\s*p_workspace_id uuid/,
+  "the cache RPC must receive the actor ID verified by the Edge Function");
+assert.match(schemaMigration, /fetched_by, fetched_at, expires_at/,
+  "cache rows must retain the verified actor as their provenance");
+assert.match(rpcMigration, /p_actor_id uuid, p_workspace_id uuid/,
+  "the identity merge RPC must receive the actor ID verified by the Edge Function");
+assert.match(rpcMigration, /owner_user_id, identity_fingerprints/,
+  "new archive rows must retain the verified actor as their owner");
+assert.match(rpcMigration, /alter function public\.nextway_lookup_prospect_crm_matches\(uuid,text\[\]\) owner to postgres/,
+  "CRM duplicate lookup must execute under the trusted database owner");
+assert.match(schemaMigration, /alter function public\.nextway_store_search_query_cache\([\s\S]*owner to postgres/,
+  "query cache writes must execute under the trusted database owner");
 
-assert.match(migration, /nextway_lookup_prospect_crm_matches/,
-  "CRM duplicate lookup RPC must be present when the integration is included");
-console.log("NEXTWAY central integration contract: integrated migration detected.");
+const cacheRead = edge.indexOf('.from("nextway_search_query_cache")');
+const rateLimit = edge.indexOf('"nextway_consume_api_rate_limit"');
+const providerCall = edge.indexOf('https://api.tavily.com/search');
+assert.ok(cacheRead >= 0 && rateLimit > cacheRead && providerCall > rateLimit,
+  "central cache lookup must happen before rate-limit consumption and Tavily");
+assert.match(edge, /p_units:\s*uncached\.length/,
+  "only cache-miss queries may consume provider units");
+const trustedWriterGuard = edge.indexOf("if (!trustedWriter)");
+assert.ok(trustedWriterGuard >= 0 && trustedWriterGuard < rateLimit && trustedWriterGuard < providerCall,
+  "the external search path must require a trusted writer before consuming credits");
+assert.ok(edge.indexOf("Servizio di scrittura centrale non configurato") < edge.indexOf('"nextway_consume_api_rate_limit"'),
+  "paid search must be blocked before rate-limit consumption when central writes are unavailable");
+assert.match(edge, /nextway_has_workspace_access/,
+  "the Edge Function must validate active workspace membership");
+assert.match(edge, /nextway_merge_prospect_identity/,
+  "central identity updates must use the protected merge RPC");
+assert.match(edge, /nextway_lookup_prospect_crm_matches/,
+  "existing CRM Leads must be checked before permitting acquisition");
+assert.match(edge, /crm_match:\s*true/,
+  "a matching existing CRM Lead must be returned as an acquired identity");
+assert.match(rpcMigration, /create or replace function public\.nextway_lookup_prospect_crm_matches/,
+  "the CRM duplicate lookup must be implemented as a protected database RPC");
+assert.match(rpcMigration, /l\.category::text, l\.status::text/,
+  "CRM lookup must explicitly cast category and status to its declared text return types");
+assert.match(rpcMigration, /lower\(btrim\(l\.source_url\)\) = lower\(btrim\(u\.url\)\)/,
+  "CRM duplicate lookup must compare canonical source URLs within the selected workspace");
+assert.ok(rpcMigration.includes("p_canonical_url !~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+  "identity merge must reject source URLs without a valid domain or IP host");
+assert.ok(rpcMigration.includes("url !~* '^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?([/?#]|$)'"),
+  "CRM lookup must reject malformed source URLs");
+assert.match(rpcMigration, /l\.workspace_id is null and l\.owner_profile_id = auth\.uid\(\)/,
+  "legacy owner-scoped CRM Leads must also be recognized without crossing user boundaries");
+assert.match(rpcMigration, /v_effective_archive_status := 'acquired'/,
+  "the database, not the browser, must derive acquired status from an existing CRM Lead");
+assert.match(rpcMigration, /pg_advisory_xact_lock\(/,
+  "identity merges must serialize concurrent updates by workspace and identity");
+assert.match(rpcMigration, /if v_match_count > 1 then/,
+  "ambiguous existing identity rows must stop the merge for manual review");
+assert.match(rpcMigration, /nextway_has_workspace_access\([\s\S]*workspace_owner.*workspace_member/,
+  "identity and CRM lookup RPCs must validate active workspace membership");
+assert.match(rpcMigration, /p_archive_status is distinct from 'seen'/,
+  "authenticated clients must not self-assert acquired or reviewed status");
+assert.match(rpcMigration, /array_position\(coalesce\(p_identity_fingerprints/,
+  "the merge RPC must reject null identity fingerprints");
+assert.match(rpcMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_public_contacts -> 'emails'/,
+  "public contact arrays must be validated safely before merging");
+assert.match(rpcMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_source_evidence/,
+  "source evidence validation must not throw on malformed scalar JSON");
+assert.match(schemaMigration, /jsonb_array_elements\(case when jsonb_typeof\(coalesce\(p_results/,
+  "cache result validation must not throw on malformed scalar JSON");
+assert.match(schemaMigration, /coalesce\(jsonb_typeof\(item\.value -> 'score'\), ''\) <> 'number'/,
+  "cached search results must contain numeric relevance scores");
+assert.match(schemaMigration, /jsonb_array_length\(case when jsonb_typeof\(source_evidence\) = 'array'/,
+  "source evidence table constraints must safely handle malformed JSON");
+assert.match(schemaMigration, /jsonb_array_length\(case when jsonb_typeof\(results\) = 'array'/,
+  "query cache table constraints must safely handle malformed JSON");
+assert.match(rpcMigration, /nextway_leads.*workspace_id.*source_url/s,
+  "migration prerequisites must include workspace-scoped Lead source URLs");
+assert.match(edge, /p_archive_status:\s*archiveStatus/,
+  "the central merge RPC must receive only the server-enforced seen status");
+assert.match(edge, /p_results:\s*safeItems/,
+  "validated provider results must be persisted through the cache RPC");
+assert.match(edge, /normalized\.length <= 2048 \? normalized : ""/,
+  "canonical source URLs must be bounded before database lookup and persistence");
+assert.match(edge, /crypto\.subtle\.digest\("SHA-256"/,
+  "identity keys must be hashed server-side before persistence");
+assert.match(edge, /"url:"\s*\+\s*url/,
+  "canonical source URLs must contribute to identity deduplication");
+assert.match(edge, /action === "archive_prospects"/,
+  "the Edge Function must expose the authenticated central archive action");
+assert.match(edge, /const archiveStatus = "seen"/,
+  "untrusted search results must never assert acquired or human-reviewed archive status");
+assert.match(edge, /action === "lookup_prospects"/,
+  "the Edge Function must expose the authenticated central identity lookup");
+assert.match(edge, /\.overlaps\("identity_fingerprints", fingerprintBatch\)/,
+  "central lookup must match shared identities by server-side hashed fingerprints");
+assert.match(edge, /offset < fingerprints\.length; offset \+= 80/,
+  "fingerprint lookups must be split into bounded URL query batches");
+assert.match(edge, /offset < urls\.length; offset \+= 5/,
+  "canonical URL lookups must also use bounded batches");
+assert.match(edge, /input\.fingerprints\.some\(fingerprint => \(storedFingerprints as string\[\]\)\.includes\(fingerprint\)\)/,
+  "lookup results must be correlated using the same fingerprints persisted in the archive");
+assert.match(edge, /candidates\.length > 1/,
+  "multiple central identity matches must be flagged as ambiguous, never silently selected");
+assert.match(edge, /\.eq\("workspace_id", workspaceId\)/,
+  "central identity lookup must remain strictly workspace-scoped");
+
+assert.match(edge, /nextway_store_search_query_cache/,
+  "cache writes must use the validated database RPC");
+assert.doesNotMatch(edge, /\.from\("nextway_search_query_cache"\)\.(insert|update)/,
+  "the Edge Function must not write cache rows directly");
+assert.match(edge, /central_cache_unavailable/,
+  "if central cache is unavailable, paid external search must stop safely");
+assert.match(edge, /p_target_type:\s*targetType/,
+  "archive records must preserve customer/partner/unknown classification");
+assert.match(edge, /classification\.includes\("cliente"\)/,
+  "Italian customer classification must map to potential_customer");
+assert.match(edge, /new_networker: "other_networker"/,
+  "new networkers must map into the supported other-networker archive segment");
+assert.match(edge, /exnetworker: "other_networker"/,
+  "former networkers must map into the supported other-networker archive segment");
+assert.match(edge, /Deno\.env\.get\("NEXTWAY_SERVICE_ROLE_KEY"\)/,
+  "server-only central writes must use the protected Supabase service credential");
+assert.match(edge, /const trustedWriter = serviceRoleKey \? createClient/,
+  "the trusted writer client must be initialized only inside the Edge Function");
+assert.ok(edge.indexOf("supabase.auth.getUser(token)") < edge.indexOf('Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY")'),
+  "the caller must be authenticated before the server-only writer is initialized");
+assert.match(edge, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/,
+  "identity archive writes must use the server-only trusted writer");
+assert.match(edge, /trustedWriter\.rpc\("nextway_store_search_query_cache"/,
+  "query cache writes must use the server-only trusted writer");
+assert.doesNotMatch(edge, /trustedWriter\.from\(/,
+  "the service credential must not be used for general table reads or writes");
+
+assert.match(ui, /nextway_list_accessible_workspaces/,
+  "the UI must load only workspaces available to the signed-in user");
+assert.match(ui, /confronta i risultati con la memoria condivisa e con i Lead già presenti nel CRM/,
+  "the UI must explain the authoritative shared and CRM duplicate checks");
+assert.match(ui, /fino a 500 identità e 20 query/,
+  "the UI must accurately describe the browser-local archive capacity");
+assert.match(ui, /può consumare fino a 5 unità Tavily/,
+  "the UI must describe the batch search as a maximum cost, not a guaranteed charge");
+assert.match(ui, /query già presenti nella cache centrale non vengono inviate/,
+  "the UI must explain that central cache hits do not consume external search units");
+assert.match(ui, /non crea né qualifica Lead nel CRM/,
+  "the UI must distinguish central identity memory from CRM Lead creation");
+assert.match(ui, /schede provvisorie dai contenuti restituiti dal servizio di ricerca/,
+  "the UI must disclose that public search content is analyzed into provisional profiles");
+assert.match(ui, /non contatta persone e non invia messaggi/,
+  "the UI must state that no prospect is contacted automatically");
+assert.match(ui, /Le identità e le fonti vengono registrate nella memoria centrale del workspace/,
+  "the UI must disclose that identity-only central memory is updated after a search");
+assert.match(ui, /l’acquisizione del prospect nel CRM richiede un tuo clic e la verifica manuale/,
+  "the UI must distinguish central memory from explicit CRM acquisition");
+assert.doesNotMatch(ui, /I risultati acquisiti vengono salvati solo nel tuo archivio locale/,
+  "the UI must not falsely describe central memory writes as local-only");
+assert.doesNotMatch(ui, /non estrae automaticamente profili/,
+  "the UI must not deny the actual preliminary profile extraction performed on search results");
+assert.doesNotMatch(ui, /1\.000 identità storiche|non sostituisce un archivio cloud condiviso/,
+  "the UI must not describe stale local-only memory limits or deny the shared archive");
+assert.match(ui, /workspace_id:searchWorkspaceId/,
+  "search requests must carry the selected workspace scope");
+assert.match(ui, /segment_key:\$\('segment'\)\.value/,
+  "cache keys must be segmented by prospect target");
+assert.match(ui, /market_key:\$\('area'\)\.value/,
+  "cache keys must be segmented by market");
+assert.match(ui, /action:'archive_prospects'/,
+  "classified search results must be sent to the central archive");
+assert.match(ui, /action:'lookup_prospects'/,
+  "search results must be checked against the shared identity archive before writing");
+assert.match(ui, /offset<dailyProspects\.length;offset\+=25/,
+  "all search results must be checked in bounded batches, not only the first 25");
+assert.match(ui, /slice\(offset,offset\+25\)/,
+  "all central archive writes must cover the complete result set in bounded batches");
+assert.match(ui, /acquisizione CRM bloccata finché la memoria condivisa non è verificata/,
+  "CRM capture must fail closed if shared duplicate lookup is unavailable");
+assert.match(ui, /Attendi il confronto con la memoria condivisa prima di acquisire/,
+  "capture buttons must be disabled while the central duplicate lookup is pending");
+assert.match(ui, /centralIdentityBlocked/,
+  "central acquired or ambiguous identities must remain blocked after lookup completes");
+assert.match(ui, /acquisizione CRM bloccata finché la memoria condivisa non è aggiornata/,
+  "CRM capture must also fail closed if central archive persistence fails");
+
+assert.ok(ui.indexOf("action:'lookup_prospects'") < ui.indexOf("action:'archive_prospects'"),
+  "central duplicate lookup must run before merging newly found identities");
+assert.match(ui, /GIÀ INDIVIDUATO NEL WORKSPACE/,
+  "the UI must label identities already present in the shared workspace");
+assert.match(ui, /record\.archive_status==='acquired'\|\|record\.crm_match===true\)\?' · GIÀ ACQUISITO NEL CRM'/,
+  "an acquired CRM match must show the acquired label even when archive history exists");
+assert.match(ui, /Già acquisito nel CRM/,
+  "the UI must prevent reacquiring identities already acquired in the shared CRM");
+assert.match(ui, /central_identity_ambiguous/,
+  "ambiguous shared identity matches must be surfaced to the operator");
+assert.match(ui, /Duplicato centrale da verificare/,
+  "CRM capture must be blocked for ambiguous shared identity matches");
+
+assert.match(ui, /archivePayload\.archived_count/,
+  "the UI must report successful central identity updates");
+assert.match(ui, /if\(!searchWorkspaceId\)throw new Error/,
+  "the UI must block search when no authorized workspace is selected");
+
+console.log("NEXTWAY central prospect memory integration: contract checks passed.");

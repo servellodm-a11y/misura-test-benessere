@@ -2,7 +2,7 @@ name: NEXTWAY static validation
 
 on:
   push:
-    branches: [main, fix/nextway-password-recovery]
+    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration]
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
@@ -30,6 +30,10 @@ on:
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-idempotency-sql-security.mjs"
       - "scripts/test-nextway-knowledge-base-sql.mjs"
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
@@ -77,6 +81,7 @@ on:
       - "scripts/test-nextway-prospect-identity-memory.mjs"
       - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "supabase/migrations/20261116120000_nextway_prospect_identity_memory_rpcs.sql"
       - "scripts/test-nextway-prospect-dimensions.mjs"
       - "scripts/test-nextway-prospect-deduplication.mjs"
       - "scripts/test-nextway-prospect-contactability.mjs"
@@ -101,6 +106,10 @@ on:
       - "scripts/validate-nextway-audit.mjs"
       - "scripts/test-nextway-provisioning-security.mjs"
       - "scripts/test-nextway-edge-functions-security.mjs"
+      - "scripts/test-nextway-prospect-search-contract.mjs"
+      - "scripts/test-nextway-prospect-central-memory-integration.mjs"
+      - "scripts/test-nextway-prospect-identity-memory.mjs"
+      - "scripts/test-nextway-prospect-identity-memory-sql.mjs"
       - "scripts/test-nextway-idempotency-sql-security.mjs"
       - "scripts/test-nextway-knowledge-base-sql.mjs"
       - "scripts/test-nextway-knowledge-ingest-security.mjs"

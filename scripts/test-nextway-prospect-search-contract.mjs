@@ -7,14 +7,16 @@ assert.match(page, /id="runsearch"[^>]*>Esegui 1 ricerca · fino a 10 risultati/
   'the single-search button must communicate its ten-result limit');
 assert.match(page, /id="runallsearch"[^>]*>Esegui tutte le 5 ricerche · fino a 50 risultati/,
   'the batch button must communicate five queries and up to fifty results');
-assert.match(page, /5 unità di ricerca/,
-  'the user must be told that the full batch consumes five search units');
+assert.match(page, /può consumare fino a 5 unità Tavily/,
+  'the user must be told the maximum possible provider usage for the full batch');
+assert.match(page, /query già presenti nella cache centrale non vengono inviate/,
+  'central cache hits must be disclosed as not consuming provider units');
 assert.match(page, /const SEARCH_MAX_RESULTS\s*=\s*10\s*;/,
   'the browser module must define one authoritative search-result limit');
 assert.match(page, /max_results\s*:\s*SEARCH_MAX_RESULTS/,
   'the Edge Function request must use the authoritative result limit');
 assert.match(page, /queries:queriesToFetch\.map\(entry=>entry\.query\)/,
-  'the Edge Function must receive only queries that missed the local cache');
+  'the Edge Function must receive only queries missing from the browser cache');
 assert.match(page, /runallsearch'\)\.addEventListener\('click',\(\)=>runSearch\(true\)\)/,
   'the all-search button must invoke the explicit batch path');
 assert.match(page, /Array\.isArray\(payload\.failures\)/,

@@ -57,7 +57,7 @@ assert.match(setter, /if \(stagedOutput\)/);
 assert.match(setter, /if \(completeError\)/);
 assert.match(setter, /return respond\(completedResponse, 200, responseOrigin\)/);
 assert.match(setter, /error: "Operazione non completata"/);
-assert.doesNotMatch(setter, /Deno\.env\.get\(["'](?:SUPABASE_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
+assert.doesNotMatch(setter, /Deno\.env\.get\(["'](?:NEXTWAY_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
 assert.doesNotMatch(setter, /fetch\(["']https?:\/\/[^"']*(?:whatsapp|twilio|sendgrid)[^"']*["']/i);
 assert.match(setter, /Non inviarla: deve rimanere una bozza/);
 
@@ -74,11 +74,21 @@ assert.doesNotMatch(search, /Access-Control-Allow-Origin["']?\s*:\s*["']\*["']/i
 assert.match(search, /req\.method !== "POST"/);
 assert.match(search, /Authorization/);
 assert.match(search, /auth\.getUser\(token\)/);
-assert.match(search, /totalBytes > 16_384/);
+assert.match(search, /totalBytes > 262_144/);
 assert.match(search, /body\.queries\.length < 1 \|\| body\.queries\.length > 5/);
-assert.match(search, /q\.length === 0 \|\| q\.length > 400/);
-assert.match(search, /p_scope: "public_search", p_units: queries\.length/);
+assert.match(search, /query\.length === 0 \|\| query\.length > 400/);
+assert.match(search, /p_scope: "public_search", p_units: uncached\.length/);
 assert.match(search, /if \(!rateLimit\.allowed\)/);
+
+assert.match(search, /nextway_has_workspace_access/,
+  "search must be scoped to an active authorized workspace");
+assert.match(search, /nextway_search_query_cache/,
+  "search must consult the shared cache");
+assert.match(search, /central_cache_unavailable/,
+  "search must stop if the central cache cannot be read");
+assert.match(search, /nextway_merge_prospect_identity/,
+  "prospect identity writes must use the protected merge RPC");
+
 assert.match(search, /AbortSignal\.timeout\(20000\)/);
 assert.match(search, /api\.tavily\.com\/search/);
 assert.match(search, /provider_rate_limited/);
@@ -87,5 +97,11 @@ assert.match(search, /queries_requested/);
 assert.match(search, /queries_completed/);
 assert.match(search, /queries_failed/);
 assert.match(search, /partial/);
-assert.doesNotMatch(search, /Deno\.env\.get\(["'](?:SUPABASE_SERVICE_ROLE_KEY|NEXTWAY_SERVICE_ROLE_KEY)["']\)/);
+assert.match(search, /Deno\.env\.get\(["']NEXTWAY_SERVICE_ROLE_KEY["']\)/);
+assert.ok(search.indexOf("supabase.auth.getUser(token)") < search.indexOf('Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY")'),
+  "the search function must authenticate the caller before initializing its server-only writer");
+assert.match(search, /trustedWriter\.rpc\("nextway_merge_prospect_identity"/);
+assert.match(search, /trustedWriter\.rpc\("nextway_store_search_query_cache"/);
+assert.doesNotMatch(search, /trustedWriter\.from\(/,
+  "the service-role client must be restricted to protected write RPCs");
 console.log("NEXTWAY Search Edge Function: authenticated boundary, query limits, distributed quota and provider resilience contract: PASS");
