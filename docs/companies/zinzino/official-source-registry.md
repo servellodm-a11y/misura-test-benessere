@@ -174,7 +174,7 @@ Fonte indice: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits .
 
 ## Knowledge Base — documenti pronti per importazione (17 novembre 2026)
 
-Preparati nel repository sette documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: customer-rewards-program.md, partner-kits-and-compensation-boundaries.md, premier-kit-catalog-validation.md, compensation-plan-eu-2025-italian-reference.md, compensation-plan-italian-2024-comparison.md, compensation-plan-eu-2025-structured-rules.md e balancetest-product-and-use-reference.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
+Preparati nel repository otto documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: customer-rewards-program.md, partner-kits-and-compensation-boundaries.md, premier-kit-catalog-validation.md, compensation-plan-eu-2025-italian-reference.md, compensation-plan-italian-2024-comparison.md, compensation-plan-eu-2025-structured-rules.md, balancetest-product-and-use-reference.md e shop-catalog-index.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
 
 
 ## Piano Compensi — riferimento europeo inglese acquisito (17 novembre 2026)

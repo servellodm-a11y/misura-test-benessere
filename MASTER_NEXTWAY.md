@@ -3486,3 +3486,27 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Knowledge Base preparatoria: 7 documenti italiani; importazione non eseguita perché workspace Zinzino non creato e ingestione richiede sessione platform_admin autenticata.
 - Sistemata la riga del manifest per mantenere una tabella Markdown valida.
 - Nessuna modifica a Supabase, nessun deploy, nessun test con utenti reali.
+
+
+---
+
+## 17 novembre 2026 — Indice Shop e stati materiali workspace Zinzino
+
+### Integrazione GitHub
+- PR #42 — indice categorie Shop Italia: merge completato nel commit `aa561626b0a307ad06dcc82e422cbf8141bdd8b6`.
+- PR #43 — stati materiali e guardrail workspace: merge completato nel commit `4d82f7f0114299abdde05ae7231096693affa5ed`.
+- CI PR #43: NEXTWAY static validation completata con successo; test workspace commercial config e type-check Edge Functions superati.
+
+### Catalogo Shop
+- Preparato `knowledge/shop-catalog-index.md`: test domiciliari, Omega, Restore, immunità, salute intestinale, controllo peso, nutrizione pelle e skincare.
+- Valentus e Xelliss sono distinti come Brand Shop di terze parti.
+- Nessun prezzo statico memorizzato: categorie e schede individuali possono differire; per ogni proposta verificare scheda e checkout Italia.
+
+### Configurazione workspace
+- Stati materiali non più generici: catalogo preparato/non importato; 20 regole compensi strutturate con calcoli disabilitati; formazione prodotto parziale; policy ufficiali da acquisire; presentazione brand da acquisire.
+- Aggiunti guardrail BalanceTest: non acquisire ID/referti/valori nel CRM; non simulare il Valore di Protezione; non trattare la citazione 98/79/CE come verifica normativa autonoma.
+- Manifest Knowledge Base: 8 documenti italiani pronti per futura importazione; non importati perché il workspace non è stato creato e l'ingestione richiede sessione platform_admin autenticata.
+
+### Stato operativo
+- Nessuna modifica Supabase, nessuna creazione workspace, nessun deploy Netlify o produzione, nessun test con utenti reali.
+- Restano necessari: accesso Admin UI autenticato platform_admin per creare il workspace draft e importare i documenti in stato pending; acquisizione policy ufficiali complete e presentazione brand.
