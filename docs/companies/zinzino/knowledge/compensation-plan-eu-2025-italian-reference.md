@@ -82,3 +82,8 @@ Questo documento è una sintesi e guida operativa originale in italiano. Non è 
 - Conferma di vigenza ricevuta: 17 novembre 2026.
 - Mercato applicativo: Italia, in quanto incluso nel perimetro europeo indicato dal documento.
 - Ultimo stato: fonte vigente confermata; strutturazione analitica delle regole e test di calcolo da completare.
+
+
+## Stato aggiornato dopo l'estrazione strutturata fase 1
+
+La sintesi dettagliata delle regole ora estratte è nel file `compensation-plan-eu-2025-structured-rules.md`. La base commerciale JSON contiene 18 regole di riferimento, con stato `phase_1_structured_reference`. Restano da completare T-Balance e OTB completi, i titoli oltre Black Crown, campagne Fast Start 60/90 giorni, viaggi incentivo e test numerici indipendenti. I calcoli automatici restano disabilitati.
