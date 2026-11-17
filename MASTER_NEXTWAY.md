@@ -3510,3 +3510,26 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Stato operativo
 - Nessuna modifica Supabase, nessuna creazione workspace, nessun deploy Netlify o produzione, nessun test con utenti reali.
 - Restano necessari: accesso Admin UI autenticato platform_admin per creare il workspace draft e importare i documenti in stato pending; acquisizione policy ufficiali complete e presentazione brand.
+
+
+---
+
+## 17 novembre 2026 — PR #44 e #45: continuità e fonti di conformità Zinzino
+
+### Integrazione GitHub
+- PR #44 — aggiornamento MASTER e registro fonti per catalogo Shop e readiness workspace: merge `1678a32e613136f588e79667c9371c5795a979d8`.
+- PR #45 — valutazione fonti etiche, marketing, privacy e condizioni di vendita Zinzino Italia: merge `5efeaafd1c9499ccc523317592409d3cd174d9a8`.
+- PR #45 è documentale: assessment e registro fonti aggiornati; nessuna modifica runtime, database, Edge Functions o deploy.
+
+### Nuove evidenze ufficiali
+- L'Annual Report Zinzino AB 2025 dichiara che il Code of Conduct e le Business Ethics Guidelines sono adottati annualmente dal Consiglio di amministrazione e inclusi negli accordi dei distributori; il rapporto non contiene il testo integrale applicabile al singolo Partner italiano.
+- L'informativa privacy Partner reperita è marcata versione 1.0 EU e non mostra una data di revisione.
+- Il PDF Marketing Rules & Ethics individuato è marcato MYS (Malaysia): non va applicato automaticamente al mercato italiano.
+- I termini di vendita italiani individuati riportano 2022-02: non vanno trattati come unica fonte delle condizioni correnti.
+
+### Regole NEXTWAY e blocchi
+- La compliance Zinzino Italia resta PARZIALE / NON APPROVATA.
+- Prima di abilitare contenuti/campagne brandizzati occorre acquisire dal Back Office Partner italiano il Partner Agreement vigente e gli allegati etici correnti, inclusi Code of Conduct e Business Ethics Guidelines, oltre a Marketing Rules & Ethics Italia/UE e informative/condizioni aggiornate.
+- L'assessment interno è `docs/companies/zinzino/compliance-source-assessment.md`; è escluso dal manifest Knowledge Base perché non è una policy aziendale approvata.
+- Il registro fonti aggiornato è `docs/companies/zinzino/official-source-registry.md`.
+- Non sono state apportate modifiche a Supabase, workspace, produzione Netlify o test reali.
