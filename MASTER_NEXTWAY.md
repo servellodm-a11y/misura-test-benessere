@@ -3120,3 +3120,22 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 2. Individuare un percorso amministrativo già disponibile e sicuro per creare il workspace Zinzino senza deploy Netlify, senza esposizione di chiavi e senza richiedere al cliente operazioni da Terminale.
 3. Solo dopo accesso amministrativo, creare il workspace in bozza, salvare la configurazione, caricare i cinque documenti ufficiali, eseguire il preflight e valutare l'attivazione.
 
+## 17 novembre 2026 — Correzioni AI Setter e riordino PR storiche
+
+### Correzioni integrate
+- PR #17: corretto il retry AI Setter dopo la creazione del prospect. La validazione HTML nativa viene disattivata nel submit handler e i campi essenziali sono validati manualmente nel percorso di nuova creazione. Merge squash: `b45667960dc73adf9e97008443f6644603e5fa0f`.
+- PR #18: gestione esplicita degli errori upstream AI Setter: quota/credito esaurito (402), rate limit temporaneo (429), autorizzazione non valida (502 con messaggio amministrativo), altri errori provider (502); logging limitato a stato e codice. Aggiunto test contrattuale e allineato il controllo audit al logging sicuro. Merge squash: `1c54f9e6bd61ebc70f51067d5dc25eba61644b12`.
+- CI PR #17: run #958 completata con successo.
+- CI PR #18: run #961 completata con successo.
+- CI post-merge main: run #962 completata con successo.
+- PR #4, #5 e #6 chiuse come superate/duplicate dopo integrazione delle rispettive correzioni nelle PR #17 e #18.
+
+### Stato PR storiche ancora da valutare
+- PR #1, #2, #3, #7 e #8 restano aperte. Non chiudere o integrare finché non è verificata la copertura completa delle rispettive modifiche su `main`.
+- PR #10 resta esclusa per decisione dell'utente.
+- PR #15 resta chiusa; PR #16 resta integrata.
+
+### Confini operativi invariati
+- Nessun deploy Netlify in produzione prima del 4 dicembre 2026.
+- Nessun test con utenti reali o conversioni reali prima del 4 dicembre 2026.
+- La correzione upstream della PR #18 è nel codice GitHub, ma la Edge Function non è stata ridistribuita: il comportamento runtime del servizio resta da aggiornare con un deploy Supabase autorizzato e controllato.
