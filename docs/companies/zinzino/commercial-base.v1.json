@@ -744,17 +744,22 @@
       "catalog_scope_note": "Catalogo strutturato parziale delle offerte visibili nella pagina ufficiale Italia. I prezzi sono snapshot; verificare scheda e condizioni della campagna prima di ogni proposta. Le etichette Full Refund Possible non autorizzano promesse di rimborso."
     },
     "compensation_plan": {
-      "status": "english_eu_master_2025_reference_summary_only",
+      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
       "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
       "source_title": "Zinzino Compensation Plan — Europe",
       "source_version": "12-02-2025",
       "source_language": "en",
       "source_market": "EU",
       "source_type": "official_company_document",
-      "italian_translation_status": "summary_only_unofficial",
+      "italian_translation_status": "original_italian_operational_summary_not_official_translation",
       "calculations_enabled": false,
       "rules": [],
-      "blocking_reason": "The official Italian page links a separate Italian PDF that could not be fully acquired. The English EU master is dated 12-02-2025 and states that the English master prevails over translations. It is retained as a historical/reference source only; do not treat it as the current Italian plan or enable commission/qualification calculations until the current Italian rules are acquired and reconciled."
+      "blocking_reason": "Fonte ufficiale europea vigente secondo conferma dell'utente del 17-11-2026. La strutturazione puntuale delle regole, le formule, le soglie, le eccezioni e i test automatici sono ancora da completare. Non abilitare calcoli commissioni/qualifiche finché le regole non sono state estratte e verificate una per una contro il documento master.",
+      "validity_confirmation": {
+        "status": "confirmed_by_user",
+        "confirmed_at": "2026-11-17",
+        "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore a novembre 2026 senza modifiche."
+      }
     }
   },
   "source_register": [
@@ -797,7 +802,9 @@
       "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
       "observed_at": "2026-11-17",
       "refresh": "before_calculation",
-      "status": "blocked_full_document_not_acquired"
+      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_rule_structuring_pending",
+      "validity_confirmed_by_user_at": "2026-11-17",
+      "validity_note": "L'utente conferma che la versione EU 12-02-2025 è in vigore in Italia a novembre 2026 senza modifiche."
     },
     {
       "id": "black_week_2026_it",
