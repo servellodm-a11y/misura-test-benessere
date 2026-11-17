@@ -3345,3 +3345,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - I documenti sono solo preparati nel repository; non importati in Supabase. nextway-knowledge-ingest richiede workspace_id valido e token utente platform_admin, accetta contenuto testuale e crea documenti con approval_status=pending.
 - Il workspace Zinzino non è ancora stato creato; nessun bypass DB/Service Role.
 - Nessun deploy Netlify.
+
+
+## 17 novembre 2026 — Pacchetto Knowledge Base Zinzino integrato (PR #31)
+
+- PR #31 integrata con quattro documenti Markdown italiani in `docs/companies/zinzino/knowledge/`: `customer-rewards-program.md`, `partner-kits-and-compensation-boundaries.md`, `premier-kit-catalog-validation.md` e `IMPORT-MANIFEST.md`.
+- I documenti sono preparati per l'importazione futura; non sono ancora presenti nella Knowledge Base Supabase perché il workspace Zinzino non è stato creato e l'ingestione richiede workspace UUID e JWT platform_admin.
+- Il manifesto definisce module_key, source_type, data/validità e controlli; i documenti mantengono la soglia 7° ordine come storica non riconfermata e mantengono il Piano Compensi in stato non validato.
+- CI PR #31 run `44098866088`: SUCCESS. Merge squash commit `06c2699488c668c25afc0d57178908ee29a66a00`.
+- Nessuna modifica DB, creazione/attivazione workspace o deploy Netlify.
