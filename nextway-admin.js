@@ -22,22 +22,42 @@
     }
 
     async function adminAction(payload) {
-      const { s } = await session();
+      const { c } = await session();
       const cfg = cloud.getConfig();
-      const response = await fetch(cfg.url + "/functions/v1/nextway-workspace-admin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + s.access_token,
-          "apikey": cfg.key
-        },
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || ("Errore HTTP " + response.status + ". Verifica che la Edge Function aggiornata sia pubblicata."));
+      const invoke = async (accessToken) => {
+        const response = await fetch(cfg.url + "/functions/v1/nextway-workspace-admin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken,
+            "apikey": cfg.key
+          },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        return { response, result };
+      };
+
+      let { s } = await cloud.active();
+      if (!s?.access_token) throw new Error("Sessione Supabase assente. Accedi nuovamente.");
+      let outcome = await invoke(s.access_token);
+
+      // A stale access token can survive in a restored browser tab. Refresh once
+      // on 401, then retry with the new user JWT; never substitute a service key.
+      if (outcome.response.status === 401) {
+        const { data, error } = await c.auth.refreshSession();
+        if (error || !data?.session?.access_token) {
+          throw new Error("Sessione amministrativa scaduta. Esci e accedi nuovamente a NEXTWAY.");
+        }
+        outcome = await invoke(data.session.access_token);
       }
-      return result;
+
+      if (!outcome.response.ok || !outcome.result.success) {
+        const detail = outcome.result.error ||
+          ("Errore HTTP " + outcome.response.status + ". Verifica sessione, ruolo platform_admin e disponibilità della Edge Function.");
+        throw new Error(detail);
+      }
+      return outcome.result;
     }
 
     function selectedWorkspace() {
