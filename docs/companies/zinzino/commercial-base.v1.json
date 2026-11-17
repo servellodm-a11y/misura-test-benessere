@@ -1576,7 +1576,22 @@
               "cumulative_increment_pay_points": 1500,
               "max_title_range": "President and above"
             }
-          ]
+          ],
+          "source_interpretation": {
+            "active_partner_requirement": {
+              "mini": "Il glossario del master EU 2025 specifica il requisito di Partner attivo per Small, Medium, Large, XL, XXL, 3XL, 4XL e 5XL; non lo esplicita per Mini. NEXTWAY non deve estendere automaticamente tale requisito a Mini.",
+              "small_through_5xl": "Partner attivo richiesto, come indicato nel glossario.",
+              "source_section": "Glossary — Customer Acquisition Bonus",
+              "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf"
+            },
+            "calculation_guardrails": [
+              "Le soglie Left Credits e Right Credits devono essere entrambe raggiunte nella stessa Income Center.",
+              "Il CAB può provenire da una sola Income Center per ogni ciclo settimanale di commissione.",
+              "La colonna Cumulative Pay Points riporta l'incremento rispetto alla soglia precedente; Total Pay Points è il totale cumulativo indicato dal piano.",
+              "I massimali sono distinti per fascia di titolo e non vanno sommati tra fasce."
+            ],
+            "status": "structured_reference_not_executable"
+          }
         },
         {
           "id": "mentor_matching_bonus",
@@ -3317,7 +3332,22 @@
             "cumulative_increment_pay_points": 1500,
             "max_title_range": "President and above"
           }
-        ]
+        ],
+        "source_interpretation": {
+          "active_partner_requirement": {
+            "mini": "Il glossario del master EU 2025 specifica il requisito di Partner attivo per Small, Medium, Large, XL, XXL, 3XL, 4XL e 5XL; non lo esplicita per Mini. NEXTWAY non deve estendere automaticamente tale requisito a Mini.",
+            "small_through_5xl": "Partner attivo richiesto, come indicato nel glossario.",
+            "source_section": "Glossary — Customer Acquisition Bonus",
+            "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf"
+          },
+          "calculation_guardrails": [
+            "Le soglie Left Credits e Right Credits devono essere entrambe raggiunte nella stessa Income Center.",
+            "Il CAB può provenire da una sola Income Center per ogni ciclo settimanale di commissione.",
+            "La colonna Cumulative Pay Points riporta l'incremento rispetto alla soglia precedente; Total Pay Points è il totale cumulativo indicato dal piano.",
+            "I massimali sono distinti per fascia di titolo e non vanno sommati tra fasce."
+          ],
+          "status": "structured_reference_not_executable"
+        }
       },
       {
         "id": "mentor_matching_bonus",
