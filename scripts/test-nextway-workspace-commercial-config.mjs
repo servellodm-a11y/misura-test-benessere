@@ -60,9 +60,9 @@ for(const segment of api.segments){
 }
 assert.equal(Object.keys(seedWorkspace.officialMaterials).length,5);
 assert.equal(seedWorkspace.officialMaterials.product_catalogue.status,'preparato_non_importato');
-assert.equal(seedWorkspace.officialMaterials.compensation_plan.status,'20_regole_strutturate_calcoli_disabilitati');
+assert.equal(seedWorkspace.officialMaterials.compensation_plan.status,'20_regole_calcoli_disabilitati');
 assert.equal(seedWorkspace.officialMaterials.product_training.status,'parziale_documentazione_pubblica');
-assert.equal(seedWorkspace.officialMaterials.compliance_guidelines.status,'guardrail_interni_parziali_policy_ufficiali_da_acquisire');
+assert.equal(seedWorkspace.officialMaterials.compliance_guidelines.status,'policy_da_acquisire_guardrail_parziali');
 assert.equal(seedWorkspace.officialMaterials.brand_presentation.status,'da_acquisire');
 assert.ok(seedWorkspace.guardrails.some(rule=>rule.includes('ID BalanceTest')));
 assert.ok(seedWorkspace.guardrails.some(rule=>rule.includes('Valore di Protezione')));
