@@ -207,6 +207,8 @@ jobs:
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
         run: node scripts/test-nextway-setter-governance.mjs
+      - name: Validate NEXTWAY AI Setter upstream error handling
+        run: node scripts/test-nextway-setter-upstream-errors.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
       - name: Validate NEXTWAY local static checks with Python 3

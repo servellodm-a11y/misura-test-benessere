@@ -214,7 +214,7 @@ assert.ok(leadSelectBlock, "AI Setter lead select block missing");
 assert.doesNotMatch(leadSelectBlock[0], /notes/);
 assert.match(setterFunction, /function logSafeFailure\(label: string, error: unknown\)/);
 assert.match(setterFunction, /console\.error\(label, \{ code, status \}\)/);
-assert.match(setterFunction, /console\.error\("OpenAI request failed:", \{ status: aiResponse\.status \}\)/);
+assert.match(setterFunction, /logSafeFailure\("OpenAI request failed", \{\s*status: aiResponse\.status,\s*code: upstreamCode,\s*\}\)/);
 assert.match(setterFunction, /console\.error\("NEXTWAY AI Setter request failed"\)/);
 assert.doesNotMatch(setterFunction, /console\.error\([^\n]*,\s*(?:limitError|claimError|stagedReadError|stageError|completeError|details|error)\s*\)/);
 console.log("AI Setter provider data minimization: explicit allowlist, free notes excluded, email/phone/URL redaction: PASS");
