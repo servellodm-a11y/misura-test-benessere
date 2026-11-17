@@ -272,3 +272,13 @@ Ulteriori fonti ufficiali Zinzino reperite:
 - Social Selling Guide en-EN: https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Social-Selling-Guide-en-EN.pdf — guida formativa inglese che richiama le Marketing Rules & Ethics, i limiti sui claim medici/promesse e il Back Office per gli asset aggiornati; data/versione non verificata.
 
 Queste fonti ampliano il riferimento interno, ma non sostituiscono Partner Agreement Italia, allegati etici annuali e Marketing Rules & Ethics confermati dal Back Office Partner. Compliance Italia resta PARZIALE / NON APPROVATA. Valutazione aggiornata in docs/companies/zinzino/compliance-source-assessment.md.
+
+## Canale acquisizione documenti Partner Italia — 17 novembre 2026
+
+La pagina pubblica Partner Italia espone il collegamento al Piano Compensi ma non i documenti contrattuali/etici riservati. La pagina Assistenza Partner rinvia a chat integrata, telefono o e-mail; il contatto chat è raggiungibile dal logo in fondo alla pagina.
+
+Link ufficiali:
+- Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb
+- Assistenza Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb/perche-noi/assistenza-partner
+
+Per chiudere la lacuna chiedere dal Back Office/chat: Partner Agreement Italia corrente e allegati; Code of Conduct e Business Ethics Guidelines correnti; Marketing Rules & Ethics applicabile all'Italia; Online Sales Application e regole digitali; condizioni aggiornate di abbonamento, cancellazione, recesso e resi. Richiedere versione, data e mercato di applicazione. Compliance Italia resta PARZIALE / NON APPROVATA fino a ricezione e verifica.
