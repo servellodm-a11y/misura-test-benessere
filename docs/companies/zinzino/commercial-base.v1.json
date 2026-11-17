@@ -221,48 +221,54 @@
     },
     "rewards": {
       "source_id": "customer_rewards_it",
-      "status": "official_web_page_plus_historical_pdf",
+      "status": "current_italian_webpage_verified_with_historical_pdf_qualification",
       "webpage": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program",
       "pdf": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/Customer-Rewards-Program-overview-IT.pdf",
       "pdf_version_date": "2024-12-01",
       "zinzcash": {
         "level_1": {
           "rule": "ZinoCash equal to shipping costs paid for each paid order",
-          "status": "pdf_rule_needs_current_page_checkout_revalidation"
+          "status": "current_italian_webpage_verified"
         },
         "level_2": {
-          "threshold_paid_orders_per_calendar_month": 7,
+          "threshold_paid_orders_per_calendar_month": null,
           "order_value_percentage": 10,
           "additional_shipping_reward": true,
-          "status": "pdf_rule_needs_current_page_checkout_revalidation"
+          "status": "percentage_and_shipping_reward_current_italian_webpage_verified_threshold_not_reconfirmed",
+          "historical_pdf_threshold_paid_orders_per_calendar_month": 7,
+          "threshold_status": "historical_pdf_2024_not_confirmed_on_current_italian_webpage"
         },
         "redemption": {
-          "eligible": "eligible single-item orders only",
+          "eligible": "single-item shop orders only",
           "excluded": [
+            "kits",
             "subscriptions",
-            "Premier Kits",
-            "preorder items",
+            "Premier Kit orders",
             "shipping"
           ],
           "partial_payment_allowed": false,
-          "order_paid_with_zincash_generates_reward": false,
-          "transferable": false,
-          "cash_convertible": false
+          "requires_full_order_balance": true,
+          "delivery": "with next order; select next delivery option to reduce shipping costs",
+          "status": "current_italian_webpage_verified"
         },
         "expiry": {
-          "active_customer": "does_not_expire",
-          "after_last_purchase_or_cancellation_months": 12
+          "on_premier_subscription_cancellation": true,
+          "after_months_without_order": 12,
+          "transferable": false,
+          "status": "current_italian_webpage_verified"
         },
-        "settlement_hours": 24
+        "settlement_hours": 24,
+        "cash_convertible": null
       },
       "zinzino4free": {
         "minimum_qualifying_friends": 4,
-        "friend_requirement": "Each friend registers and purchases a Premier Kit",
+        "friend_requirement": "Four friends subscribe and receive a Premier Kit",
         "combined_monthly_subscription_credits_multiple": 4,
         "benefit": "Monthly Premier subscription free",
         "shipping_included": false,
-        "status": "public_page_summary_verified_detailed_terms_pending",
-        "source_url": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program"
+        "status": "current_italian_webpage_verified_public_summary",
+        "source_url": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program",
+        "detailed_terms_status": "refer_to_checkout_and_customer_support_for_individual_eligibility"
       }
     }
   },
@@ -479,6 +485,18 @@
       "observed_at": "2026-11-17",
       "refresh": "before_calculation",
       "status": "blocked_full_document_not_acquired"
+    },
+    {
+      "id": "black_week_2026_it",
+      "type": "official_time_limited_campaign",
+      "audience": "customer",
+      "url": "https://www.zinzino.com/shop/7705770203/it/it-it/products/black-week-main",
+      "observed_at": "2026-11-17",
+      "valid_from": "2026-11-13T10:00:00+01:00",
+      "valid_until": "2026-12-02T12:00:00+01:00",
+      "refresh": "before_quote",
+      "status": "active_campaign_snapshot_not_permanent_catalog",
+      "notes": "Promozione Black Week con Premier Kit selezionati e prodotti gratuiti; non incorporare prezzi/promozioni nel catalogo permanente; verificare disponibilità, personalizzazione e condizioni al checkout."
     }
   ],
   "condition_engine": {

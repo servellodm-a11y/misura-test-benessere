@@ -118,3 +118,10 @@ assert.ok(searchHtml.includes('activeCompany?.searchQueries?.en?.[seg]'));
 assert.ok(searchHtml.includes('activeCompany?.brandTerms'));
 assert.ok(!searchHtml.includes('<script src="/nextway-company-config.js"></script>'));
 console.log('NEXTWAY workspace commercial config: 25+ contract assertions passed.');
+
+
+// Current Italian Customer Rewards terms and time-limited campaign safeguards
+assert.equal(integrated.commercialData.customer.rewards.zinzcash.level_2.threshold_paid_orders_per_calendar_month,null);
+assert.equal(integrated.commercialData.customer.rewards.zinzcash.level_2.historical_pdf_threshold_paid_orders_per_calendar_month,7);
+assert.equal(integrated.commercialData.customer.rewards.zinzino4free.combined_monthly_subscription_credits_multiple,4);
+assert.equal(integrated.commercialData.source_register.find(x=>x.id==='black_week_2026_it').status,'active_campaign_snapshot_not_permanent_catalog');

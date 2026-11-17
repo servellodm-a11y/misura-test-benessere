@@ -136,3 +136,14 @@ La pagina ufficiale italiana Partner Kit espone anche le seguenti varianti, regi
 - **Ultimate Xelliss Kit** — prezzo standard visualizzato €3385; Prezzo Premier €1198; etichetta “Full Refund Possible”, ma regolamento di rimborso non acquisito e nessuna promessa consentita.
 
 Fonte: https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers. La base commerciale contiene ora 14 voci Partner Kit; il catalogo resta parziale. Per le offerte con etichetta di rimborso, acquisire e verificare il regolamento specifico della campagna prima di descrivere requisiti, scadenze o importi rimborsabili.
+
+
+## Aggiornamento 17 novembre 2026 — Programma Clienti e Black Week
+
+### Programma a premi Cliente (pagina italiana corrente)
+Fonte ufficiale: https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program . La pagina conferma iscrizione automatica dopo il pagamento del primo ordine; primo livello ZinoCash pari ai costi di spedizione; secondo livello pari a spedizione più 10% dell'intero ordine; riscatto per articoli singoli (kit esclusi), con saldo sufficiente a coprire l'intero ordine; niente pagamenti parziali né uso per abbonamenti/Premier Kit; accredito entro 24 ore; saldo non trasferibile e scadenza se viene cancellato l'abbonamento Premier o passano oltre 12 mesi tra gli ordini. Zinzino4Free: quattro amici con abbonamento Premier e Credits complessivi mensili almeno quattro volte quelli del Cliente richiedente; abbonamento mensile gratuito, spedizione a carico del Cliente.
+
+Il PDF italiano dei Termini (https://zinzinowebstorage.blob.core.windows.net/filelibrary/Customer-Rewards-Program-overview-IT.pdf) è datato 1 dicembre 2024. Riporta la soglia del settimo ordine pagato nel mese per il secondo livello; la pagina italiana corrente non espone quella soglia. NEXTWAY conserva il dato come storico e non lo presenta come condizione attuale verificata.
+
+### Campagna Black Week 2026 (temporanea)
+Fonte ufficiale: https://www.zinzino.com/shop/7705770203/it/it-it/products/black-week-main . Periodo pubblicato: 13 novembre 2026 ore 10:00 CET – 2 dicembre 2026 ore 12:00 CET. La pagina elenca Premier Kit selezionati con prodotti aggiuntivi gratuiti e varianti senza abbonamento. Trattare come campagna temporanea separata dal catalogo permanente: ricontrollare disponibilità e prezzo finale al checkout; non riutilizzare dopo la scadenza.

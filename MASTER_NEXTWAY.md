@@ -3298,3 +3298,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Test commerciale aggiornato da 4 a 14 voci, con assert su Ultimate Beauty, Health Protocol e stato del rimborso Ultimate Practitioners. CI PR #27 run `44096276366`: SUCCESS.
 - PR #27 merge squash commit: `9b20590590c62560bffcfccc8bf9b526739e4712`.
 - Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
+
+
+## 17 novembre 2026 — Programma Cliente e campagna Black Week 2026
+
+- Aggiornata la sezione ZinoCash sulla base della pagina ufficiale italiana corrente: livello 1 = recupero spedizione; livello 2 = spedizione + 10% dell'intero ordine; riscatto solo articoli singoli, saldo sufficiente per l'intero ordine, esclusi kit/abbonamenti/Premier Kit/spedizione; accredito entro 24 ore; scadenza in caso di cancellazione Premier o oltre 12 mesi senza ordini.
+- Zinzino4Free: pagina italiana corrente conferma quattro amici con abbonamento Premier e Credits complessivi mensili almeno 4 volte quelli del richiedente; abbonamento mensile gratuito, spedizione esclusa.
+- La soglia del settimo ordine per il livello 2 è riportata nel PDF del 1/12/2024, ma non nella pagina italiana corrente: marcata come regola storica non riconfermata, non usare come requisito attuale certo.
+- Aggiunta campagna Black Week 2026 come fonte temporanea separata dal catalogo permanente: dal 13/11/2026 ore 10:00 CET al 2/12/2026 ore 12:00 CET. Verificare al checkout e non riutilizzare dopo scadenza.
+- Nessuna modifica DB, workspace, attivazione o deploy.
