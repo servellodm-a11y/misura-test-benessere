@@ -3076,3 +3076,20 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Configurazione effettiva del workspace Zinzino, creazione/attivazione workspace e caricamento dei materiali ufficiali: da confermare separatamente; non dedurre che il seed sia già stato scritto su Supabase.
 - Il deploy Netlify in produzione resta sospeso fino al 4 dicembre 2026. Nessun test con utenti o conversioni reali prima di tale data. Nessun provider a pagamento o credito Tavily deve essere attivato senza autorizzazione esplicita.
 - Backup locale PR14 conservato nello stash Git `NEXTWAY backup locale PR14 prima deploy`; non eliminarlo né applicarlo finché non è stato verificato che la copia remota riconciliata sia completa.
+
+---
+
+## 17 novembre 2026 — Esito integrazione PR #16
+
+### Integrazione GitHub
+- PR #16 — `NEXTWAY: integrazione controllata CRM, memoria prospect e configurazione commerciale`: COMPLETATA E MERGED su `main` il 17-11-2026 alle 09:14 UTC, con strategia squash.
+- Commit risultante: `b6f519aea7c7862bf456b62b451ed4503c67075b`. Commit sorgente PR: `e40a0ddfc9d8e9885cfb4dedb7391596523400cb`.
+- 118 file integrati; PR #10 resta esclusa. PR #15 è una precedente proposta duplicata e resta aperta/non integrata: non usarla per ulteriori merge.
+- GitHub Actions sulla PR #16: run #956, job `validate`, stato `completed`, conclusione `success`. La run è precedente al merge e certifica i controlli statici/contrattuali e il type-check, non il runtime.
+
+### Confini operativi e prossime attività
+- Nessun deploy Netlify o altro deploy di produzione è stato eseguito con il merge. Il vincolo di sospensione Netlify fino al 4 dicembre 2026 resta attivo.
+- Le cinque migrazioni prospect/workspace e la Edge Function `nextway-search` risultano già eseguite secondo gli esiti comunicati dall'utente il 17 novembre; non ripeterle.
+- Ricerca end-to-end, controllo del workspace Zinzino realmente attivo e caricamento dei materiali ufficiali restano DA COMPLETARE/DA VERIFICARE. I materiali ufficiali nel JSON sono ancora marcati `da_caricare`; non presumere che siano presenti in Supabase.
+- Prima di testare la ricerca, usare solo un ambiente controllato e verificare il provider configurato e il costo delle chiamate; nessun credito Tavily a pagamento senza autorizzazione. Nessun test con utenti o conversioni reali prima del 4 dicembre 2026.
+- Il merge integra il codice in `main`, ma non prova che il sito Netlify pubblicato contenga il codice aggiornato né che il flusso funzioni end-to-end.
