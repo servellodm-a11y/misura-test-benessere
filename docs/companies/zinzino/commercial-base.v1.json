@@ -301,6 +301,118 @@
           "id": "training-partner-kit-gocore",
           "name": "Training Partner Kit with GoCore App",
           "standard_price_snapshot_eur": 55
+        },
+        {
+          "id": "ultimate-beauty-kit",
+          "name": "Ultimate Beauty Kit",
+          "standard_price_snapshot_eur": 3105,
+          "premier_price_snapshot_eur": 1198,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "ultimate-collagen-kit",
+          "name": "Ultimate Collagen Kit",
+          "standard_price_snapshot_eur": 2075,
+          "premier_price_snapshot_eur": 1280,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "basic-vegan-kit",
+          "name": "Basic Vegan Kit",
+          "standard_price_snapshot_eur": 542,
+          "premier_price_snapshot_eur": 329,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog"
+        },
+        {
+          "id": "advanced-vegan-kit",
+          "name": "Advanced Vegan Kit",
+          "standard_price_snapshot_eur": 1387,
+          "premier_price_snapshot_eur": 860,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog"
+        },
+        {
+          "id": "ultimate-vegan-kit",
+          "name": "Ultimate Vegan Kit",
+          "standard_price_snapshot_eur": 2711,
+          "premier_price_snapshot_eur": 1198,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "ultimate-immune-kit",
+          "name": "Ultimate Immune Kit",
+          "standard_price_snapshot_eur": 3328,
+          "premier_price_snapshot_eur": 1198,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "ultimate-practitioners-kit",
+          "name": "Ultimate Practitioners Kit",
+          "standard_price_snapshot_eur": 3282,
+          "premier_price_snapshot_eur": 1198,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "health-protocol-kit",
+          "name": "Health Protocol Kit",
+          "standard_price_snapshot_eur": 1259,
+          "premier_price_snapshot_eur": 583,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog"
+        },
+        {
+          "id": "basic-xelliss-kit",
+          "name": "Basic Xelliss Kit",
+          "standard_price_snapshot_eur": 499,
+          "premier_price_snapshot_eur": 329,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog"
+        },
+        {
+          "id": "ultimate-xelliss-kit",
+          "name": "Ultimate Xelliss Kit",
+          "standard_price_snapshot_eur": 3385,
+          "premier_price_snapshot_eur": 1198,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote",
+          "availability_status": "listed_in_official_catalog",
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
         }
       ],
       "variants": [
@@ -314,7 +426,8 @@
         "Health Protocol",
         "test add-ons"
       ],
-      "price_status": "indexed_snapshot_refresh_before_quote"
+      "price_status": "indexed_snapshot_refresh_before_quote",
+      "catalog_scope_note": "Catalogo strutturato parziale delle offerte visibili nella pagina ufficiale Italia. I prezzi sono snapshot; verificare scheda e condizioni della campagna prima di ogni proposta. Le etichette Full Refund Possible non autorizzano promesse di rimborso."
     },
     "compensation_plan": {
       "status": "official_italian_pdf_linked_but_full_document_not_acquired",
