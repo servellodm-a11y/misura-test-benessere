@@ -13,6 +13,9 @@ const files = [
 for (const relativePath of files) {
   const source = readFileSync(new URL(relativePath, import.meta.url), "utf8");
   assert.ok(source.includes('"http://localhost:8000"'), relativePath + ": localhost origin missing");
+  if (relativePath.endsWith("nextway-workspace-admin/index.ts")) {
+    assert.ok(source.includes('"https://misura-test-benessere.pages.dev"'), relativePath + ": deployed Cloudflare Pages origin missing");
+  }
   assert.match(source, /\.\.\.configuredOrigins/, relativePath + ": configured origins must be preserved");
   assert.match(source, /allowedOrigins\.includes\(origin\)/, relativePath + ": explicit origin allow-list check missing");
   assert.match(source, /Access-Control-Allow-Origin/, relativePath + ": CORS allow-origin response missing");
@@ -20,4 +23,4 @@ for (const relativePath of files) {
   assert.doesNotMatch(source, /Access-Control-Allow-Origin["']?\s*:\s*["']\*["']/i, relativePath + ": wildcard CORS is forbidden");
 }
 
-console.log("NEXTWAY local CORS: all six authenticated Edge Functions explicitly allow localhost without wildcard CORS: PASS");
+console.log("NEXTWAY CORS: all six functions allow localhost; workspace administration also allows the verified Cloudflare Pages origin, without wildcard CORS: PASS");
