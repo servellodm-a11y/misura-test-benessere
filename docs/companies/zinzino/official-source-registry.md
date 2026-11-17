@@ -97,6 +97,6 @@ Regole contenute nel PDF:
 - [x] Pagina Partner italiana e collegamento diretto al Piano Compensi italiano verificati.
 - [ ] PDF Piano Compensi italiano scaricato ed esaminato integralmente: bloccato dal limite tecnico di recupero del file da 14,25 MB. Non sostituire con traduzioni/vecchie versioni terze.
 - [x] PDF ufficiale italiano Programma a premi Clienti consultato (versione 1 dicembre 2024).
-- [ ] Regolamento aggiornato Zinzino4Free verificato integralmente.
+- [x] Regole sintetiche Zinzino4Free verificate sulla pagina ufficiale italiana (4 clienti con Premier Kit; Credits aggregati almeno 4 volte l'abbonamento del Cliente; abbonamento mensile gratuito, spedizione a carico del Cliente). Regolamento dettagliato e condizioni di eccezione: da acquisire.
 - [ ] Termini e condizioni generali italiani correnti verificati: il PDF trovato precedentemente è datato 2022-02 e non è sufficiente come fonte attuale.
 - [ ] Importazione nel bucket knowledge: richiede workspace e upload autenticato, non ancora completati.
