@@ -196,7 +196,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Sessione scaduta o non autorizzata." }, 401, responseOrigin);
   }
 
-  // The service-role client is kept server-side and used only for two validated write RPCs.
+  // The service-role client is kept server-side and used only for validated, scoped write RPCs.
   // All workspace reads and membership checks continue through the caller's JWT-scoped client.
   const serviceRoleKey = Deno.env.get("NEXTWAY_SERVICE_ROLE_KEY");
   const trustedWriter = serviceRoleKey ? createClient(supabaseUrl, serviceRoleKey, {
@@ -254,6 +254,36 @@ Deno.serve(async (req: Request) => {
   if (archiveReadPreflightError) {
     console.error("NEXTWAY identity archive read preflight failed:", archiveReadPreflightError.code ?? "not_ready");
     return json({ error: "Lettura archivio centrale non pronta: nessuna ricerca esterna è stata avviata." }, 503, responseOrigin);
+  }
+
+  if (action === "confirm_crm_acquisition") {
+    if (!trustedWriter) {
+      return json({ error: "Servizio di conferma memoria non configurato: acquisizione centrale in sospeso." }, 503, responseOrigin);
+    }
+    const leadId = cleanString(body.lead_id, 36);
+    const sourceUrl = cleanString(body.source_url, 2048);
+    const canonicalUrl = safeUrl(sourceUrl);
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(leadId) ||
+        !canonicalUrl || !sourceUrl || sourceUrl.length > 2048) {
+      return json({ error: "Riferimenti del Lead non validi: conferma acquisizione sospesa." }, 400, responseOrigin);
+    }
+    const { data, error } = await trustedWriter.rpc("nextway_mark_prospect_identity_acquired", {
+      p_actor_id: userData.user.id,
+      p_workspace_id: workspaceId,
+      p_lead_id: leadId,
+      p_source_url: sourceUrl,
+      p_canonical_url: canonicalUrl,
+    });
+    if (error || !Array.isArray(data) || data.length !== 1 || typeof data[0]?.identity_id !== "string") {
+      console.error("NEXTWAY central acquisition confirmation failed:", error?.code ?? "not_confirmed");
+      return json({ error: "Lead CRM salvato, ma conferma nella memoria centrale non completata.", reason: "central_acquisition_pending" }, 503, responseOrigin);
+    }
+    return json({
+      confirmed: true,
+      identity_id: data[0].identity_id,
+      last_acquired_at: data[0].last_acquired_at,
+      note: "Acquisizione CRM confermata nella memoria centrale dopo verifica del Lead e del workspace.",
+    }, 200, responseOrigin);
   }
 
   if (action === "lookup_prospects") {

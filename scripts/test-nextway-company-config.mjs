@@ -176,11 +176,11 @@ assert.ok(cloudHtml.includes("qualification:x.qualification==='Qualificato'?'Da 
 assert.ok(cloudHtml.includes("if(needsManualReview){const {data:review,error:reviewError}=await c.rpc('nextway_confirm_lead_manual_review'"),'The manual-review RPC must perform the final qualification after the safe write');
 assert.ok(cloudHtml.includes("da qualificare, non sincronizzati: '+deferred"),'Cloud sync summary must report unqualified records deferred from synchronization');
 assert.ok(cloudHtml.includes('I risultati da qualificare restano locali e non vengono trasformati in Potenziali Partner.'),'The sync status must explain why unqualified research results are deferred');
-assert.ok(cloudHtml.includes('function getLocalSearchArchiveIndex(userId)'), 'Cloud bridge must read the authenticated user local archive index');
+assert.ok(cloudHtml.includes("function getLocalSearchArchiveIndex(userId,workspaceId='')"), 'Cloud bridge must read the authenticated user local archive index');
 assert.ok(cloudHtml.includes('function addSearchLeadToLocalArchive(userId,record)'), 'Cloud bridge must persist a prospect from the search page');
 assert.ok(archiveHtml.includes("x.category==='research_result'?'Completa classificazione':'Modifica Lead'"),'Research-only records must expose an explicit CRM classification action');
 assert.ok(cloudHtml.includes("localStorage.setItem(key,JSON.stringify(rows))"), 'Search acquisition must persist to the same owner-scoped local archive key');
-assert.ok(searchHtml.includes('getLocalSearchArchiveIndex(s.user.id)'), 'Search must inspect duplicates in the authenticated user archive');
+assert.ok(searchHtml.includes('getLocalSearchArchiveIndex(s.user.id,searchWorkspaceId)'), 'Search must inspect duplicates in the authenticated user archive');
 assert.ok(searchHtml.includes('addSearchLeadToLocalArchive(s.user.id,'), 'Search acquisition must use the cross-page archive bridge');
 assert.ok(searchHtml.includes('Apri Archivio Lead, premi “Completa classificazione”')&&searchHtml.includes('Sincronizza archivio locale'),'Search acquisition must guide the operator through manual CRM classification and synchronization');
 assert.ok(!searchHtml.includes('NEXTWAY_LOCAL_ARCHIVE?.addFromSearch'), 'Search page must not call an archive function defined only in another page');
