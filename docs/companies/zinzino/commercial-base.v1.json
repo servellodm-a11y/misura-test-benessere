@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "company": {
+    "id": "zinzino",
+    "market": "IT",
+    "country": "Italia",
+    "language": "it",
+    "currency": "EUR",
+    "captured_at": "2026-11-17",
+    "timezone": "Europe/Rome"
+  },
+  "data_policy": {
+    "authoritative_source_required": true,
+    "prices_are_snapshots": true,
+    "refresh_before_quote": true,
+    "no_inference_from_similar_offer": true,
+    "unknown_values_must_remain_null": true,
+    "compensation_calculation_enabled": false,
+    "commercial_activation_enabled": false
+  },
+  "customer": {
+    "shop": {
+      "source_id": "shop_it",
+      "status": "official_catalog_live",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/shop",
+      "purpose": [
+        "single_products",
+        "current_prices",
+        "formats",
+        "ingredients",
+        "warnings",
+        "technical_sheets"
+      ],
+      "price_storage": "do_not_cache_as_permanent_fact"
+    },
+    "premier_kits": {
+      "source_id": "premier_kits_it",
+      "status": "official_catalog_live",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits",
+      "general_rule": "Premier Kit subscriptions provide access to exclusive discounts across the range; exact price, delivery cadence and cancellation terms are specific to each offer.",
+      "offers": [
+        {
+          "id": "maternity-balanceoil-kit-910291",
+          "name": "Maternity BalanceOil+ Kit",
+          "initial_amount_eur": 118,
+          "recurring_amount_eur": 43,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 8,
+          "credits_recurring_per_month": 4,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910291",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "essent-premium-test-910351",
+          "name": "Essent+ Premium Kit with Test",
+          "initial_amount_eur": 190,
+          "recurring_amount_eur": 54,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 14,
+          "credits_recurring_per_month": 5,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "second_balancetest_after_days": 120,
+          "second_test_conditions": [
+            "subscription_active",
+            "payment_completed"
+          ],
+          "source_url": "https://www.zinzino.com/shop/site/it/it-it/products/premier-kits/910351",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "revoo-kit-910479",
+          "name": "R.E.V.O.O Kit",
+          "initial_amount_eur": 149,
+          "recurring_amount_eur": 73,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 14,
+          "credits_recurring_per_month": 7,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/it/it-it/products/premier-kits/910479",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "energy-bar-kit-910258",
+          "name": "Energy Bar Kit",
+          "initial_amount_eur": 89,
+          "recurring_amount_eur": 34,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 5,
+          "credits_recurring_per_month": 3,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910258",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "viva-plus-kit-910277",
+          "name": "Viva+ Kit",
+          "initial_amount_eur": 88,
+          "recurring_amount_eur": 31,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 5,
+          "credits_recurring_per_month": 3,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910277",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "zinobiotic-plus-kit-910256",
+          "name": "ZinoBiotic+ Kit",
+          "initial_amount_eur": 91,
+          "recurring_amount_eur": 33,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 5,
+          "credits_recurring_per_month": 3,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910256",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "protect-plus-kit-910337",
+          "name": "Protect+ Kit",
+          "initial_amount_eur": 112,
+          "recurring_amount_eur": 45,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 8,
+          "credits_recurring_per_month": 4,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910337",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "nails-hair-skin-care-kit-910810",
+          "name": "Nails, Hair & Skin Care Kit",
+          "initial_amount_eur": null,
+          "recurring_amount_eur": null,
+          "recurrence": "unknown",
+          "delivery_every_months": null,
+          "credits_initial": null,
+          "credits_recurring_per_month": null,
+          "cancellation_notice_days": null,
+          "minimum_duration_months": 6,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910810",
+          "observed_at": "2026-11-17",
+          "status": "partial_snapshot_refresh_before_quote"
+        }
+      ]
+    },
+    "rewards": {
+      "source_id": "customer_rewards_it",
+      "status": "official_web_page_plus_historical_pdf",
+      "webpage": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program",
+      "pdf": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/Customer-Rewards-Program-overview-IT.pdf",
+      "pdf_version_date": "2024-12-01",
+      "zinzcash": {
+        "level_1": {
+          "rule": "ZinoCash equal to shipping costs paid for each paid order",
+          "status": "pdf_rule_needs_current_page_checkout_revalidation"
+        },
+        "level_2": {
+          "threshold_paid_orders_per_calendar_month": 7,
+          "order_value_percentage": 10,
+          "additional_shipping_reward": true,
+          "status": "pdf_rule_needs_current_page_checkout_revalidation"
+        },
+        "redemption": {
+          "eligible": "eligible single-item orders only",
+          "excluded": [
+            "subscriptions",
+            "Premier Kits",
+            "preorder items",
+            "shipping"
+          ],
+          "partial_payment_allowed": false,
+          "order_paid_with_zincash_generates_reward": false,
+          "transferable": false,
+          "cash_convertible": false
+        },
+        "expiry": {
+          "active_customer": "does_not_expire",
+          "after_last_purchase_or_cancellation_months": 12
+        },
+        "settlement_hours": 24
+      },
+      "zinzino4free": {
+        "minimum_qualifying_friends": 4,
+        "friend_requirement": "Each friend registers and purchases a Premier Kit",
+        "combined_monthly_subscription_credits_multiple": 4,
+        "benefit": "Monthly Premier subscription free",
+        "shipping_included": false,
+        "status": "public_page_summary_verified_detailed_terms_pending",
+        "source_url": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program"
+      }
+    }
+  },
+  "partner": {
+    "enrollment": {
+      "status": "official_partner_page",
+      "free_registration_available": true,
+      "source_url": "https://www.zinzino.com/site/it/it-it/partnerweb"
+    },
+    "partner_kits": {
+      "source_id": "partner_offers_it",
+      "status": "official_catalog_live",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+      "offers": [
+        {
+          "id": "basic-kit",
+          "name": "Basic Kit",
+          "standard_price_snapshot_eur": 556,
+          "premier_price_snapshot_eur": 329
+        },
+        {
+          "id": "advanced-kit",
+          "name": "Advanced Kit",
+          "standard_price_snapshot_eur": 1718,
+          "premier_price_snapshot_eur": 860
+        },
+        {
+          "id": "ultimate-kit",
+          "name": "Ultimate Kit",
+          "standard_price_snapshot_eur": 3478,
+          "premier_price_snapshot_eur": 1198,
+          "refund_label": "Full Refund Possible",
+          "refund_rule_status": "not_acquired_do_not_promise"
+        },
+        {
+          "id": "training-partner-kit-gocore",
+          "name": "Training Partner Kit with GoCore App",
+          "standard_price_snapshot_eur": 55
+        }
+      ],
+      "variants": [
+        "Basic Vegan",
+        "Advanced Vegan",
+        "Ultimate Vegan",
+        "Ultimate Beauty",
+        "Ultimate Collagen",
+        "Ultimate Immune",
+        "Ultimate Practitioners",
+        "Health Protocol",
+        "test add-ons"
+      ],
+      "price_status": "indexed_snapshot_refresh_before_quote"
+    },
+    "compensation_plan": {
+      "status": "official_italian_pdf_linked_but_full_document_not_acquired",
+      "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
+      "linked_from": "https://www.zinzino.com/site/it/it-it/partnerweb",
+      "rules": [],
+      "calculations_enabled": false,
+      "blocking_reason": "The official Italian PDF (~14.25 MB) could not be fully retrieved and checked. Do not substitute third-party summaries or documents in another language."
+    }
+  },
+  "source_register": [
+    {
+      "id": "partner_offers_it",
+      "type": "official_catalog",
+      "audience": "partner",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers",
+      "observed_at": "2026-11-17",
+      "refresh": "before_quote"
+    },
+    {
+      "id": "premier_kits_it",
+      "type": "official_catalog",
+      "audience": "customer",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits",
+      "observed_at": "2026-11-17",
+      "refresh": "before_quote"
+    },
+    {
+      "id": "shop_it",
+      "type": "official_catalog",
+      "audience": "customer",
+      "url": "https://www.zinzino.com/shop/site/IT/it-IT/products/shop",
+      "observed_at": "2026-11-17",
+      "refresh": "before_quote"
+    },
+    {
+      "id": "customer_rewards_it",
+      "type": "official_program",
+      "audience": "customer",
+      "url": "https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program",
+      "observed_at": "2026-11-17",
+      "refresh": "before_advice"
+    },
+    {
+      "id": "compensation_plan_it",
+      "type": "official_compensation_plan",
+      "audience": "partner",
+      "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
+      "observed_at": "2026-11-17",
+      "refresh": "before_calculation",
+      "status": "blocked_full_document_not_acquired"
+    }
+  ],
+  "condition_engine": {
+    "precedence": [
+      "current_offer_specific_terms",
+      "current_checkout_terms",
+      "current_official_program_terms",
+      "official_catalog_snapshot",
+      "historical_official_pdf"
+    ],
+    "required_fields": [
+      "audience",
+      "market",
+      "source_id",
+      "source_url",
+      "observed_at",
+      "validity_status"
+    ],
+    "behavior": [
+      "never_apply_partner_rules_to_customer",
+      "never_apply_customer_rewards_to_partner_compensation",
+      "never_infer_missing_values",
+      "show_source_and_last_checked_date",
+      "require_human_review_for_unverified_or_conflicting_terms"
+    ],
+    "disallow": [
+      "income_promises",
+      "medical_claims",
+      "guaranteed_refunds_without_campaign_terms",
+      "commission_estimates_without_verified_plan"
+    ]
+  }
+}

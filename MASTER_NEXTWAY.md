@@ -3190,3 +3190,30 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Overload INTEGER (8 argomenti, ordine parametri differente): è legacy, `SECURITY DEFINER`, con `search_path=''` e grants a `authenticated` e `service_role`. Il corpo usa riferimenti espliciti `auth.uid()`, `public.nextway_leads`, `public.profiles` e `public.nextway_ai_analyses`; le funzioni e le tabelle applicative sono quindi qualificate per schema e le funzioni built-in restano risolvibili tramite `pg_catalog`. Il percorso vuoto è una scelta di hardening e non va sostituito automaticamente.
 - La query `pg_depend` non ha restituito dipendenze catalogate da altri oggetti per nessuno dei due overload; questo non prova l'assenza di chiamanti dinamici lato client.
 - Nessuna modifica o revoca è stata eseguita sull'overload INTEGER. Non eliminarlo né cambiarne i grants senza prima identificare eventuali chiamanti runtime.
+
+
+---
+
+## 17 novembre 2026 — Raccolta fonti commerciali ufficiali Zinzino Italia
+
+### Lavoro documentale su PR #21
+- Creato il registro `docs/companies/zinzino/official-source-registry.md` sul branch `docs/zinzino-official-source-registry-20261117`, PR #21: https://github.com/servellodm-a11y/misura-test-benessere/pull/21.
+- Registro aggiornato con le fonti ufficiali Italia per Partner Kit, Premier Kit, Shop, Programma a premi Clienti e Piano Compensi.
+- Catalogo Partner Kit: https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers. La pagina indica anche iscrizione gratuita e mostra prezzi standard/Prezzo Premier; i prezzi sono snapshot variabili, non valori da fissare nei prompt.
+- Catalogo Premier Kit: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits. Le schede individuali dimostrano condizioni differenti: frequenza di consegna, preavviso di cancellazione, durata minima, prezzo iniziale, canone, Credits e test inclusi devono essere letti per singolo kit.
+- Schede ufficiali consultate per Maternity BalanceOil+, Essent+ Premium with Test, R.E.V.O.O, Energy Bar, Viva+, ZinoBiotic+, Protect+ e Nails, Hair & Skin Care. Quest'ultima indica durata minima di sei mesi: non applicare a tutti i kit la regola standard del preavviso di 30 giorni.
+- Programma a premi Clienti: pagina italiana https://www.zinzino.com/site/it/it-it/perche-noi/customer-rewards-program e PDF italiano https://zinzinowebstorage.blob.core.windows.net/filelibrary/Customer-Rewards-Program-overview-IT.pdf (versione PDF 1 dicembre 2024). La pagina pubblica specifica Zinzino4Free: quattro amici con Premier Kit e valore totale Credits degli abbonamenti mensili almeno quattro volte superiore all'abbonamento del Cliente che richiede il beneficio; l'abbonamento mensile viene coperto, resta a carico la spedizione. Il PDF dettaglia ZinoCash, livelli premio, riscatto e scadenze; essendo del 2024, va confrontato con la pagina e il checkout correnti.
+- Piano Compensi: la pagina Partner italiana https://www.zinzino.com/site/it/it-it/partnerweb è stata aperta e il link "Il nostro Piano Compensi" seguito direttamente. Il link porta al PDF italiano ufficiale https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf. Il file è circa 14,25 MB e il lettore web ha rifiutato il recupero integrale per limite dimensione; il download tramite runtime non è riuscito. Non usare versioni 2021 su archivi terzi, versioni in altre lingue o riepiloghi indipendenti come sostituti del documento ufficiale.
+- La pagina Partner in versione italiana Svizzera, esaminata per confronto, reindirizzava al PDF tedesco: non usarla come prova del piano Italia; il link corretto è stato confermato sulla pagina italiana `/site/it/it-it/partnerweb`.
+- Stato: fonti principali individuate e regole pubbliche Cliente/Partner strutturate nel registro. Acquisizione integrale del PDF Piano Compensi, verifica dei termini generali correnti, importazione nella Knowledge Base e creazione del workspace restano da completare.
+- Nessun database o workspace è stato modificato; nessun upload documentale è stato eseguito; nessun deploy Netlify/produzione né test con utenti reali. Restano validi i vincoli di progetto già registrati.
+
+
+## 17 novembre 2026 — Base commerciale strutturata Zinzino Italia
+
+- Aggiunto `docs/companies/zinzino/commercial-base.v1.json`: struttura dati separata per Cliente e Partner, cataloghi, offerte Premier Kit, abbonamenti, Credits, ZinoCash, Zinzino4Free, Partner Kit, stato del piano compensi e registro delle fonti.
+- Aggiunto `docs/companies/zinzino/commercial-base.md`: dizionario dei campi, semantica degli importi e delle frequenze, stati di validità e regole di utilizzo per il motore commerciale NEXTWAY.
+- I prezzi osservati sono snapshot del 17 novembre 2026 e richiedono aggiornamento prima di qualsiasi preventivo. Le condizioni sono specifiche per singolo kit; i campi non verificati restano null.
+- Il piano compensi italiano è censito ma non decodificato: calcoli e simulazioni Partner restano disabilitati finché il PDF ufficiale completo non è acquisito e validato.
+- La base è nel repository e nella PR #21; non è ancora importata nel workspace Supabase, il workspace Zinzino non è creato e il runtime non la consuma ancora.
+- Nessuna migrazione, modifica dati Supabase, attivazione workspace, deploy o test con utenti reali eseguito.
