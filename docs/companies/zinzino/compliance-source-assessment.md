@@ -74,3 +74,26 @@ Per ogni documento acquisito registrare: URL o provenienza Back Office, mercato,
 - Zinzino, pagina Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb
 
 **Conclusione:** esistono fonti ufficiali utili, ma non è stata reperita una copia pubblica verificabile della policy Marketing Rules & Ethics attualmente applicabile ai Partner italiani. La compliance Zinzino Italia resta quindi parziale e subordinata all'acquisizione dei documenti correnti dal Back Office Partner.
+
+
+## 7. Integrazione da fonte societaria ufficiale — Annual Report 2025
+
+Il [Rapporto annuale Zinzino AB 2025](https://cdn.cms.zinzino.com/globalassets/media/reports/financial-reports/2026/zinzino-annual-report-2025.pdf), sezione *Ethical affairs* (pagine 36–37 del rapporto; pagina 48 nel PDF), dichiara che:
+
+- il Code of Conduct, le Business Ethics Guidelines e i Values descrivono l'impegno etico della società;
+- la società richiede a dipendenti, distributori, fornitori e altri partner commerciali elevati standard etici, tolleranza zero verso corruzione e conflitti d'interesse e rispetto delle norme sulla concorrenza;
+- le Business Ethics Guidelines e il Code of Conduct sono adottati annualmente dal Consiglio di amministrazione e inclusi negli accordi dei distributori;
+- le violazioni possono comportare conseguenze legali e la cessazione della partnership;
+- le linee guida e le informazioni formative sono disponibili a dipendenti e distributori tramite intranet.
+
+**Implicazione operativa:** per NEXTWAY la fonte primaria da acquisire non è soltanto un PDF pubblico di Marketing Rules & Ethics. Occorre ottenere dal Back Office Partner la copia vigente del Partner Agreement italiano e degli allegati etici incorporati nel contratto, incluse le Business Ethics Guidelines e il Code of Conduct adottati per l'anno corrente. Il rapporto annuale prova che tali documenti fanno parte del quadro contrattuale dichiarato dalla società, ma non ne riporta il testo integrale e non prova da solo la versione applicabile al singolo Partner italiano.
+
+Il rapporto annuale è una fonte societaria ufficiale e generale; non sostituisce il contratto individuale, le regole marketing specifiche del mercato italiano o la consulenza legale.
+
+## 8. Evidenza indipendente sulle comunicazioni commerciali — uso limitato
+
+La pagina del Direct Selling Self-Regulatory Council relativa al caso Zinzino n. 196-2025 descrive un'indagine su claim di reddito e contenuti social. Riporta che Zinzino ha dichiarato di fornire regole Marketing Rules & Ethics, formazione e strumenti di monitoraggio, e che ha rimosso o modificato i contenuti contestati.
+
+Questa fonte riguarda un procedimento statunitense e non stabilisce le regole contrattuali italiane. È registrata soltanto come ulteriore motivo per mantenere i guardrail NEXTWAY su affermazioni di reddito, risultati sanitari e testimonianze; non deve essere usata per attribuire automaticamente all'Italia le conclusioni o le norme USA.
+
+Fonte: https://staging.bbbprograms.org/programs/advertising/dssrc/cases/zinzino-llc
