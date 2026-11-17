@@ -3260,3 +3260,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - `nextway-cloud.js`: sincronizza il valore con `nextway_leads.commercial_audience` e lo ricarica dal database. Per compatibilità, i record locali precedenti che non possiedono il campo non azzerano accidentalmente un valore cloud esistente; quando il campo è presente e lasciato vuoto, viene salvato NULL.
 - Test contrattuale aggiunto: `scripts/test-nextway-commercial-audience-crm.mjs` (8 asserzioni), incluso nel workflow CI.
 - Nessun dato Lead reale aggiornato; il campo sarà disponibile dopo l'integrazione della PR.
+
+
+### Aggiornamento CRM — integrazione PR #24
+
+- PR #24 integrata in `main`, merge commit `afa9d07c3bf650439edd74ddc2b93ae5430899be`.
+- CI PR #24: run `44092736266` SUCCESS (65 step completati).
+- CI post-merge main: run `44092886609` SUCCESS.
+- La scheda CRM ora consente di impostare/modificare Cliente, Partner o Da classificare; il valore viene sincronizzato e riletto dal database.
+- Compatibilità: un record locale precedente privo della proprietà `commercial_audience` non cancella il valore già presente nel cloud durante una sincronizzazione non correlata.
+- Nessun deploy Netlify: le modifiche frontend sono su GitHub main ma non pubblicate in produzione per il vincolo del 4 dicembre.
