@@ -3251,3 +3251,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Edge Function `nextway-ai-setter` deployata su Supabase, versione 3, ACTIVE; `verify_jwt=false` mantenuto come nella configurazione precedente, con verifica manuale del token all'interno della funzione. Confronto sorgente GitHub/deploy: exactMatch=true.
 - Nessun Lead storico classificato automaticamente: `commercial_audience=NULL` resta da completare manualmente. Per workspace Zinzino, l'AI Setter rifiuta la generazione finché il Lead non è classificato.
 - Nessun test end-to-end con workspace Zinzino reale: il workspace non è ancora creato/attivato. Nessun messaggio inviato, nessuna conversione reale e nessun deploy Netlify.
+
+
+## 17 novembre 2026 — Classificazione Cliente/Partner anche nella scheda CRM
+
+- Nuovo branch `feat/nextway-commercial-audience-crm-form-20261117`.
+- Scheda CRM `nextway-ai.html`: aggiunto campo esplicito Percorso commerciale con valori Cliente, Partner e Da classificare. Il campo è distinto dalla categoria CRM e viene ripristinato anche durante la modifica di un Lead esistente.
+- `nextway-cloud.js`: sincronizza il valore con `nextway_leads.commercial_audience` e lo ricarica dal database. Per compatibilità, i record locali precedenti che non possiedono il campo non azzerano accidentalmente un valore cloud esistente; quando il campo è presente e lasciato vuoto, viene salvato NULL.
+- Test contrattuale aggiunto: `scripts/test-nextway-commercial-audience-crm.mjs` (8 asserzioni), incluso nel workflow CI.
+- Nessun dato Lead reale aggiornato; il campo sarà disponibile dopo l'integrazione della PR.
