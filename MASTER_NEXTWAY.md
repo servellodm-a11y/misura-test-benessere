@@ -3405,3 +3405,16 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La conferma dell'utente del 17/11/2026 che il master EU 2025 è tuttora vigente senza modifiche in Italia resta registrata come conferma dell'utente, non come attestazione indipendente Zinzino.
 - Creato docs/companies/zinzino/knowledge/compensation-plan-italian-2024-comparison.md; aggiornati registry, manifest, guida italiana e commercial-base. I calcoli restano disabilitati (calculations_enabled=false, rules=[]). Nessuna modifica Supabase/workspace o deploy.
 
+
+
+
+## 17 novembre 2026 — Estrazione strutturata Piano Compensi EU 2025, fase 1
+
+- PR #33 integrata in main dopo CI SUCCESS (run #44118633781); merge squash `89f0e81b293f530e6987fc53777664b9e561ba14`.
+- Nuovo branch `feat/zinzino-compensation-rules-structured-20261117` creato da main per la fase 1.
+- Fonte primaria: master ufficiale Zinzino EU 12/02/2025; la vigenza in Italia fino a novembre 2026 è confermata dall'utente.
+- Strutturate 18 voci: attività Cliente e Customer Points; Credits/bilanciamento/banking; ECB/ECBx/RCB; Grace Period/Active Partner; carriera Cliente; Cash Bonus; MCB/zRewards; bonus Cliente; titoli Partner fino a Black Crown; Team Commission; Volume Commission; CAB; Mentor Matching Bonus; OTB Partner parziali; zPhone/zCar; Income Center/Pay Points; Z4F Partner; Fast Start operativo confermato dall'utente.
+- Aggiunto `docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured-rules.md`; aggiornati guida, manifesto KB, registro fonti e base commerciale JSON.
+- Restano da estrarre/formalizzare: T-Balance, OTB completi per tutti i titoli, gradi oltre Black Crown, campagne Fast Start 60/90 giorni, viaggi incentivo ed esempi numerici ufficiali per test indipendenti.
+- `calculations_enabled=false` resta obbligatorio; nessuna formula di commissione o proiezione reddito attivata.
+- Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
