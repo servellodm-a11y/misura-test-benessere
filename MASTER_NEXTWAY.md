@@ -3277,3 +3277,14 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Ricontrollata la scheda ufficiale Nails, Hair & Skin Care Kit: stato pagina **Discontinued**. Aggiornata la base JSON affinché il kit non venga proposto come acquistabile.
 - Correzione della precedente nota sui sei mesi: non usarla come condizione corrente; la pagina italiana consultata mostra stato discontinuato e valori solo descrittivi.
 - Restano bloccati i calcoli compensi finché il PDF italiano ufficiale completo non è stato acquisito e validato.
+
+
+## 17 novembre 2026 — Catalogo commerciale Zinzino aggiornato (PR #25 e #26)
+
+- PR #25 integrata: `Nails, Hair & Skin Care Kit` è marcato `discontinued` secondo la scheda ufficiale italiana e non viene più restituito da `getOffer()` come offerta selezionabile. I dati prezzo/Credits restano solo storici.
+- PR #26 integrata: la base commerciale Cliente aggiunge `LeanShake Kit` (910237), `LeanShake Kit x2` (910637) e `LeanShake Challenge Kit` (910324), includendo separatamente importo iniziale, canone mensile, frequenza di consegna, Credits e alternativa prepagata.
+- Il catalogo Premier Kit strutturato contiene ora 11 offerte, ma è esplicitamente **parziale** e non esaustivo. Prezzi e condizioni sono snapshot del 17 novembre 2026: aggiornare dalle schede ufficiali prima di ogni preventivo.
+- Test commerciale CI: la prima esecuzione PR #26 ha rilevato il vecchio conteggio atteso (8); il test è stato aggiornato a 11 e sono stati aggiunti controlli per i tre nuovi kit. Esecuzione successiva PR #26 run `44096031411`: SUCCESS.
+- PR #26 merge squash commit: `18c6421436e14ec225d9ee4cb87a25202a7a68fa`.
+- CI post-merge main run `44096143255` era queued al momento dell'aggiornamento: non dichiarare ancora post-merge CI completata.
+- Nessuna modifica Supabase, nessuna creazione/attivazione workspace e nessun deploy Netlify.
