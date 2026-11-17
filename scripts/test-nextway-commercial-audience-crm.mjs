@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const html=fs.readFileSync("nextway-ai.html","utf8");
+const cloud=fs.readFileSync("nextway-cloud.js","utf8");
+assert.ok(html.includes('name="commercial_audience"'));
+assert.ok(html.includes('value="customer">Cliente — prodotti e abbonamenti'));
+assert.ok(html.includes('value="partner">Partner — kit e attività professionale'));
+assert.ok(html.includes("commercial_audience:'commercial_audience'"));
+assert.ok(html.includes("Per Zinzino l'AI Setter richiede questa classificazione"));
+assert.ok(cloud.includes("hasOwnProperty.call(x,'commercial_audience')"));
+assert.ok(cloud.includes("payload.commercial_audience=['customer','partner'].includes(x.commercial_audience)?x.commercial_audience:null"));
+assert.ok(cloud.includes("commercial_audience:r.commercial_audience||''"));
+console.log("NEXTWAY CRM commercial audience form and sync: 8 contract assertions passed");
