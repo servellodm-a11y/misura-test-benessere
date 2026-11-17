@@ -34,7 +34,7 @@ Questa cartella è il punto di raccolta della documentazione ufficiale da cui ri
 | Area | Fonte / base disponibile | Stato |
 |---|---|---|
 | Presentazione aziendale | Presentazione ufficiale e pagine pubbliche Zinzino | Parziale; integrare materiali italiani e aggiornati |
-| Catalogo prodotti | Cataloghi Partner Kit, Premier Kit e Shop Italia censiti nel registro fonti | Strutturato; prezzi e disponibilità da aggiornare prima di ogni proposta |
+| Catalogo prodotti | Cataloghi Partner Kit, Premier Kit e Shop Italia censiti nel registro fonti | Indici strutturati; schede individuali e checkout da aggiornare prima di ogni proposta |
 | Schede prodotto | Schede Premier Kit e prodotti già censite; schede tecniche complete da acquisire | Parziale; non inventare ingredienti, dosi o claim mancanti |
 | Test e strumenti | Pagina prodotto italiana, Product Sheet italiano (06/10/2026) e guida rapida ufficiale BalanceTest | Scheda e istruzioni di base acquisite; completare revisione regolatoria e manuali/FAQ tecniche |
 | Piano compensi | Master EU 2025, versione 12/02/2025, strutturato in 20 regole; applicabilità Italia confermata dall'utente il 17/11/2026 | Strutturato; calcoli disabilitati e regole residue aperte |
