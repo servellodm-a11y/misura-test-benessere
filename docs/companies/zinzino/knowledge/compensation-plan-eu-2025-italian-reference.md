@@ -42,6 +42,16 @@ https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA
 
 Il documento italiano dichiara espressamente che, in caso di traduzione potenzialmente errata, la versione originale inglese è il documento valido e vincolante. Il master europeo inglese consultato è datato **12/02/2025**. Per NEXTWAY, quindi, il PDF italiano 2024 è una fonte ufficiale localizzata ma precedente, utile per consultazione e confronto; non sostituisce il master EU 2025.
 
+### Fast Start — regola operativa confermata per NEXTWAY il 17 novembre 2026
+
+Il titolare del progetto ha precisato che la sequenza attualmente applicata è:
+1. 4 punti cliente;
+2. 2 Partner con Ultimate Partner Kit, con un Partner a sinistra e uno a destra;
+3. duplicazione dei due Partner;
+4. ulteriori 10 punti cliente, ripartiti in 4 + 6.
+
+Questa sequenza è assunta da NEXTWAY come regola operativa di riferimento sulla base della conferma esplicita dell'utente. Non è presentata come attestazione aziendale indipendente e non consente, da sola, di calcolare importi di bonus o requisiti aggiuntivi non specificati.
+
 ### Differenze e punti da chiarire
 
 1. **Fast Start — Enrollment Points (pagina 21 del master; pagina 20 del PDF italiano):** il testo principale di entrambi i documenti descrive l'iscrizione di due Partner, uno a sinistra e uno a destra. La nota in calce del PDF italiano richiede almeno un nuovo Partner a sinistra e uno a destra. La nota in calce del master inglese 2025, invece, dice che almeno 1 dei 6 Enrollment Points deve essere collocato a sinistra oppure a destra. La formulazione inglese è in tensione con il testo principale dello stesso master; non risolvere l'ambiguità con un'interpretazione automatica. Richiedere chiarimento aziendale o regole ufficiali della campagna.
