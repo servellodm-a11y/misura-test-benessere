@@ -169,3 +169,8 @@ Tutti i dati sono snapshot del 17/11/2026. Non assumere durata minima non indica
 La pagina ufficiale italiana Premier Kit elenca più offerte rispetto al catalogo commerciale già strutturato. Per evitare di presentare come validate informazioni prese soltanto dalla scheda elenco, NEXTWAY registra un indice di 19 ulteriori voci con prezzo di card come snapshot, URL ufficiale e stato `details_pending` / `listing_only_details_pending`. Queste voci non sono selezionabili né utilizzabili per preventivi finché non vengono verificate le singole schede, i Credits, la durata, il contenuto, la frequenza e il checkout.
 
 Fonte indice: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits . Le schede individuali per alcuni prodotti riportano valori iniziali e canoni diversi dalla scheda elenco (esempio BalanceOil Kit with Test: card €206/€43 al mese; scheda prodotto €204/€42 al mese), perciò i prezzi di card non sono mappati nei campi prezzo di acquisto e restano esclusivamente informativi.
+
+
+## Knowledge Base — documenti pronti per importazione (17 novembre 2026)
+
+Preparati nel repository quattro documenti italiani da importare nella Knowledge Base del workspace Zinzino dopo la creazione autenticata: knowledge/customer-rewards-program.md, knowledge/partner-kits-and-compensation-boundaries.md, knowledge/premier-kit-catalog-validation.md e knowledge/IMPORT-MANIFEST.md. L'importazione non è ancora avvenuta: il workspace non esiste e la funzione di ingestione richiede workspace UUID e JWT platform_admin. I documenti sono contenuti preparatori, non documenti pubblicati nella KB.
