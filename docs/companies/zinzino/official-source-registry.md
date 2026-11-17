@@ -240,3 +240,12 @@ Fonti ufficiali consultate:
 La documentazione dichiara che il Valore di Protezione non indica lo stato di salute. La formula completa di normalizzazione degli indicatori non è pubblicata nella scheda; NEXTWAY non deve ricostruirla né simulare il punteggio. Sono stati aggiunti limiti per claim sanitari e protezione dei dati: non archiviare risultati/ID/referti nel CRM prospecting.
 
 La scheda e il Product Sheet citano la direttiva 98/79/CE e il marchio CE. La citazione è registrata come contenuto della fonte, non come verifica autonoma della conformità normativa attuale.
+
+
+## Shop Italia — indice categorie e prodotti (consultazione 17 novembre 2026)
+
+La pagina Shop Italia e le categorie ufficiali sono state consultate per creare il documento knowledge/shop-catalog-index.md. L'indice separa test domiciliari, integratori Omega, Restore, immunità, salute intestinale, controllo del peso, nutrizione della pelle e skincare. Il Brand Shop (es. Valentus e Xelliss) è mantenuto distinto dal catalogo Zinzino.
+
+Le pagine di categoria e le schede individuali possono mostrare importi differenti. Per questa ragione non sono stati inseriti prezzi statici nell'indice. Ogni proposta deve essere basata sulla scheda prodotto e sul checkout italiani aggiornati, distinguendo acquisto singolo, Prezzo Premier, abbonamento, Credits e consegna.
+
+Documento preparato: knowledge/shop-catalog-index.md. Non sostituisce schede tecniche, ingredienti, allergeni o claim autorizzati dei singoli prodotti.
