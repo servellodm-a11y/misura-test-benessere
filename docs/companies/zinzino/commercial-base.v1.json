@@ -744,12 +744,17 @@
       "catalog_scope_note": "Catalogo strutturato parziale delle offerte visibili nella pagina ufficiale Italia. I prezzi sono snapshot; verificare scheda e condizioni della campagna prima di ogni proposta. Le etichette Full Refund Possible non autorizzano promesse di rimborso."
     },
     "compensation_plan": {
-      "status": "official_italian_pdf_linked_but_full_document_not_acquired",
-      "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
-      "linked_from": "https://www.zinzino.com/site/it/it-it/partnerweb",
-      "rules": [],
+      "status": "english_eu_master_2025_reference_summary_only",
+      "source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "source_title": "Zinzino Compensation Plan — Europe",
+      "source_version": "12-02-2025",
+      "source_language": "en",
+      "source_market": "EU",
+      "source_type": "official_company_document",
+      "italian_translation_status": "summary_only_unofficial",
       "calculations_enabled": false,
-      "blocking_reason": "The official Italian PDF (~14.25 MB) could not be fully retrieved and checked. Do not substitute third-party summaries or documents in another language."
+      "rules": [],
+      "blocking_reason": "The official Italian page links a separate Italian PDF that could not be fully acquired. The English EU master is dated 12-02-2025 and states that the English master prevails over translations. It is retained as a historical/reference source only; do not treat it as the current Italian plan or enable commission/qualification calculations until the current Italian rules are acquired and reconciled."
     }
   },
   "source_register": [
