@@ -152,17 +152,18 @@
         {
           "id": "nails-hair-skin-care-kit-910810",
           "name": "Nails, Hair & Skin Care Kit",
-          "initial_amount_eur": null,
-          "recurring_amount_eur": null,
-          "recurrence": "unknown",
-          "delivery_every_months": null,
-          "credits_initial": null,
-          "credits_recurring_per_month": null,
-          "cancellation_notice_days": null,
-          "minimum_duration_months": 6,
-          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910810",
+          "initial_amount_eur": 40,
+          "recurring_amount_eur": 20,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 2.5,
+          "credits_recurring_per_month": 1.75,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910810/",
           "observed_at": "2026-11-17",
-          "status": "partial_snapshot_refresh_before_quote"
+          "status": "official_page_discontinued_not_offerable",
+          "availability_status": "discontinued"
         }
       ]
     },
