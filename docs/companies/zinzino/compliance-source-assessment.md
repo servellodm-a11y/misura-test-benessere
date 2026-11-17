@@ -97,3 +97,37 @@ La pagina del Direct Selling Self-Regulatory Council relativa al caso Zinzino n.
 Questa fonte riguarda un procedimento statunitense e non stabilisce le regole contrattuali italiane. È registrata soltanto come ulteriore motivo per mantenere i guardrail NEXTWAY su affermazioni di reddito, risultati sanitari e testimonianze; non deve essere usata per attribuire automaticamente all'Italia le conclusioni o le norme USA.
 
 Fonte: https://staging.bbbprograms.org/programs/advertising/dssrc/cases/zinzino-llc
+
+
+## 9. Ulteriori documenti ufficiali reperiti — stato geografico e temporale da non confondere
+
+Ricerca aggiuntiva del 17 novembre 2026:
+
+| Documento | Evidenza osservata | Limite per il mercato Italia |
+|---|---|---|
+| [Zinzino Marketing Rules & Ethics — en-WW](https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Marketing-rules-and-ethics-en-WW.pdf) | Documento pubblicato sul dominio ufficiale Zinzino, intestato genericamente ai Partner; dichiara l'obbligo di rispettare le regole e richiama le leggi federali, statali e locali. Tratta marchi, pubblicità, siti, vendite online e marketplace. | Il nome file indica WW (worldwide), ma il testo contiene anche clausole e riferimenti a mercati/contratti specifici. Non è stata trovata una data/versione leggibile né una conferma esplicita che sia l'edizione vigente incorporata nel contratto italiano. Non usarlo come unica policy italiana. |
+| [Partner Agreement EU — Zinzino Operations AB, 2022-01-14, Version 4.0](https://zinzinowebstorage.blob.core.windows.net/contracts/PartnerContract_EU_en-GB.pdf) | Contratto europeo in inglese; contiene obblighi di correttezza, divieto di claim non autorizzati, assenza di garanzie di reddito e obblighi di supporto ai Partner reclutati. | Versione datata 14/01/2022. È una fonte storica europea utile per individuare temi contrattuali, ma non prova di essere il contratto corrente del Partner italiano nel 2026. Non assumere che tutte le clausole si applichino ancora. |
+| [Social Selling Guide — en-EN](https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Social-Selling-Guide-en-EN.pdf) | Guida ufficiale che richiama le Marketing Rules & Ethics, raccomanda di non fare claim medici o promesse non approvate e indica il Back Office come luogo per asset social aggiornati. | Documento inglese con data di pubblicazione non verificata e riferimenti generali. È materiale formativo di supporto, non sostituisce la policy Italia/UE vigente né autorizza l'uso di ogni contenuto nel mercato italiano. |
+
+### Regole operative che si possono dedurre senza trasformarle in policy italiana
+
+- La versione WW del documento Marketing Rules & Ethics afferma che il Partner deve rispettare le regole aziendali, le norme locali e le istruzioni aziendali. È un'indicazione generale coerente con i guardrail NEXTWAY, non una prova della versione contrattuale italiana.
+- La stessa versione WW limita l'uso dei marchi e dei materiali aziendali e disciplina pubblicità, siti personali, vendite online e marketplace. Per ogni funzione NEXTWAY che generi pubblicità o vendita online brandizzata è necessario verificare la policy italiana corrente e l'eventuale autorizzazione scritta.
+- Il Partner Agreement EU 2022.0 contiene clausole su claim, reddito, materiali approvati e obbligo di formazione/supporto dei nuovi Partner. Queste clausole sono registrate come evidenza storica e non devono essere copiate come condizioni contrattuali correnti.
+- La Social Selling Guide sostiene l'uso di contenuti ufficiali e ribadisce l'assenza di claim medici o promesse non approvate; la guida rinvia alle Marketing Rules & Ethics e al Back Office per gli aggiornamenti.
+
+### Esito aggiornato
+
+La ricerca amplia il corpus di riferimento, ma **non chiude il blocco compliance**. Sono stati reperiti documenti ufficiali generali e una versione EU del contratto risalente al 2022; non è stata ottenuta una copia verificabile del Partner Agreement Italia vigente nel 2026 né una conferma dal Back Office che la versione WW delle Marketing Rules & Ethics sia la policy applicabile in Italia.
+
+Restano obbligatori:
+1. acquisire dal Back Office Partner italiano il Partner Agreement vigente, con data/versione;
+2. scaricare gli allegati etici annuali correnti (Code of Conduct e Business Ethics Guidelines);
+3. confermare con Partner Support quale edizione di Marketing Rules & Ethics si applica all'Italia e se esiste una versione italiana/europea;
+4. acquisire le regole correnti per vendita online, pubblicità digitale, social e materiali approvati;
+5. acquisire le condizioni italiane correnti per abbonamenti, recesso, cancellazione e resi.
+
+Fonti aggiuntive:
+- https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Marketing-rules-and-ethics-en-WW.pdf
+- https://zinzinowebstorage.blob.core.windows.net/contracts/PartnerContract_EU_en-GB.pdf
+- https://zinzinowebstorage.blob.core.windows.net/filelibrary/Zinzino-Social-Selling-Guide-en-EN.pdf
