@@ -372,6 +372,10 @@
       if (isCreating) return;
       isCreating = true;
       const form = event.currentTarget;
+      // Disattiva la validazione HTML automatica: il retry deve poter ripartire
+      // anche se form.reset() ha svuotato i campi del nuovo prospect.
+      // I campi obbligatori vengono validati manualmente solo nel percorso di creazione.
+      form.noValidate = true;
       try {
         if (pendingCreatedConversationId) {
           const { s } = await cloud.active();
@@ -390,6 +394,21 @@
         }
 
         const formValues = Object.fromEntries(new FormData(form).entries());
+        if (!pendingLeadCreateRequest) {
+          const requiredFields = [
+            ['display_name', 'nome / identificativo pubblico'],
+            ['source_name', 'fonte / piattaforma'],
+            ['source_url', 'URL pubblico verificabile'],
+            ['public_evidence', 'evidenza pubblica']
+          ];
+          const missing = requiredFields.find(([name]) => !String(formValues[name] || '').trim());
+          if (missing) {
+            say('Per creare un nuovo prospect, compila il campo obbligatorio: ' + missing[1] + '.');
+            const field = form.elements.namedItem(missing[0]);
+            if (field) field.focus();
+            return;
+          }
+        }
         const values = pendingLeadCreateRequest
           ? pendingLeadCreateRequest.payload
           : {
