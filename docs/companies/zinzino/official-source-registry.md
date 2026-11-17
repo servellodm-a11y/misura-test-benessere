@@ -199,3 +199,19 @@ La pagina ufficiale Partner Italia https://www.zinzino.com/site/it/it-it/partner
 Il confronto ha individuato: (a) tensione sulla nota Fast Start Enrollment Points: il corpo del master richiede un Partner a sinistra e uno a destra, mentre la sua nota a piè pagina richiede almeno 1 dei 6 punti a sinistra oppure a destra; il PDF italiano 2024 richiede un Partner su entrambi i lati; (b) il master 2025 aggiunge una nota su bonus Fast Start 60/90 giorni aumentati secondo le regole della campagna, assente nel PDF italiano 2024. Non risolvere l'ambiguità con inferenze: mantenere il calcolo disabilitato finché la regola non è chiarita e testata.
 
 La conferma dell'utente del 17/11/2026 che il master EU 12/02/2025 è tuttora vigente senza modifiche in Italia resta registrata come conferma dell'utente, non come verifica indipendente dell'azienda. Il PDF italiano 2024 non prova da solo tale vigenza né l'assenza di modifiche successive. Sintesi e confronto sono in docs/companies/zinzino/knowledge/compensation-plan-italian-2024-comparison.md.
+
+
+## Estrazione regole Piano Compensi EU 2025 — fase 1 (17 novembre 2026)
+
+Fonte primaria: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf (Zinzino Compensation Plan — Europe, versione 12/02/2025). La vigenza fino a novembre 2026 è registrata sulla base della conferma esplicita dell'utente.
+
+Sono state strutturate 18 voci di riferimento: Cliente attivo e Customer Points; Credits e bilanciamento 2:1; banking; ECB/ECBx/RCB; Grace Period e Active Partner; Customer Career Plan; Cash Bonus; MCB e zRewards; bonus una tantum e Fast Start Cliente; titoli Partner fino a Black Crown; Team Commission; Volume Commission; CAB; Mentor Matching Bonus; OTB Partner parziali; zPhone/zCar; Income Center; Pay Points; Z4F Partner e Fast Start operativo confermato dall'utente.
+
+I valori restano nelle unità originali e non vengono trasformati in stime di reddito. T-Balance, OTB completi, titoli oltre Black Crown, campagne Fast Start 60/90 giorni e viaggi incentivo restano da formalizzare. Nessun calcolo è abilitato.
+
+Documento: docs/companies/zinzino/knowledge/compensation-plan-eu-2025-structured-rules.md.
+
+
+### Aggiornamento 17 novembre 2026 — completamento tabelle Partner
+- Master EU 2025: aggiunte soglie/strutture per Ambassador, Royal Ambassador, Black Ambassador, President, Elite President, Global President, 1 Star Global President e progressione 2 Star+; incluse condizioni dei bonus azionari.
+- OTB: estratte tutte le 14 righe da Bronze a President, inclusi limiti temporali e pagamenti mensili. Il significato operativo/formula di T-Balance resta da formalizzare; nessun calcolo OTB abilitato.
