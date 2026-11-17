@@ -164,8 +164,60 @@
           "observed_at": "2026-11-17",
           "status": "official_page_discontinued_not_offerable",
           "availability_status": "discontinued"
+        },
+        {
+          "id": "leanshake-kit-910237",
+          "name": "LeanShake Kit",
+          "initial_amount_eur": 217,
+          "recurring_amount_eur": 116,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 14,
+          "credits_recurring_per_month": 8,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "prepaid_amount_eur": 913,
+          "prepaid_credits": 38,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910237",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "leanshake-kit-x2-910637",
+          "name": "LeanShake Kit x2",
+          "initial_amount_eur": 115,
+          "recurring_amount_eur": 58,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 7,
+          "credits_recurring_per_month": 4,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "prepaid_amount_eur": 463,
+          "prepaid_credits": 19,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910637",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
+        },
+        {
+          "id": "leanshake-challenge-kit-910324",
+          "name": "LeanShake Challenge Kit",
+          "initial_amount_eur": 557,
+          "recurring_amount_eur": 116,
+          "recurrence": "monthly",
+          "delivery_every_months": 2,
+          "credits_initial": 40,
+          "credits_recurring_per_month": 8,
+          "cancellation_notice_days": 30,
+          "minimum_duration_months": null,
+          "prepaid_amount_eur": 1253,
+          "prepaid_credits": 64,
+          "source_url": "https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits/910324",
+          "observed_at": "2026-11-17",
+          "status": "official_snapshot_refresh_before_quote"
         }
-      ]
+      ],
+      "catalog_scope_note": "Catalogo strutturato parziale: include solo offerte con scheda italiana ufficiale acquisita. Non considerare l'elenco esaustivo; verificare il catalogo live prima di ogni proposta."
     },
     "rewards": {
       "source_id": "customer_rewards_it",
