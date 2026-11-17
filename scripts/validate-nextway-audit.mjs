@@ -227,7 +227,7 @@ assert.match(setter, /sessionStorage\.setItem\(PENDING_LEAD_CREATE_KEY/);
 assert.match(setter, /sessionStorage\.getItem\(PENDING_LEAD_CREATE_KEY/);
 assert.match(setter, /crypto\.subtle\.digest\('SHA-256'/);
 assert.match(setter, /nextway_create_lead_with_conversation_commercial_v3/);
-assert.match(setter, /p_commercial_audience: values\.commercial_audience/);
+assert.ok(setter.includes("p_commercial_audience: values.commercial_audience"));
 assert.match(commercialAudienceMigration, /nextway_create_lead_with_conversation_idempotent_v2/);
 assert.match(commercialAudienceMigration, /commercial_audience in \\(\'customer\',\'partner\'\\)/);
 assert.match(setter, /p_request_id: createRequest\.request_id/);
