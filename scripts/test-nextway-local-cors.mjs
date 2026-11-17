@@ -13,7 +13,11 @@ const files = [
 for (const relativePath of files) {
   const source = readFileSync(new URL(relativePath, import.meta.url), "utf8");
   assert.ok(source.includes('"http://localhost:8000"'), relativePath + ": localhost origin missing");
-  if (relativePath.endsWith("nextway-workspace-admin/index.ts")) {
+  if ([
+    "nextway-workspace-admin/index.ts",
+    "nextway-knowledge-ingest/index.ts",
+    "nextway-knowledge-upload/index.ts",
+  ].some((name) => relativePath.endsWith(name))) {
     assert.ok(source.includes('"https://misura-test-benessere.pages.dev"'), relativePath + ": deployed Cloudflare Pages origin missing");
   }
   assert.match(source, /\.\.\.configuredOrigins/, relativePath + ": configured origins must be preserved");
