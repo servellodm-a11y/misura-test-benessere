@@ -3383,3 +3383,17 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Aggiornata la guida italiana: sintesi originale operativa, non traduzione ufficiale integrale.
 - I calcoli restano prudentemente disabilitati (`calculations_enabled=false`, `rules=[]`) finché non saranno estratte e validate con test tutte le formule, soglie, condizioni, eccezioni, periodicità e requisiti di qualifica.
 - Nessuna modifica Supabase, creazione/attivazione workspace o deploy Netlify.
+
+
+
+## 17 novembre 2026 — Acquisizione e confronto PDF italiano Piano Compensi
+
+- File caricato: Piano-Comp.(1).pdf, 35 pagine. La data stampata è **14/11/2024**.
+- Il link diretto del file è quello collegato dalla pagina ufficiale Partner Italia: https://www.zinzino.com/site/it/it-it/partnerweb → https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf.
+- Master europeo inglese ufficiale: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf, data stampata **12/02/2025**. Entrambi i documenti indicano la prevalenza della versione inglese in caso di errori/differenze di traduzione.
+- Differenza/ambiguità Fast Start: il testo principale richiede un Partner a sinistra e uno a destra; la nota inglese 2025 parla di almeno 1 dei 6 Enrollment Points a sinistra oppure a destra; la nota italiana 2024 richiede un Partner su entrambi i lati. Non codificare questa regola finché non chiarita.
+- Il master 2025 contiene una nota sui bonus Fast Start a 60/90 giorni aumentati secondo le regole della campagna; la nota manca nel PDF italiano 2024. I dettagli della campagna richiedono il regolamento dedicato.
+- Il confronto non certifica equivalenza integrale delle 35 pagine. Il PDF italiano è conservato come riferimento localizzato 2024, non come fonte autonoma per calcoli correnti.
+- La conferma dell'utente del 17/11/2026 che il master EU 2025 è tuttora vigente senza modifiche in Italia resta registrata come conferma dell'utente, non come attestazione indipendente Zinzino.
+- Creato docs/companies/zinzino/knowledge/compensation-plan-italian-2024-comparison.md; aggiornati registry, manifest, guida italiana e commercial-base. I calcoli restano disabilitati (calculations_enabled=false, rules=[]). Nessuna modifica Supabase/workspace o deploy.
+
