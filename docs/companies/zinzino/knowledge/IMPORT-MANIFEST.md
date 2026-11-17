@@ -11,7 +11,7 @@
 | premier-kit-catalog-validation.md | customer_catalog | official_document | Catalogo Premier Kit e stato validazione | Snapshot 17/11/2026 |
 | compensation-plan-eu-2025-italian-reference.md | partner_compensation_reference | official_document | Piano Compensi Zinzino — guida italiana al master europeo vigente | Vigente a novembre 2026 secondo conferma utente; regole da strutturare e testare |
 | compensation-plan-italian-2024-comparison.md | partner_compensation_reference | official_document | Confronto PDF italiano 2024 e master EU 2025 | Riferimento localizzato 14/11/2024; differenze/ambiguità note; non usare da solo per calcoli |
-| compensation-plan-eu-2025-structured-rules.md | partner_compensation_rules | official_document | Regole Piano Compensi EU 2025 — estrazione strutturata fase 1 | Master EU 12/02/2025; sintesi italiana; fase 1, non abilitata al calcolo |
+| compensation-plan-eu-2025-structured-rules.md | partner_compensation_rules | official_document | Regole Piano Compensi EU 2025 — estrazione strutturata fase 2 | Master EU 12/02/2025; sintesi italiana; fase 2, non abilitata al calcolo |
 
 **Controlli prima dell'importazione:**
 1. Verificare che il workspace sia draft e appartenga al brand Zinzino Italia.
