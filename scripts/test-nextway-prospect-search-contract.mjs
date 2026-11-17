@@ -14,7 +14,7 @@ assert.match(page, /const SEARCH_MAX_RESULTS\s*=\s*10\s*;/,
 assert.match(page, /max_results\s*:\s*SEARCH_MAX_RESULTS/,
   'the Edge Function request must use the authoritative result limit');
 assert.match(page, /queries:queriesToFetch\.map\(entry=>entry\.query\)/,
-  'the Edge Function must receive only cache-miss queries while cached results are reused');
+  'the Edge Function must receive only queries that missed the local cache');
 assert.match(page, /runallsearch'\)\.addEventListener\('click',\(\)=>runSearch\(true\)\)/,
   'the all-search button must invoke the explicit batch path');
 assert.match(page, /Array\.isArray\(payload\.failures\)/,
