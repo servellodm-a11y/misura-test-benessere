@@ -46,9 +46,11 @@ const badUrl=api.normalize({workspace_key:'brand-x',workspace_name:'Brand X',com
 assert.equal(Object.keys(badUrl.consultantChannels).length,0);
 
 const seed=JSON.parse(fs.readFileSync('docs/companies/zinzino/workspace-commercial-settings.json','utf8'));
+const commercialData=JSON.parse(fs.readFileSync('docs/companies/zinzino/commercial-base.v1.json','utf8'));
+const integratedSeed={...seed,commercial_data:commercialData};
 const seedWorkspace=api.normalize({
   workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
-  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:seed
+  partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
 });
 for(const segment of api.segments){
   assert.ok(seedWorkspace.searchModifiers[segment].length>0, 'Missing Zinzino modifiers: '+segment);
@@ -61,8 +63,6 @@ assert.ok(seedWorkspace.guardrails.some(rule=>rule.includes('promesse di reddito
 
 // Commercial base is attached by the admin loader and stored in the same
 // protected workspace commercial settings document.
-const commercialData=JSON.parse(fs.readFileSync('docs/companies/zinzino/commercial-base.v1.json','utf8'));
-const integratedSeed={...seed,commercial_data:commercialData};
 const integrated=api.normalize({
   workspace_id:'workspace-fixture',workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
