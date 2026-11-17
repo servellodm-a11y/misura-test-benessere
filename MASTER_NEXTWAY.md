@@ -3317,3 +3317,12 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Test contrattuale aggiornato a 16 offerte con assert sulle cinque nuove voci. CI PR #29 run `44097688361`: SUCCESS.
 - PR #29 merge squash commit: `6b6f28aa95a2ab3981501863d07cecd2a304e771`.
 - Nessuna modifica DB, creazione/attivazione workspace o deploy Netlify.
+
+
+## 17 novembre 2026 — Indice Premier Kit esteso e gating di sicurezza
+
+- La pagina ufficiale italiana Premier Kit elenca un catalogo molto più ampio delle 16 offerte precedentemente strutturate. Sono state aggiunte 19 voci di indice con URL prodotto e prezzo mostrato nella card, marcate `details_pending` / `listing_only_details_pending`.
+- Il prezzo di card non è trattato come importo iniziale contrattuale: per esempio BalanceOil Kit with Test appare in elenco a €206 + €43/mese, mentre la scheda prodotto aperta espone €204 + €42/mese. Questo dimostra perché occorre verificare la scheda singola e il checkout.
+- `getOffer()` ora esclude anche le voci `details_pending` e `listing_only_details_pending`, oltre alle discontinued. Restano selezionabili solo le offerte che hanno superato la validazione commerciale prevista.
+- Test contrattuali aggiornati: 35 voci totali; due offerte listing-only non selezionabili; un'offerta già validata resta selezionabile.
+- Nessuna modifica DB, workspace, attivazione o deploy.

@@ -162,3 +162,10 @@ Aggiunte alla base commerciale cinque offerte con schede ufficiali italiane:
 Fonti ufficiali: https://www.zinzino.com/shop/site/IT/it-it/products/premier-kits/910533 ; https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910808/ ; https://www.zinzino.com/shop/site/IT/it-IT/products/brand-shop/valentus-premier-kits/910754/ ; https://www.zinzino.com/shop/site/it/it-it/products/brand-shop/valentus-premier-kits/910758 ; https://www.zinzino.com/shop/site/it/it-it/products/valentus-all/910761 .
 
 Tutti i dati sono snapshot del 17/11/2026. Non assumere durata minima non indicata; verificare sempre prezzo, contenuto e condizioni live prima di un preventivo. Il catalogo strutturato resta parziale.
+
+
+## 17 novembre 2026 — Indice esteso Premier Kit e blocco offerte non approfondite
+
+La pagina ufficiale italiana Premier Kit elenca più offerte rispetto al catalogo commerciale già strutturato. Per evitare di presentare come validate informazioni prese soltanto dalla scheda elenco, NEXTWAY registra un indice di 19 ulteriori voci con prezzo di card come snapshot, URL ufficiale e stato `details_pending` / `listing_only_details_pending`. Queste voci non sono selezionabili né utilizzabili per preventivi finché non vengono verificate le singole schede, i Credits, la durata, il contenuto, la frequenza e il checkout.
+
+Fonte indice: https://www.zinzino.com/shop/site/IT/it-IT/products/premier-kits . Le schede individuali per alcuni prodotti riportano valori iniziali e canoni diversi dalla scheda elenco (esempio BalanceOil Kit with Test: card €206/€43 al mese; scheda prodotto €204/€42 al mese), perciò i prezzi di card non sono mappati nei campi prezzo di acquisto e restano esclusivamente informativi.

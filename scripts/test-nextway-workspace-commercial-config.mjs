@@ -69,7 +69,10 @@ const integrated=api.normalize({
   partner_name:'Zinzino',market_country:'Italia',language_code:'it',commercial_config:integratedSeed
 });
 assert.equal(integrated.commercialData.schema_version,1);
-assert.equal(integrated.commercialData.customer.premier_kits.offers.length,16);
+assert.equal(integrated.commercialData.customer.premier_kits.offers.length,35);
+assert.equal(api.getOffer(integrated,'customer','balanceoil-kit-910330'),null,'Listing-only kit must not be offered as a validated commercial offer');
+assert.equal(api.getOffer(integrated,'customer','gut-health-mini-kit-with-test-910858'),null,'Listing-only kit with no subscription must remain gated until detail validation');
+assert.equal(api.getOffer(integrated,'customer','maternity-balanceoil-kit-910291').id,'maternity-balanceoil-kit-910291','Previously validated offers remain selectable');
 assert.equal(api.getOffer(integrated,'customer','zinogene-kit-910533').credits_recurring_per_month,5);
 assert.equal(api.getOffer(integrated,'customer','menoplex-kit-910808').recurring_amount_eur,20);
 assert.equal(api.getOffer(integrated,'customer','berry-blast-kit-910754').prepaid_amount_eur,400);
