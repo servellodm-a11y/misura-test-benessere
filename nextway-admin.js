@@ -679,6 +679,105 @@
     $("documents-refresh").addEventListener("click", async () => {
       try { await loadDocuments(); } catch (error) { status("Elenco documenti non disponibile: " + error.message); }
     });
+    $("import-zinzino-knowledge").addEventListener("click", async () => {
+      const button = $("import-zinzino-knowledge");
+      const target = $("zinzino-knowledge-import-status");
+      const workspace = selectedWorkspace();
+      if (!workspace || workspace.workspace_key !== "zinzino-italia") {
+        target.textContent = "Seleziona il workspace Zinzino Italia prima dell'importazione.";
+        return;
+      }
+      if (workspace.status === "archived") {
+        target.textContent = "Il workspace è archiviato: importazione non consentita.";
+        return;
+      }
+      button.disabled = true;
+      let processed = 0;
+      let duplicates = 0;
+      let pending = 0;
+      try {
+        const manifestResponse = await fetch("/docs/companies/zinzino/knowledge/import-manifest.v1.json", { cache: "no-store" });
+        if (!manifestResponse.ok) throw new Error("Manifesto di importazione non disponibile (HTTP " + manifestResponse.status + ").");
+        const manifest = await manifestResponse.json();
+        if (manifest.schema_version !== 1 || manifest.workspace_key !== "zinzino-italia" ||
+            manifest.language_code !== "it" || !Array.isArray(manifest.documents) ||
+            manifest.documents.length !== 8) {
+          throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 8 documenti italiani.");
+        }
+        const documents = await Promise.all(manifest.documents.map(async (item) => {
+          if (!/^[a-z0-9-]+\.md$/.test(item.file) ||
+              !/^[a-z0-9][a-z0-9_-]{1,63}$/.test(item.module_key) ||
+              item.source_type !== "training_material" || item.language_code && item.language_code !== "it" ||
+              typeof item.title !== "string" || !item.title.trim() ||
+              typeof item.source_reference !== "string" || !/^https:\/\//.test(item.source_reference)) {
+            throw new Error("Metadati non validi nel manifesto per " + String(item.file || "documento") + ".");
+          }
+          const response = await fetch("/docs/companies/zinzino/knowledge/" + item.file, { cache: "no-store" });
+          if (!response.ok) throw new Error("Documento " + item.file + " non disponibile (HTTP " + response.status + ").");
+          const content = await response.text();
+          if (!content.trim() || content.length > 500000) throw new Error("Contenuto vuoto o oltre il limite per " + item.file + ".");
+          return { ...item, content };
+        }));
+        if (!confirm("Importare " + documents.length + " documenti nel workspace Zinzino Italia? I nuovi documenti resteranno pending e non saranno consultabili dall'AI fino all'approvazione amministrativa. I duplicati non verranno ricreati.")) return;
+
+        const { c, s: initialSession } = await session();
+        const cfg = cloud.getConfig();
+        if (!initialSession?.access_token) throw new Error("Sessione amministrativa assente. Accedi nuovamente.");
+        let accessToken = initialSession.access_token;
+        const ingest = async (payload) => {
+          const invoke = async () => fetch(cfg.url + "/functions/v1/nextway-knowledge-ingest", {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer " + accessToken,
+              "apikey": cfg.key,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+          let response = await invoke();
+          if (response.status === 401) {
+            const { data, error } = await c.auth.refreshSession();
+            if (error || !data?.session?.access_token) throw new Error("Sessione amministrativa scaduta. Accedi nuovamente.");
+            accessToken = data.session.access_token;
+            response = await invoke();
+          }
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || ("Errore HTTP " + response.status + "."));
+          }
+          return result;
+        };
+
+        for (const item of documents) {
+          const result = await ingest({
+            workspace_id: workspace.id,
+            module_key: item.module_key,
+            title: item.title,
+            source_type: item.source_type,
+            language_code: "it",
+            source_reference: item.source_reference,
+            version_label: item.version_label || null,
+            valid_from: item.valid_from || null,
+            valid_until: item.valid_until || null,
+            content: item.content
+          });
+          processed += 1;
+          if (result.duplicate) duplicates += 1;
+          if (result.approval_status === "pending") pending += 1;
+          target.textContent = "Importazione in corso: " + processed + "/" + documents.length + " · nuovi pending " + pending + " · duplicati " + duplicates + ".";
+        }
+        await loadDocuments();
+        target.textContent = "Importazione completata: " + processed + " documenti esaminati · nuovi pending " + pending + " · duplicati " + duplicates + ". Nessun documento è stato approvato automaticamente.";
+        status("Knowledge Base Zinzino importata in stato di revisione. Verifica i documenti prima di approvarli.");
+      } catch (error) {
+        try { await loadDocuments(); } catch (_) {}
+        target.textContent = "Importazione interrotta dopo " + processed + " documenti · pending " + pending + " · duplicati " + duplicates + ". " + error.message + " Puoi ripetere: i duplicati vengono riconosciuti senza ricrearli.";
+        status("Importazione Knowledge non completata integralmente: " + error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
     $("knowledge-upload").addEventListener("submit", async (event) => {
       event.preventDefault();
       const workspace = selectedWorkspace();
