@@ -3627,3 +3627,74 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico
 - 17-11-2026 — PR #55 aggiunge il percorso bulk autenticato per gli 8 documenti Markdown, manifesto JSON e test CI. Importazione live non eseguita.
+
+
+---
+
+## AGGIORNAMENTO LIVE — 17 NOVEMBRE 2026 (GitHub #1070 e Supabase read-only)
+
+### Fonti consultate e perimetro
+- Repository GitHub servellodm-a11y/misura-test-benessere, branch main; HEAD osservato prima dell'aggiornamento: 51cf0e22a19840658dc5be2d56ae69cf219037bd.
+- Commit recenti verificati: PR #52 e #53, PR #55 e PR documentale #56 risultano integrate. PR #55 è stata integrata nel commit 8d2035ee0f1990e8efe1c3d6c06c90d020c1db13; PR #56 ha prodotto il commit 51cf0e22a19840658dc5be2d56ae69cf219037bd e modifica soltanto questo MASTER (+27 righe).
+- PR #55 ha modificato 6 file (+233/-8): workflow static validation, manifesto Markdown, manifesto JSON, nextway-admin.html, nextway-admin.js, test scripts/test-nextway-zinzino-knowledge-import.mjs.
+- GitHub Actions run #1069 (PR #55) e #1070 (push su main, commit applicativo #55): SUCCESS. Nella #1070 il job validate e tutti gli step elencati risultano success, incluso il nuovo contratto bulk import, i contratti Knowledge/RLS/workspace e i type-check delle Edge Functions. Run #1065 aveva fallito allo step Validate Zinzino Knowledge bulk import contract; la run #1069 successiva è passata. La #1070 precede il commit documentale #56, che non modifica codice applicativo.
+- La branch main risulta protected=false, con required status checks disattivati/vuoti. Registrare come rischio di governance; nessuna modifica alle protezioni è stata eseguita.
+- In questa sessione sono risultati disponibili i connettori GitHub e Supabase. Non risultano strumenti/connettori Netlify o Cloudflare disponibili: lo stato effettivo dei relativi deploy non è stato interrogato direttamente.
+- Le conversazioni precedenti sono state utilizzate soltanto nei limiti del contesto disponibile; non è stata effettuata una lettura indiscriminata di chat non accessibili.
+
+### Supabase live — lettura diretta del progetto
+- Il connettore Supabase ha individuato il progetto nextway-platform, ref obqwbtlltxjfeirstsya, regione eu-west-1, stato ACTIVE_HEALTHY, PostgreSQL 17.11.0.011.
+- Sono state usate esclusivamente operazioni di lettura: elenco progetto, tabelle, migrazioni, Edge Functions, sorgente di una funzione, query SQL SELECT sui cataloghi/policy/conteggi e Security/Performance/Health Advisors. Non sono stati usati apply_migration, deploy, scritture SQL o modifiche di configurazione.
+- Il catalogo restituisce 24 tabelle nello schema public, di cui 21 con prefisso nextway_. Tutte le tabelle NEXTWAY hanno RLS attivo; FORCE ROW LEVEL SECURITY risulta false. RLS attivo non equivale a FORCE RLS.
+- Conteggi letti per le tabelle CRM/workspace/Knowledge: nextway_leads=1; nextway_lead_activities=0; nextway_lead_conversion_requests=0; nextway_lead_creation_requests=1; nextway_workspaces=0; nextway_workspace_memberships=0; nextway_knowledge_documents=0; nextway_knowledge_chunks=0. Inoltre nextway_lead_audit_logs=3, nextway_setter_conversations=1, nextway_setter_workspace_generation_requests=1, nextway_api_rate_limits=2. I conteggi sono quelli restituiti dalla lettura live; non sono stati letti valori personali dei record.
+- Correzione rispetto alla diagnostica SQL precedente fornita dall'utente: il catalogo Supabase live mostra ora nextway_lead_activities e nextway_lead_conversion_requests presenti, entrambe con zero righe. La query precedente in SQL Editor le aveva riportate assenti. La causa della divergenza (momento della lettura, contesto/ruolo o progetto selezionato in SQL Editor) non è stata determinata; il dato live più recente è quello del connettore sul ref indicato.
+- nextway_leads contiene i campi di archiviazione archived_at, archived_by, archive_reason; ciclo stati comprensivo di In valutazione, Convertito cliente, Convertito partner; workspace_id nullable; campi di revisione manual_reviewed_at e manual_reviewed_by; commercial_audience nullable con valori ammessi customer/partner. Il commento DB precisa che la conversione CRM non crea automaticamente un cliente o partner.
+- Le policy live includono: Lead owner/admin più workspace-scope; attività e conversioni con policy owner/admin e workspace-scope; richieste creazione con policy owner; workspace con policy platform-admin e lettura membri; membership con gestione platform-admin e lettura propria; documenti/chunks Knowledge con policy admin, lettura approved e workspace-scope; prompt e criteri con policy platform-admin.
+- Funzioni/RPC verificate: nextway_is_platform_admin(), nextway_has_workspace_access(...), nextway_create_lead_with_conversation_commercial_v3(...), nextway_create_lead_with_conversation_idempotent_v2(...) e nextway_confirm_lead_manual_review(...) risultano SECURITY DEFINER con search_path=pg_catalog, public e EXECUTE per authenticated. nextway_merge_prospect_identity(...) e nextway_store_search_query_cache(...) risultano riservate a service_role. La variante workspace di nextway_search_knowledge con 5 argomenti è eseguibile da authenticated; la vecchia variante a 4 argomenti non lo è.
+- Le tre tabelle nextway_api_rate_limits, nextway_setter_generation_requests e nextway_setter_workspace_generation_requests hanno RLS attivo ma nessuna policy. Potrebbero essere archivi privati accessibili soltanto tramite RPC SECURITY DEFINER; l'intenzionalità va documentata/verificata, non modificare automaticamente.
+- Il bucket Storage nextway-knowledge esiste ed è privato, limite 12 MiB, MIME consentiti PDF/DOCX/TXT. Nessun documento o chunk Knowledge risulta presente; nessun workspace esiste ancora.
+
+### Storico migrazioni — discrepanza da risolvere
+- In questa sessione to_regclass('supabase_migrations.schema_migrations') restituisce la relazione presente e la tabella contiene 3 righe. Questo contrasta con il precedente errore SQL Editor 42P01 relation does not exist; la causa non è nota.
+- Supabase list_migrations e la lettura della tabella restituiscono le stesse 3 registrazioni:
+  - version 20261117114333, name 20261117130000_fix_nextway_set_lead_updated_at_search_path;
+  - version 20261117123426, name fix_nextway_admin_and_ai_analysis_search_paths;
+  - version 20261117132435, name nextway_lead_commercial_audience.
+- Nel repository main risultano invece 46 file SQL in supabase/migrations. I tre file recenti corrispondenti sono 20261117114333_fix_nextway_set_lead_updated_at_search_path.sql, 20261117123426_fix_nextway_admin_and_ai_analysis_search_paths.sql e 20261117170000_nextway_lead_commercial_audience.sql. La versione registrata 20261117132435 non coincide con il timestamp del terzo file e il campo name della prima registrazione non coincide con il nome file. Non presumere che le 3 righe rappresentino l'intera storia applicata: riconciliare schema, file e tracking prima di applicare ulteriori migrazioni.
+- Il precedente file diagnostico supabase/diagnostics/nextway_crm_prerequisites_readonly.sql non è stato eseguito dall'utente nel contesto accessibile; le verifiche live equivalenti sono state effettuate direttamente tramite SELECT e cataloghi Supabase.
+
+### Edge Functions live e divergenza dal repository
+- Elenco live: nextway-workspace-admin ACTIVE v3, verify_jwt=true, ultimo aggiornamento 12-11-2026; nextway-ai-setter ACTIVE v3, verify_jwt=false; nextway-conversion-provisioning ACTIVE v3, verify_jwt=true; nextway-search ACTIVE v3, verify_jwt=true; rapid-function ACTIVE v8 (nome visualizzato nextway-ai-setter), verify_jwt=true; hyper-api ACTIVE v5, verify_jwt=true.
+- Assenti dall'elenco live: nextway-knowledge-ingest e nextway-knowledge-upload. Entrambe sono presenti nel repository main ma non risultano distribuite nel progetto. Il flusso di importazione introdotto dalla PR #55 non può essere considerato operativo live finché l'endpoint ingest non viene distribuito.
+- La sorgente live di nextway-workspace-admin v3 usa NEXTWAY_ALLOWED_ORIGINS con fallback hardcoded alla sola origine Netlify. La versione repository main aggiunge esplicitamente http://localhost:8000 e https://misura-test-benessere.pages.dev. Il valore effettivo della variabile d'ambiente non è stato letto (nessun segreto/configurazione consultato): non si può concludere se l'origine Pages sia già ammessa a runtime. La funzione live è quindi arretrata rispetto al sorgente main e va riallineata solo nella finestra autorizzata.
+- nextway-workspace-admin live mantiene verify_jwt=true e controlla lato server il ruolo platform_admin; l'azione create_workspace crea workspace in stato draft. Nessun workspace è stato creato.
+
+### Knowledge Base Zinzino — stato repository vs live
+- Il manifesto JSON main elenca 8 documenti italiani, tutti source_type=training_material, con fonte/versione dichiarata; il pacchetto è composto da sintesi e riferimenti NEXTWAY, non da policy Zinzino originali.
+- Import policy: approval_status=pending, deduplicazione SHA-256, massimo 20 documenti per batch. Admin UI scarica e valida il manifesto e i file, poi invia i documenti sequenzialmente a /functions/v1/nextway-knowledge-ingest con JWT utente; prevede un singolo refresh session su 401 e retry idempotente dopo importazione parziale. Nessuna approvazione automatica.
+- Il codice e i test della PR #55 sono presenti e la CI è superata, ma workspace, documenti e chunks live sono ancora a zero; le funzioni ingest/upload non risultano distribuite. Stato: codice nel repository COMPLETATO E VERIFICATO staticamente; operatività live DA COMPLETARE.
+
+### Supabase Advisors — rilievi da triage, nessuna correzione eseguita
+- Security: 3 tabelle RLS senza policy (quelle indicate sopra); 19 funzioni SECURITY DEFINER eseguibili da authenticated segnalate come WARN; protezione Auth contro password compromesse disabilitata (1 WARN). Sono rilievi da valutare nel contesto dei controlli interni e degli accessi RPC, non vulnerabilità automaticamente confermate.
+- Performance: 24 foreign key senza indice di copertura; 25 avvisi RLS initplan; 32 indici non utilizzati; 14 gruppi di policy permissive multiple. Gli indici non utilizzati non vanno rimossi senza carico reale; le policy multiple possono essere intenzionali ma richiedono verifica semantica e prestazionale.
+- Health Advisors: nessun rilievo restituito in questa lettura.
+- Nessuna policy, funzione, password setting o indice è stato modificato.
+
+### Stato per componente al 17-11-2026
+- GitHub PR #52, #53, #55, #56 e CI #1069/#1070 — COMPLETATO E VERIFICATO nel repository.
+- Schema CRM: tabelle attività, conversione, creazione e campi lifecycle/archive presenti; RLS attivo e policy rilevate — COMPLETATO E VERIFICATO come stato schema, non come test end-to-end.
+- Workspace Zinzino Italia — DA COMPLETARE: tabella presente ma zero workspace; creazione soltanto tramite Admin UI autenticata come platform_admin.
+- Knowledge Base — ESEGUITO MA NON VERIFICATO nel runtime: manifest e codice import nel repository, nessun documento live; funzioni ingest/upload assenti.
+- Edge Function workspace-admin — BLOCCATO rispetto al rilascio: live v3 non allineata al sorgente main; deploy subordinato alla finestra autorizzata e alla verifica CORS.
+- Migration tracking — BLOCCATO per nuove applicazioni finché non viene riconciliata la differenza 46 file repository / 3 registrazioni live e il precedente errore 42P01.
+- Security/performance advisor findings — DA COMPLETARE: revisione controllata senza correzioni automatiche.
+- Netlify/Cloudflare deploy live — ESEGUITO MA NON VERIFICATO in questa sessione: nessun connettore dedicato disponibile.
+
+### Vincoli e prossimo passo operativo
+- Restano validi i vincoli registrati: nessun deploy Netlify/produzione, nessun deploy Edge Function e nessun test con utenti reali o conversioni reali prima del 4 dicembre 2026, salvo nuova autorizzazione esplicita.
+- Prima del 4 dicembre: preparare la riconciliazione documentale delle 46 migrazioni con le 3 registrazioni live e la verifica dei rilievi Advisor; non applicare DDL e non modificare funzioni/configurazioni.
+- Dopo la finestra autorizzata: riallineare nextway-workspace-admin e distribuire nextway-knowledge-ingest/nextway-knowledge-upload con JWT e CORS verificati; eseguire preflight dall'origine Pages, chiamata autenticata platform_admin, creare il workspace draft via Admin UI, importare gli 8 documenti in pending e revisionarli uno per uno.
+- Nessuna modifica a codice applicativo, database, Edge Functions live, deploy, impostazioni, segreti o configurazioni durante questa sessione.
+
+### Registro cronologico MASTER
+- 17-11-2026 19:56 Europe/Rome — aggiornamento documentale basato su HEAD GitHub, PR #52–#56, workflow/run #1065/#1069/#1070 e letture Supabase live. Registrati il nuovo stato CRM, la divergenza del tracking migrazioni, le Edge Functions mancanti, il pacchetto Knowledge e i rilievi Advisors. Solo MASTER modificato.
