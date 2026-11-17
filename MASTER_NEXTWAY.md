@@ -3144,3 +3144,20 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - La migrazione `20261114161500_nextway_manual_review_rpc_scope.sql` è presente nel repository come **candidate migration** e dichiara esplicitamente di non applicarla senza autorizzazione separata.
 - Non risulta tra le cinque migrazioni Supabase applicate il 17 novembre. Non è stata eseguita in questa sessione.
 - La PR #2 resta aperta: il suo branch contiene versioni differenti di file già evoluti su `main`; non va integrata integralmente né chiusa finché non si chiarisce se la correzione di scope sia necessaria e compatibile con lo stato effettivo del database.
+
+## 17 novembre 2026 — Chiusura PR storiche dopo verifica di copertura
+
+### PR storiche riconciliate
+- PR #1 chiusa come superata: tutti gli 87 percorsi toccati risultano presenti su `main`; i test associati sono richiamati dal workflow CI corrente. Non è stato eseguito il merge del branch storico, che diverge dalla storia squash di `main`.
+- PR #2 chiusa come superata: import sicuro, reset dell'attestazione di revisione, sincronizzazione e risoluzione conflitti sono presenti nel codice e nei test su `main`. La candidate migration `20261114161500_nextway_manual_review_rpc_scope.sql` resta non applicata e richiede autorizzazione separata.
+- PR #3 chiusa come superata: otto test di classificazione, qualità, evidenze, deduplicazione, contattabilità e pipeline di acquisizione sono presenti e inclusi nella CI; le relative funzionalità sono presenti nel motore corrente.
+- PR #7 chiusa come superata: esecuzione esplicita batch delle cinque query presente nel motore; test search contract e coverage inclusi nella CI.
+- PR #8 chiusa come superata: fallback organizzazione/brand durante la cattura CRM presente in `nextway-cloud.js`; gestione dei risultati parziali e test di acquisizione presenti.
+- PR #4, #5 e #6 chiuse dopo integrazione delle correzioni nelle PR #17 e #18.
+- PR #10 resta esclusa per decisione dell'utente. PR #15 resta chiusa. PR #16, #17 e #18 integrate.
+
+### Stato di sicurezza e rilascio
+- La chiusura delle PR storiche non ha eseguito merge aggiuntivi, migrazioni o deploy.
+- La candidate migration manual-review scope non è applicata; non dichiarare concluso il controllo runtime del flag RPC.
+- Il codice di gestione errori upstream AI Setter della PR #18 è su GitHub `main`, ma la Edge Function Supabase non è stata ridistribuita.
+- Nessun deploy Netlify prima del 4 dicembre 2026; nessun test con utenti reali o conversioni reali prima della stessa data.
