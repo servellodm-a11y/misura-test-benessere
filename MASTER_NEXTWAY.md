@@ -3424,3 +3424,9 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Fonte ufficiale EU 2025 interrogata direttamente: aggiunte le soglie e le strutture di avanzamento da Ambassador a 2 Star Global President e il programma bonus azionari.
 - La tabella One-Time Title Bonuses è ora strutturata per tutti i 14 titoli, con finestra temporale, tre criteri, rate e importi. Resta non automatizzabile la formula di T-Balance.
 - Il test contrattuale è stato corretto per verificare che le copie del registro Partner e del registro radice siano identiche e che le tabelle complete restino presenti.
+
+
+### Aggiornamento Fast Start — dettagli del master EU 2025 e conferma utente
+- Strutturati i quattro step ufficiali 30/60/90/120 giorni, i bonus standard (100/400/1.200/150 PP), i requisiti di attività, i valori Enrollment Points dei kit e il requisito separato di 12 punti per il successivo Enrollment Bonus.
+- La sequenza NEXTWAY resta quella confermata dall'utente: 4 punti cliente; due UPK uno a sinistra e uno a destra; duplicazione; altri 10 punti cliente (4+6). La conferma dell'utente risolve per la configurazione operativa la nota del master sui punti di iscrizione, senza essere presentata come dichiarazione indipendente Zinzino.
+- I bonus Fast Start a 60/90 giorni sono indicati dal master come aumentati secondo regole di campagna; non è stato inserito un importo promozionale non verificato.
