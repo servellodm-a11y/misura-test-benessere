@@ -220,6 +220,8 @@ jobs:
         run: python3 scripts/test-nextway-local-static.py
       - name: Validate Zinzino company configuration and search integration
         run: node scripts/test-nextway-company-config.mjs
+      - name: Validate structured Zinzino EU 2025 compensation rules
+        run: node scripts/test-zinzino-compensation-rules.mjs
       - name: Validate workspace commercial configuration
         run: node scripts/test-nextway-workspace-commercial-config.mjs
       - name: Validate NEXTWAY commercial audience and AI Setter integration
