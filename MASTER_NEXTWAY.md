@@ -3182,3 +3182,11 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Verifiche ancora necessarie, senza interventi distruttivi
 - Esaminare l'overload legacy INTEGER di `public.nextway_save_ai_analysis`, distinto dall'overload SMALLINT corretto nella PR #20. Risulta avere `search_path` vuoto: prima di modificarlo occorre accertare dipendenze, chiamanti e compatibilità. Non eliminarlo né alterarne i grants senza analisi.
 - Il workspace Zinzino Italia non risulta ancora creato: la creazione richiede la sessione amministrativa autenticata nell'interfaccia. La configurazione nel repository non equivale a un workspace salvato nel database.
+
+
+### 17 novembre 2026 — Esito audit overload legacy AI analysis
+- Confrontati i due overload di `public.nextway_save_ai_analysis` direttamente su Supabase.
+- Overload SMALLINT (8 argomenti): è quello aggiornato, con `search_path=pg_catalog, public`; mantiene controllo autenticazione, ownership/admin, lock del Lead, punteggi e qualificazione.
+- Overload INTEGER (8 argomenti, ordine parametri differente): è legacy, `SECURITY DEFINER`, con `search_path=''` e grants a `authenticated` e `service_role`. Il corpo usa riferimenti espliciti `auth.uid()`, `public.nextway_leads`, `public.profiles` e `public.nextway_ai_analyses`; le funzioni e le tabelle applicative sono quindi qualificate per schema e le funzioni built-in restano risolvibili tramite `pg_catalog`. Il percorso vuoto è una scelta di hardening e non va sostituito automaticamente.
+- La query `pg_depend` non ha restituito dipendenze catalogate da altri oggetti per nessuno dei due overload; questo non prova l'assenza di chiamanti dinamici lato client.
+- Nessuna modifica o revoca è stata eseguita sull'overload INTEGER. Non eliminarlo né cambiarne i grants senza prima identificare eventuali chiamanti runtime.
