@@ -67,6 +67,7 @@ on:
       - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
+      - "scripts/test-nextway-setter-knowledge-context.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - "scripts/test-nextway-local-cors.mjs"
       - "scripts/test-nextway-local-static.py"
@@ -140,6 +141,7 @@ on:
       - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
+      - "scripts/test-nextway-setter-knowledge-context.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - "scripts/test-nextway-local-cors.mjs"
@@ -216,6 +218,8 @@ jobs:
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
         run: node scripts/test-nextway-setter-governance.mjs
+      - name: Validate NEXTWAY AI Setter workspace Knowledge Base retrieval
+        run: node scripts/test-nextway-setter-knowledge-context.mjs
       - name: Validate NEXTWAY AI Setter upstream error handling
         run: node scripts/test-nextway-setter-upstream-errors.mjs
       - name: Validate NEXTWAY platform admin UI contract
