@@ -3841,3 +3841,31 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 17-11-2026 19:56 Europe/Rome — aggiornamento documentale basato su HEAD GitHub, PR #52–#56, workflow/run #1065/#1069/#1070 e letture Supabase live. Registrati il nuovo stato CRM, la divergenza del tracking migrazioni, le Edge Functions mancanti, il pacchetto Knowledge e i rilievi Advisors. Solo MASTER modificato.
+
+## VERIFICA DI AVANZAMENTO WORKSPACE E EDGE FUNCTION — 18-11-2026
+
+### Letture live Supabase effettuate il 18-11-2026
+- Progetto: nextway-platform, ref obqwbtlltxjfeirstsya.
+- Conteggi live: 0 nextway_workspaces, 0 nextway_workspace_memberships, 0 nextway_workspace_prompts, 0 nextway_workspace_prospect_criteria, 0 nextway_knowledge_documents, 0 nextway_knowledge_chunks; 1 nextway_leads.
+- Il profilo amministratore e le tabelle workspace risultano presenti nel progetto. Le colonne effettive di nextway_workspaces includono workspace_key, name, partner_name, sector, description, website_url, market_country, language_code, status, settings, created_by e timestamp.
+- Migration tracking riletto: restano 3 sole registrazioni (versioni 20261117114333, 20261117123426, 20261117132435). La discrepanza con i file migration nel repository rimane irrisolta. Nessuna migrazione applicata.
+- Edge Functions live: nextway-workspace-admin ACTIVE v3, verify_jwt=true; nextway-ai-setter ACTIVE v3, verify_jwt=false; nextway-search ACTIVE v3, verify_jwt=true; nextway-conversion-provisioning ACTIVE v3, verify_jwt=true; rapid-function ACTIVE v8, verify_jwt=true; hyper-api ACTIVE v5, verify_jwt=true.
+- nextway-knowledge-ingest e nextway-knowledge-upload non risultano nell'elenco live.
+- PR #10 è l'unica PR aperta restituita dalla ricerca corrente; riguarda la riduzione di query prospect ripetute e non costituisce il passaggio di allineamento workspace-admin.
+
+### Divergenza verificata nextway-workspace-admin
+- La funzione live v3 ha hash sorgente 3c2f70a8c67e01477ac966362a24e977e564317c3ed314b3ed3f32be28ebb711.
+- Il file su main ha blob SHA 303bf5bb7c1b8adc84237c7387f81bbc1d7c09dd.
+- I sorgenti non coincidono. La versione main contiene controlli ulteriori per l'attivazione membership: richiede una membership invited esistente, email utente confermata e, per profili creati da conversione, corrispondenza della conversione attivata con utente e workspace. Preserva inoltre l'invitante originale. La funzione live non contiene questi controlli nella porzione corrispondente.
+- Il sorgente main ammette anche localhost:8000 e misura-test-benessere.pages.dev nella lista CORS predefinita, mentre la live ha fallback predefinito alla sola origine Netlify. Il valore effettivo del secret NEXTWAY_ALLOWED_ORIGINS non è stato letto; quindi non si può stabilire la lista CORS runtime completa.
+- La divergenza è documentata, non corretta: nessun deploy Edge Function eseguito.
+
+### Decisione operativa e blocchi
+- Non creare il workspace Zinzino senza esplicita autorizzazione dedicata. I conteggi live confermano che non esiste ancora alcun workspace e che nessun contenuto Knowledge è stato caricato.
+- Nessuna modifica a codice applicativo, DB, Edge Functions, segreti, impostazioni o deploy in questa sessione.
+- Restano vincolanti i limiti già registrati: nessun deploy di produzione/Edge Function e nessun test con utenti reali o conversioni reali prima del 4 dicembre 2026, salvo nuova autorizzazione esplicita.
+- Prossimo passo utile prima della finestra autorizzata: completare la revisione documentale della funzione workspace-admin e la riconciliazione migration tracking/schema. Preparare il piano di allineamento per il 4 dicembre; non distribuire né applicare migrazioni in anticipo.
+- Il collegamento Knowledge Base → AI Setter e il multilinguismo IT/EN restano fasi successive, dopo l'allineamento del workspace e l'operatività amministrativa.
+
+### Registro cronologico MASTER
+- 18-11-2026 — letture read-only di Supabase live, elenco Edge Functions, migration tracking, conteggi workspace/Knowledge, confronto sorgente live e GitHub main di nextway-workspace-admin e stato PR aperte. Aggiornamento solo documentale; nessuna modifica runtime.
