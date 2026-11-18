@@ -2432,16 +2432,19 @@
       "url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf",
       "observed_at": "2026-11-17",
       "refresh": "before_calculation",
-      "status": "official_italian_localized_pdf_2024_historical_reference_not_equivalent_by_default_to_eu_2025_master",
+      "status": "official_italian_companion_reference_equivalence_confirmed_by_platform_owner",
       "validity_confirmed_by_user_at": "2026-11-17",
       "validity_note": "L'utente conferma che la versione EU 12-02-2025 è in vigore in Italia a novembre 2026 senza modifiche.",
       "source_version": "14-11-2024",
       "source_language": "it",
-      "source_market": "Italy",
-      "translation_status": "official_italian_pdf_linked_from_italy_partner_page_but_older_than_eu_2025_master",
-      "reconciliation_status": "master_eu_2025_user_confirmed_current_phase_1_rules_structured",
+      "source_market": "EU",
+      "translation_status": "official_italian_localized_companion_reference",
+      "reconciliation_status": "equivalence_confirmed_by_platform_owner_2026-11-18",
       "master_precedence_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
-      "notes": "Il PDF italiano 14/11/2024 è collegato dalla pagina ufficiale Partner Italia e resta riferimento localizzato precedente al master EU 12/02/2025. Per NEXTWAY la sequenza Fast Start attualmente applicata è stata confermata dal titolare del progetto il 17/11/2026; vedere compensation-plan-italian-2024-comparison.md. Il master EU resta la fonte primaria. Le condizioni dei bonus 60/90 giorni restano dipendenti dal regolamento della campagna specifica."
+      "notes": "Riferimento italiano localizzato corrispondente al master EU 2025 sulla base della verifica già completata e confermata dal titolare della piattaforma. PDF italiano: data stampata 14/11/2024; master inglese EU: 12/02/2025. La diversa data stampata non costituisce di per sé una divergenza. La validità a novembre 2026 è confermata dall'utente. Usare il master EU come fonte primaria in caso di dubbi; non modificare o ricostruire i valori delle tabelle. Condizioni di campagne e promozioni restano soggette a regolamenti aggiornati.",
+      "equivalence_status": "confirmed_by_platform_owner",
+      "equivalence_confirmed_at": "2026-11-18",
+      "equivalence_note": "L'utente conferma che il PDF italiano e il master EU inglese 2025 corrispondono; il confronto era già stato completato e confermato nella sessione precedente. Non riaprire il confronto e non trattare la differenza tra date stampate come conflitto."
     },
     {
       "id": "black_week_2026_it",
@@ -2464,9 +2467,11 @@
       "source_version": "12-02-2025",
       "source_language": "en",
       "source_market": "EU",
-      "status": "official_eu_2025_current_validity_confirmed_by_user_2026-11_phase_1_structured",
-      "validity_note": "L'utente conferma il 17/11/2026 che il master EU 12/02/2025 è vigente in Italia senza modifiche; la conferma è dell'utente, non una dichiarazione indipendente Zinzino.",
-      "refresh": "before_calculation"
+      "status": "official_eu_2025_master_equivalence_confirmed_by_platform_owner_current_validity_user_confirmed",
+      "validity_note": "L'utente conferma che il master EU 12/02/2025 è vigente in Italia a novembre 2026 senza modifiche e che il PDF italiano localizzato corrisponde; conferma dell'utente, non dichiarazione indipendente Zinzino.",
+      "refresh": "before_calculation",
+      "equivalence_status": "italian_companion_equivalence_confirmed_by_platform_owner",
+      "equivalence_confirmed_at": "2026-11-18"
     }
   ],
   "condition_engine": {
@@ -2507,7 +2512,7 @@
     "source_language": "en",
     "source_market": "EU",
     "source_type": "official_company_document",
-    "italian_translation_status": "original_italian_operational_summary_not_official_translation",
+    "italian_translation_status": "official_italian_localized_companion_reference_equivalence_confirmed_by_platform_owner",
     "calculations_enabled": false,
     "rules": [
       {
@@ -4100,7 +4105,9 @@
     "validity_confirmation": {
       "status": "confirmed_by_user",
       "confirmed_at": "2026-11-17",
-      "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore a novembre 2026 senza modifiche."
+      "valid_through": "2026-11",
+      "scope": "EU 2025 plan applied in Italy",
+      "statement": "L'utente conferma che la versione europea 12-02-2025 è tuttora in vigore in Italia a novembre 2026 senza modifiche."
     },
     "fast_start_operational_rule": {
       "status": "confirmed_by_project_owner_for_nextway",
@@ -4132,7 +4139,7 @@
           }
         }
       ],
-      "note": "Regola operativa confermata dal titolare del progetto per la configurazione NEXTWAY. Non costituisce attestazione aziendale indipendente e non specifica importi o bonus aggiuntivi."
+      "note": "Sequenza operativa NEXTWAY confermata dal titolare del progetto il 17/11/2026: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due Partner; ulteriori 10 punti cliente (4+6). Non confondere questa sequenza operativa con importi/bonus promozionali, che dipendono dalle regole ufficiali e dalle campagne correnti."
     },
     "rules_status": "phase_2_structured_reference",
     "rule_coverage": {
@@ -4145,6 +4152,32 @@
         "esempi numerici ufficiali e test indipendenti per banking, compressione, più Income Centers, arrotondamenti e combinazioni bonus"
       ],
       "calculations_enabled": false
+    },
+    "italian_reference": {
+      "document": "Piano-Comp..pdf",
+      "printed_date": "2024-11-14",
+      "language": "it",
+      "market": "EU",
+      "equivalence_status": "confirmed_by_platform_owner",
+      "equivalence_confirmed_at": "2026-11-18",
+      "master_source_url": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf",
+      "note": "La verifica di equivalenza era già stata completata e confermata dall'utente nella sessione precedente. Non ripetere il confronto né riaprire le vecchie segnalazioni di conflitto."
     }
-  }
+  },
+  "knowledge_modules": {
+    "customer": [
+      "customer_rewards",
+      "customer_catalog",
+      "customer_product_education"
+    ],
+    "partner": [
+      "partner_program",
+      "partner_compensation_reference",
+      "partner_compensation_rules"
+    ]
+  },
+  "supported_languages": [
+    "it",
+    "en"
+  ]
 }

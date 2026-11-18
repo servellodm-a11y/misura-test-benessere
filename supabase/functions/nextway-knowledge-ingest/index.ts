@@ -138,8 +138,8 @@ Deno.serve(async (req) => {
   if (typeof sourceType !== "string" || !allowedSourceTypes.has(sourceType)) {
     return respond({ error: "source_type non valido" }, 400, origin);
   }
-  if (languageCode !== "it") {
-    return respond({ error: "La prima versione della Knowledge Base supporta documenti in italiano (it)" }, 400, origin);
+  if (typeof languageCode !== "string" || !["it", "en"].includes(languageCode)) {
+    return respond({ error: "Lingua non supportata: sono ammessi italiano (it) e inglese (en)" }, 400, origin);
   }
   if (typeof content !== "string" || !content.trim() || content.length > MAX_CONTENT_CHARS) {
     return respond({ error: "Contenuto vuoto o oltre il limite di 500.000 caratteri" }, 400, origin);

@@ -20,4 +20,6 @@ barList('states',['Da verificare','Verificato','Escluso','Contattato'].map(s=>[s
 barList('bands',['A','B','C','Sotto soglia'].map(b=>[b,count(x=>band(score(x))===b&&x.status!=='Escluso')]));
 let sourceMap={};records.forEach(x=>{let s=(x.source||'Fonte non indicata').trim();sourceMap[s]=(sourceMap[s]||0)+1});barList('sources',Object.entries(sourceMap).sort((a,b)=>b[1]-a[1]).slice(0,8));
 let recent=records.slice().sort((a,b)=>new Date(b.created||b.verified_at||0)-new Date(a.created||a.verified_at||0)).slice(0,8),root=$('recent');if(!recent.length){root.textContent='Nessuna attività registrata.'}else{let t=document.createElement('table'),head=document.createElement('tr');['Lead','Categoria','Punteggio','Inserito'].forEach(v=>{let th=document.createElement('th');th.textContent=v;head.append(th)});t.append(head);recent.forEach(x=>{let tr=document.createElement('tr');[x.name||'Senza nome',catLabels[x.category]||'Non classificata',score(x)+'/100',x.created?new Date(x.created).toLocaleDateString('it-IT'):'—'].forEach((v,i)=>{let td=document.createElement('td');td.textContent=v;if(i===2)td.className='right';tr.append(td)});t.append(tr)});root.append(t)}
-</script></body></html>
+</script>
+<script src="/nextway-i18n.js"></script>
+</body></html>

@@ -22,7 +22,7 @@ Questo file converte le fonti ufficiali già censite in record leggibili da un f
 5. Un valore `null` significa che non è stato verificato; non va sostituito con una stima o copiato da un prodotto simile.
 6. Le condizioni di cancellazione e durata minima sono specifiche della singola offerta. Non propagare la regola dei 30 giorni ai prodotti per cui la scheda non la conferma.
 7. L'etichetta “Full Refund Possible” non costituisce una promessa di rimborso: il regolamento applicabile non è ancora acquisito.
-8. Il piano compensi è strutturato in `commercial-base.v1.json` sulla base del master EU 2025 (versione 12/02/2025), la cui applicabilità in Italia fino a novembre 2026 è stata confermata dall'utente. La guida italiana è una sintesi originale, non una traduzione ufficiale integrale. I calcoli restano disabilitati: T-Balance, regole di campagna e casi numerici indipendenti non sono ancora sufficientemente documentati o verificati.
+8. Il piano compensi è strutturato in `commercial-base.v1.json` sulla base del master EU 2025 (12/02/2025) e del PDF italiano localizzato (14/11/2024), la cui corrispondenza è stata confermata dall'utente il 18/11/2026. Le date stampate sono conservate; la diversa data non viene trattata come conflitto. La sequenza Fast Start operativa NEXTWAY confermata dall'utente è registrata separatamente dai bonus di campagna: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno per lato; duplicazione dei due Partner; ulteriori 10 punti cliente (4+6). I calcoli restano disabilitati: T-Balance/OTB, regole di campagna e casi numerici indipendenti non sono ancora sufficientemente documentati o verificati.
 
 ## Stati di validità
 

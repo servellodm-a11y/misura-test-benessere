@@ -700,14 +700,14 @@
         if (!manifestResponse.ok) throw new Error("Manifesto di importazione non disponibile (HTTP " + manifestResponse.status + ").");
         const manifest = await manifestResponse.json();
         if (manifest.schema_version !== 1 || manifest.workspace_key !== "zinzino-italia" ||
-            manifest.language_code !== "it" || !Array.isArray(manifest.documents) ||
-            manifest.documents.length !== 8) {
-          throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 8 documenti italiani.");
+            !["it", "en"].includes(manifest.language_code) || !Array.isArray(manifest.documents) ||
+            manifest.documents.length !== 7) {
+          throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 7 documenti IT/EN.");
         }
         const documents = await Promise.all(manifest.documents.map(async (item) => {
           if (!/^[a-z0-9-]+\.md$/.test(item.file) ||
               !/^[a-z0-9][a-z0-9_-]{1,63}$/.test(item.module_key) ||
-              item.source_type !== "training_material" || item.language_code && item.language_code !== "it" ||
+              item.source_type !== "training_material" || item.language_code && !["it", "en"].includes(item.language_code) ||
               typeof item.title !== "string" || !item.title.trim() ||
               typeof item.source_reference !== "string" || !/^https:\/\//.test(item.source_reference)) {
             throw new Error("Metadati non validi nel manifesto per " + String(item.file || "documento") + ".");
@@ -754,7 +754,7 @@
             module_key: item.module_key,
             title: item.title,
             source_type: item.source_type,
-            language_code: "it",
+            language_code: item.language_code || manifest.language_code,
             source_reference: item.source_reference,
             version_label: item.version_label || null,
             valid_from: item.valid_from || null,
@@ -825,7 +825,7 @@
           p_workspace_id: workspace.id,
           p_query: query,
           p_module_key: $("knowledge-upload").elements.namedItem("module_key").value.trim() || workspace.workspace_key.slice(0, 64),
-          p_language_code: "it",
+          p_language_code: $("knowledge-language").value === "en" ? "en" : "it",
           p_limit: 5
         });
         if (error) throw error;

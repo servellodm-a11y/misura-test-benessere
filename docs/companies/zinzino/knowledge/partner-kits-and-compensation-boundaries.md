@@ -21,10 +21,11 @@ I prezzi rilevati nel catalogo sono solo snapshot e possono cambiare. Prima di u
 Alcuni kit mostrano l'etichetta “Full Refund Possible”. La sola etichetta non descrive requisiti, tempi, condizioni, importi o procedura. Non promettere rimborsi e non costruire una regola di rimborso finché non è disponibile e verificato il regolamento ufficiale della campagna specifica.
 
 ## Piano Compensi
-- La pagina Partner italiana collega il PDF ufficiale CompensationPlan_ITA_it.pdf.
-- Il file ufficiale collegato è stato identificato ma non è stato possibile acquisirlo integralmente in questa sessione per il limite di lettura/download (14.247.800 byte).
-- Fino all'acquisizione e validazione integrale, NEXTWAY deve mantenere disattivati calcoli di commissioni, qualifiche, Pay Points, bonus e proiezioni di reddito.
-- Non sostituire il documento italiano con vecchie versioni di terzi o con piani di altri mercati.
+- La pagina Partner italiana collega il PDF ufficiale `CompensationPlan_ITA_it.pdf` (data stampata 14/11/2024); il master ufficiale EU inglese è datato 12/02/2025.
+- Il titolare della piattaforma ha confermato il 18/11/2026 che il PDF italiano e il master EU 2025 corrispondono e che la verifica era già stata completata e confermata. La versione EU 2025 è dichiarata vigente in Italia a novembre 2026.
+- Il master EU 2025 è il riferimento primario; la guida italiana NEXTWAY è una sintesi originale e non una traduzione integrale.
+- I calcoli automatici di commissioni, qualifiche, Pay Points, bonus e proiezioni di reddito restano disabilitati finché non sono completati tutte le regole e i test indipendenti.
+- Non dedurre bonus di campagna, rimborsi o importi non documentati; non fare promesse di reddito.
 
 ## Fonti
 - Catalogo Partner Italia: https://www.zinzino.com/shop/site/IT/it-IT/products/partner-offers

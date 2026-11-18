@@ -3869,3 +3869,292 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — letture read-only di Supabase live, elenco Edge Functions, migration tracking, conteggi workspace/Knowledge, confronto sorgente live e GitHub main di nextway-workspace-admin e stato PR aperte. Aggiornamento solo documentale; nessuna modifica runtime.
+
+
+## KNOWLEDGE BASE WORKSPACE-SCOPED SEARCH E INTEGRAZIONE AI SETTER — 18-11-2026
+
+### RPC Knowledge Base live
+- La migrazione repository `20261111230000_nextway_workspace_scoped_rls.sql` è stata applicata al progetto Supabase live con nome registro `nextway_workspace_scoped_rls`, versione 20261118074914.
+- La migrazione ha riallineato la RPC di ricerca Knowledge: nuova firma `nextway_search_knowledge(uuid,text,text,text,integer)` con parametro obbligatorio `p_workspace_id`.
+- Verificato: filtro `d.workspace_id = p_workspace_id`; controllo `nextway_has_workspace_access(p_workspace_id)`; solo documenti `approved` e nel periodo di validità; `security invoker`; EXECUTE a authenticated sì, anon no.
+- La vecchia firma senza workspace `nextway_search_knowledge(text,text,text,integer)` è rimasta presente ma non è eseguibile da authenticated. La nuova firma è compatibile con il payload già usato dall'interfaccia Admin Knowledge.
+- La migrazione ha riconfermato gli oggetti RLS workspace-scoped già presenti: audit log, Lead, attività, conversioni e Knowledge. Nessuna riga cliente/documento è stata creata.
+- Migration registry ora contiene 8 record (3 preesistenti + 5 applicazioni registrate il 18-11-2026). La riconciliazione completa dei restanti file migration rimane DA COMPLETARE.
+
+### Analisi AI Setter e Knowledge
+- Il codice `supabase/functions/nextway-ai-setter/index.ts` su main carica già configurazione commerciale, prompt e criteri approvati, ma non richiamava la Knowledge Base.
+- La ricerca Admin UI era già scritta per passare `p_workspace_id`, ma la RPC live aveva ancora la vecchia firma senza workspace e nessun EXECUTE per authenticated. L'applicazione della migrazione workspace-scoped ha riallineato questa dipendenza.
+- Il manifest Zinzino usa moduli distinti per argomento: customer_rewards, customer_catalog, customer_product_education, partner_program, partner_compensation_reference e partner_compensation_rules.
+- Nessun documento Knowledge è attualmente caricato: conteggi live verificati 0 documenti e 0 chunk. Nessun workspace Zinzino è stato creato.
+
+### Implementazione preparata in PR #58
+- PR draft: https://github.com/servellodm-a11y/misura-test-benessere/pull/58
+- Branch `feat/nextway-setter-knowledge-context-20261118`, ultimo head documentale `bcac7469c9011bd0d3f0000bb82161ab53946118`; il codice verificato dalla CI è al commit `8a4edecd90cfcec1d98b137cd75c73085afebd89` (i commit successivi hanno aggiornato solo il MASTER).
+- L'AI Setter cerca estratti con la RPC workspace-scoped solo per il workspace della conversazione, per l'audience esplicita Cliente/Partner e per i moduli configurati nel campo `commercial_data.knowledge_modules`.
+- Configurazione Zinzino:
+  - Cliente: customer_rewards, customer_catalog, customer_product_education.
+  - Partner: partner_program, partner_compensation_reference, partner_compensation_rules.
+- La ricerca è limitata a 3 moduli, 2 chunk per modulo, massimo 6 estratti e 1.000 caratteri per estratto. Solo lingua italiana finché il supporto full-text multilingue non sarà completato.
+- I retry con output già salvato non ripetono la ricerca Knowledge. I contenuti sono sanitizzati e trattati come dati di riferimento, non come istruzioni.
+- Nuovo test statico `scripts/test-nextway-setter-knowledge-context.mjs` e step dedicato nella CI.
+- GitHub Actions run 1075, commit `8a4edecd90cfcec1d98b137cd75c73085afebd89`, conclusione SUCCESS: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44262344773.
+- Il primo run 1074 era fallito soltanto per maiuscole/minuscole nell'asserzione del testo del prompt; corretta l'asserzione e il run 1075 è passato.
+- Nessun deploy di `nextway-ai-setter`; PR #58 resta draft/non integrata. Nessuna chiamata OpenAI eseguita e nessun token/credito consumato. L'uso futuro del Setter continuerà a richiedere i token OpenAI già previsti dalla generazione; questa implementazione non è attiva in produzione.
+
+### Advisor performance — 18-11-2026
+- Rilevati 26 foreign key senza indice di copertura, 25 avvisi auth/RLS initplan, 14 gruppi di policy permissive multiple e 34 indici non utilizzati.
+- Sono rilievi di ottimizzazione da valutare in modo mirato; non sono state applicate modifiche automatiche a indici o policy.
+- Gli indici non utilizzati non vanno rimossi in questa fase: il database non ha ancora traffico reale sufficiente per una valutazione attendibile.
+
+### Stato aggiornato
+- COMPLETATO E VERIFICATO: RPC Knowledge Base workspace-scoped live, con permessi e filtri verificati.
+- ESEGUITO MA NON VERIFICATO IN PRODUZIONE: codice AI Setter → Knowledge Base preparato su PR #58; CI statica e type-check Deno superati.
+- DA COMPLETARE: review e integrazione PR #58; non effettuare merge finché non è escluso un deploy frontend di produzione non desiderato.
+- DA COMPLETARE: deploy controllato di `nextway-ai-setter` solo quando è autorizzato l'utilizzo dei token OpenAI necessari alle generazioni e dopo l'integrazione del codice.
+- DA COMPLETARE: importare e approvare i documenti Knowledge solo dopo creazione esplicitamente autorizzata del workspace Zinzino.
+- DA COMPLETARE: collegare le Edge Functions `nextway-knowledge-ingest` e `nextway-knowledge-upload` al runtime; attualmente non risultano distribuite.
+- DA COMPLETARE: multilinguismo full-text IT/EN e test integrati.
+
+### Registro cronologico MASTER
+- 18-11-2026 — applicata migrazione workspace-scoped RLS/Knowledge e verificata la nuova RPC. Preparata integrazione AI Setter→Knowledge su PR #58; CI run 1075 SUCCESS. Nessuna chiamata OpenAI, nessun deploy Setter, nessun documento/workspace creato.
+
+
+## DISTRIBUZIONE EDGE FUNCTIONS KNOWLEDGE — 18-11-2026
+
+- Distribuita `nextway-knowledge-ingest` v1, stato ACTIVE, `verify_jwt=true`, hash `d54320a75c2d07389fdad6aee2021541987a6f780ecc5f2517700938e96089e9`.
+- Distribuita `nextway-knowledge-upload` v1, stato ACTIVE, `verify_jwt=true`, hash `621c744b557346751d6bae7550f707f838af1214db31a48a863501c2d9561628`.
+- Le due funzioni usano il JWT dell'utente e verificano il ruolo `platform_admin`; upload richiama ingest con lo stesso token. Non sono stati modificati o letti secrets.
+- Verificato tramite elenco live che entrambe le funzioni risultano ACTIVE v1 con JWT obbligatorio.
+- Nessun upload o ingest runtime eseguito; non esiste ancora un workspace Zinzino né documenti Knowledge nel database.
+- Nessun token OpenAI è stato consumato. L'ingestione documenti non richiede chiamate al provider AI.
+- `nextway-ai-setter` resta live v3 e non è stato distribuito con il codice della PR #58, perché la generazione AI successiva utilizza token OpenAI. Il collegamento Knowledge è quindi preparato nel branch, non ancora attivo nel runtime.
+
+### Registro cronologico MASTER
+- 18-11-2026 — distribuite e verificate le Edge Functions `nextway-knowledge-ingest` e `nextway-knowledge-upload` v1 con JWT obbligatorio. Nessun documento caricato e nessun workspace creato.
+
+
+## SUPPORTO MULTILINGUE IT/EN — KNOWLEDGE BASE E AI SETTER — 18-11-2026
+
+### Database e ricerca full-text
+- Preflight live: 0 documenti e 0 chunk; nessun contenuto esistente da migrare o ricostruire.
+- Applicata migrazione `20261118080714_nextway_knowledge_bilingual_search.sql`, registrata live come versione `20261118080714`, nome `nextway_knowledge_bilingual_search`.
+- La tabella documenti ammette ora `language_code` it/en.
+- Aggiunta colonna generata `search_vector_en` e indice GIN dedicato; il vettore italiano esistente resta invariato.
+- RPC `nextway_search_knowledge(uuid,text,text,text,integer)` seleziona vettore e configurazione linguistica italiana/inglese in base al documento e alla query.
+- Confermati live: filtro workspace, membership, stato approved, validità, lingua identica documento/query; SECURITY INVOKER; EXECUTE authenticated sì, anon no.
+- Smoke test SQL: full-text italiano e inglese entrambi restituiscono match corretti.
+
+### Ingestione e caricamento
+- `nextway-knowledge-ingest` aggiornata a v2 ACTIVE, `verify_jwt=true`, hash `424f69a56a1d34cc83dcb9db8bd38e65e61d40466b74f1f63a76803828206539`.
+- `nextway-knowledge-upload` aggiornata a v2 ACTIVE, `verify_jwt=true`, hash `1d46a0366b24a5d0c071f6b074b2c25458e10c403dd1c32179caa5587a5ea7be`.
+- Entrambe accettano soltanto `it` o `en`; autorizzazione platform_admin e approvazione pending obbligatoria restano invariate.
+- Admin UI nel branch: selezione lingua upload e lingua di ricerca; import manifest accetta manifest/documenti IT/EN. Il pacchetto Zinzino attuale resta italiano e non è stato importato.
+
+### AI Setter
+- Selettore lingua bozza IT/EN nell'interfaccia Setter; la lingua entra nel payload e nell'idempotency scope, così un tentativo inglese non riusa un output italiano.
+- La Edge Function verifica la lingua richiesta contro `supported_languages` della base commerciale o della configurazione workspace. Se non abilitata, rifiuta la richiesta.
+- Zinzino `commercial-base.v1.json` dichiara `supported_languages: ["it","en"]`.
+- Il recupero Knowledge usa la lingua della bozza e restituisce solo documenti della stessa lingua; non traduce né mescola automaticamente fonti italiane e inglesi.
+- Prompt Setter richiede l'output nella lingua esplicitamente selezionata.
+- `nextway-ai-setter` live resta v3; nessun deploy e nessuna chiamata OpenAI eseguita.
+
+### CI e limiti
+- Nuovo test statico esteso per vettori, RPC, ingest/upload, selezione lingua e allowlist workspace/brand.
+- GitHub Actions run 1094 SUCCESS sul commit codice `f76432ffa4357592d810a7809d644c329e84db69`: test statici Knowledge Base IT/EN e type-check di tutte le Edge Functions completati dopo l'allineamento del nome file migrazione al registro live. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44264559129.
+- Nessun token/credito AI consumato. Nessun documento, workspace, utente o conversione creati.
+- Il frontend non è stato pubblicato su Netlify; le modifiche UI sono nel branch della PR #58.
+- Questa tranche abilita la lingua dei documenti, della ricerca e delle bozze AI. La traduzione completa di tutte le schermate e dei messaggi amministrativi NEXTWAY resta DA COMPLETARE.
+
+### Stato
+- COMPLETATO E VERIFICATO: schema e ricerca full-text IT/EN live; Edge Functions Knowledge v2 live; smoke test SQL IT/EN.
+- ESEGUITO MA NON VERIFICATO IN PRODUZIONE: codice Setter IT/EN, configurazione Zinzino e UI admin/Setter nel branch PR #58; CI statica/type-check in attesa del run 1091.
+- DA COMPLETARE: localizzazione completa dell'interfaccia NEXTWAY; eventuale materiale documentale inglese verificato e approvato; deploy AI Setter soltanto quando autorizzato l'utilizzo dei token OpenAI.
+- Nessun documento inglese è ancora caricato o approvato; non dichiarare il percorso EN operativo end-to-end finché non esiste una fonte inglese approvata.
+
+### Registro cronologico MASTER
+- 18-11-2026 — applicato supporto full-text IT/EN; distribuite Edge Functions Knowledge v2. Preparato selettore lingua AI Setter e allowlist Zinzino sul branch PR #58. Nessuna chiamata AI o deploy Setter.
+
+
+## LOCALIZZAZIONE INTERFACCIA NEXTWAY IT/EN — 18-11-2026
+
+### Implementazione
+- Creato `nextway-i18n.js`, runtime unico di localizzazione senza dipendenze esterne, richieste di rete o chiamate AI.
+- Italiano resta lingua predefinita; selettore EN/IT persistente nel browser tramite `localStorage`.
+- Aggiornamento dinamico di `document.documentElement.lang` e del titolo pagina.
+- Traduzione di testi, opzioni, placeholder e attributi accessibili; MutationObserver copre contenuti inseriti dinamicamente da UI e moduli.
+- Le stringhe dinamiche sono tradotte solo quando corrispondono a voci note; i dati personali, i contenuti inseriti dall'utente, URL, JSON e testo dei documenti non vengono tradotti o alterati.
+- Pagine collegate al runtime: `nextway-ai.html`, `nextway-admin.html`, `nextway-dashboard.html`, `nextway-analisi.html`, `nextway-ricerca.html`, `nextway-motore-ricerca.html`, `nextway-reset-password.html`.
+- Le traduzioni includono navigazione, moduli CRM, filtri, dashboard, ricerca prospect, amministrazione workspace, Knowledge Base, AI Setter, messaggi di stato più comuni e recupero password.
+- Nessuna modifica al sito pubblico `index.html`: questa tranche riguarda l'applicazione NEXTWAY operativa.
+
+### Verifiche
+- Aggiunto `scripts/test-nextway-localization.mjs`: verifica runtime, persistenza lingua, aggiornamento DOM, attributi form, pagine collegate e assenza di chiamate di rete/AI nel runtime.
+- Workflow GitHub Actions run 1111: SUCCESS; step `Validate NEXTWAY Italian and English localization`: SUCCESS.
+- Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44265726091
+- Nessuna chiamata OpenAI, nessun token/credito AI consumato.
+- Nessun deploy Netlify; la UI resta sul branch PR #58.
+
+### Limiti e prossimi completamenti
+- La lingua inglese copre i testi statici e numerosi messaggi dinamici noti. Le stringhe dinamiche composte con dati runtime, nuovi messaggi futuri o contenuti non presenti nel dizionario possono restare in italiano: estendere il dizionario quando si aggiungono funzionalità.
+- I contenuti commerciali, i documenti Knowledge e i dati inseriti dall'utente non vengono tradotti automaticamente: devono essere forniti nella lingua corretta e sottoposti ad approvazione.
+- Il selettore lingua è locale al browser e non modifica la lingua del workspace né i dati nel database.
+- Resta da eseguire un controllo visivo manuale delle pagine in EN e la verifica end-to-end dopo il rilascio frontend.
+- Non dichiarare completata la localizzazione di tutto il prodotto NEXTWAY finché non sono coperte anche tutte le stringhe dinamiche e i futuri moduli.
+
+### Stato
+- COMPLETATO E VERIFICATO: runtime IT/EN, collegamento alle 7 pagine operative, test CI statici.
+- ESEGUITO MA NON VERIFICATO VISIVAMENTE: resa completa in browser desktop/mobile e tutti i messaggi dinamici runtime.
+- DA COMPLETARE: controllo visivo e copertura progressiva delle stringhe dinamiche mancanti; localizzazione del sito pubblico solo se richiesta.
+
+### Registro cronologico MASTER
+- 18-11-2026 — aggiunto runtime centralizzato di localizzazione IT/EN e test CI; nessun deploy frontend e nessun consumo di token AI.
+
+
+### Estensione localizzazione dinamica — 18-11-2026
+- Esteso il dizionario alle stringhe operative di autenticazione, connessione centrale, coda conversioni, audit, sincronizzazione cloud, amministrazione workspace, approvazione documenti e messaggi AI Setter.
+- I dialoghi nativi `alert`, `confirm` e `prompt` usano la lingua selezionata, traducendo messaggi e valori iniziali noti.
+- La traduzione dei messaggi composti riconosce prefissi dinamici comuni senza tradurre i dati personali inseriti o i valori dei Lead.
+- Test aggiornato per verificare la localizzazione dei dialoghi nativi.
+- GitHub Actions run 1115 SUCCESS, incluso il test `Validate NEXTWAY Italian and English localization`: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44266081394
+- La copertura non è ancora totale per ogni messaggio dinamico o testo generato da nuovi moduli: le voci non presenti nel dizionario restano nella lingua originale. Non tradurre automaticamente contenuti utente, documenti, JSON o dati commerciali.
+- Stato: COMPLETATO E VERIFICATO per il runtime e il contratto statico; ESEGUITO MA NON VERIFICATO VISIVAMENTE per la resa effettiva su browser desktop/mobile.
+
+
+### Copertura dinamica e test eseguibili IT/EN — 18-11-2026
+- Esteso il dizionario alle conferme composte con valori runtime: attivazione/archiviazione workspace, approvazione documenti, importazione Knowledge, configurazione commerciale e coda conversioni.
+- Tradotti i messaggi residui di AI Setter, sincronizzazione e controllo duplicati nella memoria condivisa.
+- La traduzione dei frammenti riconosce le frasi statiche note all'interno di conferme composte, mantenendo invariati i nomi e gli altri valori dinamici.
+- Aggiunto test automatico che confronta le stringhe passate a `say/status/alert/confirm/prompt` in `nextway-cloud.js`, `nextway-admin.js` e `nextway-setter.js` con il dizionario e i prefissi tradotti.
+- Aggiunto controllo di copertura per i testi statici visibili, placeholder e attributi accessibili delle sette pagine operative.
+- Aggiunto test eseguibile Node/V8 del runtime con DOM simulato: cambio lingua IT/EN, traduzione e ritorno IT, conferme dinamiche con dati variabili.
+- GitHub Actions run 1125 SUCCESS: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44267851327
+- Stato: COMPLETATO E VERIFICATO per copertura statica, messaggi dinamici noti e comportamento del runtime in ambiente simulato.
+- ESEGUITO MA NON VERIFICATO VISIVAMENTE: resa grafica su browser desktop/mobile e interazioni reali con Supabase. Non è disponibile un ambiente browser live autorizzato per la verifica in questa fase.
+- Nessun deploy Netlify, nessuna chiamata OpenAI, nessun token/credito consumato.
+
+
+## DOCUMENTAZIONE ENGLISH E GATE DI RILASCIO — 18 NOVEMBRE 2026
+
+### Documentazione Zinzino in inglese
+- Aggiunto `docs/companies/zinzino/knowledge/en/premier-kits-overview.en.draft.md`: sintesi inglese del catalogo ufficiale Italy (EN), senza prezzi o condizioni permanenti; richiede revisione umana prima dell'ingestione.
+- Aggiunto `docs/companies/zinzino/knowledge/en/customer-rewards-program.en.review-required.md`: fonte inglese ufficiale individuata, ma PDF collegato alla pagina UK e datato 1 dicembre 2024; applicabilità ai clienti italiani non verificata. Stato `blocked_market_validation`; ingestione vietata.
+- L'utente ha confermato che il PDF italiano `Piano-Comp..pdf` (35 pagine, footer 14/11/2024) è il riferimento europeo del piano compensi 2025 da utilizzare, pur con quella data stampata. È stata individuata la fonte ufficiale Zinzino del master inglese EU datato 12-02-2025: `https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf`.
+- Aggiunto `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.en.source.md`: scheda della fonte master inglese e criteri di approvazione. Non è una traduzione inventata: il documento inglese ufficiale viene usato come riferimento primario; il PDF italiano resta il riferimento confermato dall'utente.
+- Le due date stampate (14/11/2024 italiano e 12-02-2025 master inglese) restano registrate. La necessità di ripetere un confronto pagina per pagina è SUPERATA dalla successiva conferma dell'utente del 18/11/2026 che l'equivalenza era già stata verificata e confermata nella sessione precedente. Non riaprire il confronto; lo stato di validità a novembre 2026 resta correttamente qualificato come conferma dell'utente, non verifica indipendente Zinzino.
+- Nessun caricamento o approvazione su Supabase è stato eseguito.
+- Nessun documento inglese è stato caricato o approvato nella Knowledge Base Supabase.
+
+### Verifica visiva e test end-to-end
+- Aggiunto `docs/NEXTWAY-RELEASE-VERIFICATION-CHECKLIST.md` con viewport desktop/mobile, pagine da ispezionare, criteri di accettazione, test sintetici Knowledge Base e restrizioni AI.
+- La checklist è preparatoria: nessuna verifica visiva reale eseguita e nessun test end-to-end post-rilascio eseguito.
+- I test AI-free dovranno usare un workspace dedicato e dati sintetici; le chiamate a OpenAI restano escluse senza autorizzazione esplicita.
+- Nessun deploy Netlify, nessun merge, nessuna attivazione workspace, nessun consumo di token/crediti.
+
+### Stato
+- Documenti inglesi: **DRAFT / REVIEW REQUIRED**; Customer Rewards **BLOCKED** per verifica mercato e validità legale.
+- Checklist visual/E2E: **PREPARATA, NON ESEGUITA**.
+- PR #58: da mantenere aperta e in bozza.
+
+
+## PIANO COMPENSI ZINZINO EU 2025 — ALLINEAMENTO CONFERMATO (18 NOVEMBRE 2026)
+
+### Riferimenti documentali
+- PDF italiano caricato dall'utente: Piano-Comp..pdf, 35 pagine, data stampata 14/11/2024.
+- Master ufficiale europeo inglese ospitato da Zinzino: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf, data stampata 12-02-2025.
+- L'utente ha confermato che il piano europeo inglese e quello italiano corrispondono e che la verifica di equivalenza era già stata completata e confermata nella sessione precedente.
+- L'utente ha inoltre confermato che la versione europea 2025 resta in vigore a novembre 2026 senza modifiche.
+
+### Decisione correttiva
+- La precedente annotazione del 18-11-2026 che segnalava conflitti materiali in Potential Earnings, CAB Accelerator e massimali multi-Income Center viene **SUPERATA**: derivava da una lettura non correttamente riallineata delle tabelle e non deve essere utilizzata come blocco operativo.
+- Non richiedere una nuova conferma a Zinzino e non ripetere da zero il confronto già svolto e confermato.
+- Per NEXTWAY, trattare il Piano Compensi EU 2025 italiano/inglese come documentazione corrispondente e ufficiale secondo la conferma dell'utente.
+- Conservare i PDF originali e le rispettive date stampate: la differenza tra le date non costituisce, da sola, prova di divergenza delle regole.
+- Non alterare, ricostruire o trasporre valori delle tabelle. Per le risposte commerciali usare le regole ufficiali del piano e mantenere sempre il disclaimer sui redditi: esempi e massimali non sono guadagni tipici, attesi o garantiti.
+
+### Preparazione import Knowledge Zinzino — allineamento contratto (18 novembre 2026)
+- Manifest italiano verificato: 7 file Markdown effettivamente presenti, tutti con `source_type=training_material`, lingua italiana e stato di approvazione `pending`.
+- Report di confronto IT/EN mantenuto come documentazione interna e rimosso dal manifest destinato ai contenuti Partner.
+- Corretto il controllo di quantità in `nextway-admin.js` da 8 a 7 documenti.
+- Corretto `scripts/test-nextway-zinzino-knowledge-import.mjs` affinché controlli 7 documenti e lo stesso limite dell'interfaccia Admin.
+- Riallineata la scheda Kit Partner: non riporta più come non acquisito il PDF italiano; rimangono correttamente disabilitati i calcoli automatici.
+- Readback GitHub conferma corrispondenza tra manifest, numero atteso dall'Admin e numero atteso dal test; tutti i sette percorsi elencati sono stati recuperati dal branch.
+- **ESEGUITO MA NON VERIFICATO localmente:** non è stato possibile eseguire Node.js sui file remoti tramite GitHub connector. Per l'ultimo HEAD non risultano ancora workflow run né status checks esposti da GitHub.
+- Nessuna ingestione Supabase: il workspace `zinzino-italia` non è stato creato/attivato. Il manifest resta `pending`.
+- Nessuna chiamata AI, token, credito, merge o deploy Netlify.
+
+### Allineamento configurazione commerciale — 18 novembre 2026
+- Aggiornato `docs/companies/zinzino/commercial-base.v1.json` sul branch: la fonte italiana è ora registrata come riferimento localizzato EU corrispondente al master 2025, sulla base della verifica già completata e confermata dal titolare della piattaforma.
+- Aggiornato il registro del master inglese EU 12/02/2025 con lo stato di equivalenza confermata; le date stampate 14/11/2024 e 12/02/2025 restano conservate.
+- Inserita una scheda strutturata del riferimento italiano e riallineata la conferma di validità a novembre 2026.
+- La sequenza Fast Start NEXTWAY resta quella confermata: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno per lato; duplicazione dei due Partner; ulteriori 10 punti cliente (4+6). Nessun importo promozionale è stato dedotto.
+- Restano disabilitati i calcoli automatici (`calculations_enabled=false`): copertura delle regole e casi di test indipendenti non sono ancora completi.
+- Il documento Customer Rewards collegato al mercato UK resta bloccato per validazione Italia; la sintesi Premier Kits EN resta draft con approvazione umana richiesta.
+- Nessuna ingestione Supabase, nessuna creazione workspace, nessun deploy Netlify, nessuna chiamata OpenAI o consumo di token/crediti.
+
+### Stato
+- **COMPLETATO E VERIFICATO (conferma dell'utente):** corrispondenza del Piano Compensi EU 2025 italiano/inglese e validità dichiarata a novembre 2026.
+- **COMPLETATO SUL BRANCH:** metadati del piano e sequenza Fast Start riallineati in `commercial-base.v1.json`.
+- **DA COMPLETARE:** preparare/validare il manifest Knowledge e completare l'allineamento degli altri materiali commerciali prima dell'eventuale ingestione amministrativa autorizzata.
+- **NON ESEGUITO:** ingestione Supabase e approvazione documenti; nessun workspace Zinzino creato.
+- Nessun token AI, deploy Netlify o merge eseguito.
+
+
+## 18 novembre 2026 — ultima correzione test import Zinzino
+- Corretto il messaggio finale di `scripts/test-nextway-zinzino-knowledge-import.mjs`: il manifest contiene 7 documenti, non 8.
+- Aggiunto controllo statico che impedisce duplicati nei nomi file del manifest.
+- Il test continua a controllare metadati, file presenti/non vuoti, limiti dimensione, JWT, approvazione pending e assenza di privilegi service_role nell'azione Admin.
+- Modifica registrata sul branch `feat/nextway-setter-knowledge-context-20261118`; esecuzione locale Node.js non disponibile in questa sessione, quindi non dichiarare il test eseguito.
+- Nessuna ingestione, workspace, merge, deploy o chiamata AI effettuati.
+
+
+## PREPARAZIONE AMMINISTRATIVA IMPORT KNOWLEDGE ZINZINO — 18 NOVEMBRE 2026
+
+- Creato `docs/companies/zinzino/knowledge/ADMIN-IMPORT-HANDOFF.md`: procedura amministrativa controllata, prerequisiti, lotto esatto di 7 documenti, criteri di arresto, gestione retry e controlli successivi.
+- Il passaggio chiarisce che importazione e approvazione sono operazioni distinte: tutti i documenti devono rimanere `pending` fino a un'approvazione amministrativa esplicita.
+- Esclusi dal lotto i documenti inglesi draft/review-required e il materiale Customer Rewards UK non validato per l'Italia.
+- Verifica GitHub Actions sul commit precedente al documento di handoff: run 1151, job `validate`, SUCCESS. Lo step dedicato `Validate Zinzino Knowledge bulk import contract` è SUCCESS; anche gli step di sicurezza Knowledge ingest/upload e type-check delle Edge Functions sono SUCCESS.
+- Questo esito risolve il precedente controllo di esecuzione: il test è stato effettivamente eseguito in CI su GitHub Actions, non soltanto letto o verificato staticamente tramite API.
+- Il commit corrente della PR #58 al momento del controllo era `c1fabb045e24219b0a579d69007e04567f16c9ad`; il run 1151 è associato esattamente a tale SHA.
+- **Stato importazione:** PREPARAZIONE AMMINISTRATIVA COMPLETATA; IMPORTAZIONE NON ESEGUITA. Workspace `zinzino-italia` non creato/attivato; nessun documento/chunk caricato; nessuna approvazione.
+- Nessun merge, deploy Netlify, chiamata OpenAI o consumo di token/crediti.
+
+
+### Rettifica stato esecuzione test — 18 novembre 2026
+La nota precedente che indicava il test come non eseguito localmente descriveva correttamente l'assenza di un'esecuzione sul Mac, ma non teneva conto della successiva esecuzione automatica CI. Il test `Validate Zinzino Knowledge bulk import contract` è stato eseguito con esito SUCCESS nella GitHub Actions run 1151 sul commit `c1fabb045e24219b0a579d69007e04567f16c9ad`. Pertanto: **test automatizzato CI COMPLETATO E VERIFICATO**; test locale sul Mac non eseguito e non necessario per attestare l'esito CI.
+
+
+## 18 novembre 2026 — Correzione bootstrap Owner workspace
+
+- Diagnosi confermata su Supabase: la Edge Function `nextway-workspace-admin` rifiutava ogni membership `active` su workspace `draft`; l'errore osservato dall'utente era generato dal backend.
+- Workspace Zinzino Italia: `zinzino-italia`, ID `b4b79015-ea09-46f5-9d37-501bd3895cad`, resta `draft`; nessuna membership presente al momento della diagnosi.
+- Indici DB verificati: vincolo univoco `(workspace_id,user_id)` e indice parziale `nextway_workspace_one_owner_uidx`, che impedisce più Owner invited/active per workspace.
+- Patch sul branch `feat/nextway-setter-knowledge-context-20261118`:
+  - bootstrap ammesso solo per il proprio profilo dell'amministratore autenticato;
+  - ruolo obbligatorio `workspace_owner`;
+  - workspace deve essere `draft`;
+  - deve esistere una membership precedente in stato `invited`;
+  - email dell'utente deve essere confermata;
+  - tutti gli altri casi di membership active continuano a richiedere workspace active;
+  - attivazione workspace rifiutata se non esiste un Owner con membership `active`.
+- Test statico aggiunto: `scripts/test-nextway-workspace-admin-bootstrap.mjs`; registrato nel workflow `.github/workflows/nextway-static-validation.yml`.
+- Commit patch: `6d7084a1397248d37e9f2cbfb99899df3a8381ad`.
+- Commit test: `c61473bfa231b704234e254ab094df4ba8ac7b94`.
+- Commit workflow: `e12866ab465f586258395b4a182b51e86ce99ece`.
+- Verifica contenuti GitHub post-commit: guardie bootstrap, invito preliminare, Owner attivo richiesto per attivazione workspace e registrazione test nel workflow presenti.
+- CI: nessun workflow run/status associato al commit `e12866ab465f586258395b4a182b51e86ce99ece` al momento dell'ultima interrogazione; test automatico quindi **non ancora verificato**.
+- Non eseguiti deploy Edge Function, migrazioni DB, merge PR, deploy Netlify, attivazione workspace o chiamate AI. PR #58 resta aperta e draft.
+- Sequenza operativa dopo la verifica CI e il successivo rilascio autorizzato: creare membership Owner in stato `invited`; attivare la stessa membership come Owner (solo per l'amministratore autenticato); quindi attivare il workspace.
+
+
+### Aggiornamento completamento bootstrap Owner — 18 novembre 2026, ore 10:50
+
+- Corretto il test di regressione preesistente `scripts/test-nextway-prospect-central-memory-integration.mjs`, che richiedeva la vecchia condizione di blocco assoluto e non contemplava l'eccezione bootstrap strettamente limitata all'Owner iniziale.
+- Corretto anche il dizionario IT/EN: `Importa pacchetto Zinzino (7 documenti)` → `Import Zinzino package (7 documents)`.
+- GitHub Actions run **44289097565**: `SUCCESS` sul commit `d6bc116e9bb957f14d5567dcd7a74f5c94369940`. Tutti i 70 step completati, inclusi test Owner bootstrap, localizzazione IT/EN, regressione workspace e type-check Deno della Edge Function `nextway-workspace-admin`.
+- Edge Function `nextway-workspace-admin` distribuita su Supabase progetto `obqwbtlltxjfeirstsya`: versione **5**, stato `ACTIVE`, `verify_jwt=true`, SHA-256 `8c8fa3b50985192ef738897389517951a18673fa73ade81fa89c139126283359`.
+- Verifica post-deploy del sorgente live: presenti la guardia bootstrap Owner e il controllo che impedisce l'attivazione del workspace senza Owner active.
+- Verifica DB successiva al deploy: workspace `zinzino-italia` ancora `draft`; membership totali 0; Owner attivi 0. Nessuna modifica ai dati di produzione.
+- La PR #58 resta aperta, draft e non merged. Head corrente al momento dell'aggiornamento: `d28c7deb41d4ff9de97130ae76836b61a6b7583f`. Il codice della Edge Function e i test inclusi nella run SUCCESS sono invariati rispetto al commit validato; i commit successivi riguardano il solo workflow e documentazione/controlli.
+- Non eseguiti merge, deploy Netlify, migrazioni SQL, chiamate AI o test su utenti reali.
+- **Azione manuale ancora necessaria nella UI autenticata**: creare la membership Owner in stato `invited` per il proprio profilo; quindi modificarla in `active` (ora consentito dal bootstrap autenticato); infine attivare il workspace. L'invito è un record interno e non invia email.
+- Non tentare di attivare il workspace prima che la membership Owner sia active.

@@ -37,7 +37,7 @@ Questa cartella è il punto di raccolta della documentazione ufficiale da cui ri
 | Catalogo prodotti | Cataloghi Partner Kit, Premier Kit e Shop Italia censiti nel registro fonti | Indici strutturati; schede individuali e checkout da aggiornare prima di ogni proposta |
 | Schede prodotto | Schede Premier Kit e prodotti già censite; schede tecniche complete da acquisire | Parziale; non inventare ingredienti, dosi o claim mancanti |
 | Test e strumenti | Pagina prodotto italiana, Product Sheet italiano (06/10/2026) e guida rapida ufficiale BalanceTest | Scheda e istruzioni di base acquisite; completare revisione regolatoria e manuali/FAQ tecniche |
-| Piano compensi | Master EU 2025, versione 12/02/2025, strutturato in 20 regole; applicabilità Italia confermata dall'utente il 17/11/2026 | Strutturato; calcoli disabilitati e regole residue aperte |
+| Piano compensi | Master EU 2025 (12/02/2025) + PDF italiano localizzato (14/11/2024); corrispondenza IT/EN confermata dall'utente il 18/11/2026; validità Italia confermata dall'utente a novembre 2026 | Riferimenti allineati e 20 regole strutturate; calcoli disabilitati e regole residue aperte |
 | Regole commerciali | Condizioni catalogo, Customer Rewards e riferimenti policy censiti | Parziale; acquisire regolamenti completi e aggiornati |
 | Formazione | Pagine pubbliche di onboarding e Fast Start | Parziale; completare materiali ufficiali italiani |
 | Claim consentiti | Fonti pubbliche e regole di conformità registrate | Da completare con dossier claim approvati per Italia/UE |
