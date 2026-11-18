@@ -33,6 +33,21 @@ assert.match(edge, /onConflict: "workspace_id,user_id"/);
 assert.match(edge, /select\("id,membership_status,activated_at,invited_by"\)/);
 assert.match(edge, /invited_by: existing\?\.invited_by \?\? authData\.user\.id/);
 assert.match(edge, /membership_status === "active"/);
+
+// Membership activation must follow a real invitation and confirmed email.
+assert.match(edge, /body\.membership_status === "active" && !authUser\.user\.email_confirmed_at/);
+assert.match(edge, /membership_status === "invited"/);
+assert.match(edge, /Per attivare l'accesso deve esistere una membership invited/);
+
+// Conversion-created partners must be bound to the activated conversion,
+// the same Auth user, and the same workspace before membership activation.
+assert.match(edge, /nextway_conversion_request_id/);
+assert.match(edge, /conversionRequest\.status !== "activated"/);
+assert.match(edge, /conversionRequest\.activation_user_id !== body\.user_id/);
+assert.match(edge, /conversionRequest\.workspace_id !== body\.workspace_id/);
+
+// Re-activating an existing membership must preserve its original inviter.
+assert.match(edge, /invited_by: existing\?\.invited_by \?\? authData\.user\.id/);
 assert.match(edge, /workspace\.status !== "active"/);
 assert.match(edge, /workspace_owner[\s\S]*?workspace_admin[\s\S]*?workspace_manager[\s\S]*?workspace_member[\s\S]*?workspace_viewer/);
 assert.match(edge, /invited[\s\S]*?active[\s\S]*?suspended/);
