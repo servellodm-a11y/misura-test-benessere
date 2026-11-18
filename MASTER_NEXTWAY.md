@@ -4031,3 +4031,23 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Stato: COMPLETATO E VERIFICATO per copertura statica, messaggi dinamici noti e comportamento del runtime in ambiente simulato.
 - ESEGUITO MA NON VERIFICATO VISIVAMENTE: resa grafica su browser desktop/mobile e interazioni reali con Supabase. Non è disponibile un ambiente browser live autorizzato per la verifica in questa fase.
 - Nessun deploy Netlify, nessuna chiamata OpenAI, nessun token/credito consumato.
+
+
+## DOCUMENTAZIONE ENGLISH E GATE DI RILASCIO — 18 NOVEMBRE 2026
+
+### Documentazione Zinzino in inglese
+- Aggiunto `docs/companies/zinzino/knowledge/en/premier-kits-overview.en.draft.md`: sintesi inglese del catalogo ufficiale Italy (EN), senza prezzi o condizioni permanenti; richiede revisione umana prima dell'ingestione.
+- Aggiunto `docs/companies/zinzino/knowledge/en/customer-rewards-program.en.review-required.md`: fonte inglese ufficiale individuata, ma PDF collegato alla pagina UK e datato 1 dicembre 2024; applicabilità ai clienti italiani non verificata. Stato `blocked_market_validation`; ingestione vietata.
+- Recuperato dalla Libreria il PDF italiano `Piano-Comp..pdf` (caricato il 17-11-2026). Il documento riporta internamente la data 14-11-2024 e 35 pagine PDF. La data non coincide con il riferimento alla versione europea 2025 precedentemente indicato; traduzione sospesa in attesa di chiarimento. Non modificare né aggiornare i contenuti del piano sulla base di supposizioni.
+- Nessun documento inglese è stato caricato o approvato nella Knowledge Base Supabase.
+
+### Verifica visiva e test end-to-end
+- Aggiunto `docs/NEXTWAY-RELEASE-VERIFICATION-CHECKLIST.md` con viewport desktop/mobile, pagine da ispezionare, criteri di accettazione, test sintetici Knowledge Base e restrizioni AI.
+- La checklist è preparatoria: nessuna verifica visiva reale eseguita e nessun test end-to-end post-rilascio eseguito.
+- I test AI-free dovranno usare un workspace dedicato e dati sintetici; le chiamate a OpenAI restano escluse senza autorizzazione esplicita.
+- Nessun deploy Netlify, nessun merge, nessuna attivazione workspace, nessun consumo di token/crediti.
+
+### Stato
+- Documenti inglesi: **DRAFT / REVIEW REQUIRED**; Customer Rewards **BLOCKED** per verifica mercato e validità legale.
+- Checklist visual/E2E: **PREPARATA, NON ESEGUITA**.
+- PR #58: da mantenere aperta e in bozza.
