@@ -432,7 +432,92 @@
     "NEXTWAY AI | Analisi Lead": "NEXTWAY AI | Lead analysis",
     "NEXTWAY AI · Ricerca assistita": "NEXTWAY AI · Assisted search",
     "NEXTWAY AI · Motore di ricerca": "NEXTWAY AI · Search engine",
-    "NEXTWAY · Reimposta password": "NEXTWAY · Reset password"
+    "NEXTWAY · Reimposta password": "NEXTWAY · Reset password",
+    "Seleziona workspace": "Select workspace",
+    "Nessun workspace presente. Crea il primo workspace in bozza.": "No workspaces found. Create the first workspace draft.",
+    "Seleziona": "Select",
+    "Attiva workspace": "Activate workspace",
+    "Attivazione non completata:": "Activation failed:",
+    "Archivia": "Archive",
+    "Workspace archiviato.": "Workspace archived.",
+    "Archiviazione non completata:": "Archiving failed:",
+    "Sospendi membership": "Suspend membership",
+    "Membership sospesa.": "Membership suspended.",
+    "Sospensione non completata:": "Suspension failed:",
+    "Seleziona un workspace.": "Select a workspace.",
+    "Nessuna membership registrata.": "No memberships registered.",
+    "Ruolo:": "Role:",
+    "Stato:": "Status:",
+    "User ID:": "User ID:",
+    "Nessun documento caricato.": "No documents uploaded.",
+    "Modulo:": "Module:",
+    "Tipo:": "Type:",
+    "Versione:": "Version:",
+    "Documento ID:": "Document ID:",
+    "Motivo rifiuto:": "Rejection reason:",
+    "Approva": "Approve",
+    "Documento approvato.": "Document approved.",
+    "Approvazione non completata:": "Approval failed:",
+    "Respingi": "Reject",
+    "Documento respinto.": "Document rejected.",
+    "Rifiuto non completato:": "Rejection failed:",
+    "Configurazione commerciale presente ·": "Commercial configuration present ·",
+    "Configurazione commerciale non ancora impostata ·": "Commercial configuration not set yet ·",
+    "Profilo commerciale:": "Commercial profile:",
+    "offerte": "offers",
+    "pubblici": "audiences",
+    "parole chiave": "keywords",
+    "Workspace attivato.": "Workspace activated.",
+    "Profili caricati:": "Profiles loaded:",
+    "Istruzioni AI:": "AI instructions:",
+    "· Criteri:": "· Criteria:",
+    "Nessuna istruzione AI configurata.": "No AI instructions configured.",
+    "Nessun criterio di qualificazione configurato.": "No qualification criteria configured.",
+    "Attiva versione": "Activate version",
+    "Versione attivata.": "Version activated.",
+    "Archivia bozza": "Archive draft",
+    "Bozza istruzione AI salvata. Non è attiva finché non la attivi.": "AI instruction draft saved. It is not active until you activate it.",
+    "Bozza criteri salvata. Non è attiva finché non la attivi.": "Criteria draft saved. It is not active until you activate it.",
+    "Configurazione criteri non valida:": "Invalid criteria configuration:",
+    "Seleziona il workspace Zinzino Italia prima dell'importazione.": "Select the Zinzino Italy workspace before importing.",
+    "Il workspace è archiviato: importazione non consentita.": "The workspace is archived: importing is not allowed.",
+    "Importazione in corso:": "Importing:",
+    "nuovi pending": "new pending",
+    "duplicati": "duplicates",
+    "Generazione della bozza in corso…": "Generating draft…",
+    "Bozza generata e salvata. Nessun messaggio è stato inviato.": "Draft generated and saved. No message was sent.",
+    "Caricamento conversazioni…": "Loading conversations…",
+    "Impossibile caricare le conversazioni:": "Unable to load conversations:",
+    "Generazione non riuscita:": "Draft generation failed:",
+    "Per creare un nuovo prospect, compila il campo obbligatorio:": "To create a new prospect, complete the required field:",
+    "Inserisci un URL pubblico http o https valido.": "Enter a valid public http or https URL.",
+    "Creazione prospect e conversazione…": "Creating prospect and conversation…",
+    "Prospect e conversazione creati. Preparazione della bozza…": "Prospect and conversation created. Preparing the draft…",
+    "Bozza copiata negli appunti.": "Draft copied to clipboard.",
+    "Copia automatica non disponibile. Seleziona il testo della bozza e copialo manualmente.": "Automatic copy is unavailable. Select the draft text and copy it manually.",
+    "Impossibile caricare i workspace:": "Unable to load workspaces:",
+    "Caricamento configurazione aziendale…": "Loading company configuration…",
+    "Verifica accesso in corso…": "Checking access…",
+    "Errore HTTP": "HTTP error",
+    "Ricerca in corso…": "Searching…",
+    "Richiesta già attivata.": "Request already activated.",
+    "Lead non più disponibile": "Lead no longer available",
+    "Workspace caricati:": "Workspaces loaded:",
+    "Elenco profili non disponibile:": "Profile list unavailable:",
+    "Bozza istruzione non salvata:": "Instruction draft not saved:",
+    "Bozza criteri non salvata:": "Criteria draft not saved:",
+    "Istruzioni e criteri non disponibili:": "Instructions and criteria unavailable:",
+    "Elenco documenti non disponibile:": "Document list unavailable:",
+    "Preparazione non completata:": "Preparation failed:",
+    "Caricamento non riuscito:": "Loading failed:",
+    "Seleziona prima un workspace.": "Select a workspace first.",
+    "Configurazione commerciale aggiornata.": "Commercial configuration updated.",
+    "Configurazione non salvata:": "Configuration not saved:",
+    "Salvataggio configurazione commerciale non completato:": "Commercial configuration save failed:",
+    "Validatore commerciale non disponibile: workspace non creato.": "Commercial validator unavailable: workspace not created.",
+    "Identità workspace modificata: prepara nuovamente il modello Zinzino prima della creazione.": "Workspace identity changed: prepare the Zinzino template again before creation.",
+    "Elenco workspace non disponibile:": "Workspace list unavailable:",
+    "Membership non salvata:": "Membership not saved:"
   };
 
   const reverse = Object.fromEntries(Object.entries(translations).map(([it, en]) => [en, it]));
@@ -443,7 +528,13 @@
     const source = String(value ?? "");
     const trimmed = source.trim();
     if (!trimmed) return source;
-    const translated = language === "en" ? translations[trimmed] : reverse[trimmed];
+    const table = language === "en" ? translations : reverse;
+    let translated = table[trimmed];
+    if (!translated) {
+      const prefix = Object.keys(table).filter((key) => key.endsWith(":") && trimmed.startsWith(key))
+        .sort((a, b) => b.length - a.length)[0];
+      if (prefix) translated = table[prefix] + trimmed.slice(prefix.length);
+    }
     if (!translated) return source;
     const start = source.indexOf(trimmed);
     return source.slice(0, start) + translated + source.slice(start + trimmed.length);
