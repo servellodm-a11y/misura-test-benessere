@@ -4158,5 +4158,9 @@
       "partner_compensation_reference",
       "partner_compensation_rules"
     ]
-  }
+  },
+  "supported_languages": [
+    "it",
+    "en"
+  ]
 }
