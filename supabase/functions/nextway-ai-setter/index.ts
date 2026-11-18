@@ -228,6 +228,7 @@ Deno.serve(async (req) => {
 
     const conversationId = body.conversation_id;
     const goal = body.goal;
+    const requestedResponseLanguage = body.response_language_code;
 
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -244,6 +245,13 @@ Deno.serve(async (req) => {
       !goals.includes(goal)
     ) {
       return respond({ error: "Obiettivo non valido" }, 400, responseOrigin);
+    }
+    if (
+      requestedResponseLanguage !== undefined &&
+      (typeof requestedResponseLanguage !== "string" ||
+        !["it", "en"].includes(requestedResponseLanguage))
+    ) {
+      return respond({ error: "Lingua di risposta non supportata" }, 400, responseOrigin);
     }
 
     const requestId = body.request_id;
@@ -337,7 +345,8 @@ Deno.serve(async (req) => {
     // L'audience è un dato esplicito del Lead: non viene mai dedotta dalla categoria.
     let commercialContext: Record<string, unknown> | null = null;
     let knowledgeModuleKeys: string[] = [];
-    let knowledgeLanguageCode = "";
+    let knowledgeLanguageCode = "it";
+    let responseLanguageCode = "it";
     if (conversation.workspace_id) {
       const { data: workspaceData, error: workspaceError } = await supabase.rpc(
         "nextway_get_workspace_commercial_config",
@@ -354,6 +363,20 @@ Deno.serve(async (req) => {
       const commercialData = commercialConfig.commercial_data && typeof commercialConfig.commercial_data === "object"
         ? commercialConfig.commercial_data as Record<string, unknown>
         : null;
+      const supportedLanguages = Array.isArray(commercialData?.supported_languages)
+        ? (commercialData.supported_languages as unknown[])
+          .filter((value): value is string => typeof value === "string" && ["it", "en"].includes(value))
+        : [String(workspace.language_code || "it")];
+      responseLanguageCode = typeof requestedResponseLanguage === "string"
+        ? requestedResponseLanguage
+        : (supportedLanguages.includes(String(workspace.language_code || "it"))
+          ? String(workspace.language_code || "it") : "it");
+      if (!supportedLanguages.includes(responseLanguageCode)) {
+        return respond({
+          error: "La lingua richiesta non è abilitata per questo workspace. Configurare prima le lingue supportate.",
+        }, 409, responseOrigin);
+      }
+      knowledgeLanguageCode = responseLanguageCode;
       const configuredKnowledge = commercialData?.knowledge_modules &&
         typeof commercialData.knowledge_modules === "object"
         ? commercialData.knowledge_modules as Record<string, unknown>
@@ -368,7 +391,7 @@ Deno.serve(async (req) => {
           typeof value === "string" && /^[a-z0-9][a-z0-9_-]{1,63}$/.test(value)
         )
         .slice(0, 3);
-      knowledgeLanguageCode = workspace.language_code === "it" ? "it" : "";
+
       const isZinzino = String(workspace.workspace_key || "").toLowerCase() === "zinzino-italia"
         || String(workspace.partner_name || "").toLowerCase() === "zinzino";
       if (isZinzino && !commercialData) {
@@ -501,6 +524,7 @@ Deno.serve(async (req) => {
       channel: conversation.channel,
       conversation_objective: sanitizeModelText(conversation.objective, 500),
       requested_goal: goal,
+      response_language_code: responseLanguageCode,
       commercial_context: commercialContext,
       qualification_criteria: activeQualificationCriteria,
       knowledge_base: approvedKnowledgeContext,
@@ -611,7 +635,8 @@ REGOLE:
 5. Non ripetere messaggi già inviati.
 6. Rispetta lo storico della conversazione.
 7. Adatta il linguaggio al canale utilizzato.
-8. Non presentare prodotti quando l'obiettivo
+8. Scrivi sempre la bozza nella lingua indicata da response_language_code (it = italiano, en = inglese), indipendentemente dalla lingua degli altri campi.
+9. Non presentare prodotti quando l'obiettivo
    è una collaborazione professionale.
 9. Non confondere interesse commerciale e
    interesse per prodotti.
