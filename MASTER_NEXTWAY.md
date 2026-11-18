@@ -1,3 +1,73 @@
+## REQUISITO ARCHITETTURALE — PIATTAFORMA MULTILINGUE (18 NOVEMBRE 2026)
+
+### Decisione e obiettivo
+- NEXTWAY deve essere progettata come piattaforma multilingue e multi-mercato, non come prodotto esclusivamente italiano da tradurre in seguito.
+- Lingue iniziali richieste: italiano (`it`) e inglese (`en`). L'architettura deve consentire l'aggiunta progressiva di altre lingue (ad esempio spagnolo, francese, tedesco e portoghese) senza duplicare la piattaforma o riscrivere la logica applicativa.
+- Questa è una decisione/requisito architetturale registrato. Non costituisce prova che tutte le interfacce, Edge Functions, prompt, documenti e flussi siano già multilingue end-to-end.
+- Il workspace Zinzino Italia mantiene italiano come lingua predefinita iniziale; l'inglese deve essere disponibile come seconda lingua supportata quando il relativo contenuto e le traduzioni saranno pronti.
+
+### Separazione obbligatoria: lingua, mercato e impostazioni locali
+- La lingua dell'interfaccia o della conversazione non deve determinare automaticamente il mercato commerciale.
+- Mantenere concetti distinti:
+  - `language_code`: lingua di UI, contenuti e comunicazione (codice BCP 47 ove necessario; es. `it`, `en`, `en-GB`).
+  - `market_country`: paese/mercato cui si applicano prezzi, disponibilità, condizioni commerciali e regole locali (es. `IT`, `GB`).
+  - `locale`: convenzioni di formattazione di date, numeri e importi (es. `it-IT`, `en-GB`).
+  - `timezone`: fuso orario IANA, indipendente da lingua e paese.
+  - `currency`: valuta ISO 4217, determinata dal mercato/configurazione commerciale, non dalla lingua.
+- Non usare un singolo campo lingua per rappresentare paese, valuta, fuso orario o piano commerciale.
+
+### Modello di preferenze e fallback
+- Prevedere, dove pertinente e dopo verifica dello schema esistente:
+  - lingua preferita dell'utente/profilo;
+  - lingua preferita del contatto/prospect;
+  - lingua predefinita e insieme delle lingue abilitate del workspace;
+  - lingua e mercato associati a documenti e contenuti Knowledge.
+- Priorità linguistica AI Setter: scelta esplicita nella conversazione > preferenza dichiarata del contatto > preferenza utente/operatore quando applicabile > lingua predefinita del workspace.
+- Se una lingua non è abilitata o non esiste una versione affidabile del contenuto richiesto, usare il fallback dichiarato del workspace e non simulare una traduzione ufficiale.
+- L'operatore deve poter vedere e, quando autorizzato, correggere la lingua assegnata. Non dedurre stabilmente la preferenza linguistica da una singola frase o dal paese del contatto.
+
+### Ambiti funzionali da rendere multilingue
+1. Interfacce e navigazione: stringhe UI esternalizzate in cataloghi di traduzione; evitare testi utente codificati direttamente nei componenti.
+2. CRM: conservare la lingua preferita del contatto separata dal mercato e dai dati anagrafici; filtri e ricerca non devono confondere lingue differenti.
+3. AI Setter: produrre bozze e risposte nella lingua scelta secondo la priorità sopra; mantenere coerenti lingua della conversazione, lingua del prospect e lingua dei contenuti usati.
+4. Knowledge Base: associare lingua originale, eventuale lingua tradotta, mercato applicabile, versione e provenienza; filtrare per workspace + mercato + lingua. Un documento non deve diventare valido per un altro mercato solo perché tradotto.
+5. Configurazione commerciale: prezzi, kit, promozioni, requisiti, piani compensi e regole devono essere versionati per mercato e validità temporale. La traduzione linguistica non modifica né sostituisce la regola ufficiale del mercato.
+6. Ricerca prospect e contenuti generati: supportare query, parole chiave, template e output nella lingua selezionata; preservare i vincoli di mercato e workspace.
+7. Amministrazione e audit: rendere leggibili gli stati e i messaggi amministrativi nella lingua dell'operatore, conservando valori tecnici/codici stabili nei dati.
+
+### Regole di integrità commerciale e documentale
+- Nessuna traduzione automatica può trasformare condizioni commerciali di un paese in condizioni di un altro paese.
+- Per piani compensi, prezzi, condizioni cliente/partner, promozioni, policy e documenti regolatori: usare la versione ufficiale valida per il mercato e la data; registrare fonte, versione, data di efficacia e stato di revisione.
+- Se è disponibile solo una traduzione di lavoro, etichettarla chiaramente come tale e non presentarla come documento ufficiale.
+- I contenuti generati dall'AI devono rispettare la lingua richiesta, ma non possono inventare prezzi, requisiti, vantaggi o regole assenti dalla Knowledge Base approvata.
+
+### Criteri di accettazione prima di dichiarare il supporto multilingue completo
+- UI verificata in italiano e inglese, senza stringhe essenziali non tradotte o overflow bloccanti.
+- Preferenze lingua utente, contatto e workspace persistite e applicate correttamente, con fallback testato.
+- AI Setter testato in entrambe le lingue, inclusi cambio lingua durante la conversazione, messaggio in lingua diversa, fallback e mantenimento del contesto.
+- Knowledge retrieval verificato con documenti di lingue e mercati differenti: nessuna contaminazione tra workspace o mercati; preferenza per la lingua corretta e fallback esplicito.
+- Configurazioni commerciali, valute, date e numeri testati per mercati diversi senza dedurre il mercato dalla lingua.
+- Edge Functions, RPC, log e audit verificati con payload multilingue e codifica Unicode; nessuna perdita di accenti o caratteri non latini.
+- Aggiunta di una nuova lingua dimostrata tramite cataloghi/contenuti/configurazione, senza fork del codice o duplicazione del workspace.
+
+### Stato al momento della registrazione
+- Requisito e decisione architetturale: **COMPLETATO E VERIFICATO come decisione documentale**.
+- Configurazione seed Zinzino attualmente nota: lingua predefinita italiana (`it`); la disponibilità effettiva di contenuti inglesi e il campo delle lingue abilitate non sono stati verificati in questo aggiornamento.
+- Supporto end-to-end italiano/inglese: **DA COMPLETARE / DA VERIFICARE**. Non dichiararlo già operativo sulla sola base dei campi `language_code` o `market_country`.
+- Supporto a ulteriori lingue: **REQUISITO ARCHITETTURALE**, non ancora certificato.
+- Nessuna modifica a codice applicativo, database, Edge Functions, deploy, impostazioni, segreti o configurazioni eseguita per questo compito.
+
+### Prossimi passi tecnici (sola ispezione prima di qualsiasi modifica)
+1. Inventariare nel repository i campi lingua/mercato già presenti in workspace, profili, Lead, documenti Knowledge e configurazioni commerciali; evitare colonne duplicate.
+2. Verificare i seed Zinzino italiano/inglese e i cataloghi di traduzione realmente presenti.
+3. Mappare i punti in cui UI, AI Setter, ricerca e Knowledge scelgono la lingua e identificare le lacune.
+4. Proporre eventuali modifiche minime e compatibili solo dopo aver completato l'inventario; nessuna migrazione o deploy implicito.
+
+### Registro cronologico
+- 18-11-2026 — formalizzato il requisito multilingue (italiano e inglese iniziali, estensibilità futura) e le regole di separazione lingua/mercato/locale/valuta/fuso orario. Aggiornato esclusivamente MASTER_NEXTWAY.md; nessun intervento runtime.
+ 
+---
+
 ## CONTROLLO DI CONTINUITÀ — 11 NOVEMBRE 2026, ORE 19:28 (Europe/Rome)
 
 ### Repository, branch e fonti verificate
