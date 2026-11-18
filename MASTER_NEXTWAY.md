@@ -3931,3 +3931,45 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — distribuite e verificate le Edge Functions `nextway-knowledge-ingest` e `nextway-knowledge-upload` v1 con JWT obbligatorio. Nessun documento caricato e nessun workspace creato.
+
+
+## SUPPORTO MULTILINGUE IT/EN — KNOWLEDGE BASE E AI SETTER — 18-11-2026
+
+### Database e ricerca full-text
+- Preflight live: 0 documenti e 0 chunk; nessun contenuto esistente da migrare o ricostruire.
+- Applicata migrazione `20261118110000_nextway_knowledge_bilingual_search.sql`, registrata live come versione `20261118080714`, nome `nextway_knowledge_bilingual_search`.
+- La tabella documenti ammette ora `language_code` it/en.
+- Aggiunta colonna generata `search_vector_en` e indice GIN dedicato; il vettore italiano esistente resta invariato.
+- RPC `nextway_search_knowledge(uuid,text,text,text,integer)` seleziona vettore e configurazione linguistica italiana/inglese in base al documento e alla query.
+- Confermati live: filtro workspace, membership, stato approved, validità, lingua identica documento/query; SECURITY INVOKER; EXECUTE authenticated sì, anon no.
+- Smoke test SQL: full-text italiano e inglese entrambi restituiscono match corretti.
+
+### Ingestione e caricamento
+- `nextway-knowledge-ingest` aggiornata a v2 ACTIVE, `verify_jwt=true`, hash `424f69a56a1d34cc83dcb9db8bd38e65e61d40466b74f1f63a76803828206539`.
+- `nextway-knowledge-upload` aggiornata a v2 ACTIVE, `verify_jwt=true`, hash `1d46a0366b24a5d0c071f6b074b2c25458e10c403dd1c32179caa5587a5ea7be`.
+- Entrambe accettano soltanto `it` o `en`; autorizzazione platform_admin e approvazione pending obbligatoria restano invariate.
+- Admin UI nel branch: selezione lingua upload e lingua di ricerca; import manifest accetta manifest/documenti IT/EN. Il pacchetto Zinzino attuale resta italiano e non è stato importato.
+
+### AI Setter
+- Selettore lingua bozza IT/EN nell'interfaccia Setter; la lingua entra nel payload e nell'idempotency scope, così un tentativo inglese non riusa un output italiano.
+- La Edge Function verifica la lingua richiesta contro `supported_languages` della base commerciale o della configurazione workspace. Se non abilitata, rifiuta la richiesta.
+- Zinzino `commercial-base.v1.json` dichiara `supported_languages: ["it","en"]`.
+- Il recupero Knowledge usa la lingua della bozza e restituisce solo documenti della stessa lingua; non traduce né mescola automaticamente fonti italiane e inglesi.
+- Prompt Setter richiede l'output nella lingua esplicitamente selezionata.
+- `nextway-ai-setter` live resta v3; nessun deploy e nessuna chiamata OpenAI eseguita.
+
+### CI e limiti
+- Nuovo test statico esteso per vettori, RPC, ingest/upload, selezione lingua e allowlist workspace/brand.
+- Run 1088 SUCCESS dopo aggiornamento dei test di sicurezza ingest; run 1091 in corso al momento dell'aggiornamento. La verifica finale del run 1091 sarà aggiunta dopo conclusione.
+- Nessun token/credito AI consumato. Nessun documento, workspace, utente o conversione creati.
+- Il frontend non è stato pubblicato su Netlify; le modifiche UI sono nel branch della PR #58.
+- Questa tranche abilita la lingua dei documenti, della ricerca e delle bozze AI. La traduzione completa di tutte le schermate e dei messaggi amministrativi NEXTWAY resta DA COMPLETARE.
+
+### Stato
+- COMPLETATO E VERIFICATO: schema e ricerca full-text IT/EN live; Edge Functions Knowledge v2 live; smoke test SQL IT/EN.
+- ESEGUITO MA NON VERIFICATO IN PRODUZIONE: codice Setter IT/EN, configurazione Zinzino e UI admin/Setter nel branch PR #58; CI statica/type-check in attesa del run 1091.
+- DA COMPLETARE: localizzazione completa dell'interfaccia NEXTWAY; eventuale materiale documentale inglese verificato e approvato; deploy AI Setter soltanto quando autorizzato l'utilizzo dei token OpenAI.
+- Nessun documento inglese è ancora caricato o approvato; non dichiarare il percorso EN operativo end-to-end finché non esiste una fonte inglese approvata.
+
+### Registro cronologico MASTER
+- 18-11-2026 — applicato supporto full-text IT/EN; distribuite Edge Functions Knowledge v2. Preparato selettore lingua AI Setter e allowlist Zinzino sul branch PR #58. Nessuna chiamata AI o deploy Setter.
