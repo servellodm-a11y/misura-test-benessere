@@ -10,7 +10,7 @@ const base = new URL("../docs/companies/zinzino/knowledge/", import.meta.url);
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.workspace_key, "zinzino-italia");
 assert.equal(manifest.language_code, "it");
-assert.equal(manifest.documents.length, 8);
+assert.equal(manifest.documents.length, 7);
 assert.equal(manifest.import_policy.approval_status, "pending");
 assert.equal(manifest.import_policy.deduplicate_by_content_sha256, true);
 assert.match(html, /id="import-zinzino-knowledge"/);
