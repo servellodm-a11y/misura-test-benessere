@@ -363,8 +363,13 @@ Deno.serve(async (req) => {
       const commercialData = commercialConfig.commercial_data && typeof commercialConfig.commercial_data === "object"
         ? commercialConfig.commercial_data as Record<string, unknown>
         : null;
-      const supportedLanguages = Array.isArray(commercialData?.supported_languages)
-        ? (commercialData.supported_languages as unknown[])
+      const configuredLanguageList = Array.isArray(commercialData?.supported_languages)
+        ? commercialData.supported_languages
+        : Array.isArray(commercialConfig.supported_languages)
+          ? commercialConfig.supported_languages
+          : null;
+      const supportedLanguages = configuredLanguageList
+        ? (configuredLanguageList as unknown[])
           .filter((value): value is string => typeof value === "string" && ["it", "en"].includes(value))
         : [String(workspace.language_code || "it")];
       responseLanguageCode = typeof requestedResponseLanguage === "string"
