@@ -453,7 +453,8 @@
     if (!node || node.nodeType !== Node.TEXT_NODE) return;
     const parent = node.parentElement;
     if (!parent || parent.closest("script,style,textarea,input,code,pre,[contenteditable='true']")) return;
-    node.nodeValue = translateValue(node.nodeValue, currentLanguage);
+    const translated = translateValue(node.nodeValue, currentLanguage);
+    if (translated !== node.nodeValue) node.nodeValue = translated;
   }
 
   function translateElement(element) {
