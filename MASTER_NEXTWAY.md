@@ -4105,3 +4105,15 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il test continua a controllare metadati, file presenti/non vuoti, limiti dimensione, JWT, approvazione pending e assenza di privilegi service_role nell'azione Admin.
 - Modifica registrata sul branch `feat/nextway-setter-knowledge-context-20261118`; esecuzione locale Node.js non disponibile in questa sessione, quindi non dichiarare il test eseguito.
 - Nessuna ingestione, workspace, merge, deploy o chiamata AI effettuati.
+
+
+## PREPARAZIONE AMMINISTRATIVA IMPORT KNOWLEDGE ZINZINO — 18 NOVEMBRE 2026
+
+- Creato `docs/companies/zinzino/knowledge/ADMIN-IMPORT-HANDOFF.md`: procedura amministrativa controllata, prerequisiti, lotto esatto di 7 documenti, criteri di arresto, gestione retry e controlli successivi.
+- Il passaggio chiarisce che importazione e approvazione sono operazioni distinte: tutti i documenti devono rimanere `pending` fino a un'approvazione amministrativa esplicita.
+- Esclusi dal lotto i documenti inglesi draft/review-required e il materiale Customer Rewards UK non validato per l'Italia.
+- Verifica GitHub Actions sul commit precedente al documento di handoff: run 1151, job `validate`, SUCCESS. Lo step dedicato `Validate Zinzino Knowledge bulk import contract` è SUCCESS; anche gli step di sicurezza Knowledge ingest/upload e type-check delle Edge Functions sono SUCCESS.
+- Questo esito risolve il precedente controllo di esecuzione: il test è stato effettivamente eseguito in CI su GitHub Actions, non soltanto letto o verificato staticamente tramite API.
+- Il commit corrente della PR #58 al momento del controllo era `c1fabb045e24219b0a579d69007e04567f16c9ad`; il run 1151 è associato esattamente a tale SHA.
+- **Stato importazione:** PREPARAZIONE AMMINISTRATIVA COMPLETATA; IMPORTAZIONE NON ESEGUITA. Workspace `zinzino-italia` non creato/attivato; nessun documento/chunk caricato; nessuna approvazione.
+- Nessun merge, deploy Netlify, chiamata OpenAI o consumo di token/crediti.
