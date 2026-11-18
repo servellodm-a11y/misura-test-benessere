@@ -34,31 +34,35 @@ NEXTWAY deve distinguere:
 2. **Guida italiana:** questo documento, scritto in forma originale per spiegare e organizzare le regole senza riprodurre integralmente il testo protetto.
 3. **Regole strutturate:** formule, soglie, requisiti, condizioni, eccezioni e periodicità estratte in campi verificabili e collegate alla sezione/pagina del master.
 
-## PDF italiano ufficiale collegato dal portale Italia — confronto del 17 novembre 2026
+## Riferimento italiano ufficiale e corrispondenza confermata — 18 novembre 2026
 
-Il PDF italiano caricato è identificato come **Piano Compensi di Zinzino 14/11/2024**. Il link al PDF è presente nella pagina ufficiale Partner Italia:
+Il PDF italiano caricato dall'utente è identificato come **Piano Compensi di Zinzino 14/11/2024**, 35 pagine. È collegato dalla pagina ufficiale Partner Italia:
 https://www.zinzino.com/site/it/it-it/partnerweb
 https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf
 
-Il documento italiano dichiara espressamente che, in caso di traduzione potenzialmente errata, la versione originale inglese è il documento valido e vincolante. Il master europeo inglese consultato è datato **12/02/2025**. Per NEXTWAY, quindi, il PDF italiano 2024 è una fonte ufficiale localizzata ma precedente, utile per consultazione e confronto; non sostituisce il master EU 2025.
+Il master europeo inglese ufficiale è datato **12/02/2025**:
+https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf
 
-### Fast Start — regola operativa confermata per NEXTWAY il 17 novembre 2026
+**Corrispondenza IT/EN:** il titolare della piattaforma ha confermato il 18/11/2026 che il PDF italiano e il master EU inglese corrispondono e che la verifica era già stata completata e confermata nella sessione precedente. Non riaprire il confronto e non utilizzare le precedenti annotazioni su presunte divergenze come blocchi operativi. Le date stampate restano quelle originali; la differenza di data non costituisce da sola una divergenza.
 
-Il titolare del progetto ha precisato che la sequenza attualmente applicata è:
+Il master inglese resta la fonte primaria in caso di dubbi interpretativi, in coerenza con la clausola riportata nei documenti. La validità del piano EU 2025 in Italia a novembre 2026 è confermata dall'utente e non costituisce una dichiarazione indipendente di Zinzino.
+
+### Fast Start — regola operativa confermata per NEXTWAY
+
+La sequenza operativa confermata dall'utente è:
 1. 4 punti cliente;
 2. 2 Partner con Ultimate Partner Kit, con un Partner a sinistra e uno a destra;
 3. duplicazione dei due Partner;
 4. ulteriori 10 punti cliente, ripartiti in 4 + 6.
 
-Questa sequenza è assunta da NEXTWAY come regola operativa di riferimento sulla base della conferma esplicita dell'utente. Non è presentata come attestazione aziendale indipendente e non consente, da sola, di calcolare importi di bonus o requisiti aggiuntivi non specificati.
+Questa sequenza è il riferimento operativo NEXTWAY. Non dedurre da essa importi, bonus promozionali o condizioni aggiuntive. Gli importi maggiorati delle campagne Fast Start 60/90 giorni restano soggetti al regolamento specifico della campagna corrente.
 
-### Differenze e punti da chiarire
+### Confini di utilizzo
 
-1. **Fast Start — Enrollment Points (pagina 21 del master; pagina 20 del PDF italiano):** il testo principale di entrambi i documenti descrive l'iscrizione di due Partner, uno a sinistra e uno a destra. La nota in calce del PDF italiano richiede almeno un nuovo Partner a sinistra e uno a destra. La nota in calce del master inglese 2025, invece, dice che almeno 1 dei 6 Enrollment Points deve essere collocato a sinistra oppure a destra. La formulazione inglese è in tensione con il testo principale dello stesso master; non risolvere l'ambiguità con un'interpretazione automatica. Richiedere chiarimento aziendale o regole ufficiali della campagna.
-2. **Fast Start — campagne 60/90 giorni:** il master inglese 2025 aggiunge la nota che i bonus Fast Start a 60 e 90 giorni sono aumentati e rinvia alle regole della campagna. Tale nota non compare nel PDF italiano 2024. Gli importi e le condizioni promozionali non vanno dedotti dal solo piano: occorre il regolamento della campagna applicabile.
-3. **Dati descrittivi:** nella sezione missione/visione la formulazione italiana 2024 non coincide letteralmente con quella del master inglese 2025. Non è una regola di compenso e non va usata per alterare le regole economiche.
-
-Il confronto svolto individua questi punti concreti; non certifica una corrispondenza integrale, parola per parola, di tutte le 35 pagine. Le regole operative devono essere estratte dal master EU 2025, con le ambiguità marcate e non colmate per supposizione.
+- Non modificare, ricostruire o trasporre i valori delle tabelle dei PDF.
+- Non trattare le precedenti note su Potential Earnings, CAB Accelerator o massimali multi-Income Center come conflitti aperti: sono state superate dal successivo riallineamento confermato dall'utente.
+- Separare le regole permanenti del piano dalle campagne, dai prezzi e dalle condizioni locali aggiornabili.
+- Mantenere il disclaimer sui redditi: esempi e massimali non sono guadagni tipici, attesi o garantiti.
 
 ## Stato dei calcoli
 
