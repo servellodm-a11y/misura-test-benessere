@@ -458,7 +458,7 @@
 
   function translateElement(element) {
     if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-    if (element.matches("input,textarea,script,style,code,pre,[contenteditable='true']")) return;
+    if (element.matches("script,style,code,pre,[contenteditable='true']")) return;
     const attrs = ["placeholder", "title", "aria-label"];
     attrs.forEach((name) => {
       if (element.hasAttribute(name)) {
@@ -468,6 +468,7 @@
     if (element.tagName === "TITLE") {
       element.textContent = translateValue(element.textContent, currentLanguage);
     }
+    if (element.matches("input,textarea")) return;
     element.childNodes.forEach((child) => {
       if (child.nodeType === Node.TEXT_NODE) translateNode(child);
       else if (child.nodeType === Node.ELEMENT_NODE) translateElement(child);
