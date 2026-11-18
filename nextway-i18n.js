@@ -335,7 +335,7 @@
     "Aggiorna profili": "Refresh profiles",
     "Seleziona un workspace per consultare le membership.": "Select a workspace to view memberships.",
     "Knowledge Base": "Knowledge Base",
-    "Importa pacchetto Zinzino (8 documenti)": "Import Zinzino package (8 documents)",
+    "Importa pacchetto Zinzino (7 documenti)": "Import Zinzino package (7 documents)",
     "Importazione multipla dei riferimenti Markdown; tutti i nuovi documenti resteranno pending.": "Bulk import of Markdown references; all new documents will remain pending.",
     "Modulo / area documentale": "Module / document area",
     "Titolo documento": "Document title",
