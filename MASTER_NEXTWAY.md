@@ -4121,3 +4121,26 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Rettifica stato esecuzione test — 18 novembre 2026
 La nota precedente che indicava il test come non eseguito localmente descriveva correttamente l'assenza di un'esecuzione sul Mac, ma non teneva conto della successiva esecuzione automatica CI. Il test `Validate Zinzino Knowledge bulk import contract` è stato eseguito con esito SUCCESS nella GitHub Actions run 1151 sul commit `c1fabb045e24219b0a579d69007e04567f16c9ad`. Pertanto: **test automatizzato CI COMPLETATO E VERIFICATO**; test locale sul Mac non eseguito e non necessario per attestare l'esito CI.
+
+
+## 18 novembre 2026 — Correzione bootstrap Owner workspace
+
+- Diagnosi confermata su Supabase: la Edge Function `nextway-workspace-admin` rifiutava ogni membership `active` su workspace `draft`; l'errore osservato dall'utente era generato dal backend.
+- Workspace Zinzino Italia: `zinzino-italia`, ID `b4b79015-ea09-46f5-9d37-501bd3895cad`, resta `draft`; nessuna membership presente al momento della diagnosi.
+- Indici DB verificati: vincolo univoco `(workspace_id,user_id)` e indice parziale `nextway_workspace_one_owner_uidx`, che impedisce più Owner invited/active per workspace.
+- Patch sul branch `feat/nextway-setter-knowledge-context-20261118`:
+  - bootstrap ammesso solo per il proprio profilo dell'amministratore autenticato;
+  - ruolo obbligatorio `workspace_owner`;
+  - workspace deve essere `draft`;
+  - deve esistere una membership precedente in stato `invited`;
+  - email dell'utente deve essere confermata;
+  - tutti gli altri casi di membership active continuano a richiedere workspace active;
+  - attivazione workspace rifiutata se non esiste un Owner con membership `active`.
+- Test statico aggiunto: `scripts/test-nextway-workspace-admin-bootstrap.mjs`; registrato nel workflow `.github/workflows/nextway-static-validation.yml`.
+- Commit patch: `6d7084a1397248d37e9f2cbfb99899df3a8381ad`.
+- Commit test: `c61473bfa231b704234e254ab094df4ba8ac7b94`.
+- Commit workflow: `e12866ab465f586258395b4a182b51e86ce99ece`.
+- Verifica contenuti GitHub post-commit: guardie bootstrap, invito preliminare, Owner attivo richiesto per attivazione workspace e registrazione test nel workflow presenti.
+- CI: nessun workflow run/status associato al commit `e12866ab465f586258395b4a182b51e86ce99ece` al momento dell'ultima interrogazione; test automatico quindi **non ancora verificato**.
+- Non eseguiti deploy Edge Function, migrazioni DB, merge PR, deploy Netlify, attivazione workspace o chiamate AI. PR #58 resta aperta e draft.
+- Sequenza operativa dopo la verifica CI e il successivo rilascio autorizzato: creare membership Owner in stato `invited`; attivare la stessa membership come Owner (solo per l'amministratore autenticato); quindi attivare il workspace.
