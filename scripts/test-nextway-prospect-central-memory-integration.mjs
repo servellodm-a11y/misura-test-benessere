@@ -62,8 +62,12 @@ assert.match(workspaceAdmin, /body\.workspace_role === "workspace_owner" &&\s*bo
   "draft bootstrap must be limited to the authenticated administrator own Owner membership");
 assert.match(workspaceAdmin, /existing\.membership_status !== "invited"/,
   "draft Owner bootstrap must start from a previously invited membership");
-assert.match(workspaceAdmin, /Impossibile attivare il workspace[\s\S]*workspace_role", "workspace_owner"[\s\S]*membership_status", "active"/,
-  "workspace activation must require an active Owner membership");
+assert.match(workspaceAdmin, /Impossibile attivare il workspace/,
+  "workspace activation must fail closed without an active Owner");
+assert.match(workspaceAdmin, /\.eq\("workspace_role", "workspace_owner"\)/,
+  "workspace activation must query the Owner role");
+assert.match(workspaceAdmin, /\.eq\("membership_status", "active"\)/,
+  "workspace activation must query an active Owner membership");
 assert.match(workspaceAdmin, /!authUser\.user\.email_confirmed_at/,
   "normal user membership activation must require a confirmed account");
 assert.match(workspaceAdmin, /!existing \|\| !\["invited", "active"\]\.includes/,
