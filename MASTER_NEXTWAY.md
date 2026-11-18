@@ -3869,3 +3869,51 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — letture read-only di Supabase live, elenco Edge Functions, migration tracking, conteggi workspace/Knowledge, confronto sorgente live e GitHub main di nextway-workspace-admin e stato PR aperte. Aggiornamento solo documentale; nessuna modifica runtime.
+
+
+## KNOWLEDGE BASE WORKSPACE-SCOPED SEARCH E INTEGRAZIONE AI SETTER — 18-11-2026
+
+### RPC Knowledge Base live
+- La migrazione repository `20261111230000_nextway_workspace_scoped_rls.sql` è stata applicata al progetto Supabase live con nome registro `nextway_workspace_scoped_rls`, versione 20261118074914.
+- La migrazione ha riallineato la RPC di ricerca Knowledge: nuova firma `nextway_search_knowledge(uuid,text,text,text,integer)` con parametro obbligatorio `p_workspace_id`.
+- Verificato: filtro `d.workspace_id = p_workspace_id`; controllo `nextway_has_workspace_access(p_workspace_id)`; solo documenti `approved` e nel periodo di validità; `security invoker`; EXECUTE a authenticated sì, anon no.
+- La vecchia firma senza workspace `nextway_search_knowledge(text,text,text,integer)` è rimasta presente ma non è eseguibile da authenticated. La nuova firma è compatibile con il payload già usato dall'interfaccia Admin Knowledge.
+- La migrazione ha riconfermato gli oggetti RLS workspace-scoped già presenti: audit log, Lead, attività, conversioni e Knowledge. Nessuna riga cliente/documento è stata creata.
+- Migration registry ora contiene 8 record (3 preesistenti + 5 applicazioni registrate il 18-11-2026). La riconciliazione completa dei restanti file migration rimane DA COMPLETARE.
+
+### Analisi AI Setter e Knowledge
+- Il codice `supabase/functions/nextway-ai-setter/index.ts` su main carica già configurazione commerciale, prompt e criteri approvati, ma non richiamava la Knowledge Base.
+- La ricerca Admin UI era già scritta per passare `p_workspace_id`, ma la RPC live aveva ancora la vecchia firma senza workspace e nessun EXECUTE per authenticated. L'applicazione della migrazione workspace-scoped ha riallineato questa dipendenza.
+- Il manifest Zinzino usa moduli distinti per argomento: customer_rewards, customer_catalog, customer_product_education, partner_program, partner_compensation_reference e partner_compensation_rules.
+- Nessun documento Knowledge è attualmente caricato: conteggi live verificati 0 documenti e 0 chunk. Nessun workspace Zinzino è stato creato.
+
+### Implementazione preparata in PR #58
+- PR draft: https://github.com/servellodm-a11y/misura-test-benessere/pull/58
+- Branch `feat/nextway-setter-knowledge-context-20261118`, head `8a4edecd90cfcec1d98b137cd75c73085afebd89`.
+- L'AI Setter cerca estratti con la RPC workspace-scoped solo per il workspace della conversazione, per l'audience esplicita Cliente/Partner e per i moduli configurati nel campo `commercial_data.knowledge_modules`.
+- Configurazione Zinzino:
+  - Cliente: customer_rewards, customer_catalog, customer_product_education.
+  - Partner: partner_program, partner_compensation_reference, partner_compensation_rules.
+- La ricerca è limitata a 3 moduli, 2 chunk per modulo, massimo 6 estratti e 1.000 caratteri per estratto. Solo lingua italiana finché il supporto full-text multilingue non sarà completato.
+- I retry con output già salvato non ripetono la ricerca Knowledge. I contenuti sono sanitizzati e trattati come dati di riferimento, non come istruzioni.
+- Nuovo test statico `scripts/test-nextway-setter-knowledge-context.mjs` e step dedicato nella CI.
+- GitHub Actions run 1075, commit `8a4edecd90cfcec1d98b137cd75c73085afebd89`, conclusione SUCCESS: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44262344773.
+- Il primo run 1074 era fallito soltanto per maiuscole/minuscole nell'asserzione del testo del prompt; corretta l'asserzione e il run 1075 è passato.
+- Nessun deploy di `nextway-ai-setter`; PR #58 resta draft/non integrata. Nessuna chiamata OpenAI eseguita e nessun token/credito consumato. L'uso futuro del Setter continuerà a richiedere i token OpenAI già previsti dalla generazione; questa implementazione non è attiva in produzione.
+
+### Advisor performance — 18-11-2026
+- Rilevati 26 foreign key senza indice di copertura, 25 avvisi auth/RLS initplan, 14 gruppi di policy permissive multiple e 34 indici non utilizzati.
+- Sono rilievi di ottimizzazione da valutare in modo mirato; non sono state applicate modifiche automatiche a indici o policy.
+- Gli indici non utilizzati non vanno rimossi in questa fase: il database non ha ancora traffico reale sufficiente per una valutazione attendibile.
+
+### Stato aggiornato
+- COMPLETATO E VERIFICATO: RPC Knowledge Base workspace-scoped live, con permessi e filtri verificati.
+- ESEGUITO MA NON VERIFICATO IN PRODUZIONE: codice AI Setter → Knowledge Base preparato su PR #58; CI statica e type-check Deno superati.
+- DA COMPLETARE: review e integrazione PR #58; non effettuare merge finché non è escluso un deploy frontend di produzione non desiderato.
+- DA COMPLETARE: deploy controllato di `nextway-ai-setter` solo quando è autorizzato l'utilizzo dei token OpenAI necessari alle generazioni e dopo l'integrazione del codice.
+- DA COMPLETARE: importare e approvare i documenti Knowledge solo dopo creazione esplicitamente autorizzata del workspace Zinzino.
+- DA COMPLETARE: collegare le Edge Functions `nextway-knowledge-ingest` e `nextway-knowledge-upload` al runtime; attualmente non risultano distribuite.
+- DA COMPLETARE: multilinguismo full-text IT/EN e test integrati.
+
+### Registro cronologico MASTER
+- 18-11-2026 — applicata migrazione workspace-scoped RLS/Knowledge e verificata la nuova RPC. Preparata integrazione AI Setter→Knowledge su PR #58; CI run 1075 SUCCESS. Nessuna chiamata OpenAI, nessun deploy Setter, nessun documento/workspace creato.
