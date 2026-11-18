@@ -2,7 +2,7 @@ name: NEXTWAY static validation
 
 on:
   push:
-    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config]
+    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config, feat/nextway-setter-knowledge-context-20261118]
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
