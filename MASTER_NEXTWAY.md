@@ -4117,3 +4117,7 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Il commit corrente della PR #58 al momento del controllo era `c1fabb045e24219b0a579d69007e04567f16c9ad`; il run 1151 è associato esattamente a tale SHA.
 - **Stato importazione:** PREPARAZIONE AMMINISTRATIVA COMPLETATA; IMPORTAZIONE NON ESEGUITA. Workspace `zinzino-italia` non creato/attivato; nessun documento/chunk caricato; nessuna approvazione.
 - Nessun merge, deploy Netlify, chiamata OpenAI o consumo di token/crediti.
+
+
+### Rettifica stato esecuzione test — 18 novembre 2026
+La nota precedente che indicava il test come non eseguito localmente descriveva correttamente l'assenza di un'esecuzione sul Mac, ma non teneva conto della successiva esecuzione automatica CI. Il test `Validate Zinzino Knowledge bulk import contract` è stato eseguito con esito SUCCESS nella GitHub Actions run 1151 sul commit `c1fabb045e24219b0a579d69007e04567f16c9ad`. Pertanto: **test automatizzato CI COMPLETATO E VERIFICATO**; test locale sul Mac non eseguito e non necessario per attestare l'esito CI.
