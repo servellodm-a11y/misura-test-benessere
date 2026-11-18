@@ -4008,3 +4008,13 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — aggiunto runtime centralizzato di localizzazione IT/EN e test CI; nessun deploy frontend e nessun consumo di token AI.
+
+
+### Estensione localizzazione dinamica — 18-11-2026
+- Esteso il dizionario alle stringhe operative di autenticazione, connessione centrale, coda conversioni, audit, sincronizzazione cloud, amministrazione workspace, approvazione documenti e messaggi AI Setter.
+- I dialoghi nativi `alert`, `confirm` e `prompt` usano la lingua selezionata, traducendo messaggi e valori iniziali noti.
+- La traduzione dei messaggi composti riconosce prefissi dinamici comuni senza tradurre i dati personali inseriti o i valori dei Lead.
+- Test aggiornato per verificare la localizzazione dei dialoghi nativi.
+- GitHub Actions run 1115 SUCCESS, incluso il test `Validate NEXTWAY Italian and English localization`: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44266081394
+- La copertura non è ancora totale per ogni messaggio dinamico o testo generato da nuovi moduli: le voci non presenti nel dizionario restano nella lingua originale. Non tradurre automaticamente contenuti utente, documenti, JSON o dati commerciali.
+- Stato: COMPLETATO E VERIFICATO per il runtime e il contratto statico; ESEGUITO MA NON VERIFICATO VISIVAMENTE per la resa effettiva su browser desktop/mobile.
