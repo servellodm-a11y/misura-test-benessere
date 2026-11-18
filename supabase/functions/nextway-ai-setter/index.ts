@@ -443,60 +443,7 @@ Deno.serve(async (req) => {
         };
       });
 
-    // Recupera solo estratti approvati e limitati al workspace e all'audience corrente.
-    // La RPC applica membership, stato di approvazione e validità documentale nel database.
     let approvedKnowledgeContext: Array<Record<string, string>> = [];
-    if (
-      conversation.workspace_id &&
-      knowledgeLanguageCode === "it" &&
-      knowledgeModuleKeys.length > 0 &&
-      ["customer", "partner"].includes(String(lead.commercial_audience || ""))
-    ) {
-      const knowledgeQuery = buildKnowledgeSearchQuery(
-        String(lead.commercial_audience),
-        [lead.category, lead.profession, conversation.objective],
-      );
-      if (knowledgeQuery) {
-        const knowledgeResponses = await Promise.all(
-          knowledgeModuleKeys.map((moduleKey) => supabase.rpc(
-            "nextway_search_knowledge",
-            {
-              p_workspace_id: conversation.workspace_id,
-              p_query: knowledgeQuery,
-              p_module_key: moduleKey,
-              p_language_code: knowledgeLanguageCode,
-              p_limit: 2,
-            },
-          )),
-        );
-        const knowledgeRows: Array<Record<string, unknown>> = [];
-        for (const response of knowledgeResponses) {
-          if (response.error) {
-            logSafeFailure("Workspace knowledge search failed", response.error);
-            continue;
-          }
-          if (Array.isArray(response.data)) {
-            knowledgeRows.push(...response.data as Array<Record<string, unknown>>);
-          }
-        }
-        const seenChunks = new Set<string>();
-        approvedKnowledgeContext = knowledgeRows
-          .filter((item) => {
-            const chunkId = typeof item.chunk_id === "string" ? item.chunk_id : "";
-            if (!chunkId || seenChunks.has(chunkId)) return false;
-            seenChunks.add(chunkId);
-            return typeof item.content === "string" && item.content.trim().length > 0;
-          })
-          .sort((a, b) => Number(b.relevance || 0) - Number(a.relevance || 0))
-          .slice(0, 6)
-          .map((item) => ({
-            title: sanitizeModelText(item.document_title, 180),
-            module_key: sanitizeModelText(item.module_key, 64),
-            version: sanitizeModelText(item.version_label, 80),
-            content: sanitizeModelText(item.content, 1000),
-          }));
-      }
-    }
 
     // Claim idempotente condiviso nel database, dopo i controlli di accesso al prospect.
     const { data: claimRows, error: claimError } = await supabase.rpc(
@@ -580,6 +527,61 @@ Deno.serve(async (req) => {
     if (stagedOutput) {
       draft = stagedOutput as Record<string, unknown>;
     } else {
+      // Nessun output persistito: recupera la Knowledge Base prima della nuova chiamata.
+      // I retry con output già registrato non eseguono ricerche duplicate né consumano contesto aggiuntivo.
+      if (
+        conversation.workspace_id &&
+        knowledgeLanguageCode === "it" &&
+        knowledgeModuleKeys.length > 0 &&
+        ["customer", "partner"].includes(String(lead.commercial_audience || ""))
+      ) {
+        const knowledgeQuery = buildKnowledgeSearchQuery(
+          String(lead.commercial_audience),
+          [lead.category, lead.profession, conversation.objective],
+        );
+        if (knowledgeQuery) {
+          const knowledgeResponses = await Promise.all(
+            knowledgeModuleKeys.map((moduleKey) => supabase.rpc(
+              "nextway_search_knowledge",
+              {
+                p_workspace_id: conversation.workspace_id,
+                p_query: knowledgeQuery,
+                p_module_key: moduleKey,
+                p_language_code: knowledgeLanguageCode,
+                p_limit: 2,
+              },
+            )),
+          );
+          const knowledgeRows: Array<Record<string, unknown>> = [];
+          for (const response of knowledgeResponses) {
+            if (response.error) {
+              logSafeFailure("Workspace knowledge search failed", response.error);
+              continue;
+            }
+            if (Array.isArray(response.data)) {
+              knowledgeRows.push(...response.data as Array<Record<string, unknown>>);
+            }
+          }
+          const seenChunks = new Set<string>();
+          approvedKnowledgeContext = knowledgeRows
+            .filter((item) => {
+              const chunkId = typeof item.chunk_id === "string" ? item.chunk_id : "";
+              if (!chunkId || seenChunks.has(chunkId)) return false;
+              seenChunks.add(chunkId);
+              return typeof item.content === "string" && item.content.trim().length > 0;
+            })
+            .sort((a, b) => Number(b.relevance || 0) - Number(a.relevance || 0))
+            .slice(0, 6)
+            .map((item) => ({
+              title: sanitizeModelText(item.document_title, 180),
+              module_key: sanitizeModelText(item.module_key, 64),
+              version: sanitizeModelText(item.version_label, 80),
+              content: sanitizeModelText(item.content, 1000),
+            }));
+        }
+      }
+      context.knowledge_base = approvedKnowledgeContext;
+
       // Nessun output persistito: esegue una nuova chiamata al provider.
       const aiResponse = await fetch(
         "https://api.openai.com/v1/responses",
