@@ -3973,3 +3973,38 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — applicato supporto full-text IT/EN; distribuite Edge Functions Knowledge v2. Preparato selettore lingua AI Setter e allowlist Zinzino sul branch PR #58. Nessuna chiamata AI o deploy Setter.
+
+
+## LOCALIZZAZIONE INTERFACCIA NEXTWAY IT/EN — 18-11-2026
+
+### Implementazione
+- Creato `nextway-i18n.js`, runtime unico di localizzazione senza dipendenze esterne, richieste di rete o chiamate AI.
+- Italiano resta lingua predefinita; selettore EN/IT persistente nel browser tramite `localStorage`.
+- Aggiornamento dinamico di `document.documentElement.lang` e del titolo pagina.
+- Traduzione di testi, opzioni, placeholder e attributi accessibili; MutationObserver copre contenuti inseriti dinamicamente da UI e moduli.
+- Le stringhe dinamiche sono tradotte solo quando corrispondono a voci note; i dati personali, i contenuti inseriti dall'utente, URL, JSON e testo dei documenti non vengono tradotti o alterati.
+- Pagine collegate al runtime: `nextway-ai.html`, `nextway-admin.html`, `nextway-dashboard.html`, `nextway-analisi.html`, `nextway-ricerca.html`, `nextway-motore-ricerca.html`, `nextway-reset-password.html`.
+- Le traduzioni includono navigazione, moduli CRM, filtri, dashboard, ricerca prospect, amministrazione workspace, Knowledge Base, AI Setter, messaggi di stato più comuni e recupero password.
+- Nessuna modifica al sito pubblico `index.html`: questa tranche riguarda l'applicazione NEXTWAY operativa.
+
+### Verifiche
+- Aggiunto `scripts/test-nextway-localization.mjs`: verifica runtime, persistenza lingua, aggiornamento DOM, attributi form, pagine collegate e assenza di chiamate di rete/AI nel runtime.
+- Workflow GitHub Actions run 1111: SUCCESS; step `Validate NEXTWAY Italian and English localization`: SUCCESS.
+- Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44265726091
+- Nessuna chiamata OpenAI, nessun token/credito AI consumato.
+- Nessun deploy Netlify; la UI resta sul branch PR #58.
+
+### Limiti e prossimi completamenti
+- La lingua inglese copre i testi statici e numerosi messaggi dinamici noti. Le stringhe dinamiche composte con dati runtime, nuovi messaggi futuri o contenuti non presenti nel dizionario possono restare in italiano: estendere il dizionario quando si aggiungono funzionalità.
+- I contenuti commerciali, i documenti Knowledge e i dati inseriti dall'utente non vengono tradotti automaticamente: devono essere forniti nella lingua corretta e sottoposti ad approvazione.
+- Il selettore lingua è locale al browser e non modifica la lingua del workspace né i dati nel database.
+- Resta da eseguire un controllo visivo manuale delle pagine in EN e la verifica end-to-end dopo il rilascio frontend.
+- Non dichiarare completata la localizzazione di tutto il prodotto NEXTWAY finché non sono coperte anche tutte le stringhe dinamiche e i futuri moduli.
+
+### Stato
+- COMPLETATO E VERIFICATO: runtime IT/EN, collegamento alle 7 pagine operative, test CI statici.
+- ESEGUITO MA NON VERIFICATO VISIVAMENTE: resa completa in browser desktop/mobile e tutti i messaggi dinamici runtime.
+- DA COMPLETARE: controllo visivo e copertura progressiva delle stringhe dinamiche mancanti; localizzazione del sito pubblico solo se richiesta.
+
+### Registro cronologico MASTER
+- 18-11-2026 — aggiunto runtime centralizzato di localizzazione IT/EN e test CI; nessun deploy frontend e nessun consumo di token AI.
