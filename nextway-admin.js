@@ -702,7 +702,7 @@
         if (manifest.schema_version !== 1 || manifest.workspace_key !== "zinzino-italia" ||
             !["it", "en"].includes(manifest.language_code) || !Array.isArray(manifest.documents) ||
             manifest.documents.length !== 7) {
-          throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 8 documenti IT/EN.");
+          throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 7 documenti IT/EN.");
         }
         const documents = await Promise.all(manifest.documents.map(async (item) => {
           if (!/^[a-z0-9-]+\.md$/.test(item.file) ||
