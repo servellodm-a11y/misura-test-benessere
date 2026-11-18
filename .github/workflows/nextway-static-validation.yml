@@ -55,6 +55,7 @@ on:
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
       - "scripts/test-nextway-multi-workspace-sql.mjs"
       - "scripts/test-nextway-workspace-admin-security.mjs"
+      - "scripts/test-nextway-workspace-admin-bootstrap.mjs"
       - "scripts/test-nextway-workspace-data-association.mjs"
       - "scripts/test-nextway-workspace-memberships.mjs"
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
@@ -192,6 +193,8 @@ jobs:
         run: node scripts/test-nextway-multi-workspace-sql.mjs
       - name: Validate NEXTWAY workspace admin security contract
         run: node scripts/test-nextway-workspace-admin-security.mjs
+      - name: Validate NEXTWAY workspace Owner bootstrap security contract
+        run: node scripts/test-nextway-workspace-admin-bootstrap.mjs
       - name: Validate NEXTWAY local CORS allow-lists
         run: node scripts/test-nextway-local-cors.mjs
       - name: Validate NEXTWAY local preflight shell syntax
