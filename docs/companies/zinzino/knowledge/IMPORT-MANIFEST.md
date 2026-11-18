@@ -10,7 +10,6 @@
 | partner-kits-and-compensation-boundaries.md | partner_program | training_material | Kit Partner e limiti del Piano Compensi | Da verificare a ogni refresh |
 | premier-kit-catalog-validation.md | customer_catalog | training_material | Catalogo Premier Kit e stato validazione | Snapshot 17/11/2026 |
 | compensation-plan-eu-2025-italian-reference.md | partner_compensation_reference | training_material | Piano Compensi Zinzino — guida italiana al master europeo vigente | Corrispondenza IT/EN confermata dall'utente il 18/11/2026; vigente in Italia a novembre 2026 secondo conferma utente; 20 regole strutturate, calcoli disabilitati |
-| compensation-plan-italian-2024-comparison.md | partner_compensation_reference | training_material | Confronto PDF italiano 2024 e master EU 2025 | Riferimento localizzato 14/11/2024; differenze/ambiguità note; non usare da solo per calcoli |
 | compensation-plan-eu-2025-structured-rules.md | partner_compensation_rules | training_material | Regole Piano Compensi EU 2025 — estrazione strutturata fase 2 | 20 regole; test di coerenza tabellare; calcoli disabilitati | 
 | balancetest-product-and-use-reference.md | customer_product_education | training_material | BalanceTest — scheda prodotto e istruzioni ufficiali | Product Sheet italiano 06/10/2026; aggiornare prima di ogni uso commerciale |
 | shop-catalog-index.md | customer_catalog | training_material | Shop Zinzino Italia — indice categorie e prodotti | Indice consultato 17/11/2026; schede e checkout da aggiornare prima dell'uso |
