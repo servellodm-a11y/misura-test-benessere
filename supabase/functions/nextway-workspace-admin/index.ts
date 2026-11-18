@@ -167,8 +167,17 @@ Deno.serve(async (req) => {
         .select("id,status").eq("id", body.workspace_id).maybeSingle();
       if (workspaceError) throw workspaceError;
       if (!workspace) return respond({ error: "Workspace non trovato" }, 404, origin);
-      if (body.membership_status === "active" && workspace.status !== "active") {
-        return respond({ error: "Attiva prima il workspace per attivare una membership" }, 409, origin);
+      // Bootstrap exception: the authenticated platform_admin may activate
+      // only their own first Owner membership while the workspace is still draft.
+      // The invited record must already exist; all other active memberships require
+      // an active workspace. The partial unique owner index remains authoritative.
+      const isBootstrapOwner = body.membership_status === "active" &&
+        workspace.status === "draft" &&
+        body.workspace_role === "workspace_owner" &&
+        body.user_id === authData.user.id;
+      if (body.membership_status === "active" &&
+          workspace.status !== "active" && !isBootstrapOwner) {
+        return respond({ error: "Per attivare questa membership il workspace deve essere attivo. In bozza è consentito solo il bootstrap del proprio Owner." }, 409, origin);
       }
 
       const { data: authUser, error: userError } = await admin.auth.admin.getUserById(body.user_id);
@@ -192,6 +201,11 @@ Deno.serve(async (req) => {
         if (!existing || !["invited", "active"].includes(existing.membership_status)) {
           return respond({
             error: "Per attivare l'accesso deve esistere una membership invited. Crea prima l'invito."
+          }, 409, origin);
+        }
+        if (isBootstrapOwner && existing.membership_status !== "invited") {
+          return respond({
+            error: "Il bootstrap Owner richiede una membership Owner in stato invited."
           }, 409, origin);
         }
 
@@ -378,6 +392,20 @@ Deno.serve(async (req) => {
         patch.status = body.status;
       }
       if (!Object.keys(patch).length) return respond({ error: "Nessun campo modificabile" }, 400, origin);
+      if (patch.status === "active") {
+        const { data: owner, error: ownerError } = await admin
+          .from("nextway_workspace_memberships")
+          .select("id")
+          .eq("workspace_id", body.workspace_id)
+          .eq("workspace_role", "workspace_owner")
+          .eq("membership_status", "active")
+          .limit(1)
+          .maybeSingle();
+        if (ownerError) throw ownerError;
+        if (!owner) {
+          return respond({ error: "Impossibile attivare il workspace: assegna prima una membership Owner attiva." }, 409, origin);
+        }
+      }
       patch.updated_at = new Date().toISOString();
       const { data, error } = await admin.from("nextway_workspaces").update(patch)
         .eq("id", body.workspace_id).select("id,workspace_key,name,status,updated_at").maybeSingle();
