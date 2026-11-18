@@ -1,5 +1,6 @@
 name: NEXTWAY static validation
 # Includes secure initial Owner bootstrap and lifecycle regression checks.
+# Runs the complete static validation suite on the feature branch.
 
 on:
   push:
