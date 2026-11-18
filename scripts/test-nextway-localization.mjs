@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import vm from "node:vm";
 
 const runtime = fs.readFileSync("nextway-i18n.js", "utf8");
 const pages = [
@@ -30,6 +31,27 @@ assert.match(runtime, /"Criteri di qualificazione dei contatti": "Contact qualif
 assert.match(runtime, /"Ricerca mirata dei profili": "Targeted profile search"/);
 assert.match(runtime, /"Salva nuova password": "Save new password"/);
 assert.doesNotMatch(runtime, /fetch\s*\(|XMLHttpRequest|openai|api\.openai\.com/i);
+let confirmedMessage = "";
+const sandboxWindow = { alert() {}, confirm(message) { confirmedMessage = message; return true; }, prompt(message) { return message; } };
+const sandboxDocument = {
+  readyState: "loading",
+  documentElement: { lang: "it" },
+  title: "NEXTWAY",
+  body: { nodeType: 1, matches() { return false; }, hasAttribute() { return false; }, childNodes: [] },
+  addEventListener() {},
+  getElementById() { return null; },
+};
+vm.runInNewContext(runtime, { window: sandboxWindow, document: sandboxDocument, Node: { ELEMENT_NODE: 1, TEXT_NODE: 3 }, MutationObserver: class {}, localStorage: { setItem() {} } });
+sandboxWindow.NEXTWAY_I18N.setLanguage("en");
+assert.equal(sandboxDocument.documentElement.lang, "en");
+assert.equal(sandboxWindow.NEXTWAY_I18N.translate("Attivare il workspace Alpha?"), "Activate workspace Alpha?");
+sandboxWindow.confirm("Approvare il documento Policy? Sarà disponibile alla ricerca nel workspace.");
+assert.equal(confirmedMessage, "Approve document Policy? It will be available in workspace search.");
+sandboxWindow.confirm("Confermi di creare l’account e inviare l’invito al partner? L’operazione non è reversibile dalla coda conversioni.");
+assert.equal(confirmedMessage, "Confirm create the account and send the Partner invitation? This operation cannot be reversed from the conversion queue.");
+sandboxWindow.NEXTWAY_I18N.setLanguage("it");
+assert.equal(sandboxDocument.documentElement.lang, "it");
+assert.equal(sandboxWindow.NEXTWAY_I18N.translate("Activate workspace Alpha?"), "Attivare il workspace Alpha?");
 
 const dictionaryKeys = new Set([...runtime.matchAll(/^\s*"([^"]+)"\s*:/gm)].map((match) => match[1]));
 const dynamicMessageFiles = ["nextway-cloud.js", "nextway-admin.js", "nextway-setter.js"];
