@@ -757,7 +757,19 @@
     "Richieste pronte per l’attivazione": "Requests ready for activation",
     " richieste pendenti": " pending requests",
     " richieste pronte per l’attivazione": " requests ready for activation",
-    " (massimo 100).": " (maximum 100)."
+    " (massimo 100).": " (maximum 100).",
+    "Confermi di ": "Confirm ",
+    "creare l’account e inviare l’invito al partner": "create the account and send the Partner invitation",
+    "registrare il cliente nell’archivio del proprietario": "register the customer in the owner's archive",
+    " L’operazione non è reversibile dalla coda conversioni.": " This operation cannot be reversed from the conversion queue.",
+    " I membri perderanno l'accesso operativo.": " Members will lose operational access.",
+    " I membri perderanno l’accesso operativo.": " Members will lose operational access.",
+    "? Sarà disponibile alla ricerca nel workspace.": "? It will be available in workspace search.",
+    "Motivo del rifiuto (almeno 5 caratteri):": "Rejection reason (at least 5 characters):",
+    "Salvare la configurazione commerciale ": "Save the commercial configuration ",
+    "Attivare ": "Activate ",
+    "Importare ": "Import ",
+    "È presente una richiesta di creazione senza risposta confermata. Il modulo è stato ripristinato: premi di nuovo “Crea conversazione e genera bozza” per ripetere la stessa richiesta senza duplicare il Lead.": "A creation request is pending without a confirmed response. The form has been restored: click “Create conversation and generate draft” again to retry the same request without duplicating the Lead."
   };
 
   const reverse = Object.fromEntries(Object.entries(translations).map(([it, en]) => [en, it]));
@@ -775,7 +787,16 @@
         .sort((a, b) => b.length - a.length)[0];
       if (prefix) translated = table[prefix] + trimmed.slice(prefix.length);
     }
-    if (!translated) return source;
+    if (!translated) {
+      translated = trimmed;
+    }
+    const fragments = Object.keys(table)
+      .filter((key) => key.length >= 8 && !key.endsWith(":") && !key.endsWith(" "))
+      .sort((a, b) => b.length - a.length);
+    for (const fragment of fragments) {
+      if (translated.includes(fragment)) translated = translated.split(fragment).join(table[fragment]);
+    }
+    if (translated === trimmed && !table[trimmed]) return source;
     const start = source.indexOf(trimmed);
     return source.slice(0, start) + translated + source.slice(start + trimmed.length);
   }
