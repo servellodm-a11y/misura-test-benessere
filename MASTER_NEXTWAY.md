@@ -3869,3 +3869,54 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — letture read-only di Supabase live, elenco Edge Functions, migration tracking, conteggi workspace/Knowledge, confronto sorgente live e GitHub main di nextway-workspace-admin e stato PR aperte. Aggiornamento solo documentale; nessuna modifica runtime.
+
+
+## ALLINEAMENTO LIVE WORKSPACE, CONVERSIONI E EDGE FUNCTION — 18-11-2026 (AGGIORNAMENTO)
+
+### Autorizzazione e limite costi
+- L'utente ha autorizzato gli interventi necessari anche prima del 4 dicembre 2026, con condizione inderogabile: procedere solo se non comportano costi aggiuntivi, crediti/token a pagamento, acquisti o upgrade. Se un costo non è certo, fermarsi.
+- Nessun servizio a pagamento, nuovo progetto/branch Supabase, upgrade o credito AI acquistato è stato attivato.
+- Nessun workspace Zinzino creato o attivato; nessun utente, cliente, partner o conversione reale creati.
+
+### Migrazioni applicate al progetto Supabase live
+Progetto nextway-platform, ref obqwbtlltxjfeirstsya. Le seguenti quattro migrazioni sono state applicate una alla volta tramite il flusso migration e verificate con query read-only dopo ciascuna:
+1. nextway_conversion_request_workspace_snapshot — versione registrata 20261118074515.
+2. nextway_conversion_workspace_finalization — versione registrata 20261118074524.
+3. nextway_partner_conversion_cancellation — versione registrata 20261118074531.
+4. nextway_setter_stale_output_trigger_workspace_fix — versione registrata 20261118074537.
+
+Verifiche live:
+- nextway_lead_conversion_requests.workspace_id presente; RPC nextway_create_lead_conversion_request e guard di revisione presenti; policy workspace SELECT e scope presenti.
+- nextway_client_workspace_attributions creata con RLS attiva e nessun accesso diretto a anon, authenticated o service_role; nextway_list_workspace_clients presente e accessibile solo ad authenticated; nextway_finalize_conversion_activation aggiornata per l'attribuzione cliente-workspace.
+- RPC nextway_cancel_conversion_activation presente; colonne cancelled_at, cancelled_by, cancellation_reason presenti; stato cancelled ammesso.
+- nextway_setter_workspace_generation_requests e tabella legacy nextway_setter_generation_requests entrambe preservate; trigger stale-output workspace creato; vecchio trigger legacy assente.
+- I conteggi pre-migrazione erano 0 conversion requests, 0 clients e 0 partner_details. Nessuna riga applicativa è stata creata o modificata dalle migrazioni.
+- Migration registry ora contiene 7 record: le 3 registrazioni preesistenti più le 4 versioni sopra. La discrepanza generale tra tutte le migrazioni del repository e il registro live NON è completamente riconciliata: non applicare indiscriminatamente le restanti migrazioni.
+
+### Edge Function amministrativa
+- nextway-workspace-admin aggiornata con il sorgente main (blob SHA 303bf5bb7c1b8adc84237c7387f81bbc1d7c09dd).
+- Deploy completato: ACTIVE v4, verify_jwt=true, hash live c2fed4940656163192f1669eb37db67daf47f1534ae76441d68145287e3d477b.
+- La versione distribuita contiene i controlli di conferma email, membership invited preesistente, corrispondenza conversione activated/activation_user_id/workspace_id e preservazione invited_by.
+- Il codice conserva NEXTWAY_ALLOWED_ORIGINS come secret runtime senza leggerlo o modificarlo; aggiunge localhost:8000 e misura-test-benessere.pages.dev alla lista predefinita. Il valore effettivo del secret non è stato ispezionato.
+- verify_jwt resta true. Nessuna chiave o secret è stato letto o modificato.
+
+### Test, PR e rilievi
+- PR #57 resta open e draft: https://github.com/servellodm-a11y/misura-test-benessere/pull/57. Contiene test statici di regressione per i controlli di sicurezza amministrativa; non è stata integrata in main.
+- GitHub Actions run 1072, commit 179614fc45fce8eb97c6ea6d1256d392d04859a0, conclusione success: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44260110418.
+- Supabase Security Advisors: 4 rilievi INFO RLS enabled/no policy, inclusa la tabella attribuzioni volutamente non accessibile direttamente; 22 WARN su funzioni SECURITY DEFINER invocabili da authenticated, da valutare singolarmente perché alcune sono RPC intenzionali con controlli interni; 1 WARN su Leaked Password Protection disabilitata. Nessuna correzione automatica applicata ai rilievi.
+- Cloudflare Pages ha riportato un deploy di preview riuscito per il branch PR #57; non è stato effettuato un deploy Netlify di produzione.
+- Nessun test runtime con utenti o conversioni reali è stato eseguito.
+
+### Stato e prossime attività
+- COMPLETATO E VERIFICATO: quattro migrazioni workspace/conversioni/Setter applicate; controlli strutturali, trigger e privilegi verificati.
+- COMPLETATO E VERIFICATO: Edge Function nextway-workspace-admin live v4.
+- COMPLETATO E VERIFICATO: CI statico run 1072 success.
+- DA COMPLETARE: review e integrazione PR #57; non fondere finché non è escluso un deploy di produzione non desiderato.
+- DA COMPLETARE: riconciliazione completa del migration registry rispetto ai file repository.
+- DA COMPLETARE: valutazione mirata dei 22 warning SECURITY DEFINER e della protezione password compromesse; non cambiare ACL o Auth settings senza analisi specifica.
+- DA COMPLETARE: collegamento effettivo Knowledge Base → AI Setter, poi multilinguismo IT/EN, poi test integrati.
+- Vincolo costi: nessun nuovo branch/progetto Supabase a pagamento o operazione che richieda crediti/token acquistati.
+- Vincolo produzione: nessun deploy Netlify di produzione eseguito; non avviare deploy frontend di produzione senza autorizzazione specifica.
+
+### Registro cronologico MASTER
+- 18-11-2026 — applicate e verificate le quattro migrazioni workspace/conversioni/Setter sul progetto Supabase live; migration registry passato da 3 a 7 record. Distribuita nextway-workspace-admin v4 dal sorgente main. CI PR #57 run 1072 success. Solo le modifiche database/Edge Function sopra descritte hanno toccato il runtime; nessun workspace o record commerciale creato.
