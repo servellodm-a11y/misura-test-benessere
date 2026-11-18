@@ -3869,3 +3869,65 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — letture read-only di Supabase live, elenco Edge Functions, migration tracking, conteggi workspace/Knowledge, confronto sorgente live e GitHub main di nextway-workspace-admin e stato PR aperte. Aggiornamento solo documentale; nessuna modifica runtime.
+
+
+## AGGIORNAMENTO SERALE — STATO LIVE E PR #57/#58 — 18-11-2026, ORE 19:24
+
+### Perimetro, fonti e distinzione delle evidenze
+- Aggiornamento basato su letture GitHub e Supabase effettuate il 18-11-2026 alle 19:24 Europe/Rome. Il progetto Supabase è stato interrogato esclusivamente in lettura; i log GitHub Actions sono stati consultati senza rilanciare workflow.
+- HEAD di `main` osservato: `163852dc11400bd971ca9d4921e8c2a421d1a7dd` (`163852d`), commit documentale del mattino. Il commit combinato di stato GitHub non ha restituito status check associati a questo SHA; le evidenze CI sotto riportate appartengono ai branch PR, non a `main`.
+- La precedente rilevazione del 18 novembre che riportava 0 workspace, 0 membership, sole 3 migrazioni e `nextway-workspace-admin` v3 è superata dai controlli live delle 19:24 qui registrati. Non usare quei valori precedenti come stato corrente.
+- Nessuna modifica a codice applicativo, database, Edge Functions, impostazioni, segreti, configurazioni o deploy è stata eseguita in questo aggiornamento. Le variazioni live sono state soltanto osservate; questa verifica non attribuisce l'azione o l'autore che le ha prodotte.
+
+### GitHub: PR e validazione automatizzata
+- PR #58, `feat/nextway-setter-knowledge-context-20261118`: **OPEN, DRAFT, NOT MERGED**. Head osservato `03b667dcdd121eecec66862d1efb74bc9d5b2e9f`; confronto con `main`: 114 commit avanti, 0 indietro. Il diff comprende modifiche a AI Setter, Knowledge Ingest/Upload, workspace-admin, migrazione di ricerca Knowledge bilingue, localizzazione IT/EN, test e documentazione. Il contenuto del branch non è quindi parte di `main`.
+- GitHub Actions `NEXTWAY static validation`, run #1177, ID `44289262709`, sul commit head della PR #58: **SUCCESS**. Il job `validate` e tutti gli step riportati risultano completati con successo. I log confermano, tra gli altri: test statico workspace/Owner bootstrap; contratto di recupero Knowledge dal Setter; contratto localizzazione IT/EN; controlli workspace-scoped, audience-scoped, lingua-specifici, approved-only, validità, sanitizzazione e limiti; type-check Deno di AI Setter, Knowledge Ingest, Knowledge Upload, conversion provisioning, workspace-admin e search. Nei log risultano inoltre 68/68 controlli statici sul flusso conversione workspace e 6/6 test unitari sul ciclo invito Partner.
+- La run #1177 dimostra il superamento dei controlli automatizzati del branch, non un collaudo end-to-end della UI live o un test con utenti reali. La PR resta draft e non integrata.
+- PR #57, `fix/nextway-workspace-admin-conversion-guards-20261118`: **OPEN, DRAFT, NOT MERGED**. Head `53918a39b5f9e923f995c754ee0d77b73638c391`; la run osservata sul commit, #1073 (ID `44261580710`), è **SUCCESS**. La PR riguarda le guardie statiche di sicurezza per email confermata, membership invited, integrità conversione e conservazione dell'invitante.
+- La PR #10 resta aperta e non mergeable; riguarda la riduzione delle ricerche prospect ripetute e non è il passaggio di allineamento workspace/Knowledge.
+
+### Supabase live: stato aggiornato
+- Progetto `nextway-platform`, ref `obqwbtlltxjfeirstsya`, regione `eu-west-1`: **ACTIVE_HEALTHY**.
+- Conteggi letti direttamente: `nextway_workspaces` = 1; `nextway_workspace_memberships` = 1; `nextway_workspace_prompts` = 0; `nextway_workspace_prospect_criteria` = 0; `nextway_knowledge_documents` = 0; `nextway_knowledge_chunks` = 0; `nextway_leads` = 1.
+- Il workspace `zinzino-italia` / “Zinzino Italia” risulta **active**. La membership associata risulta `workspace_owner` con stato **active**. È quindi verificato che il bootstrap Owner e l'attivazione workspace sono ora completati sul database live. La query non ha identificato chi abbia eseguito l'ultima attivazione né il momento esatto dell'operazione.
+- Il workspace attivo non è ancora popolato: nessun prompt, criterio di prospect o documento/chunk Knowledge risulta presente. Non dichiarare quindi completata l'operatività documentale o la governance AI del workspace.
+- Migration tracking: ora risultano 9 registrazioni:
+  - `20261117114333` — `20261117130000_fix_nextway_set_lead_updated_at_search_path`;
+  - `20261117123426` — `fix_nextway_admin_and_ai_analysis_search_paths`;
+  - `20261117132435` — `nextway_lead_commercial_audience`;
+  - `20261118074515` — `nextway_conversion_request_workspace_snapshot`;
+  - `20261118074524` — `nextway_conversion_workspace_finalization`;
+  - `20261118074531` — `nextway_partner_conversion_cancellation`;
+  - `20261118074537` — `nextway_setter_stale_output_trigger_workspace_fix`;
+  - `20261118074914` — `nextway_workspace_scoped_rls`;
+  - `20261118080714` — `nextway_knowledge_bilingual_search`.
+- Il registro è quindi passato da 3 a 9 versioni rispetto alla precedente lettura. La riconciliazione completa file-migrazione → oggetti effettivi (tabelle, colonne, indici, trigger, policy, grant e definizioni RPC) resta **DA COMPLETARE**; la sola presenza nel registro non sostituisce il confronto delle definizioni live.
+
+### Edge Functions live
+- `nextway-workspace-admin`: **ACTIVE v5**, `verify_jwt=true`, SHA-256 sorgente `8c8fa3b50985192ef738897389517951a18673fa73ade81fa89c139126283359`. La versione live include la lista CORS predefinita con localhost:8000 e il dominio Pages, oltre alle origini configurate; il valore del secret `NEXTWAY_ALLOWED_ORIGINS` non è stato letto.
+- `nextway-knowledge-ingest`: **ACTIVE v2**, `verify_jwt=true`.
+- `nextway-knowledge-upload`: **ACTIVE v2**, `verify_jwt=true`.
+- `nextway-ai-setter`: **ACTIVE v3**, `verify_jwt=false`. La PR #58 contiene modifiche al sorgente AI Setter per il recupero Knowledge, ma la descrizione della PR dichiara che questa versione modificata non è stata distribuita. Non dichiarare il collegamento Knowledge Base → AI Setter operativo sul live.
+- `nextway-search`: **ACTIVE v3**, `verify_jwt=true`.
+- `nextway-conversion-provisioning`: **ACTIVE v3**, `verify_jwt=true`.
+- `hyper-api`: **ACTIVE v5**, `verify_jwt=true`.
+- È inoltre presente una funzione con slug `rapid-function`, nome visualizzato `nextway-ai-setter`, **ACTIVE v8**, `verify_jwt=true`. Va mantenuta distinta dalla funzione con slug `nextway-ai-setter` v3: la relazione tra i due endpoint non è stata determinata in questa verifica.
+
+### Stato per componente
+- Workspace Zinzino creato e attivo; membership Owner active: **COMPLETATO E VERIFICATO** sul database live.
+- `nextway-workspace-admin` v5: **COMPLETATO E VERIFICATO** quanto a versione/stato live e hash; i test statici del branch sono PASS.
+- Knowledge Ingest e Upload v2: **COMPLETATO E VERIFICATO** quanto al deployment live. Importazione e approvazione dei documenti: **DA COMPLETARE** (0 documenti e 0 chunk).
+- Migrazioni conversione, workspace-scoped RLS e ricerca Knowledge bilingue: **COMPLETATO E VERIFICATO** quanto alla presenza nel migration tracking; verifica completa delle definizioni DB: **DA COMPLETARE**.
+- Prompt e criteri workspace: **DA COMPLETARE** (nessun record presente).
+- Recupero Knowledge nell'AI Setter: **ESEGUITO MA NON VERIFICATO sul live**; contratto statico PASS nel branch PR #58, ma funzione live `nextway-ai-setter` ancora v3 e PR non merged.
+- Localizzazione UI IT/EN: **ESEGUITO MA NON VERIFICATO sul live**; test statico PASS nel branch PR #58, ma codice non ancora integrato in `main`.
+- Verifica visiva desktop/mobile e test end-to-end: **DA COMPLETARE** dopo la finestra e l'autorizzazione di rilascio.
+- Merge PR #57/#58, deploy frontend Netlify e ulteriori modifiche live: **BLOCCATO/RINVIATO** secondo i vincoli già registrati; nessuna di queste operazioni è stata eseguita in questo aggiornamento.
+
+### Prossimo passo operativo
+1. Proseguire il punto 1 con la riconciliazione read-only delle 9 migrazioni registrate rispetto ai file del repository e alle definizioni effettive di policy, trigger, indici, grant e RPC.
+2. Dopo la riconciliazione, completare la revisione tecnica della PR #58 e definire un piano di rilascio separato per AI Setter/Knowledge/UI IT-EN. Non eseguire merge, migrazioni o deploy senza autorizzazione esplicita e senza rispettare il vincolo temporale già registrato.
+3. Solo dopo il rilascio autorizzato: popolare il workspace con contenuti approvati e configurazioni; quindi eseguire test end-to-end e verifica visiva.
+
+### Registro cronologico MASTER
+- 18-11-2026 19:24 Europe/Rome — nuova lettura read-only GitHub/Supabase: PR #57/#58, Actions #1073/#1177 e log #1177; 9 migrazioni registrate; workspace Zinzino active con Owner active; funzioni workspace-admin v5 e Knowledge ingest/upload v2 live; AI Setter live v3; nessun documento/chunk o prompt/criterio. Aggiornato esclusivamente MASTER_NEXTWAY.md; nessuna modifica runtime.
