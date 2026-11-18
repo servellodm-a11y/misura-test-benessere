@@ -3889,7 +3889,7 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Implementazione preparata in PR #58
 - PR draft: https://github.com/servellodm-a11y/misura-test-benessere/pull/58
-- Branch `feat/nextway-setter-knowledge-context-20261118`, head `8a4edecd90cfcec1d98b137cd75c73085afebd89`.
+- Branch `feat/nextway-setter-knowledge-context-20261118`, ultimo head documentale `bcac7469c9011bd0d3f0000bb82161ab53946118`; il codice verificato dalla CI è al commit `8a4edecd90cfcec1d98b137cd75c73085afebd89` (i commit successivi hanno aggiornato solo il MASTER).
 - L'AI Setter cerca estratti con la RPC workspace-scoped solo per il workspace della conversazione, per l'audience esplicita Cliente/Partner e per i moduli configurati nel campo `commercial_data.knowledge_modules`.
 - Configurazione Zinzino:
   - Cliente: customer_rewards, customer_catalog, customer_product_education.
