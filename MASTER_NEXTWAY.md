@@ -1,3 +1,76 @@
+## INVENTARIO MULTILINGUA DEL REPOSITORY — 18 NOVEMBRE 2026
+
+### Perimetro e metodo
+- Ispezionati in sola lettura i seed Zinzino, i moduli browser di configurazione, il frontend CRM/Setter, le Edge Functions AI Setter/ricerca/Knowledge Base e le migrazioni workspace/Knowledge Base presenti su `main`.
+- Fonti principali e blob osservati:
+  - `docs/companies/zinzino/workspace-commercial-settings.json` — `f7d61738ba5cb76189093350dca3a3ce7eaf57d4`.
+  - `docs/companies/zinzino/commercial-base.v1.json` — `4bf2b577ea7f7f25e19b9daef1abdda7d79f9112`.
+  - `nextway-workspace-commercial-config.js` — `5503633f1393d6f66e73e2eb8a827ba4b79e0b04`.
+  - `nextway-setter.js` — `1018db6c90399f474d15fb9e8b09b418aa34c79a`.
+  - `supabase/functions/nextway-ai-setter/index.ts` — `4757e6c46bc4e54088d4f8cc66c221b27ee1a00f`.
+  - `supabase/functions/nextway-search/index.ts` — `182a75a90c137ba8b1e275543d6b2acdff9911de`.
+  - `supabase/functions/nextway-knowledge-ingest/index.ts` — `abbec98eb97dd2c4e0bbb00f88fdc2b76b1f590a`.
+  - `supabase/functions/nextway-knowledge-upload/index.ts` — `505406880ae308264370b1b7405691752de55453`.
+  - `supabase/migrations/20261111190000_nextway_multi_workspace_foundation.sql` — `a048ad1546538da8b80e4dfa8f228f7c1aebb496`.
+  - `supabase/migrations/20261111170000_nextway_knowledge_base.sql` — `889983d215c0dadc0eacac30ff0e91d77731f1da`.
+  - `supabase/migrations/20261116140000_nextway_workspace_commercial_config.sql` — `d85f22f55122cfb1ccb0d76b423e0752c20c57f1`.
+- Inventario del repository, non test runtime: i risultati descrivono il codice presente su GitHub `main`; non dimostrano che tutte le Edge Functions siano deployate né che il sito live esegua questi blob.
+
+### Elementi già presenti
+1. **Seed ricerca IT/EN — PARZIALMENTE PRONTO**
+   - `workspace-commercial-settings.json` contiene due rami di query, `it` ed `en`, per tutti e nove i segmenti commerciali.
+   - Sono presenti 5 voci per segmento e lingua: 45 query IT e 45 query EN. Il normalizzatore `nextway-workspace-commercial-config.js` legge entrambi i rami e rifiuta la configurazione se mancano query IT o EN o criteri per un segmento.
+   - Questo dimostra la disponibilità strutturale di query di ricerca in entrambe le lingue, non la qualità linguistica/semantica di ogni query né la capacità di tutta la ricerca di operare in EN.
+2. **Metadati workspace — PARZIALI**
+   - La fondazione workspace prevede `market_country` e `language_code`, con default `it` e validazione del formato lingua.
+   - Non è presente nel DDL esaminato un campo dedicato `supported_languages`, né campi dedicati `locale`, `timezone` o `currency` sulla tabella workspace.
+   - La RPC di lettura configurazione commerciale restituisce `market_country` e `language_code`; non espone una lista di lingue abilitate.
+3. **Base commerciale Zinzino — ITALIANA**
+   - `commercial-base.v1.json` identifica il mercato IT, lingua `it`, valuta EUR e fuso `Europe/Rome`.
+   - Il seed contiene alcuni riferimenti a fonti originali in inglese e riepiloghi/annotazioni in italiano; non costituisce un catalogo commerciale completo bilingue. La lingua principale della base resta `it`.
+   - `nextway-company-config.js` definisce Zinzino con paese Italia e lingua `it`; i suoi termini e modificatori commerciali sono prevalentemente italiani.
+4. **AI Setter — NON ANCORA MULTILINGUE CONFIGURABILE**
+   - Il payload di contesto include dati prospect, obiettivo, percorso commerciale, criteri, istruzioni approvate e storico; nel codice esaminato non viene passato un campo esplicito `requested_language` o una preferenza lingua del contatto/workspace.
+   - Le istruzioni di sistema sono scritte in italiano e non definiscono una regola esplicita per la lingua di risposta. Lo storico può contenere messaggi in più lingue, ma non è un controllo deterministico della lingua desiderata.
+   - Il modulo frontend `nextway-setter.js` non contiene, nell'inventario effettuato, una selezione/persistenza esplicita della lingua della conversazione.
+5. **Knowledge Base — SOLO ITALIANO NELLA V1**
+   - La migrazione iniziale impone `language_code = 'it'` sulla tabella documenti.
+   - La ricerca SQL usa la configurazione linguistica PostgreSQL `italian` sia per indicizzazione sia per query; il parametro `p_language_code` filtra i documenti, ma non rende multilingue il motore full-text.
+   - `nextway-knowledge-ingest` rifiuta ogni lingua diversa da `it`; `nextway-knowledge-upload` applica lo stesso vincolo.
+   - Il manifest Knowledge Zinzino registra `language_code: it`. L'importazione di contenuti EN non è quindi abilitata dal flusso corrente.
+6. **Ricerca prospect — SUPPORTO EN PARZIALE**
+   - Le query seed IT/EN vengono normalizzate e mantenute separate dal modulo di configurazione commerciale.
+   - La Edge Function `nextway-search` usa in più punti normalizzazione `toLocaleLowerCase('it')`; l'inventario non ha rilevato una scelta dinamica della locale. Ciò non impedisce necessariamente query inglesi, ma non rappresenta una gestione completa delle convenzioni linguistiche.
+7. **UI e amministrazione — ITALIANO**
+   - Le interfacce HTML/JS CRM, Setter e amministrazione esaminate contengono etichette, messaggi e flussi scritti direttamente in italiano.
+   - Non è stato individuato in questo perimetro un catalogo centralizzato di traduzioni UI o un selettore lingua globale.
+
+### Valutazione complessiva
+- **Italiano:** lingua attuale principale del prodotto e della configurazione Zinzino.
+- **Inglese:** presente nei seed di ricerca (45 query) e in alcune fonti originali; non risulta una seconda lingua end-to-end per UI, AI Setter e Knowledge Base.
+- **Altre lingue:** non risultano ancora supportate dal flusso applicativo esaminato.
+- **Conclusione:** NEXTWAY possiede alcuni mattoni predisposti per IT/EN, ma allo stato del repository non può essere dichiarata una piattaforma operativa multilingue. Il limite più netto è la Knowledge Base, esplicitamente vincolata all'italiano; seguono UI e AI Setter senza gestione lingua esplicita.
+
+### Sequenza tecnica raccomandata — da realizzare separatamente
+1. Definire un contratto locale comune: `language_code`, `supported_languages`, lingua preferita utente/contatto, `market_country`, `locale`, `timezone` e `currency`, riutilizzando i campi già esistenti e senza duplicarli.
+2. Rendere la Knowledge Base capace di memorizzare lingue supportate e di indicizzare/ricercare secondo configurazioni linguistiche corrette; non basta togliere il vincolo `it` se il parser full-text resta italiano.
+3. Passare la lingua richiesta in modo esplicito al Setter e definire priorità e fallback; aggiungere test IT/EN, cambio lingua e storico misto.
+4. Separare i cataloghi UI e tradurre progressivamente CRM, Setter, dashboard e amministrazione.
+5. Rendere la ricerca prospect sensibile alla lingua selezionata senza alterare il mercato/workspace e testare le query EN.
+6. Aggiungere test automatici per Unicode, formattazione locale, fallback e isolamento documentale per mercato e workspace.
+7. Solo dopo i test statici e la revisione di sicurezza, pianificare eventuali migrazioni e deploy separati con autorizzazione.
+
+### Stato e limiti
+- Inventario repository: **COMPLETATO E VERIFICATO** per i file e i blob sopra elencati.
+- Supporto IT/EN end-to-end: **DA COMPLETARE**.
+- Nessun file applicativo, migrazione SQL, database, Edge Function live, segreto, configurazione o deploy è stato modificato in questo compito; viene registrato soltanto questo inventario nel MASTER.
+- Non sono stati eseguiti test runtime o collaudi con utenti; non è stata verificata la lingua delle versioni live delle funzioni.
+
+### Registro cronologico
+- 18-11-2026 — inventariato il supporto multilingue presente nel repository: query IT/EN nel seed, workspace language_code, limiti Knowledge Base solo IT, AI Setter senza lingua richiesta esplicita, UI italiana e ricerca con normalizzazione italiana. Solo MASTER aggiornato.
+
+---
+
 ## REQUISITO ARCHITETTURALE — PIATTAFORMA MULTILINGUE (18 NOVEMBRE 2026)
 
 ### Decisione e obiettivo
