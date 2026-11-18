@@ -4144,3 +4144,17 @@ La nota precedente che indicava il test come non eseguito localmente descriveva 
 - CI: nessun workflow run/status associato al commit `e12866ab465f586258395b4a182b51e86ce99ece` al momento dell'ultima interrogazione; test automatico quindi **non ancora verificato**.
 - Non eseguiti deploy Edge Function, migrazioni DB, merge PR, deploy Netlify, attivazione workspace o chiamate AI. PR #58 resta aperta e draft.
 - Sequenza operativa dopo la verifica CI e il successivo rilascio autorizzato: creare membership Owner in stato `invited`; attivare la stessa membership come Owner (solo per l'amministratore autenticato); quindi attivare il workspace.
+
+
+### Aggiornamento completamento bootstrap Owner — 18 novembre 2026, ore 10:50
+
+- Corretto il test di regressione preesistente `scripts/test-nextway-prospect-central-memory-integration.mjs`, che richiedeva la vecchia condizione di blocco assoluto e non contemplava l'eccezione bootstrap strettamente limitata all'Owner iniziale.
+- Corretto anche il dizionario IT/EN: `Importa pacchetto Zinzino (7 documenti)` → `Import Zinzino package (7 documents)`.
+- GitHub Actions run **44289097565**: `SUCCESS` sul commit `d6bc116e9bb957f14d5567dcd7a74f5c94369940`. Tutti i 70 step completati, inclusi test Owner bootstrap, localizzazione IT/EN, regressione workspace e type-check Deno della Edge Function `nextway-workspace-admin`.
+- Edge Function `nextway-workspace-admin` distribuita su Supabase progetto `obqwbtlltxjfeirstsya`: versione **5**, stato `ACTIVE`, `verify_jwt=true`, SHA-256 `8c8fa3b50985192ef738897389517951a18673fa73ade81fa89c139126283359`.
+- Verifica post-deploy del sorgente live: presenti la guardia bootstrap Owner e il controllo che impedisce l'attivazione del workspace senza Owner active.
+- Verifica DB successiva al deploy: workspace `zinzino-italia` ancora `draft`; membership totali 0; Owner attivi 0. Nessuna modifica ai dati di produzione.
+- La PR #58 resta aperta, draft e non merged. Head corrente al momento dell'aggiornamento: `d28c7deb41d4ff9de97130ae76836b61a6b7583f`. Il codice della Edge Function e i test inclusi nella run SUCCESS sono invariati rispetto al commit validato; i commit successivi riguardano il solo workflow e documentazione/controlli.
+- Non eseguiti merge, deploy Netlify, migrazioni SQL, chiamate AI o test su utenti reali.
+- **Azione manuale ancora necessaria nella UI autenticata**: creare la membership Owner in stato `invited` per il proprio profilo; quindi modificarla in `active` (ora consentito dal bootstrap autenticato); infine attivare il workspace. L'invito è un record interno e non invia email.
+- Non tentare di attivare il workspace prima che la membership Owner sia active.
