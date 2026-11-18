@@ -4097,3 +4097,11 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - **DA COMPLETARE:** preparare/validare il manifest Knowledge e completare l'allineamento degli altri materiali commerciali prima dell'eventuale ingestione amministrativa autorizzata.
 - **NON ESEGUITO:** ingestione Supabase e approvazione documenti; nessun workspace Zinzino creato.
 - Nessun token AI, deploy Netlify o merge eseguito.
+
+
+## 18 novembre 2026 — ultima correzione test import Zinzino
+- Corretto il messaggio finale di `scripts/test-nextway-zinzino-knowledge-import.mjs`: il manifest contiene 7 documenti, non 8.
+- Aggiunto controllo statico che impedisce duplicati nei nomi file del manifest.
+- Il test continua a controllare metadati, file presenti/non vuoti, limiti dimensione, JWT, approvazione pending e assenza di privilegi service_role nell'azione Admin.
+- Modifica registrata sul branch `feat/nextway-setter-knowledge-context-20261118`; esecuzione locale Node.js non disponibile in questa sessione, quindi non dichiarare il test eseguito.
+- Nessuna ingestione, workspace, merge, deploy o chiamata AI effettuati.
