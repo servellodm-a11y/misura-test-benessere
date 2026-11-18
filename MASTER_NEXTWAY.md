@@ -4018,3 +4018,16 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - GitHub Actions run 1115 SUCCESS, incluso il test `Validate NEXTWAY Italian and English localization`: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44266081394
 - La copertura non è ancora totale per ogni messaggio dinamico o testo generato da nuovi moduli: le voci non presenti nel dizionario restano nella lingua originale. Non tradurre automaticamente contenuti utente, documenti, JSON o dati commerciali.
 - Stato: COMPLETATO E VERIFICATO per il runtime e il contratto statico; ESEGUITO MA NON VERIFICATO VISIVAMENTE per la resa effettiva su browser desktop/mobile.
+
+
+### Copertura dinamica e test eseguibili IT/EN — 18-11-2026
+- Esteso il dizionario alle conferme composte con valori runtime: attivazione/archiviazione workspace, approvazione documenti, importazione Knowledge, configurazione commerciale e coda conversioni.
+- Tradotti i messaggi residui di AI Setter, sincronizzazione e controllo duplicati nella memoria condivisa.
+- La traduzione dei frammenti riconosce le frasi statiche note all'interno di conferme composte, mantenendo invariati i nomi e gli altri valori dinamici.
+- Aggiunto test automatico che confronta le stringhe passate a `say/status/alert/confirm/prompt` in `nextway-cloud.js`, `nextway-admin.js` e `nextway-setter.js` con il dizionario e i prefissi tradotti.
+- Aggiunto controllo di copertura per i testi statici visibili, placeholder e attributi accessibili delle sette pagine operative.
+- Aggiunto test eseguibile Node/V8 del runtime con DOM simulato: cambio lingua IT/EN, traduzione e ritorno IT, conferme dinamiche con dati variabili.
+- GitHub Actions run 1125 SUCCESS: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44267851327
+- Stato: COMPLETATO E VERIFICATO per copertura statica, messaggi dinamici noti e comportamento del runtime in ambiente simulato.
+- ESEGUITO MA NON VERIFICATO VISIVAMENTE: resa grafica su browser desktop/mobile e interazioni reali con Supabase. Non è disponibile un ambiente browser live autorizzato per la verifica in questa fase.
+- Nessun deploy Netlify, nessuna chiamata OpenAI, nessun token/credito consumato.
