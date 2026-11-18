@@ -1,4 +1,5 @@
 name: NEXTWAY static validation
+# Includes secure initial Owner bootstrap and lifecycle regression checks.
 
 on:
   push:
