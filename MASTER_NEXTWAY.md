@@ -4069,3 +4069,25 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Stato
 - COMPLETATO E VERIFICATO: confronto preliminare delle principali tabelle e soglie sopra elencate; report inserito nel branch PR #58.
 - DA COMPLETARE: confronto integrale residuo, controllo umano finale e approvazione separata prima di qualsiasi ingestione Knowledge.
+
+
+## ESITO ESTESO CONFRONTO PIANO COMPENSI ZINZINO IT/EN — 18 NOVEMBRE 2026
+
+Questa sezione **sostituisce e corregge** il precedente esito preliminare del confronto del piano compensi. Il controllo esteso ha individuato differenze materiali che non erano emerse nella prima verifica.
+
+- Confrontate anche le sezioni di viaggi incentive e glossario, oltre alle tabelle di compenso e ai requisiti dei titoli.
+- Le principali soglie di attivazione, Partner Kit, Fast Start, Customer Career Plan, Enrollment Incentive Program, Mentor Matching Bonus, Team Commission base, Volume Commission base, CAB base, One-Time Title Bonuses, titoli e bonus zPhone/zCar risultano coerenti nei valori principali esaminati.
+- **Discrepanza materiale confermata:** la tabella “Potential earnings / Tabella dei guadagni potenziali” presenta una diversa sequenza di massimali, in particolare nella riga Totale IC multipli. PDF italiano: valori tra cui 23.500, 27.500, 31.500, 52.500, 58.500, 70.500 e 132.000 PP/settimana. Master EN: 12.990, 17.320, 28.145, 32.475, 41.135, 60.620, 69.280, 77.940, 93.095, 101.755, 119.075 e 162.375. Le strutture delle colonne non sono sovrapponibili direttamente.
+- **Differenza da chiarire:** la riga CAB Accelerator / Acceleratore CAB presenta valori e celle valorizzate in modo differente tra i due PDF.
+- La tabella italiana include anche il riferimento 2 Star Global President nei riepiloghi, mentre la tabella riepilogativa inglese esaminata arriva alla colonna 1 Star Global President; il master descrive comunque il 2 Star nelle sezioni specifiche.
+- Le definizioni principali del glossario sono presenti in entrambe le versioni; campagne, destinazioni e condizioni operative dettagliate rinviano a documenti separati e aggiornamenti Back Office.
+- Creato e verificato il report aggiornato: `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.it-en-comparison.review.md`.
+- **Decisione:** confronto esteso completato con discrepanze materiali registrate. Le tabelle Potential Earnings, CAB Accelerator e i massimali multi-IC sono marcati **CONFLITTO TRA FONTI — NON UTILIZZARE** finché Zinzino non conferma la tabella applicabile al mercato italiano.
+- Non dichiarare i due PDF equivalenti. Non utilizzare i massimali divergenti per simulazioni, risposte commerciali o calcolo compensi.
+- Stato documento: `completed_with_material_discrepancies`; `ingestion_allowed: false`. Nessun caricamento/approvazione Supabase.
+- La precedente frase del report preliminare “nessuna differenza numerica nelle sezioni controllate” è superata e non va più utilizzata.
+
+### Stato
+- COMPLETATO E VERIFICATO: confronto esteso delle principali sezioni e identificazione delle discrepanze materiali; report e MASTER aggiornati sul branch PR #58.
+- BLOCCATO: approvazione della Knowledge Base per le parti del piano compensi che dipendono dalle tabelle divergenti, in attesa di conferma aziendale scritta.
+- Nessun token AI, deploy Netlify, merge o ingestione Supabase.
