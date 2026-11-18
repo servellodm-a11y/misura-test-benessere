@@ -18,6 +18,12 @@ on:
       - "supabase/functions/nextway-workspace-admin/**"
       - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
+      - "nextway-dashboard.html"
+      - "nextway-analisi.html"
+      - "nextway-ricerca.html"
+      - "nextway-reset-password.html"
+      - "nextway-i18n.js"
+      - "scripts/test-nextway-localization.mjs"
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
       - "nextway-workspace-commercial-config.js"
@@ -224,6 +230,8 @@ jobs:
         run: node scripts/test-nextway-setter-upstream-errors.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
+      - name: Validate NEXTWAY Italian and English localization
+        run: node scripts/test-nextway-localization.mjs
       - name: Validate NEXTWAY local static checks with Python 3
         run: python3 scripts/test-nextway-local-static.py
       - name: Validate Zinzino company configuration and search integration
