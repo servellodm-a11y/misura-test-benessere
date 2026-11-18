@@ -56,9 +56,14 @@ assert.match(workspaceAdmin, /workspace_key: key,[\s\S]*status: "draft"/,
   "new workspaces must start in draft state and never become searchable automatically");
 assert.match(workspaceAdmin, /if \(!\["draft", "active", "archived"\]\.includes\(String\(body\.status\)\)\)/,
   "workspace activation must use the explicit admin status transition");
-assert.match(workspaceAdmin, /body\.membership_status === "active" && workspace\.status !== "active"/,
-  "a normal membership cannot be activated before its workspace is active");
-assert.match(workspaceAdmin, /!authUser\.user\.email_confirmed_at/,
+assert.match(workspaceAdmin, /body\.membership_status === "active" &&\s*workspace\.status !== "active" && !isBootstrapOwner/,
+  "only the tightly-scoped initial Owner bootstrap may activate while a workspace is draft");
+assert.match(workspaceAdmin, /body\.workspace_role === "workspace_owner" &&\s*body\.user_id === authData\.user\.id/,
+  "draft bootstrap must be limited to the authenticated administrator own Owner membership");
+assert.match(workspaceAdmin, /existing\.membership_status !== "invited"/,
+  "draft Owner bootstrap must start from a previously invited membership");
+assert.match(workspaceAdmin, /Impossibile attivare il workspace[\s\S]*workspace_role", "workspace_owner"[\s\S]*membership_status", "active"/,
+  "workspace activation must require an active Owner membership");
   "normal user membership activation must require a confirmed account");
 assert.match(workspaceAdmin, /!existing \|\| !\["invited", "active"\]\.includes/,
   "normal user membership activation must follow an existing invitation");
