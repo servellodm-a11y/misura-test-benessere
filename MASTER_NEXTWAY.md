@@ -4071,7 +4071,18 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Conservare i PDF originali e le rispettive date stampate: la differenza tra le date non costituisce, da sola, prova di divergenza delle regole.
 - Non alterare, ricostruire o trasporre valori delle tabelle. Per le risposte commerciali usare le regole ufficiali del piano e mantenere sempre il disclaimer sui redditi: esempi e massimali non sono guadagni tipici, attesi o garantiti.
 
+### Allineamento configurazione commerciale — 18 novembre 2026
+- Aggiornato `docs/companies/zinzino/commercial-base.v1.json` sul branch: la fonte italiana è ora registrata come riferimento localizzato EU corrispondente al master 2025, sulla base della verifica già completata e confermata dal titolare della piattaforma.
+- Aggiornato il registro del master inglese EU 12/02/2025 con lo stato di equivalenza confermata; le date stampate 14/11/2024 e 12/02/2025 restano conservate.
+- Inserita una scheda strutturata del riferimento italiano e riallineata la conferma di validità a novembre 2026.
+- La sequenza Fast Start NEXTWAY resta quella confermata: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno per lato; duplicazione dei due Partner; ulteriori 10 punti cliente (4+6). Nessun importo promozionale è stato dedotto.
+- Restano disabilitati i calcoli automatici (`calculations_enabled=false`): copertura delle regole e casi di test indipendenti non sono ancora completi.
+- Il documento Customer Rewards collegato al mercato UK resta bloccato per validazione Italia; la sintesi Premier Kits EN resta draft con approvazione umana richiesta.
+- Nessuna ingestione Supabase, nessuna creazione workspace, nessun deploy Netlify, nessuna chiamata OpenAI o consumo di token/crediti.
+
 ### Stato
 - **COMPLETATO E VERIFICATO (conferma dell'utente):** corrispondenza del Piano Compensi EU 2025 italiano/inglese e validità dichiarata a novembre 2026.
-- **DA COMPLETARE:** riallineamento dei metadati e dei documenti Knowledge Base sul branch; eventuale ingestione Supabase solo nel flusso autorizzato e senza chiamate AI.
+- **COMPLETATO SUL BRANCH:** metadati del piano e sequenza Fast Start riallineati in `commercial-base.v1.json`.
+- **DA COMPLETARE:** preparare/validare il manifest Knowledge e completare l'allineamento degli altri materiali commerciali prima dell'eventuale ingestione amministrativa autorizzata.
+- **NON ESEGUITO:** ingestione Supabase e approvazione documenti; nessun workspace Zinzino creato.
 - Nessun token AI, deploy Netlify o merge eseguito.
