@@ -4038,7 +4038,10 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 ### Documentazione Zinzino in inglese
 - Aggiunto `docs/companies/zinzino/knowledge/en/premier-kits-overview.en.draft.md`: sintesi inglese del catalogo ufficiale Italy (EN), senza prezzi o condizioni permanenti; richiede revisione umana prima dell'ingestione.
 - Aggiunto `docs/companies/zinzino/knowledge/en/customer-rewards-program.en.review-required.md`: fonte inglese ufficiale individuata, ma PDF collegato alla pagina UK e datato 1 dicembre 2024; applicabilità ai clienti italiani non verificata. Stato `blocked_market_validation`; ingestione vietata.
-- Recuperato dalla Libreria il PDF italiano `Piano-Comp..pdf` (caricato il 17-11-2026). Il documento riporta internamente la data 14-11-2024 e 35 pagine PDF. La data non coincide con il riferimento alla versione europea 2025 precedentemente indicato; traduzione sospesa in attesa di chiarimento. Non modificare né aggiornare i contenuti del piano sulla base di supposizioni.
+- L'utente ha confermato che il PDF italiano `Piano-Comp..pdf` (35 pagine, footer 14/11/2024) è il riferimento europeo del piano compensi 2025 da utilizzare, pur con quella data stampata. È stata individuata la fonte ufficiale Zinzino del master inglese EU datato 12-02-2025: `https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf`.
+- Aggiunto `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.en.source.md`: scheda della fonte master inglese e criteri di approvazione. Non è una traduzione inventata: il documento inglese ufficiale viene usato come riferimento primario; il PDF italiano resta il riferimento confermato dall'utente.
+- Le due date stampate (14/11/2024 italiano e 12-02-2025 master inglese) non sono identiche. Prima dell'approvazione KB occorre confronto pagina per pagina e tabella per tabella per escludere differenze in soglie, bonus, condizioni e glossario. Lo stato di validità al 18-11-2026 è dichiarazione dell'utente, non verifica indipendente.
+- Nessun caricamento o approvazione su Supabase è stato eseguito.
 - Nessun documento inglese è stato caricato o approvato nella Knowledge Base Supabase.
 
 ### Verifica visiva e test end-to-end
