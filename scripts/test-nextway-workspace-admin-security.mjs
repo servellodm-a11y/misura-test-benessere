@@ -36,7 +36,7 @@ assert.match(edge, /membership_status === "active"/);
 
 // Membership activation must follow a real invitation and confirmed email.
 assert.match(edge, /body\.membership_status === "active" && !authUser\.user\.email_confirmed_at/);
-assert.match(edge, /membership_status === "invited"/);
+assert.match(edge, /\["invited",\s*"active"\]\.includes\(existing\.membership_status\)/);
 assert.match(edge, /Per attivare l'accesso deve esistere una membership invited/);
 
 // Conversion-created partners must be bound to the activated conversion,
