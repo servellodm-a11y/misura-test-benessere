@@ -3960,7 +3960,7 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### CI e limiti
 - Nuovo test statico esteso per vettori, RPC, ingest/upload, selezione lingua e allowlist workspace/brand.
-- GitHub Actions run 1091 SUCCESS sul commit codice `144c663ba6861568513634fe07fbd02c6fd64cc9`: test statici Knowledge Base IT/EN e type-check di tutte le Edge Functions completati. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44264407797.
+- GitHub Actions run 1094 SUCCESS sul commit codice `f76432ffa4357592d810a7809d644c329e84db69`: test statici Knowledge Base IT/EN e type-check di tutte le Edge Functions completati dopo l'allineamento del nome file migrazione al registro live. Run: https://github.com/servellodm-a11y/misura-test-benessere/actions/runs/44264559129.
 - Nessun token/credito AI consumato. Nessun documento, workspace, utente o conversione creati.
 - Il frontend non è stato pubblicato su Netlify; le modifiche UI sono nel branch della PR #58.
 - Questa tranche abilita la lingua dei documenti, della ricerca e delle bozze AI. La traduzione completa di tutte le schermate e dei messaggi amministrativi NEXTWAY resta DA COMPLETARE.
