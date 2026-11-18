@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 const setter = fs.readFileSync("supabase/functions/nextway-ai-setter/index.ts", "utf8");
 const bilingualMigration = fs.readFileSync(
-  "supabase/migrations/20261118110000_nextway_knowledge_bilingual_search.sql",
+  "supabase/migrations/20261118080714_nextway_knowledge_bilingual_search.sql",
   "utf8",
 );
 const ingest = fs.readFileSync("supabase/functions/nextway-knowledge-ingest/index.ts", "utf8");
