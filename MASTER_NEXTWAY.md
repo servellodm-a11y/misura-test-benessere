@@ -4071,6 +4071,17 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Conservare i PDF originali e le rispettive date stampate: la differenza tra le date non costituisce, da sola, prova di divergenza delle regole.
 - Non alterare, ricostruire o trasporre valori delle tabelle. Per le risposte commerciali usare le regole ufficiali del piano e mantenere sempre il disclaimer sui redditi: esempi e massimali non sono guadagni tipici, attesi o garantiti.
 
+### Preparazione import Knowledge Zinzino — allineamento contratto (18 novembre 2026)
+- Manifest italiano verificato: 7 file Markdown effettivamente presenti, tutti con `source_type=training_material`, lingua italiana e stato di approvazione `pending`.
+- Report di confronto IT/EN mantenuto come documentazione interna e rimosso dal manifest destinato ai contenuti Partner.
+- Corretto il controllo di quantità in `nextway-admin.js` da 8 a 7 documenti.
+- Corretto `scripts/test-nextway-zinzino-knowledge-import.mjs` affinché controlli 7 documenti e lo stesso limite dell'interfaccia Admin.
+- Riallineata la scheda Kit Partner: non riporta più come non acquisito il PDF italiano; rimangono correttamente disabilitati i calcoli automatici.
+- Readback GitHub conferma corrispondenza tra manifest, numero atteso dall'Admin e numero atteso dal test; tutti i sette percorsi elencati sono stati recuperati dal branch.
+- **ESEGUITO MA NON VERIFICATO localmente:** non è stato possibile eseguire Node.js sui file remoti tramite GitHub connector. Per l'ultimo HEAD non risultano ancora workflow run né status checks esposti da GitHub.
+- Nessuna ingestione Supabase: il workspace `zinzino-italia` non è stato creato/attivato. Il manifest resta `pending`.
+- Nessuna chiamata AI, token, credito, merge o deploy Netlify.
+
 ### Allineamento configurazione commerciale — 18 novembre 2026
 - Aggiornato `docs/companies/zinzino/commercial-base.v1.json` sul branch: la fonte italiana è ora registrata come riferimento localizzato EU corrispondente al master 2025, sulla base della verifica già completata e confermata dal titolare della piattaforma.
 - Aggiornato il registro del master inglese EU 12/02/2025 con lo stato di equivalenza confermata; le date stampate 14/11/2024 e 12/02/2025 restano conservate.
