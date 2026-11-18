@@ -771,7 +771,7 @@
     const table = language === "en" ? translations : reverse;
     let translated = table[trimmed];
     if (!translated) {
-      const prefix = Object.keys(table).filter((key) => key.endsWith(":") && trimmed.startsWith(key))
+      const prefix = Object.keys(table).filter((key) => (key.endsWith(":") || key.endsWith(" ")) && trimmed.startsWith(key))
         .sort((a, b) => b.length - a.length)[0];
       if (prefix) translated = table[prefix] + trimmed.slice(prefix.length);
     }
@@ -820,6 +820,16 @@
     }
     try { localStorage.setItem("nextway-language", currentLanguage); } catch (_) {}
   }
+
+  const nativeAlert = window.alert.bind(window);
+  const nativeConfirm = window.confirm.bind(window);
+  const nativePrompt = window.prompt.bind(window);
+  window.alert = (message) => nativeAlert(translateValue(message, currentLanguage));
+  window.confirm = (message) => nativeConfirm(translateValue(message, currentLanguage));
+  window.prompt = (message, defaultValue) => nativePrompt(
+    translateValue(message, currentLanguage),
+    defaultValue === undefined ? undefined : translateValue(defaultValue, currentLanguage),
+  );
 
   function install() {
     if (!document.body) return;
