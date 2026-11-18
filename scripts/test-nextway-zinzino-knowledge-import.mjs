@@ -15,7 +15,7 @@ assert.equal(manifest.import_policy.approval_status, "pending");
 assert.equal(manifest.import_policy.deduplicate_by_content_sha256, true);
 assert.match(html, /id="import-zinzino-knowledge"/);
 assert.match(admin, /nextway-knowledge-ingest/);
-assert.match(admin, /manifest\.documents\.length !== 8/);
+assert.match(admin, /manifest\.documents\.length !== 7/);
 assert.match(admin, /workspace\.workspace_key !== "zinzino-italia"/);
 assert.match(admin, /approval_status/);
 assert.match(admin, /result\.duplicate/);
