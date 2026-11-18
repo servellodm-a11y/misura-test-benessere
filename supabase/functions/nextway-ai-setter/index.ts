@@ -65,7 +65,7 @@ function buildKnowledgeSearchQuery(audience: string, values: unknown[]) {
     : ["partner", "collaborazione", "kit", "piano compensi", "formazione"];
   const stopWords = new Set([
     "per", "del", "della", "dello", "delle", "degli", "con", "che",
-    "una", "uno", "come", "nel", "nella", "sul", "sulla", "the", "and",
+    "una", "uno", "come", "nel", "nella", "sul", "sulla", "the", "and", "for", "with", "from", "this", "that", "your", "you", "are", "was", "were", "not",
   ]);
   const terms = new Set<string>();
   for (const value of [...defaults, ...values]) {
@@ -346,7 +346,7 @@ Deno.serve(async (req) => {
     let commercialContext: Record<string, unknown> | null = null;
     let knowledgeModuleKeys: string[] = [];
     let knowledgeLanguageCode = "it";
-    let responseLanguageCode = "it";
+    let responseLanguageCode = typeof requestedResponseLanguage === "string" ? requestedResponseLanguage : "it";
     if (conversation.workspace_id) {
       const { data: workspaceData, error: workspaceError } = await supabase.rpc(
         "nextway_get_workspace_commercial_config",
