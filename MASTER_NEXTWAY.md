@@ -3937,7 +3937,7 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Database e ricerca full-text
 - Preflight live: 0 documenti e 0 chunk; nessun contenuto esistente da migrare o ricostruire.
-- Applicata migrazione `20261118110000_nextway_knowledge_bilingual_search.sql`, registrata live come versione `20261118080714`, nome `nextway_knowledge_bilingual_search`.
+- Applicata migrazione `20261118080714_nextway_knowledge_bilingual_search.sql`, registrata live come versione `20261118080714`, nome `nextway_knowledge_bilingual_search`.
 - La tabella documenti ammette ora `language_code` it/en.
 - Aggiunta colonna generata `search_vector_en` e indice GIN dedicato; il vettore italiano esistente resta invariato.
 - RPC `nextway_search_knowledge(uuid,text,text,text,integer)` seleziona vettore e configurazione linguistica italiana/inglese in base al documento e alla query.
