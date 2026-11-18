@@ -185,8 +185,8 @@ Deno.serve(async (req) => {
     if (!/^[a-z0-9][a-z0-9_-]{1,63}$/.test(moduleKey)) {
       return respond({ error: "module_key non valido" }, 400, origin);
     }
-    if (!title || title.length > 240 || languageCode !== "it") {
-      return respond({ error: "Titolo o lingua non validi: la V1 supporta italiano" }, 400, origin);
+    if (!title || title.length > 240 || !["it", "en"].includes(languageCode)) {
+      return respond({ error: "Titolo o lingua non validi: sono ammessi italiano (it) e inglese (en)" }, 400, origin);
     }
 
     const objectName = `source-files/${workspaceId}/${moduleKey}/${crypto.randomUUID()}-${safeFilename(originalName)}`;
