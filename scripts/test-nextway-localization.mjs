@@ -31,6 +31,20 @@ assert.match(runtime, /"Ricerca mirata dei profili": "Targeted profile search"/)
 assert.match(runtime, /"Salva nuova password": "Save new password"/);
 assert.doesNotMatch(runtime, /fetch\s*\(|XMLHttpRequest|openai|api\.openai\.com/i);
 
+const dictionaryKeys = new Set([...runtime.matchAll(/^\\s*"((?:[^"\\\\]|\\\\.)+)"\\s*:/gm)].map((match) => match[1].replace(/\\\\"/g, '"')));
+const dynamicMessageFiles = ["nextway-cloud.js", "nextway-admin.js", "nextway-setter.js"];
+const dynamicPrefixes = [...dictionaryKeys].filter((key) => key.endsWith(":") || key.endsWith(" "));
+
+for (const file of dynamicMessageFiles) {
+  const source = fs.readFileSync(file, "utf8");
+  const messages = [...source.matchAll(/(?:say|status|setStatus|alert|confirm|prompt)\\s*\\(\\s*(['"`])([\\s\\S]*?)\\1/g)]
+    .map((match) => match[2].replace(/\\s+/g, " "));
+  const missing = [...new Set(messages)].filter((message) =>
+    message.trim() && !dictionaryKeys.has(message.trim()) && !dynamicPrefixes.some((prefix) => message.startsWith(prefix)),
+  );
+  assert.deepEqual(missing, [], file + " contains dynamic UI messages without a localization entry");
+}
+
 for (const page of pages) {
   const html = fs.readFileSync(page, "utf8");
   assert.match(html, /<html[^>]*lang=["']it["']/i, `${page} must keep Italian as the default language`);
