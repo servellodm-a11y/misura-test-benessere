@@ -41,6 +41,12 @@
               <option value="appointment">Proporre un appuntamento</option>
             </select>
           </label>
+          <label>Lingua della bozza
+            <select id="nwst-language">
+              <option value="it">Italiano</option>
+              <option value="en">English</option>
+            </select>
+          </label>
         </div>
         <button id="nwst-refresh" class="secondary" type="button">Aggiorna conversazioni</button>
         <button id="nwst-generate" type="button">Genera bozza dalla conversazione selezionata</button>
@@ -252,8 +258,8 @@
         : 'Crea conversazione e genera bozza';
     }
 
-    function getIdempotencyKey(conversationId, goal) {
-      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal;
+    function getIdempotencyKey(conversationId, goal, language) {
+      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal + ':' + language;
       if (pendingRequestScope !== scope) {
         pendingRequestScope = scope;
         pendingRequestId = '';
@@ -268,8 +274,8 @@
       return pendingRequestId;
     }
 
-    function clearIdempotencyKey(conversationId, goal) {
-      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal;
+    function clearIdempotencyKey(conversationId, goal, language) {
+      const scope = 'nextway_setter_idem:' + conversationId + ':' + goal + ':' + language;
       try { sessionStorage.removeItem(scope); } catch (_) {}
       if (pendingRequestScope === scope) pendingRequestId = '';
     }
@@ -332,7 +338,8 @@
       try {
         const { s } = await cloud.active();
         const cfg = cloud.getConfig();
-        const requestId = getIdempotencyKey(conversationId, goal);
+        const responseLanguage = $('nwst-language').value === 'en' ? 'en' : 'it';
+        const requestId = getIdempotencyKey(conversationId, goal, responseLanguage);
         const response = await fetch(cfg.url + ENDPOINT, {
           method: 'POST',
           headers: {
@@ -343,12 +350,13 @@
           body: JSON.stringify({
             conversation_id: conversationId,
             goal: goal,
+            response_language_code: responseLanguage,
             request_id: requestId
           })
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload.success) throw new Error(payload.error || ('Errore HTTP ' + response.status));
-        clearIdempotencyKey(conversationId, goal);
+        clearIdempotencyKey(conversationId, goal, responseLanguage);
         lastDraft = payload.message || '';
         $('nwst-draft').textContent = lastDraft;
         $('nwst-meta').textContent = [
