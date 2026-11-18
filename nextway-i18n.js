@@ -758,6 +758,7 @@
     " richieste pendenti": " pending requests",
     " richieste pronte per l’attivazione": " requests ready for activation",
     " (massimo 100).": " (maximum 100).",
+    "La configurazione deve essere un oggetto JSON valido. Esempio iniziale: {\"interest\":\"high|medium|low\",\"availability\":\"high|medium|low\"}.": "The configuration must be a valid JSON object. Initial example: {\"interest\":\"high|medium|low\",\"availability\":\"high|medium|low\"}.",
     "Riepilogo ciclo commerciale": "Commercial cycle summary",
     "Cerca nome, professione, azienda, fonte, note": "Search name, profession, company, source, notes",
     "Filtra qualificazione commerciale": "Filter commercial qualification",
