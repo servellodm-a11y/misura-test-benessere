@@ -3917,3 +3917,17 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 
 ### Registro cronologico MASTER
 - 18-11-2026 — applicata migrazione workspace-scoped RLS/Knowledge e verificata la nuova RPC. Preparata integrazione AI Setter→Knowledge su PR #58; CI run 1075 SUCCESS. Nessuna chiamata OpenAI, nessun deploy Setter, nessun documento/workspace creato.
+
+
+## DISTRIBUZIONE EDGE FUNCTIONS KNOWLEDGE — 18-11-2026
+
+- Distribuita `nextway-knowledge-ingest` v1, stato ACTIVE, `verify_jwt=true`, hash `d54320a75c2d07389fdad6aee2021541987a6f780ecc5f2517700938e96089e9`.
+- Distribuita `nextway-knowledge-upload` v1, stato ACTIVE, `verify_jwt=true`, hash `621c744b557346751d6bae7550f707f838af1214db31a48a863501c2d9561628`.
+- Le due funzioni usano il JWT dell'utente e verificano il ruolo `platform_admin`; upload richiama ingest con lo stesso token. Non sono stati modificati o letti secrets.
+- Verificato tramite elenco live che entrambe le funzioni risultano ACTIVE v1 con JWT obbligatorio.
+- Nessun upload o ingest runtime eseguito; non esiste ancora un workspace Zinzino né documenti Knowledge nel database.
+- Nessun token OpenAI è stato consumato. L'ingestione documenti non richiede chiamate al provider AI.
+- `nextway-ai-setter` resta live v3 e non è stato distribuito con il codice della PR #58, perché la generazione AI successiva utilizza token OpenAI. Il collegamento Knowledge è quindi preparato nel branch, non ancora attivo nel runtime.
+
+### Registro cronologico MASTER
+- 18-11-2026 — distribuite e verificate le Edge Functions `nextway-knowledge-ingest` e `nextway-knowledge-upload` v1 con JWT obbligatorio. Nessun documento caricato e nessun workspace creato.
