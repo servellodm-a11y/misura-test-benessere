@@ -24,6 +24,8 @@ assert.match(setter, /knowledgeModuleKeys = \(configuredModules\.length \? confi
 assert.match(setter, /\.slice\(0, 3\)/);
 assert.match(setter, /requestedResponseLanguage/);
 assert.match(setter, /supportedLanguages/);
+assert.match(setter, /commercialConfig\\.supported_languages/);
+assert.match(setter, /commercialData\\?\\.supported_languages/);
 assert.match(setter, /response_language_code: responseLanguageCode/);
 assert.match(setter, /Scrivi sempre la bozza nella lingua indicata da response_language_code/);
 assert.match(setterUi, /id="nwst-language"/);
