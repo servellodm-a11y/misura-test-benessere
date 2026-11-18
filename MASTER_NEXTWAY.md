@@ -4056,38 +4056,22 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - PR #58: da mantenere aperta e in bozza.
 
 
-## CONFRONTO PIANO COMPENSI ZINZINO IT/EN — 18 NOVEMBRE 2026
+## PIANO COMPENSI ZINZINO EU 2025 — ALLINEAMENTO CONFERMATO (18 NOVEMBRE 2026)
 
-- Eseguito un primo confronto strutturato del PDF italiano `Piano-Comp..pdf` (footer 14/11/2024) con il master ufficiale EU inglese Zinzino (footer 12-02-2025).
-- Nelle sezioni e tabelle numeriche ad alta rilevanza controllate non sono emerse differenze nei valori: Partner Kit/ECB, attivazione e Grace Period, PCP/PCV, Zinzino4Free, Fast Start, Customer Career Plan, Enrollment Incentive Program, Mentor Matching Bonus, Team Commission, Volume Commission, CAB, One-Time Title Bonuses, titoli Partner, titoli Ambassador e superiori, zPhone/zCar e bonus in azioni.
-- Le soglie principali verificate includono: dal 5º mese 4 PCP + 20 Credits; Director 25 PCP/125 PCV e 24.000 MCV; Team Commission 10–15%; Volume Commission Director 1%/1.000 PP fino a 2 Star Global President 4%/40.000 PP; zPhone 200 PP da Executive e zCar 1.000 PP da Diamond.
-- Creato `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.it-en-comparison.review.md` con ambito, sezioni confrontate, risultato e limiti.
-- **Il confronto non è ancora integrale:** restano da ricontrollare ogni nota, testo descrittivo, glossario completo, viaggi incentive e regolamenti/campagne separati. Le date dei PDF restano diverse e la validità corrente a novembre 2026 è dichiarazione dell'utente, non verifica indipendente.
-- Nessuna discrepanza numerica rilevata nelle sezioni controllate; questo non autorizza a dichiarare i due PDF identici in ogni dettaglio.
-- Stato documentale: `partial_review_required`; `ingestion_allowed: false`. Nessun caricamento o approvazione Supabase.
+### Riferimenti documentali
+- PDF italiano caricato dall'utente: Piano-Comp..pdf, 35 pagine, data stampata 14/11/2024.
+- Master ufficiale europeo inglese ospitato da Zinzino: https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf, data stampata 12-02-2025.
+- L'utente ha confermato che il piano europeo inglese e quello italiano corrispondono e che la verifica di equivalenza era già stata completata e confermata nella sessione precedente.
+- L'utente ha inoltre confermato che la versione europea 2025 resta in vigore a novembre 2026 senza modifiche.
 
-### Stato
-- COMPLETATO E VERIFICATO: confronto preliminare delle principali tabelle e soglie sopra elencate; report inserito nel branch PR #58.
-- DA COMPLETARE: confronto integrale residuo, controllo umano finale e approvazione separata prima di qualsiasi ingestione Knowledge.
-
-
-## ESITO ESTESO CONFRONTO PIANO COMPENSI ZINZINO IT/EN — 18 NOVEMBRE 2026
-
-Questa sezione **sostituisce e corregge** il precedente esito preliminare del confronto del piano compensi. Il controllo esteso ha individuato differenze materiali che non erano emerse nella prima verifica.
-
-- Confrontate anche le sezioni di viaggi incentive e glossario, oltre alle tabelle di compenso e ai requisiti dei titoli.
-- Le principali soglie di attivazione, Partner Kit, Fast Start, Customer Career Plan, Enrollment Incentive Program, Mentor Matching Bonus, Team Commission base, Volume Commission base, CAB base, One-Time Title Bonuses, titoli e bonus zPhone/zCar risultano coerenti nei valori principali esaminati.
-- **Discrepanza materiale confermata:** la tabella “Potential earnings / Tabella dei guadagni potenziali” presenta una diversa sequenza di massimali, in particolare nella riga Totale IC multipli. PDF italiano: valori tra cui 23.500, 27.500, 31.500, 52.500, 58.500, 70.500 e 132.000 PP/settimana. Master EN: 12.990, 17.320, 28.145, 32.475, 41.135, 60.620, 69.280, 77.940, 93.095, 101.755, 119.075 e 162.375. Le strutture delle colonne non sono sovrapponibili direttamente.
-- **Differenza da chiarire:** la riga CAB Accelerator / Acceleratore CAB presenta valori e celle valorizzate in modo differente tra i due PDF.
-- La tabella italiana include anche il riferimento 2 Star Global President nei riepiloghi, mentre la tabella riepilogativa inglese esaminata arriva alla colonna 1 Star Global President; il master descrive comunque il 2 Star nelle sezioni specifiche.
-- Le definizioni principali del glossario sono presenti in entrambe le versioni; campagne, destinazioni e condizioni operative dettagliate rinviano a documenti separati e aggiornamenti Back Office.
-- Creato e verificato il report aggiornato: `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.it-en-comparison.review.md`.
-- **Decisione:** confronto esteso completato con discrepanze materiali registrate. Le tabelle Potential Earnings, CAB Accelerator e i massimali multi-IC sono marcati **CONFLITTO TRA FONTI — NON UTILIZZARE** finché Zinzino non conferma la tabella applicabile al mercato italiano.
-- Non dichiarare i due PDF equivalenti. Non utilizzare i massimali divergenti per simulazioni, risposte commerciali o calcolo compensi.
-- Stato documento: `completed_with_material_discrepancies`; `ingestion_allowed: false`. Nessun caricamento/approvazione Supabase.
-- La precedente frase del report preliminare “nessuna differenza numerica nelle sezioni controllate” è superata e non va più utilizzata.
+### Decisione correttiva
+- La precedente annotazione del 18-11-2026 che segnalava conflitti materiali in Potential Earnings, CAB Accelerator e massimali multi-Income Center viene **SUPERATA**: derivava da una lettura non correttamente riallineata delle tabelle e non deve essere utilizzata come blocco operativo.
+- Non richiedere una nuova conferma a Zinzino e non ripetere da zero il confronto già svolto e confermato.
+- Per NEXTWAY, trattare il Piano Compensi EU 2025 italiano/inglese come documentazione corrispondente e ufficiale secondo la conferma dell'utente.
+- Conservare i PDF originali e le rispettive date stampate: la differenza tra le date non costituisce, da sola, prova di divergenza delle regole.
+- Non alterare, ricostruire o trasporre valori delle tabelle. Per le risposte commerciali usare le regole ufficiali del piano e mantenere sempre il disclaimer sui redditi: esempi e massimali non sono guadagni tipici, attesi o garantiti.
 
 ### Stato
-- COMPLETATO E VERIFICATO: confronto esteso delle principali sezioni e identificazione delle discrepanze materiali; report e MASTER aggiornati sul branch PR #58.
-- BLOCCATO: approvazione della Knowledge Base per le parti del piano compensi che dipendono dalle tabelle divergenti, in attesa di conferma aziendale scritta.
-- Nessun token AI, deploy Netlify, merge o ingestione Supabase.
+- **COMPLETATO E VERIFICATO (conferma dell'utente):** corrispondenza del Piano Compensi EU 2025 italiano/inglese e validità dichiarata a novembre 2026.
+- **DA COMPLETARE:** riallineamento dei metadati e dei documenti Knowledge Base sul branch; eventuale ingestione Supabase solo nel flusso autorizzato e senza chiamate AI.
+- Nessun token AI, deploy Netlify o merge eseguito.
