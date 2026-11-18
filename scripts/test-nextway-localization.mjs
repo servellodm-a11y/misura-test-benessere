@@ -49,6 +49,13 @@ for (const page of pages) {
   const html = fs.readFileSync(page, "utf8");
   assert.match(html, /<html[^>]*lang=["']it["']/i, `${page} must keep Italian as the default language`);
   assert.match(html, /<script src=["']\/nextway-i18n\.js["']><\/script>/, `${page} must load the shared localization runtime`);
+  const visibleHtml = html.replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<style\b[\s\S]*?<\/style>/gi, "");
+  const visibleText = [...visibleHtml.matchAll(/>([^<>]{2,180})</g)].map((match) => match[1].trim()).filter((value) => /[A-Za-zÀ-ÿ]/.test(value));
+  const missingVisibleText = [...new Set(visibleText)].filter((value) => !dictionaryKeys.has(value));
+  assert.deepEqual(missingVisibleText, [], page + " contains visible copy without an English translation");
+  const labels = [...html.matchAll(/\b(?:placeholder|title|aria-label)="([^"]+)"/gi)].map((match) => match[1]).filter((value) => /[A-Za-zÀ-ÿ]/.test(value) && !/^https?:\/\//i.test(value));
+  const missingLabels = [...new Set(labels)].filter((value) => !dictionaryKeys.has(value));
+  assert.deepEqual(missingLabels, [], page + " contains untranslated placeholders or accessibility labels");
 }
 
 console.log("NEXTWAY IT/EN localization contract: PASS");
