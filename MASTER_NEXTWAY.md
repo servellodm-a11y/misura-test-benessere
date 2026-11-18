@@ -4054,3 +4054,18 @@ Tutte le quattro PR osservate sono OPEN e NOT MERGED. I conteggi seguenti sono m
 - Documenti inglesi: **DRAFT / REVIEW REQUIRED**; Customer Rewards **BLOCKED** per verifica mercato e validità legale.
 - Checklist visual/E2E: **PREPARATA, NON ESEGUITA**.
 - PR #58: da mantenere aperta e in bozza.
+
+
+## CONFRONTO PIANO COMPENSI ZINZINO IT/EN — 18 NOVEMBRE 2026
+
+- Eseguito un primo confronto strutturato del PDF italiano `Piano-Comp..pdf` (footer 14/11/2024) con il master ufficiale EU inglese Zinzino (footer 12-02-2025).
+- Nelle sezioni e tabelle numeriche ad alta rilevanza controllate non sono emerse differenze nei valori: Partner Kit/ECB, attivazione e Grace Period, PCP/PCV, Zinzino4Free, Fast Start, Customer Career Plan, Enrollment Incentive Program, Mentor Matching Bonus, Team Commission, Volume Commission, CAB, One-Time Title Bonuses, titoli Partner, titoli Ambassador e superiori, zPhone/zCar e bonus in azioni.
+- Le soglie principali verificate includono: dal 5º mese 4 PCP + 20 Credits; Director 25 PCP/125 PCV e 24.000 MCV; Team Commission 10–15%; Volume Commission Director 1%/1.000 PP fino a 2 Star Global President 4%/40.000 PP; zPhone 200 PP da Executive e zCar 1.000 PP da Diamond.
+- Creato `docs/companies/zinzino/knowledge/en/compensation-plan-europe-2025.it-en-comparison.review.md` con ambito, sezioni confrontate, risultato e limiti.
+- **Il confronto non è ancora integrale:** restano da ricontrollare ogni nota, testo descrittivo, glossario completo, viaggi incentive e regolamenti/campagne separati. Le date dei PDF restano diverse e la validità corrente a novembre 2026 è dichiarazione dell'utente, non verifica indipendente.
+- Nessuna discrepanza numerica rilevata nelle sezioni controllate; questo non autorizza a dichiarare i due PDF identici in ogni dettaglio.
+- Stato documentale: `partial_review_required`; `ingestion_allowed: false`. Nessun caricamento o approvazione Supabase.
+
+### Stato
+- COMPLETATO E VERIFICATO: confronto preliminare delle principali tabelle e soglie sopra elencate; report inserito nel branch PR #58.
+- DA COMPLETARE: confronto integrale residuo, controllo umano finale e approvazione separata prima di qualsiasi ingestione Knowledge.
