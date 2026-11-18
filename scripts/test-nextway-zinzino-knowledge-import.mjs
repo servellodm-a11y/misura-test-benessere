@@ -11,6 +11,7 @@ assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.workspace_key, "zinzino-italia");
 assert.equal(manifest.language_code, "it");
 assert.equal(manifest.documents.length, 7);
+assert.equal(new Set(manifest.documents.map(item => item.file)).size, 7, "manifest must not contain duplicate files");
 assert.equal(manifest.import_policy.approval_status, "pending");
 assert.equal(manifest.import_policy.deduplicate_by_content_sha256, true);
 assert.match(html, /id="import-zinzino-knowledge"/);
@@ -37,4 +38,4 @@ for (const item of manifest.documents) {
   assert.ok(file.length <= 500000, item.file + " exceeds the ingestion size limit");
 }
 
-console.log("NEXTWAY Zinzino Knowledge bulk import contract: PASS (8 Markdown files, JWT-only, idempotent, pending approval)");
+console.log("NEXTWAY Zinzino Knowledge bulk import contract: PASS (7 Markdown files, JWT-only, idempotent, pending approval)");
