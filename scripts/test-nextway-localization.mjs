@@ -53,7 +53,7 @@ sandboxWindow.NEXTWAY_I18N.setLanguage("it");
 assert.equal(sandboxDocument.documentElement.lang, "it");
 assert.equal(sandboxWindow.NEXTWAY_I18N.translate("Activate workspace Alpha?"), "Attivare il workspace Alpha?");
 
-const dictionaryKeys = new Set([...runtime.matchAll(/^\s*"([^"]+)"\s*:/gm)].map((match) => match[1]));
+const dictionaryKeys = new Set([...runtime.matchAll(/^\s*"((?:[^"\\]|\\.)+)"\s*:/gm)].map((match) => match[1].replace(/\\"/g, '"')));
 const dynamicMessageFiles = ["nextway-cloud.js", "nextway-admin.js", "nextway-setter.js"];
 const dynamicPrefixes = [...dictionaryKeys].filter((key) => key.endsWith(":") || key.endsWith(" "));
 
