@@ -4146,5 +4146,17 @@
       ],
       "calculations_enabled": false
     }
+  },
+  "knowledge_modules": {
+    "customer": [
+      "customer_rewards",
+      "customer_catalog",
+      "customer_product_education"
+    ],
+    "partner": [
+      "partner_program",
+      "partner_compensation_reference",
+      "partner_compensation_rules"
+    ]
   }
 }
