@@ -4363,3 +4363,16 @@ Elenco letto nuovamente da Supabase; tutte risultano `ACTIVE`:
 
 ### Registro cronologico MASTER
 - 20-11-2026 19:45 Europe/Rome — nuova lettura read-only GitHub/Supabase: HEAD `main` a `ec9bf53` (commit solo documentale); PR #58/#57/#10 OPEN; Actions #1177/#1073 SUCCESS; 9 migrazioni live con effetti strutturali verificati e discrepanze file/versione ancora da risolvere; workspace Zinzino active con Owner active; ricerca Knowledge IT/EN presente nel DB ma sorgente migrazione solo nella PR #58; `nextway-workspace-admin` live v5 non identica al file `main`; Edge log non esposti dal query stream consultato. Aggiornato esclusivamente `MASTER_NEXTWAY.md`; nessuna modifica runtime.
+
+## Aggiornamento 23 novembre 2026 — correzione import Knowledge Base Zinzino
+
+- PR #58, branch `feat/nextway-setter-knowledge-context-20261118`.
+- Corretto lo stile del pulsante `Importa pacchetto Zinzino (7 documenti)`: ora usa lo stile primario, evitando che appaia come comando secondario disabilitato.
+- Introdotto un timeout di 30 secondi per le richieste amministrative, il caricamento del manifest, il recupero dei sette file e le singole chiamate di ingestione. In caso di mancata risposta, l'operazione termina con errore leggibile e il pulsante viene riabilitato nel blocco `finally`.
+- Rafforzata la validazione preventiva del manifest: richiede `approval_status=pending` e `deduplicate_by_content_sha256=true`, oltre ai sette documenti previsti.
+- Test `scripts/test-nextway-zinzino-knowledge-import.mjs` aggiornato per verificare stile/descrizione del pulsante, timeout e policy del manifest.
+- Commit: `84f3e23158260517d6409d3ac9006a5db1328169`, `ebacfb83b23e44620fb678212d4cec763f490ebb`, `669985d953b81f6dbb5b13660c57d1be88f7f6ad`.
+- GitHub Actions run 1192 (push) SUCCESS e run 1193 (pull_request) SUCCESS sul commit `669985d953b81f6dbb5b13660c57d1be88f7f6ad`; controlli automatici completati.
+- PR #58 resta aperta e draft, non integrata in `main`; branch riallineato (`behind_by=0`, `mergeable=true`).
+- Nessuna modifica Supabase, nessun documento importato/approvato, nessuna chiamata OpenAI, nessun deploy Netlify o consumo di crediti.
+- **Da completare:** prova visiva e clic end-to-end nel browser locale con sessione `platform_admin`; verificare il riepilogo di 7 documenti e lo stato `pending`. L'importazione reale resta subordinata all'autorizzazione esplicita e ai prerequisiti del workspace.
