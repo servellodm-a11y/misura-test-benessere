@@ -342,7 +342,29 @@ async function getLeadForConflict(cloudId){
  }
  window.NEXTWAY_CLOUD={active,getConfig,getLocalSearchArchiveIndex,addSearchLeadToLocalArchive,createLeadConversionRequest,getLeadConversionRequest,getLeadConversionQueue,reviewLeadConversionRequest,archiveLead:(id,reason,updatedAt)=>setLeadArchived(id,true,reason,updatedAt),restoreLead:(id,updatedAt)=>setLeadArchived(id,false,'',updatedAt),getLeadForConflict,getLeadById,getLeadHistory,getLeadActivities,getOpenLeadActivities,getLeadActivitySummary,addLeadActivity,setLeadActivityStatus,resolveLeadConflict};
  function fromCloud(r){return {id:r.id,cloud_id:r.id,owner_profile_id:r.owner_profile_id,name:r.display_name,profession:r.profession||'',company_brand:r.company_brand||'',location:r.location||'',category:r.category,partner_type:r.partner_type||'',mode:r.discovery_mode||'',signal_type:r.public_signal||'',source:r.source_name,url:r.source_url,evidence:r.public_evidence,verified_at:r.verified_at||'',identity_check:r.identity_check,qualification:r.qualification,manual_reviewed_at:r.manual_reviewed_at||null,manual_reviewed_by:r.manual_reviewed_by||null,fit:r.score_fit,activity:r.score_activity,presence:r.score_presence,interest:r.score_interest,approach:r.score_approach,status:r.status,notes:r.notes||'',created:r.created_at,archived_at:r.archived_at||null,archive_reason:r.archive_reason||'',cloud_updated_at:r.updated_at,local_dirty:false};}
- async function syncLocal(){const {c,s}=await active();let rows=[];try{rows=JSON.parse(localStorage.getItem(localArchiveKey(s.user.id))||'[]')}catch(e){throw new Error('Archivio locale non leggibile.');}let added=0,updated=0,skipped=0,deferred=0,failed=0,conflicts=0;
+ function normalizeLeadSourceUrl(value){return String(value??'').trim().toLowerCase();}
+ function leadPayloadMatches(cloudLead,payload){
+  return Object.keys(payload).every(key=>{
+   const localValue=payload[key]===undefined?null:payload[key];
+   const cloudValue=cloudLead[key]===undefined?null:cloudLead[key];
+   return localValue===cloudValue;
+  });
+ }
+ async function findExistingLeadBySourceUrl(c,ownerId,sourceUrl){
+  const target=normalizeLeadSourceUrl(sourceUrl);
+  if(!target)return [];
+  const pageSize=1000;let offset=0,matches=[];
+  while(true){
+   const {data,error}=await c.from('nextway_leads').select('*').eq('owner_profile_id',ownerId).order('id',{ascending:true}).range(offset,offset+pageSize-1);
+   if(error)throw error;
+   const page=data||[];
+   matches.push(...page.filter(row=>normalizeLeadSourceUrl(row.source_url)===target));
+   if(page.length<pageSize)break;
+   offset+=page.length;
+  }
+  return matches;
+ }
+ async function syncLocal(){const {c,s}=await active();let rows=[];try{rows=JSON.parse(localStorage.getItem(localArchiveKey(s.user.id))||'[]')}catch(e){throw new Error('Archivio locale non leggibile.');}let added=0,updated=0,linked=0,skipped=0,deferred=0,failed=0,conflicts=0;
  for(const x of rows){if(x.is_test){skipped++;continue;}if(x.category==='research_result'){deferred++;continue;}if(x.requires_manual_qualification&&(x.qualification!=='Qualificato'||x.identity_check!=='confirmed'||['fit','activity','presence','interest','approach'].reduce((n,k)=>n+Math.max(0,Number(x[k]||0)),0)<50)){deferred++;continue;}if(!x.name||!x.url||!x.source||!x.evidence){failed++;continue;}
  const payload={display_name:String(x.name).slice(0,120),profession:x.profession||null,company_brand:x.company_brand||null,location:x.location||null,category:['potential_partner','final_customer','wellness_professional'].includes(x.category)?x.category:'potential_partner',partner_type:x.partner_type||null,discovery_mode:x.mode||null,public_signal:x.signal_type||null,source_name:String(x.source).slice(0,200),source_url:x.url,public_evidence:String(x.evidence).slice(0,4000),verified_at:x.verified_at||null,identity_check:['pending','confirmed','uncertain'].includes(x.identity_check)?x.identity_check:'pending',qualification:['Da approfondire','Qualificato','Escluso'].includes(x.qualification)?x.qualification:'Da approfondire',score_fit:Number(x.fit||0),score_activity:Number(x.activity||0),score_presence:Number(x.presence||0),score_interest:Number(x.interest||0),score_approach:Number(x.approach||0),status:['Da verificare','Verificato','Contattato','In follow-up','In valutazione','Convertito cliente','Convertito partner','Non interessato','Escluso'].includes(x.status)?x.status:'Da verificare',notes:x.notes||null};
  if(x.cloud_id){
@@ -356,7 +378,24 @@ async function getLeadForConflict(cloudId){
  }
  const insertPayload={...payload,owner_profile_id:s.user.id};
  const {data,error}=await c.from('nextway_leads').insert(insertPayload).select('id,updated_at,qualification,manual_reviewed_at,manual_reviewed_by').single();
- if(error){if(error.code==='23505'){skipped++;continue;}failed++;continue;}x.cloud_id=data.id;x.cloud_updated_at=data.updated_at;x.qualification=data.qualification;x.manual_reviewed_at=data.manual_reviewed_at||null;x.manual_reviewed_by=data.manual_reviewed_by||null;
+ if(error){
+  if(error.code==='23505'){
+   try{
+    const matches=await findExistingLeadBySourceUrl(c,s.user.id,payload.source_url);
+    if(matches.length===1&&leadPayloadMatches(matches[0],payload)){
+     const existing=matches[0];x.cloud_id=existing.id;x.cloud_updated_at=existing.updated_at;x.qualification=existing.qualification;x.manual_reviewed_at=existing.manual_reviewed_at||null;x.manual_reviewed_by=existing.manual_reviewed_by||null;
+     if(x.manual_review_confirmed&&payload.qualification==='Qualificato'){
+      const {data:review,error:reviewError}=await c.rpc('nextway_confirm_lead_manual_review',{p_lead_id:x.cloud_id});
+      if(reviewError){failed++;x.local_dirty=true;continue;}
+      x.manual_reviewed_at=review.manual_reviewed_at;x.manual_reviewed_by=review.manual_reviewed_by;x.cloud_updated_at=review.updated_at;x.qualification=review.qualification;
+     }
+     x.manual_review_confirmed=false;x.local_dirty=false;delete x._sync_conflict;linked++;continue;
+    }
+    conflicts++;continue;
+   }catch(lookupError){conflicts++;continue;}
+  }
+  failed++;continue;
+ }x.cloud_id=data.id;x.cloud_updated_at=data.updated_at;x.qualification=data.qualification;x.manual_reviewed_at=data.manual_reviewed_at||null;x.manual_reviewed_by=data.manual_reviewed_by||null;
  if(x.manual_review_confirmed&&payload.qualification==='Qualificato'){const {data:review,error:reviewError}=await c.rpc('nextway_confirm_lead_manual_review',{p_lead_id:x.cloud_id});if(reviewError){failed++;x.local_dirty=true;continue;}x.manual_reviewed_at=review.manual_reviewed_at;x.manual_reviewed_by=review.manual_reviewed_by;x.cloud_updated_at=review.updated_at;x.qualification=review.qualification;}
  x.manual_review_confirmed=false;x.local_dirty=false;added++;
  }
