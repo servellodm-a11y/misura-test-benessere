@@ -21,11 +21,26 @@
       return cloud.active();
     }
 
+    async function fetchWithTimeout(url, options, label) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      try {
+        return await fetch(url, { ...(options || {}), signal: controller.signal });
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          throw new Error((label || "Richiesta") + " senza risposta entro 30 secondi. Riprova dopo aver verificato la connessione.");
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
     async function adminAction(payload) {
       const { c, s: initialSession } = await session();
       const cfg = cloud.getConfig();
       const invoke = async (accessToken) => {
-        const response = await fetch(cfg.url + "/functions/v1/nextway-workspace-admin", {
+        const response = await fetchWithTimeout(cfg.url + "/functions/v1/nextway-workspace-admin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -33,7 +48,7 @@
             "apikey": cfg.key
           },
           body: JSON.stringify(payload)
-        });
+        }, "Operazione amministrativa");
         const result = await response.json().catch(() => ({}));
         return { response, result };
       };
@@ -696,12 +711,15 @@
       let duplicates = 0;
       let pending = 0;
       try {
-        const manifestResponse = await fetch("/docs/companies/zinzino/knowledge/import-manifest.v1.json", { cache: "no-store" });
+        target.textContent = "Verifica manifest e 7 documenti in corso…";
+        const manifestResponse = await fetchWithTimeout("/docs/companies/zinzino/knowledge/import-manifest.v1.json", { cache: "no-store" }, "Manifesto Zinzino");
         if (!manifestResponse.ok) throw new Error("Manifesto di importazione non disponibile (HTTP " + manifestResponse.status + ").");
         const manifest = await manifestResponse.json();
         if (manifest.schema_version !== 1 || manifest.workspace_key !== "zinzino-italia" ||
-            !["it", "en"].includes(manifest.language_code) || !Array.isArray(manifest.documents) ||
-            manifest.documents.length !== 7) {
+            !["it", "en"].includes(manifest.language_code) ||
+            manifest.import_policy?.approval_status !== "pending" ||
+            manifest.import_policy?.deduplicate_by_content_sha256 !== true ||
+            !Array.isArray(manifest.documents) || manifest.documents.length !== 7) {
           throw new Error("Manifesto Zinzino non valido o incompleto: attesi esattamente 7 documenti IT/EN.");
         }
         const documents = await Promise.all(manifest.documents.map(async (item) => {
@@ -712,7 +730,7 @@
               typeof item.source_reference !== "string" || !/^https:\/\//.test(item.source_reference)) {
             throw new Error("Metadati non validi nel manifesto per " + String(item.file || "documento") + ".");
           }
-          const response = await fetch("/docs/companies/zinzino/knowledge/" + item.file, { cache: "no-store" });
+          const response = await fetchWithTimeout("/docs/companies/zinzino/knowledge/" + item.file, { cache: "no-store" }, "Documento " + item.file);
           if (!response.ok) throw new Error("Documento " + item.file + " non disponibile (HTTP " + response.status + ").");
           const content = await response.text();
           if (!content.trim() || content.length > 500000) throw new Error("Contenuto vuoto o oltre il limite per " + item.file + ".");
@@ -725,7 +743,7 @@
         if (!initialSession?.access_token) throw new Error("Sessione amministrativa assente. Accedi nuovamente.");
         let accessToken = initialSession.access_token;
         const ingest = async (payload) => {
-          const invoke = async () => fetch(cfg.url + "/functions/v1/nextway-knowledge-ingest", {
+          const invoke = async () => fetchWithTimeout(cfg.url + "/functions/v1/nextway-knowledge-ingest", {
             method: "POST",
             headers: {
               "Authorization": "Bearer " + accessToken,
@@ -733,7 +751,7 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
-          });
+          }, "Importazione " + payload.title);
           let response = await invoke();
           if (response.status === 401) {
             const { data, error } = await c.auth.refreshSession();
