@@ -6,10 +6,23 @@ alter table public.nextway_leads
   add column if not exists manual_reviewed_by uuid;
 comment on column public.nextway_leads.manual_reviewed_by is 'UUID immutabile del revisore autenticato; non FK, per conservare l attribuzione storica anche se il profilo viene eliminato.';
 -- Existing qualifications have no stored human-review evidence: return them to review.
--- Temporarily disable the legacy auto-qualification trigger for this one-time backfill.
-alter table public.nextway_leads disable trigger nextway_qualification_v1;
-update public.nextway_leads set qualification='Da approfondire',manual_reviewed_at=null,manual_reviewed_by=null where qualification='Qualificato';
-alter table public.nextway_leads enable trigger nextway_qualification_v1;
+-- Backfill without assuming that the legacy trigger exists in every installation.
+do $backfill$
+begin
+ if exists (
+  select 1 from pg_catalog.pg_trigger
+  where tgrelid='public.nextway_leads'::regclass
+   and tgname='nextway_qualification_v1'
+   and not tgisinternal
+ ) then
+  execute 'alter table public.nextway_leads disable trigger nextway_qualification_v1';
+  update public.nextway_leads set qualification='Da approfondire',manual_reviewed_at=null,manual_reviewed_by=null where qualification='Qualificato';
+  execute 'alter table public.nextway_leads enable trigger nextway_qualification_v1';
+ else
+  update public.nextway_leads set qualification='Da approfondire',manual_reviewed_at=null,manual_reviewed_by=null where qualification='Qualificato';
+ end if;
+end;
+$backfill$;
 alter table public.nextway_leads drop constraint if exists nextway_qualified_manual_review_check;
 alter table public.nextway_leads add constraint nextway_qualified_manual_review_check
  check (qualification <> 'Qualificato' or (manual_reviewed_at is not null and manual_reviewed_by is not null)) not valid;
@@ -41,7 +54,12 @@ begin
   or new.manual_reviewed_by is distinct from old.manual_reviewed_by then
   raise exception 'I dati di revisione possono essere modificati solo tramite la procedura NEXTWAY.' using errcode='42501';
  end if;
- if new.identity_check is distinct from old.identity_check
+ if new.display_name is distinct from old.display_name
+  or new.category is distinct from old.category
+  or new.source_name is distinct from old.source_name
+  or new.source_url is distinct from old.source_url
+  or new.public_evidence is distinct from old.public_evidence
+  or new.identity_check is distinct from old.identity_check
   or new.score_fit is distinct from old.score_fit
   or new.score_activity is distinct from old.score_activity
   or new.score_presence is distinct from old.score_presence
@@ -60,7 +78,7 @@ $function$;
 
 drop trigger if exists zzzz_nextway_lead_manual_review_guard on public.nextway_leads;
 create trigger zzzz_nextway_lead_manual_review_guard
-before insert or update of identity_check,qualification,score_fit,score_activity,score_presence,score_interest,score_approach,manual_reviewed_at,manual_reviewed_by
+before insert or update of display_name,category,source_name,source_url,public_evidence,identity_check,qualification,score_fit,score_activity,score_presence,score_interest,score_approach,manual_reviewed_at,manual_reviewed_by
 on public.nextway_leads for each row execute function public.nextway_guard_manual_lead_review();
 
 create or replace function public.nextway_confirm_lead_manual_review(p_lead_id uuid)
