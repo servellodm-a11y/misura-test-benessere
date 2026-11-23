@@ -13,6 +13,7 @@ vm.runInNewContext(helperSource + '\nthis.normalizeLeadSourceUrl=normalizeLeadSo
 assert.equal(context.normalizeLeadSourceUrl('  HTTPS://Example.COM/Lead  '), 'https://example.com/lead');
 const payload = { display_name: 'Mario Rossi', source_url: 'https://example.com/lead', score_fit: 10, notes: null };
 assert.equal(context.leadPayloadMatches({ ...payload }, payload), true);
+assert.equal(context.leadPayloadMatches({ ...payload, source_url: '  HTTPS://EXAMPLE.COM/LEAD ' }, payload), true, 'Source URL comparison must follow lower(btrim(source_url))');
 assert.equal(context.leadPayloadMatches({ ...payload, notes: 'different' }, payload), false);
 assert.equal(context.leadPayloadMatches({ ...payload, display_name: 'Mario Bianchi' }, payload), false);
 assert.equal(context.leadPayloadMatches({ ...payload, notes: undefined }, payload), true, 'Undefined and SQL NULL are equivalent');
