@@ -347,6 +347,7 @@ async function getLeadForConflict(cloudId){
   return Object.keys(payload).every(key=>{
    const localValue=payload[key]===undefined?null:payload[key];
    const cloudValue=cloudLead[key]===undefined?null:cloudLead[key];
+   if(key==='source_url')return normalizeLeadSourceUrl(localValue)===normalizeLeadSourceUrl(cloudValue);
    return localValue===cloudValue;
   });
  }
