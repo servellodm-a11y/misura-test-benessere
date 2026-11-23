@@ -61,16 +61,16 @@ function sanitizeModelText(value: unknown, maxLength: number) {
 
 function buildKnowledgeSearchQuery(audience: string, values: unknown[]) {
   const defaults = audience === "customer"
-    ? ["cliente", "prodotti", "catalogo", "premier kit", "premi", "balancetest"]
-    : ["partner", "collaborazione", "kit", "piano compensi", "formazione"];
+    ? ["cliente", "prodotti", "catalogo", "premier kit", "premi", "balancetest", "customer", "products", "catalog", "rewards", "benefits"]
+    : ["partner", "collaborazione", "kit", "piano compensi", "formazione", "partnership", "compensation", "training", "enrollment"];
   const stopWords = new Set([
     "per", "del", "della", "dello", "delle", "degli", "con", "che",
-    "una", "uno", "come", "nel", "nella", "sul", "sulla", "the", "and", "for", "with", "from", "this", "that", "your", "you", "are", "was", "were", "not",
+    "una", "uno", "come", "nel", "nella", "sul", "sulla", "the", "and", "for", "with", "from", "this", "that", "your", "you", "are", "was", "were", "not", "a", "an", "of", "to", "in", "on", "at", "by", "is", "be", "it", "or", "as", "about", "our", "we", "they", "their",
   ]);
   const terms = new Set<string>();
   for (const value of [...defaults, ...values]) {
     if (typeof value !== "string") continue;
-    for (const raw of value.toLocaleLowerCase("it").split(/\s+/)) {
+    for (const raw of value.toLowerCase().split(/\s+/)) {
       const term = raw.replace(/[^\p{L}\p{N}-]/gu, "");
       if (term.length >= 3 && term.length <= 40 && !stopWords.has(term)) {
         terms.add(term);
@@ -560,7 +560,6 @@ Deno.serve(async (req) => {
       // I retry con output già registrato non eseguono ricerche duplicate né consumano contesto aggiuntivo.
       if (
         conversation.workspace_id &&
-        knowledgeLanguageCode === "it" &&
         knowledgeModuleKeys.length > 0 &&
         ["customer", "partner"].includes(String(lead.commercial_audience || ""))
       ) {
