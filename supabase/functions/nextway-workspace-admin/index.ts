@@ -20,7 +20,9 @@ const allowedOrigins = [...new Set([
 ])];
 const keyPattern = /^[a-z0-9][a-z0-9_-]{1,79}$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const MAX_BODY_BYTES = 100_000;
+// Workspace commercial seed includes the structured Customer/Partner catalog (~183 KB).
+// Keep the request ceiling above the 250 KB client-side schema limit, with JSON overhead.
+const MAX_BODY_BYTES = 300_000;
 
 function respond(body: unknown, status: number, origin: string) {
   return new Response(JSON.stringify(body), {
