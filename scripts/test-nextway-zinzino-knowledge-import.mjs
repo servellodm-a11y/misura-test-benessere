@@ -10,12 +10,17 @@ const base = new URL("../docs/companies/zinzino/knowledge/", import.meta.url);
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.workspace_key, "zinzino-italia");
 assert.equal(manifest.language_code, "it");
-assert.equal(manifest.documents.length, 8);
+assert.equal(manifest.documents.length, 7);
+assert.equal(new Set(manifest.documents.map(item => item.file)).size, 7, "manifest must not contain duplicate files");
 assert.equal(manifest.import_policy.approval_status, "pending");
 assert.equal(manifest.import_policy.deduplicate_by_content_sha256, true);
-assert.match(html, /id="import-zinzino-knowledge"/);
+assert.match(html, /class="btn" id="import-zinzino-knowledge"/, "bulk import action must be visibly enabled as a primary action");
+assert.match(html, /aria-describedby="zinzino-knowledge-import-status"/);
+assert.match(admin, /fetchWithTimeout/);
+assert.match(admin, /manifest\.import_policy\?\.approval_status !== "pending"/);
+assert.match(admin, /manifest\.import_policy\?\.deduplicate_by_content_sha256 !== true/);
 assert.match(admin, /nextway-knowledge-ingest/);
-assert.match(admin, /manifest\.documents\.length !== 8/);
+assert.match(admin, /manifest\.documents\.length !== 7/);
 assert.match(admin, /workspace\.workspace_key !== "zinzino-italia"/);
 assert.match(admin, /approval_status/);
 assert.match(admin, /result\.duplicate/);
@@ -37,4 +42,4 @@ for (const item of manifest.documents) {
   assert.ok(file.length <= 500000, item.file + " exceeds the ingestion size limit");
 }
 
-console.log("NEXTWAY Zinzino Knowledge bulk import contract: PASS (8 Markdown files, JWT-only, idempotent, pending approval)");
+console.log("NEXTWAY Zinzino Knowledge bulk import contract: PASS (7 Markdown files, JWT-only, idempotent, pending approval)");

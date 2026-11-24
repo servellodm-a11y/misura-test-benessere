@@ -6,7 +6,7 @@
     "approval_status": "pending",
     "deduplicate_by_content_sha256": true,
     "maximum_documents_per_batch": 20,
-    "notes": "Documenti NEXTWAY di sintesi e riferimento interno basati su fonti ufficiali indicate in ogni file. Non sono policy Zinzino originali né pareri legali o medici."
+    "notes": "Documenti NEXTWAY di sintesi e riferimento interno basati su fonti ufficiali indicate in ogni file. Il PDF italiano 14/11/2024 e il master EU inglese 12/02/2025 sono considerati corrispondenti sulla base della verifica già completata e confermata dal titolare della piattaforma il 18/11/2026. Il report di confronto resta interno e non viene importato come contenuto per il Partner. Non sono policy Zinzino originali né pareri legali o medici."
   },
   "documents": [
     {
@@ -37,17 +37,9 @@
       "file": "compensation-plan-eu-2025-italian-reference.md",
       "module_key": "partner_compensation_reference",
       "source_type": "training_material",
-      "title": "Piano Compensi Zinzino — guida italiana al master europeo vigente",
+      "title": "Piano Compensi Zinzino EU 2025 — guida italiana al master europeo con riferimento localizzato corrispondente",
       "version_label": "EU-2025-IT-reference-2026-11",
       "source_reference": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf"
-    },
-    {
-      "file": "compensation-plan-italian-2024-comparison.md",
-      "module_key": "partner_compensation_reference",
-      "source_type": "training_material",
-      "title": "Confronto PDF italiano 2024 e master EU 2025",
-      "version_label": "IT-2024-vs-EU-2025",
-      "source_reference": "https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_ITA_it.pdf"
     },
     {
       "file": "compensation-plan-eu-2025-structured-rules.md",

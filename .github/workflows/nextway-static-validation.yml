@@ -1,8 +1,11 @@
 name: NEXTWAY static validation
+# Includes secure initial Owner bootstrap and lifecycle regression checks.
+# Runs the complete static validation suite on the feature branch.
+# Re-run after tightening Owner activation assertions.
 
 on:
   push:
-    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config]
+    branches: [main, fix/nextway-password-recovery, feat/nextway-central-prospect-memory-integration, feat/nextway-workspace-commercial-config, feat/nextway-setter-knowledge-context-20261118]
     paths:
       - "nextway-cloud.js"
       - "nextway-setter.js"
@@ -18,6 +21,12 @@ on:
       - "supabase/functions/nextway-workspace-admin/**"
       - "supabase/functions/nextway-search/**"
       - "nextway-ai.html"
+      - "nextway-dashboard.html"
+      - "nextway-analisi.html"
+      - "nextway-ricerca.html"
+      - "nextway-reset-password.html"
+      - "nextway-i18n.js"
+      - "scripts/test-nextway-localization.mjs"
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
       - "nextway-workspace-commercial-config.js"
@@ -49,6 +58,7 @@ on:
       - "scripts/test-nextway-knowledge-ingest-security.mjs"
       - "scripts/test-nextway-multi-workspace-sql.mjs"
       - "scripts/test-nextway-workspace-admin-security.mjs"
+      - "scripts/test-nextway-workspace-admin-bootstrap.mjs"
       - "scripts/test-nextway-workspace-data-association.mjs"
       - "scripts/test-nextway-workspace-memberships.mjs"
       - "scripts/test-nextway-workspace-scoped-rls.mjs"
@@ -67,6 +77,7 @@ on:
       - "supabase/diagnostics/nextway_conversion_workspace_preflight_readonly.sql"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
+      - "scripts/test-nextway-setter-knowledge-context.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - "scripts/test-nextway-local-cors.mjs"
       - "scripts/test-nextway-local-static.py"
@@ -78,6 +89,12 @@ on:
       - "nextway-cloud.js"
       - "nextway-setter.js"
       - "nextway-ai.html"
+      - "nextway-i18n.js"
+      - "nextway-dashboard.html"
+      - "nextway-analisi.html"
+      - "nextway-ricerca.html"
+      - "nextway-reset-password.html"
+      - "scripts/test-nextway-localization.mjs"
       - "nextway-motore-ricerca.html"
       - "nextway-company-config.js"
       - "nextway-workspace-commercial-config.js"
@@ -140,6 +157,7 @@ on:
       - "scripts/test-nextway-conversion-workspace-snapshot.mjs"
       - "scripts/test-nextway-setter-workspace-ui.mjs"
       - "scripts/test-nextway-setter-governance.mjs"
+      - "scripts/test-nextway-setter-knowledge-context.mjs"
       - "scripts/test-nextway-setter-generation-table-isolation.mjs"
       - "scripts/test-nextway-admin-ui.mjs"
       - "scripts/test-nextway-local-cors.mjs"
@@ -178,6 +196,8 @@ jobs:
         run: node scripts/test-nextway-multi-workspace-sql.mjs
       - name: Validate NEXTWAY workspace admin security contract
         run: node scripts/test-nextway-workspace-admin-security.mjs
+      - name: Validate NEXTWAY workspace Owner bootstrap security contract
+        run: node scripts/test-nextway-workspace-admin-bootstrap.mjs
       - name: Validate NEXTWAY local CORS allow-lists
         run: node scripts/test-nextway-local-cors.mjs
       - name: Validate NEXTWAY local preflight shell syntax
@@ -216,10 +236,14 @@ jobs:
         run: node scripts/test-nextway-setter-workspace-ui.mjs
       - name: Validate NEXTWAY AI Setter governance integration
         run: node scripts/test-nextway-setter-governance.mjs
+      - name: Validate NEXTWAY AI Setter workspace Knowledge Base retrieval
+        run: node scripts/test-nextway-setter-knowledge-context.mjs
       - name: Validate NEXTWAY AI Setter upstream error handling
         run: node scripts/test-nextway-setter-upstream-errors.mjs
       - name: Validate NEXTWAY platform admin UI contract
         run: node scripts/test-nextway-admin-ui.mjs
+      - name: Validate NEXTWAY Italian and English localization
+        run: node scripts/test-nextway-localization.mjs
       - name: Validate NEXTWAY local static checks with Python 3
         run: python3 scripts/test-nextway-local-static.py
       - name: Validate Zinzino company configuration and search integration

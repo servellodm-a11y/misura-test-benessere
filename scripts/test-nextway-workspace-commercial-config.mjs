@@ -110,6 +110,12 @@ assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'
 const unsafeCompensation={...integratedSeed,commercial_data:{...commercialData,partner:{...commercialData.partner,compensation_plan:{...commercialData.partner.compensation_plan,calculations_enabled:true,rules:[{rate:99}]}}}};
 assert.throws(()=>api.normalize({workspace_key:'zinzino-italia',workspace_name:'Zinzino Italia',commercial_config:unsafeCompensation}),/Calcoli compensi bloccati/);
 const adminJs=fs.readFileSync('nextway-admin.js','utf8');
+const adminHtml=fs.readFileSync('nextway-admin.html','utf8');
+const adminFunction=fs.readFileSync('supabase/functions/nextway-workspace-admin/index.ts','utf8');
+const integratedPayloadBytes=Buffer.byteLength(JSON.stringify(integratedSeed));
+assert.ok(integratedPayloadBytes>100000,'Regression fixture must exceed the previous 100 KB request ceiling');
+assert.match(adminHtml,/id="commercial-config-json" maxlength="250000"/,'Admin editor must accept the complete commercial seed');
+assert.match(adminFunction,/const MAX_BODY_BYTES = 300_000;/,'Workspace admin endpoint must accept the complete commercial seed with JSON overhead');
 assert.ok(adminJs.includes('commercial-base.v1.json'),'Admin must load the structured commercial data file');
 assert.ok(adminJs.includes('seed.commercial_data = commercialData'),'Admin must attach the commercial base before save');
 assert.ok(adminJs.includes('normalizer.normalize('),'Admin must validate the integrated commercial config before save');

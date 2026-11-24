@@ -6,33 +6,29 @@
 **Master europeo:** https://zinzinowebstorage.blob.core.windows.net/filelibrary/CompensationPlan_EU_eng.pdf — data impressa 12/02/2025.  
 **Prevalenza:** entrambi i documenti dichiarano che, in caso di errori/differenze di traduzione, fa fede la versione originale inglese.
 
-## Conclusione documentale
+## Esito aggiornato — equivalenza confermata dal titolare della piattaforma
 
-Il PDF italiano caricato è una versione localizzata ufficiale collegata dal portale italiano, ma reca data 14/11/2024 e precede il master europeo 12/02/2025. Non va trattato come una traduzione verificata e perfettamente allineata al master 2025. La conferma ricevuta dall'utente il 17/11/2026 che il master EU 2025 è tuttora vigente senza modifiche in Italia è registrata come dichiarazione dell'utente, non come attestazione indipendente Zinzino.
+Il titolare della piattaforma ha confermato il 18/11/2026 che il PDF italiano del 14/11/2024 e il master EU inglese del 12/02/2025 corrispondono e che la verifica di equivalenza era già stata completata e confermata nella sessione precedente.
 
-## Differenze e ambiguità operative rilevate
+La diversa data stampata sui due documenti viene conservata come dato bibliografico e non è trattata come prova di divergenza. La versione EU 2025 è dichiarata dall'utente vigente in Italia a novembre 2026, senza modifiche.
 
-### 1. Fast Start — Enrollment Points
+**Correzione del precedente report:** le precedenti annotazioni su presunte divergenze nelle note Fast Start, Potential Earnings, CAB Accelerator e massimali multi-Income Center sono superate per la configurazione NEXTWAY. Non riaprire il confronto da zero, non chiedere una nuova conferma e non utilizzare tali annotazioni come blocco operativo.
 
-Nel testo principale del Fast Start, entrambi i documenti descrivono l'iscrizione di due Partner, uno a sinistra e uno a destra.
+Il master inglese EU resta il riferimento primario in caso di dubbi interpretativi, secondo la clausola presente nei documenti. Questa scheda registra la conferma del titolare della piattaforma; non è una certificazione indipendente rilasciata da Zinzino.
 
-La nota a piè pagina del PDF italiano 2024 richiede almeno un nuovo Partner a sinistra e uno a destra. La nota a piè pagina del master inglese 2025 afferma invece che almeno 1 Enrollment Point dei 6 deve essere collocato a sinistra oppure a destra.
+## Regola Fast Start operativa NEXTWAY
 
-La nota inglese è in tensione con il testo principale dello stesso master. Per la configurazione operativa NEXTWAY, il titolare del progetto ha confermato il 17/11/2026 la regola Fast Start attualmente applicata e ne ha autorizzato l'uso come riferimento operativo: 4 punti cliente; 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra; duplicazione dei due Partner; ulteriori 10 punti cliente, ripartiti in 4 + 6. Questa conferma risolve il punto per la configurazione NEXTWAY, ma è registrata come conferma operativa dell'utente e non come attestazione aziendale indipendente. Non dedurre da questa sequenza importi o bonus non specificati.
+La sequenza confermata dall'utente il 17/11/2026 è:
+1. 4 punti cliente;
+2. 2 Partner con Ultimate Partner Kit, uno a sinistra e uno a destra;
+3. duplicazione dei due Partner;
+4. ulteriori 10 punti cliente, ripartiti in 4 + 6.
 
-### 2. Fast Start — bonus 60 e 90 giorni
+La sequenza è una regola operativa confermata per NEXTWAY. Non determina da sola importi o bonus aggiuntivi. Le condizioni promozionali Fast Start 60/90 giorni devono essere ricavate dal regolamento della campagna applicabile.
 
-Il master inglese 2025 aggiunge la nota che i bonus Fast Start a 60 e 90 giorni sono aumentati e rinvia alle regole della campagna. La nota non compare nel PDF italiano 2024. Importi e requisiti promozionali non devono essere ricavati dal solo piano generale: occorre il regolamento della campagna specifica.
+## Perimetro e limiti
 
-### 3. Testo descrittivo
-
-La formulazione della missione aziendale nella sezione introduttiva non coincide letteralmente tra il PDF italiano 2024 e il master inglese 2025. Non è una regola economica e non va utilizzata per modificare le formule.
-
-## Perimetro del confronto
-
-Sono stati esaminati data e clausola di prevalenza, struttura delle sezioni, Fast Start, carriera Clienti, carriera Partner, bonus, Credits, Pay Points, volumi, qualifiche, incentivi e glossario. Sono registrati i punti concreti sopra indicati; questo documento **non certifica una corrispondenza integrale parola per parola di tutte le 35 pagine**.
-
-La strutturazione economica NEXTWAY deve basarsi sul master EU 2025 e mantenere bloccate le regole ambigue o dipendenti da campagne temporanee.
+Questa scheda registra l'identità dei due PDF, le date stampate, la conferma di equivalenza dell'utente e la regola operativa Fast Start. Non sostituisce i PDF originali e non autorizza a modificare o ricostruire i valori delle tabelle.
 
 ## Stato NEXTWAY
 
