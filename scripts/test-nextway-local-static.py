@@ -74,7 +74,7 @@ def test_workspace_admin_security():
     matches(edge, r"auth\.getUser\(token\)", "Verifica token autenticazione assente")
     matches(edge, r"profile\?\.role !== \"platform_admin\"", "Gate platform_admin assente")
     contains(edge, "NEXTWAY_SERVICE_ROLE_KEY", "Configurazione server-side admin assente")
-    contains(edge, "MAX_BODY_BYTES = 100_000", "Limite dimensione body assente")
+    contains(edge, "MAX_BODY_BYTES = 300_000", "Limite dimensione body commerciale non conforme")
 
     actions = [
         "list_workspaces", "list_profiles", "list_memberships", "set_membership",
